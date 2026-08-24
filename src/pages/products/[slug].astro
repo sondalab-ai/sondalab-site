@@ -131,17 +131,6 @@ const verified = data.verified.toISOString().slice(0, 10);
   .product__head {
     padding-block: clamp(2rem, 5vw, 3.5rem);
     border-bottom: 1px solid var(--sl-border-subtle);
-    position: relative;
-  }
-  .product__head::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: clamp(2rem, 5vw, 3.5rem);
-    width: 2.5rem;
-    height: 3px;
-    border-radius: var(--sl-radius-pill);
-    background: var(--sl-accent-default);
   }
   .product__name {
     font-family: var(--sl-font-display);

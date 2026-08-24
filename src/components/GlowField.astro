@@ -112,8 +112,9 @@
     width: 100%;
     height: 100%;
     display: block;
-    /* Feather top/bottom so the field dissolves into the page. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 78%, transparent);
-    mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 78%, transparent);
+    /* Feather only under the sticky header; run the field to the hero's bottom
+       edge so it meets the next section cleanly (no hard black cut-off). */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 100%);
   }
 </style>
