@@ -7,6 +7,7 @@ const claimParts = SITE.claim.split(', ');
 
 <section class="hero">
   <GlowField />
+  <div class="hero__scrim" aria-hidden="true"></div>
   <div class="wrap hero__inner">
     <p class="eyebrow hero__eyebrow">Sondalab — a lab for operators</p>
 
@@ -37,24 +38,24 @@ const claimParts = SITE.claim.split(', ');
     align-items: center;
     overflow: hidden;
   }
-  .hero__inner {
-    position: relative;
-    z-index: 1;
-    padding-block: 6rem;
-  }
-  /* Soft readability scrim over the glow — text-side biased, field stays visible. */
-  .hero__inner::before {
-    content: '';
+  /* Full-bleed readability scrim over the glow — biased to the text side, fades
+     fully to transparent so it never reads as a rectangle. */
+  .hero__scrim {
     position: absolute;
-    inset: -3rem -6rem -3rem -6rem;
-    z-index: -1;
+    inset: 0;
+    z-index: 1;
     pointer-events: none;
     background: radial-gradient(
-      130% 100% at 22% 48%,
+      75% 115% at 26% 52%,
       var(--sl-bg-canvas) 0%,
-      color-mix(in srgb, var(--sl-bg-canvas) 42%, transparent) 42%,
-      transparent 72%
+      color-mix(in srgb, var(--sl-bg-canvas) 45%, transparent) 34%,
+      transparent 66%
     );
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    padding-block: 6rem;
   }
   .hero__eyebrow { margin-bottom: 1.75rem; }
 
@@ -101,7 +102,7 @@ const claimParts = SITE.claim.split(', ');
     left: 50%;
     bottom: 1.75rem;
     transform: translateX(-50%);
-    z-index: 1;
+    z-index: 2;
   }
   .hero__scroll span {
     display: block;
