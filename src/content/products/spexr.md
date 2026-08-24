@@ -29,6 +29,5 @@ summaries, and one-click resume.
 Transparent about how it works: SPEXR does **not** call the Anthropic API — it
 spawns your locally installed agent binary and reuses its stored credentials.
 Today that means a working Claude Code CLI is a hard dependency, with
-multi-harness support (OpenCode) on the way. It's public beta (MIT; macOS,
-Windows, Linux); a few features (smart search, Git, Darkfactory) are on `main`
-and need a source build until the next installer release.
+multi-harness support (OpenCode) on the way. It's public beta — MIT, on macOS,
+Windows and Linux.
