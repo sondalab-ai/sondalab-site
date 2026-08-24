@@ -11,13 +11,23 @@ links:
   - label: Download (releases)
     href: https://github.com/marcellobarile/spexr-ide/releases
 verified: 2026-08-24
-summary: An agent-centric IDE on Eclipse Theia where specs drive the build and every agent step stays visible and yours to steer.
+summary: An agent-centric IDE on Eclipse Theia where the Claude session is the main surface and every change traces back to a spec — plan → tasks → diff → PR. Ships on-device semantic search, built-in Git, and Darkfactory, a live wall of all your local Claude sessions.
 ---
 
-SPEXR turns a specification into the unit of work. You write the spec; agents
-draft, wire and revise against it — and the whole run stays legible on screen,
-step by step, so you can stop, correct or take over at any point.
+SPEXR inverts the usual layout: instead of bolting an agent into a sidebar, the
+Claude session is the primary surface and your files and terminals orbit it.
+Specs are first-class artifacts — `docs/specs/<id>.md` becomes a plan, tasks, a
+diff and a PR, and a drift detector flags divergence. A two-scope memory (user +
+project) keeps what the agent learns.
 
-It runs on Eclipse Theia with Theia AI, ships packaged installers, and is the
-most UI-mature tool in the suite — the reference surface for the Sondalab design
-language.
+It also ships local semantic search (hybrid keyword + embeddings, with one-line
+file descriptions generated on-device — no API calls, nothing leaves the
+machine), a full built-in Git provider, and **Darkfactory**: a wall of every
+local Claude session across your config profiles, with live state, on-device
+summaries, and one-click resume.
+
+Transparent about how it works: SPEXR does **not** call the Anthropic API — it
+spawns your locally installed `claude` binary and reuses its stored credentials,
+so a working Claude Code CLI is a hard dependency. It's public beta (MIT;
+macOS, Windows, Linux); a few features (smart search, Git, Darkfactory) are on
+`main` and need a source build until the next installer release.

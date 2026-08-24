@@ -7,12 +7,20 @@ order: 4
 repo: https://github.com/marcellobarile/local-agents
 repoPublic: false
 verified: 2026-08-24
-summary: A local control surface for running and watching agents on your own hardware.
+summary: A home network of local LLM agents — an intelligent router in front of LM Studio that sends each request to the right specialist (a coder, a creative and a home/utility agent), with integrated voice and a dashboard to assign models, all running on your own GPU.
 ---
 
-local-agents is the operator's dashboard: launch, wall and watch agents running
-on hardware you own. It's where "own it" stops being a slogan — the compute, the
-data and the kill switch are all in the same room as you.
+local-agents turns a machine at home into a small network of specialised LLM
+agents. An intelligent router sits in front of LM Studio and sends each request
+to the right one — a coder, a creative writer, and a home/utility assistant —
+with integrated voice and a dashboard where you assign which local model backs
+each role, tune the classifier, and wire up memory (embeddings) and a household
+knowledge base.
 
-Early and in progress: the dashboard and design-system adoption are in place;
-broader control is on the way.
+Everything runs on hardware you own: LM Studio serves the models on your GPU, and
+the router, web search, memory and dashboard run in Docker, reachable from any
+device on your local network. It's the operator's dashboard for agents that never
+leave the house.
+
+Early and in progress: the router, dashboard and design-system adoption are in
+place; broader control is on the way. The source repository is currently private.

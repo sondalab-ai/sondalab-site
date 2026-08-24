@@ -44,6 +44,7 @@ const usedStatuses = [
                   {meta && <span class="prow__status">{meta.label}</span>}
                 </div>
                 <p class="prow__tagline">{p.data.tagline}</p>
+                <p class="prow__summary">{p.data.summary}</p>
               </div>
               <span class="prow__surface">{p.data.surface}</span>
               <span class="prow__go" aria-hidden="true">→</span>
@@ -163,6 +164,13 @@ const usedStatuses = [
     margin: 0.5rem 0 0;
     color: var(--sl-text-secondary);
     max-width: 48ch;
+  }
+  .prow__summary {
+    margin: 0.6rem 0 0;
+    font-size: var(--sl-text-sm);
+    line-height: var(--sl-line-normal);
+    color: var(--sl-text-muted);
+    max-width: 62ch;
   }
   .prow__surface {
     font-family: var(--sl-font-mono);
