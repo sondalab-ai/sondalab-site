@@ -1,0 +1,122 @@
+---
+import GlowField from './GlowField.astro';
+import { SITE } from '../lib/site';
+
+const claimParts = SITE.claim.split(', ');
+---
+
+<section class="hero">
+  <GlowField />
+  <div class="wrap hero__inner">
+    <p class="eyebrow hero__eyebrow">Sondalab — a lab for operators</p>
+
+    <h1 class="display hero__claim">
+      <span>{claimParts[0]},</span>
+      <span class="hero__claim-accent">{claimParts[1]}.</span>
+    </h1>
+
+    <p class="hero__tagline">{SITE.tagline}</p>
+
+    <div class="hero__actions">
+      <a class="sl-btn sl-btn--primary" href="/#products">See the tools</a>
+      <a class="hero__ghost" href="/#approach">What we believe →</a>
+    </div>
+  </div>
+
+  <a class="hero__scroll" href="/#approach" aria-label="Scroll to content">
+    <span></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    min-height: clamp(34rem, 88vh, 52rem);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    padding-block: 6rem;
+  }
+  /* Soft readability scrim over the glow — text-side biased, field stays visible. */
+  .hero__inner::before {
+    content: '';
+    position: absolute;
+    inset: -3rem -6rem -3rem -6rem;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      130% 100% at 22% 48%,
+      var(--sl-bg-canvas) 0%,
+      color-mix(in srgb, var(--sl-bg-canvas) 42%, transparent) 42%,
+      transparent 72%
+    );
+  }
+  .hero__eyebrow { margin-bottom: 1.75rem; }
+
+  .hero__claim {
+    max-width: 18ch;
+  }
+  .hero__claim span { display: block; }
+  .hero__claim-accent {
+    color: var(--sl-accent-default);
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
+    font-style: italic;
+  }
+
+  .hero__tagline {
+    margin-top: 2rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-md);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sl-text-primary);
+  }
+
+  .hero__actions {
+    margin-top: 2.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .hero__ghost {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-sm);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    color: var(--sl-text-secondary);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .hero__ghost:hover { color: var(--sl-text-primary); }
+
+  .hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.75rem;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+  .hero__scroll span {
+    display: block;
+    width: 1px;
+    height: 3rem;
+    background: linear-gradient(to bottom, transparent, var(--sl-accent-default));
+    animation: drop 2.4s var(--sl-motion-ease) infinite;
+    transform-origin: top;
+  }
+  @keyframes drop {
+    0% { transform: scaleY(0); opacity: 0; }
+    40% { transform: scaleY(1); opacity: 1; }
+    100% { transform: scaleY(1) translateY(1rem); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__scroll span { animation: none; }
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+import Wordmark from './Wordmark.astro';
+import { SITE } from '../lib/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <div class="site-footer__brand">
+      <Wordmark size="1.2rem" />
+      <p class="site-footer__claim">{SITE.tagline}</p>
+    </div>
+    <p class="site-footer__meta">
+      © {year} Sondalab · a lab for operators
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--sl-border-subtle);
+    padding-block: 2.5rem;
+  }
+  .site-footer__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .site-footer__brand { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .site-footer__claim {
+    margin: 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .site-footer__meta {
+    margin: 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.06em;
+    color: var(--sl-text-muted);
+  }
+</style>

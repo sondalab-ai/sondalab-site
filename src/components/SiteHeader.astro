@@ -1,0 +1,109 @@
+---
+import Wordmark from './Wordmark.astro';
+
+const nav = [
+  { label: 'Products', href: '/#products' },
+  { label: 'Approach', href: '/#approach' },
+  { label: 'Contact', href: '/#contact' },
+];
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="site-header__brand" href="/" aria-label="Sondalab home">
+      <Wordmark size="1.35rem" />
+    </a>
+
+    <nav class="site-header__nav" aria-label="Primary">
+      {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+    </nav>
+
+    <button class="theme-toggle" type="button" aria-label="Toggle colour theme" data-theme-toggle>
+      <span class="theme-toggle__dot" aria-hidden="true"></span>
+      <span class="theme-toggle__label" data-theme-label>dark</span>
+    </button>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    var btn = document.querySelector('[data-theme-toggle]');
+    var label = document.querySelector('[data-theme-label]');
+    var root = document.documentElement;
+    function sync() {
+      if (label) label.textContent = root.getAttribute('data-sl-theme') || 'dark';
+    }
+    sync();
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var next = root.getAttribute('data-sl-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-sl-theme', next);
+        try { localStorage.setItem('sl-theme', next); } catch (e) {}
+        sync();
+      });
+    }
+  })();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--sl-z-overlay);
+    background: color-mix(in srgb, var(--sl-bg-canvas) 82%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--sl-border-subtle);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 4rem;
+  }
+  .site-header__brand { text-decoration: none; margin-right: auto; }
+
+  .site-header__nav {
+    display: flex;
+    gap: 1.75rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .site-header__nav a {
+    text-decoration: none;
+    color: var(--sl-text-secondary);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .site-header__nav a:hover { color: var(--sl-text-primary); }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    background: transparent;
+    border: 1px solid var(--sl-border-default);
+    border-radius: var(--sl-radius-pill);
+    padding: 0.3rem 0.7rem;
+    color: var(--sl-text-secondary);
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .theme-toggle:hover { border-color: var(--sl-border-strong); }
+  .theme-toggle__dot {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: var(--sl-radius-pill);
+    background: var(--sl-accent-default);
+  }
+
+  @media (max-width: 34rem) {
+    .site-header__nav { display: none; }
+  }
+</style>

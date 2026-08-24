@@ -1,0 +1,185 @@
+---
+import { getCollection } from 'astro:content';
+import { accentVars, type AccentKey } from '../lib/accents';
+import { STATUS_META } from '../lib/site';
+
+const products = (await getCollection('products')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+// Which statuses actually appear, for the legend below the list.
+const usedStatuses = [...new Set(products.map((p) => p.data.status))];
+---
+
+<section id="products" class="section products">
+  <div class="wrap">
+    <div class="section-index">
+      <span class="section-index__no">02</span>
+      <span class="eyebrow">The tools</span>
+    </div>
+
+    <div class="products__intro">
+      <h2 class="h2">Six tools, one throughline.</h2>
+      <p class="lede">
+        Each is a different instrument; all of them keep you seeing, steering and
+        owning what the machine does.
+      </p>
+    </div>
+
+    <ol class="products__list">
+      {products.map((p, i) => {
+        const acc = accentVars(p.data.accent as AccentKey);
+        const meta = STATUS_META[p.data.status];
+        return (
+          <li
+            class="prow"
+            style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}
+          >
+            <span class="prow__no">{String(i + 1).padStart(2, '0')}</span>
+            <span class="prow__rule" aria-hidden="true"></span>
+            <div class="prow__main">
+              <div class="prow__headline">
+                <h3 class="prow__name">{p.data.name}</h3>
+                <span class="prow__status">{meta.label}</span>
+              </div>
+              <p class="prow__tagline">{p.data.tagline}</p>
+            </div>
+            <span class="prow__surface">{p.data.surface}</span>
+          </li>
+        );
+      })}
+    </ol>
+
+    <dl class="legend" aria-label="Status legend">
+      {usedStatuses.map((s) => (
+        <div class="legend__item">
+          <dt class="legend__term">{STATUS_META[s].label}</dt>
+          <dd class="legend__desc">{STATUS_META[s].note}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .products__intro {
+    max-width: 40rem;
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .products__intro .lede { margin-top: 1.25rem; max-width: 46ch; }
+
+  .products__list { list-style: none; margin: 0; padding: 0; }
+
+  .prow {
+    --row-accent: var(--row-accent-dark);
+    display: grid;
+    grid-template-columns: auto 3px 1fr auto;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
+    border-top: 1px solid var(--sl-border-subtle);
+    transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .prow:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
+  :root[data-sl-theme='light'] .prow { --row-accent: var(--row-accent-light); }
+  .prow:hover {
+    background: color-mix(in srgb, var(--row-accent) 6%, transparent);
+  }
+
+  .prow__no {
+    font-family: var(--sl-font-mono);
+    font-weight: 100;
+    font-size: var(--step-numeral);
+    line-height: 0.8;
+    color: var(--sl-text-muted);
+    transition: color var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .prow:hover .prow__no { color: var(--row-accent); }
+
+  .prow__rule {
+    align-self: stretch;
+    width: 3px;
+    background: var(--row-accent);
+    border-radius: var(--sl-radius-pill);
+    transform: scaleY(0.35);
+    transform-origin: center;
+    opacity: 0.55;
+    transition: transform var(--sl-motion-mid) var(--sl-motion-ease),
+      opacity var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .prow:hover .prow__rule { transform: scaleY(1); opacity: 1; }
+
+  .prow__headline {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .prow__name {
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 60, 'WONK' 1;
+    font-size: var(--step-h3);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .prow__status {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--row-accent);
+    padding: 0.15em 0.6em;
+    border: 1px solid color-mix(in srgb, var(--row-accent) 45%, transparent);
+    border-radius: var(--sl-radius-pill);
+  }
+  .prow__tagline {
+    margin: 0.5rem 0 0;
+    color: var(--sl-text-secondary);
+    max-width: 48ch;
+  }
+  .prow__surface {
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+
+  .legend {
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sl-border-subtle);
+  }
+  .legend__item { display: flex; align-items: baseline; gap: 0.6rem; }
+  .legend__term {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sl-text-primary);
+  }
+  .legend__desc {
+    margin: 0;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-text-muted);
+  }
+
+  @media (max-width: 40rem) {
+    .prow {
+      grid-template-columns: auto 1fr;
+      grid-template-areas: 'no main' 'rule main';
+      gap: 0.75rem 1.25rem;
+    }
+    .prow__rule { display: none; }
+    .prow__surface { display: none; }
+    .prow__no { grid-area: no; }
+    .prow__main { grid-area: main; }
+  }
+</style>

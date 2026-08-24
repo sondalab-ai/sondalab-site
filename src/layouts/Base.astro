@@ -1,0 +1,85 @@
+---
+// Self-hosted variable faces (no Google Fonts CDN — GDPR-clean on .eu).
+// Fraunces `full.css` carries the opsz / SOFT / WONK axes the display type uses.
+import '@fontsource-variable/fraunces/full.css';
+import '@fontsource-variable/instrument-sans';
+import '@fontsource-variable/martian-mono';
+
+// Design system — Tier A (Page substrate): tokens + both themes + components.
+import '@sondalab/ui-kit/tokens.css';
+import '@sondalab/ui-kit/themes/light.css';
+import '@sondalab/ui-kit/themes/dark.css';
+import '@sondalab/ui-kit/components.css';
+
+import '../styles/site.css';
+import { SITE } from '../lib/site';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Sondalab builds local, legible tools for operators — the people who run agents, see every step, and own the machine.',
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.claim}`;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en" data-sl-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/* Set theme before paint: stored choice → OS preference → dark default. */}
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('sl-theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = stored || (prefersLight ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-sl-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    z-index: var(--sl-z-toast);
+    background: var(--sl-accent-default);
+    color: var(--sl-text-on-accent);
+    padding: 0.5rem 1rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+  }
+  .skip-link:focus { left: 0; }
+</style>

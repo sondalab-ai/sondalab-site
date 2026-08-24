@@ -1,0 +1,70 @@
+---
+import { SITE, SOCIALS } from '../lib/site';
+---
+
+<section id="contact" class="section contact">
+  <div class="wrap contact__grid">
+    <div>
+      <div class="section-index">
+        <span class="section-index__no">03</span>
+        <span class="eyebrow">Contact</span>
+      </div>
+      <h2 class="h2">Building something you'd rather run yourself?</h2>
+      <p class="lede">
+        Sondalab is early and independent. If the operator's stance resonates —
+        as a user, a builder, or a collaborator — we'd like to hear from you.
+      </p>
+    </div>
+
+    <div class="contact__reach">
+      <a class="contact__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+
+      {SOCIALS.length > 0 && (
+        <ul class="contact__socials">
+          {SOCIALS.map((s) => (
+            <li><a class="sl-link" href={s.href}>{s.label}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+  @media (min-width: 52rem) {
+    .contact__grid { grid-template-columns: 1.1fr 0.9fr; align-items: end; }
+  }
+  .contact__grid .h2 { margin-top: 1.25rem; max-width: 18ch; }
+  .contact__grid .lede { margin-top: 1.5rem; }
+
+  .contact__reach { display: flex; flex-direction: column; gap: 1.5rem; }
+  .contact__email {
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-size: var(--step-h3);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--sl-text-primary);
+    border-bottom: 2px solid var(--sl-accent-default);
+    padding-bottom: 0.15em;
+    align-self: flex-start;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .contact__email:hover { color: var(--sl-accent-default); }
+
+  .contact__socials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+  }
+</style>
