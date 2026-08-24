@@ -41,6 +41,10 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -p "$port" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          rsync -avz --delete --exclude='.well-known/' \
+          # -rlvz (not -a): the doc root is group-owned by another CloudPanel
+          # user, so setting dir/file times, perms or ownership is not permitted
+          # and would fail the transfer. We only need the file contents mirrored.
+          rsync -rlvz --delete --omit-dir-times --no-perms --no-owner --no-group \
+            --exclude='.well-known/' \
             -e "ssh -i ~/.ssh/id_deploy -p $port -o StrictHostKeyChecking=yes" \
             dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"

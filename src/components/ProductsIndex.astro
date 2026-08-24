@@ -32,7 +32,7 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
         const meta = STATUS_META[p.data.status];
         return (
           <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow" href={`/products/${p.id}`}>
+            <a class="prow" href={`/products/${p.id}/`}>
               <span class="prow__no">{String(i + 1).padStart(2, '0')}</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">

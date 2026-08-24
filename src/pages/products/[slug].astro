@@ -77,13 +77,13 @@ const verified = data.verified.toISOString().slice(0, 10);
 
       <nav class="product__nav" aria-label="Other tools">
         {prev ? (
-          <a class="product__nav-link product__nav-link--prev" href={`/products/${prev.id}`}>
+          <a class="product__nav-link product__nav-link--prev" href={`/products/${prev.id}/`}>
             <span class="product__nav-dir">← Previous</span>
             <span class="product__nav-name">{prev.data.name}</span>
           </a>
         ) : <span />}
         {next ? (
-          <a class="product__nav-link product__nav-link--next" href={`/products/${next.id}`}>
+          <a class="product__nav-link product__nav-link--next" href={`/products/${next.id}/`}>
             <span class="product__nav-dir">Next →</span>
             <span class="product__nav-name">{next.data.name}</span>
           </a>
