@@ -4,7 +4,7 @@ tagline: Your agents, on your machine.
 accent: local-agents
 surface: App
 order: 4
-repo: https://github.com/marcellobarile/local-agents
+repo: https://github.com/sondalab-ai/local-agents
 repoPublic: false
 verified: 2026-08-24
 summary: A home network of local LLM agents — an intelligent router in front of LM Studio that sends each request to the right specialist (a coder, a creative and a home/utility agent), with integrated voice and a dashboard to assign models, all running on your own GPU.

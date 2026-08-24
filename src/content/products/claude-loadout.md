@@ -4,7 +4,7 @@ tagline: Start each session with only the tools it needs.
 accent: default
 surface: Term
 order: 2
-repo: https://github.com/marcellobarile/claude-loadout
+repo: https://github.com/sondalab-ai/claude-loadout
 repoPublic: true
 links:
   - label: ccloadout on PyPI
