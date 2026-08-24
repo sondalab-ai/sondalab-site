@@ -7,8 +7,11 @@ const products = (await getCollection('products')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
-// Which statuses actually appear, for the legend below the list.
-const usedStatuses = [...new Set(products.map((p) => p.data.status))];
+// Which statuses actually appear, for the legend below the list (some products
+// carry no status, so drop undefined).
+const usedStatuses = [
+  ...new Set(products.map((p) => p.data.status).filter(Boolean)),
+] as string[];
 ---
 
 <section id="products" class="section products">
@@ -29,7 +32,7 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
     <ol class="products__list">
       {products.map((p, i) => {
         const acc = accentVars(p.data.accent as AccentKey);
-        const meta = STATUS_META[p.data.status];
+        const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
           <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
             <a class="prow" href={`/products/${p.id}/`}>
@@ -38,7 +41,7 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
               <div class="prow__main">
                 <div class="prow__headline">
                   <h3 class="prow__name">{p.data.name}</h3>
-                  <span class="prow__status">{meta.label}</span>
+                  {meta && <span class="prow__status">{meta.label}</span>}
                 </div>
                 <p class="prow__tagline">{p.data.tagline}</p>
               </div>

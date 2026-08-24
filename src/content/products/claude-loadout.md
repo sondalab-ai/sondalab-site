@@ -1,7 +1,6 @@
 ---
 name: claude-loadout
 tagline: Curate the context your agents run on.
-status: shipped
 accent: default
 surface: Term
 order: 2

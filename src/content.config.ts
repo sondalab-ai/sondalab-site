@@ -24,7 +24,8 @@ const products = defineCollection({
   schema: z.object({
     name: z.string(),
     tagline: z.string().max(90),
-    status: z.enum(STATUS),
+    // Optional: a product may show no maturity label at all.
+    status: z.enum(STATUS).optional(),
     accent: z.enum(ACCENT).default('default'),
     surface: z.enum(SURFACE),
     /** Sort order in the editorial index; flagship first. */

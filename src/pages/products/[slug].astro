@@ -23,7 +23,7 @@ const { data } = product;
 const { Content } = await render(product);
 
 const acc = accentVars(data.accent as AccentKey);
-const meta = STATUS_META[data.status];
+const meta = data.status ? STATUS_META[data.status] : null;
 const verified = data.verified.toISOString().slice(0, 10);
 ---
 
@@ -41,10 +41,12 @@ const verified = data.verified.toISOString().slice(0, 10);
         <h1 class="product__name">{data.name}</h1>
         <p class="product__tagline">{data.tagline}</p>
 
-        <div class="product__meta">
-          <span class="product__status">{meta.label}</span>
-          <span class="product__meta-note">{meta.note}</span>
-        </div>
+        {meta && (
+          <div class="product__meta">
+            <span class="product__status">{meta.label}</span>
+            <span class="product__meta-note">{meta.note}</span>
+          </div>
+        )}
       </header>
 
       <div class="product__body">
@@ -54,7 +56,7 @@ const verified = data.verified.toISOString().slice(0, 10);
 
         <aside class="product__aside">
           <dl class="factsheet">
-            <div><dt>Status</dt><dd>{meta.label}</dd></div>
+            {meta && <div><dt>Status</dt><dd>{meta.label}</dd></div>}
             <div><dt>Surface</dt><dd>{data.surface}</dd></div>
             <div><dt>Verified</dt><dd>{verified}</dd></div>
           </dl>
