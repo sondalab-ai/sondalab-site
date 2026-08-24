@@ -63,9 +63,16 @@ rather than aspirational.
   with `gh`: public = spexr, introspect, claude-loadout, claude-skills; private
   = daos, local-agents (render "Source is currently private", no dead link). The
   `smartctx` product was renamed to **claude-loadout** (folder to follow).
-- **Slice 3 — contact/social + deploy**: social channels from `SOCIALS` (empty
-  until handles exist — no dead links); deploy to the owner's VPS (static build
-  behind Caddy, auto-HTTPS) via a small rsync/Action step.
+- **Slice 3 — contact/social + deploy** *(done)*: social channels from `SOCIALS`
+  (empty until handles exist — no dead links). Deploy is a GitHub Actions
+  workflow (`deploy.yml`): on push to `main`, build + audit, then rsync `dist/`
+  over SSH to the CloudPanel **Static HTML Site** doc root
+  (`/home/sondalab-site/htdocs/sondalab.eu`). Live at <https://sondalab.eu>
+  (Let's Encrypt via CloudPanel). rsync uses `-rlvz --omit-dir-times --no-perms
+  --no-owner --no-group` because the doc root is group-owned by another
+  CloudPanel user. `trailingSlash: 'always'` matches nginx directory serving
+  (no 301, consistent canonical). Deploy secrets: `DEPLOY_{SSH_KEY,HOST,USER,
+  PORT,PATH}`; the deploy key is a dedicated ed25519 pair.
 
 ## Open items
 
