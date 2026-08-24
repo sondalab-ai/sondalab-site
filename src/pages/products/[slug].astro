@@ -1,0 +1,292 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { accentVars, type AccentKey } from '../../lib/accents';
+import { STATUS_META } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const products = (await getCollection('products')).sort(
+    (a, b) => a.data.order - b.data.order,
+  );
+  return products.map((p, i) => ({
+    params: { slug: p.id },
+    props: {
+      product: p,
+      prev: products[i - 1] ?? null,
+      next: products[i + 1] ?? null,
+    },
+  }));
+}
+
+const { product, prev, next } = Astro.props;
+const { data } = product;
+const { Content } = await render(product);
+
+const acc = accentVars(data.accent as AccentKey);
+const meta = STATUS_META[data.status];
+const verified = data.verified.toISOString().slice(0, 10);
+---
+
+<Base title={data.name} description={data.summary}>
+  <article
+    class="product"
+    data-product
+    style={`--acc-light:${acc.light};--acc-dark:${acc.dark}`}
+  >
+    <div class="wrap">
+      <a class="product__back" href="/#products">← All tools</a>
+
+      <header class="product__head">
+        <p class="eyebrow">Tool — {data.surface}</p>
+        <h1 class="product__name">{data.name}</h1>
+        <p class="product__tagline">{data.tagline}</p>
+
+        <div class="product__meta">
+          <span class="product__status">{meta.label}</span>
+          <span class="product__meta-note">{meta.note}</span>
+        </div>
+      </header>
+
+      <div class="product__body">
+        <div class="prose">
+          <Content />
+        </div>
+
+        <aside class="product__aside">
+          <dl class="factsheet">
+            <div><dt>Status</dt><dd>{meta.label}</dd></div>
+            <div><dt>Surface</dt><dd>{data.surface}</dd></div>
+            <div><dt>Verified</dt><dd>{verified}</dd></div>
+          </dl>
+
+          {(data.repoPublic || data.links.length > 0) && (
+            <div class="product__links">
+              {data.repoPublic && data.repo && (
+                <a class="sl-btn sl-btn--primary" href={data.repo}>Source on GitHub</a>
+              )}
+              {data.links.map((l) => (
+                <a class="sl-link" href={l.href}>{l.label} →</a>
+              ))}
+            </div>
+          )}
+          {!data.repoPublic && (
+            <p class="product__private">Source is currently private.</p>
+          )}
+        </aside>
+      </div>
+
+      <nav class="product__nav" aria-label="Other tools">
+        {prev ? (
+          <a class="product__nav-link product__nav-link--prev" href={`/products/${prev.id}`}>
+            <span class="product__nav-dir">← Previous</span>
+            <span class="product__nav-name">{prev.data.name}</span>
+          </a>
+        ) : <span />}
+        {next ? (
+          <a class="product__nav-link product__nav-link--next" href={`/products/${next.id}`}>
+            <span class="product__nav-dir">Next →</span>
+            <span class="product__nav-name">{next.data.name}</span>
+          </a>
+        ) : <span />}
+      </nav>
+    </div>
+  </article>
+</Base>
+
+<style>
+  /* Repaint the accent from the product's registered hue. DS components read the
+     --slc-* role vars (resolved at :root, so a --sl-accent-default override on a
+     descendant would NOT re-derive them — hence we map --slc-* here directly).
+     --sl-accent-default is also set for this page's own authored CSS. Steps use
+     the DS ratios (89/76/12) off --slc-accent, so only the base hue flips per
+     theme. Only var()/color-mix here — the hex lives in the inline style attr. */
+  [data-product] {
+    --sl-accent-default: var(--acc-dark);
+    --slc-accent: var(--acc-dark);
+    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 89%, black);
+    --slc-accent-active: color-mix(in srgb, var(--slc-accent) 76%, black);
+    --slc-accent-subtle: color-mix(in srgb, var(--slc-accent) 12%, transparent);
+    --slc-focus: var(--slc-accent);
+  }
+  :root[data-sl-theme='light'] [data-product] {
+    --sl-accent-default: var(--acc-light);
+    --slc-accent: var(--acc-light);
+  }
+
+  .product { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+
+  .product__back {
+    display: inline-block;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--sl-text-muted);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .product__back:hover { color: var(--sl-accent-default); }
+
+  .product__head {
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    border-bottom: 1px solid var(--sl-border-subtle);
+    position: relative;
+  }
+  .product__head::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: clamp(2rem, 5vw, 3.5rem);
+    width: 2.5rem;
+    height: 3px;
+    border-radius: var(--sl-radius-pill);
+    background: var(--sl-accent-default);
+  }
+  .product__name {
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-size: var(--step-display);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 1.75rem 0 0;
+  }
+  .product__tagline {
+    margin: 1.25rem 0 0;
+    font-size: var(--sl-text-xl);
+    line-height: var(--sl-line-tight);
+    color: var(--sl-text-secondary);
+    max-width: 24ch;
+    font-family: var(--sl-font-display);
+    font-weight: 340;
+    font-variation-settings: 'opsz' 40;
+  }
+  .product__meta {
+    margin-top: 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .product__status {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-accent-default);
+    padding: 0.2em 0.7em;
+    border: 1px solid color-mix(in srgb, var(--sl-accent-default) 45%, transparent);
+    border-radius: var(--sl-radius-pill);
+  }
+  .product__meta-note {
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.04em;
+    color: var(--sl-text-muted);
+  }
+
+  .product__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+    padding-top: clamp(2.5rem, 5vw, 4rem);
+  }
+  @media (min-width: 52rem) {
+    .product__body { grid-template-columns: 1.6fr 0.9fr; align-items: start; }
+    .product__aside { position: sticky; top: 6rem; }
+  }
+
+  .factsheet { margin: 0; display: grid; gap: 1rem; }
+  .factsheet div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--sl-border-subtle);
+  }
+  .factsheet dt {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .factsheet dd {
+    margin: 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-text-primary);
+  }
+
+  .product__links {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .product__private {
+    margin-top: 2rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.04em;
+    color: var(--sl-text-muted);
+  }
+
+  .product__nav {
+    margin-top: clamp(3rem, 7vw, 6rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--sl-border-subtle);
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .product__nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: var(--sl-text-primary);
+  }
+  .product__nav-link--next { text-align: right; }
+  .product__nav-dir {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .product__nav-name {
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-size: var(--step-h3);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .product__nav-link:hover .product__nav-name { color: var(--sl-accent-default); }
+
+  /* --- rendered markdown --- */
+  .prose { max-width: 60ch; }
+  .prose :global(p) {
+    margin: 0 0 1.25rem;
+    font-size: var(--sl-text-lg);
+    line-height: var(--sl-line-relaxed);
+    color: var(--sl-text-secondary);
+  }
+  .prose :global(p:first-child) { color: var(--sl-text-primary); }
+  .prose :global(a) { color: var(--sl-accent-default); }
+  .prose :global(code) {
+    font-family: var(--sl-font-mono);
+    font-size: 0.9em;
+    background: var(--sl-bg-surface);
+    padding: 0.1em 0.35em;
+    border-radius: var(--sl-radius-sm);
+  }
+</style>

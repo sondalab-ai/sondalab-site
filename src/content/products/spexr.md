@@ -6,7 +6,10 @@ accent: spexr
 surface: IDE
 order: 0
 repo: https://github.com/marcellobarile/spexr-ide
-repoPublic: false
+repoPublic: true
+links:
+  - label: Download (releases)
+    href: https://github.com/marcellobarile/spexr-ide/releases
 verified: 2026-08-24
 summary: An agent-centric IDE on Eclipse Theia where specs drive the build and every agent step stays visible and yours to steer.
 ---

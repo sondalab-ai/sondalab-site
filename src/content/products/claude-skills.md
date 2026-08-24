@@ -6,7 +6,7 @@ accent: default
 surface: Library
 order: 5
 repo: https://github.com/marcellobarile/claude-skills
-repoPublic: false
+repoPublic: true
 verified: 2026-08-24
 summary: A library of composable skills that give local agents concrete, repeatable capabilities.
 ---

@@ -4,6 +4,7 @@
 import puppeteer from 'puppeteer-core';
 
 const URL = process.argv[2] || 'http://localhost:4321/';
+const NAME = process.argv[3] || 'home';
 const CHROME =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const OUT = '.audit';
@@ -31,10 +32,10 @@ for (const theme of ['dark', 'light']) {
     window.scrollTo(0, 0);
   });
   await new Promise((r) => setTimeout(r, 800)); // let the glow field paint
-  await page.screenshot({ path: `${OUT}/home-${theme}.png` });
-  const full = `${OUT}/home-${theme}-full.png`;
+  await page.screenshot({ path: `${OUT}/${NAME}-${theme}.png` });
+  const full = `${OUT}/${NAME}-${theme}-full.png`;
   await page.screenshot({ path: full, fullPage: true });
-  console.log(`shot ${theme} → ${OUT}/home-${theme}.png (+ full)`);
+  console.log(`shot ${theme} → ${OUT}/${NAME}-${theme}.png (+ full)`);
   await page.close();
 }
 

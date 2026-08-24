@@ -6,7 +6,7 @@ accent: introspect
 surface: App
 order: 1
 repo: https://github.com/marcellobarile/introspect
-repoPublic: false
+repoPublic: true
 verified: 2026-08-24
 summary: Live observability for local agent sessions — state, timelines and on-device summaries, so nothing runs unseen.
 ---

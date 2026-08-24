@@ -31,20 +31,20 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
         const acc = accentVars(p.data.accent as AccentKey);
         const meta = STATUS_META[p.data.status];
         return (
-          <li
-            class="prow"
-            style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}
-          >
-            <span class="prow__no">{String(i + 1).padStart(2, '0')}</span>
-            <span class="prow__rule" aria-hidden="true"></span>
-            <div class="prow__main">
-              <div class="prow__headline">
-                <h3 class="prow__name">{p.data.name}</h3>
-                <span class="prow__status">{meta.label}</span>
+          <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
+            <a class="prow" href={`/products/${p.id}`}>
+              <span class="prow__no">{String(i + 1).padStart(2, '0')}</span>
+              <span class="prow__rule" aria-hidden="true"></span>
+              <div class="prow__main">
+                <div class="prow__headline">
+                  <h3 class="prow__name">{p.data.name}</h3>
+                  <span class="prow__status">{meta.label}</span>
+                </div>
+                <p class="prow__tagline">{p.data.tagline}</p>
               </div>
-              <p class="prow__tagline">{p.data.tagline}</p>
-            </div>
-            <span class="prow__surface">{p.data.surface}</span>
+              <span class="prow__surface">{p.data.surface}</span>
+              <span class="prow__go" aria-hidden="true">→</span>
+            </a>
           </li>
         );
       })}
@@ -70,21 +70,43 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
 
   .products__list { list-style: none; margin: 0; padding: 0; }
 
+  .products__list li { --row-accent: var(--row-accent-dark); }
+  :root[data-sl-theme='light'] .products__list li { --row-accent: var(--row-accent-light); }
+
   .prow {
-    --row-accent: var(--row-accent-dark);
     display: grid;
-    grid-template-columns: auto 3px 1fr auto;
+    grid-template-columns: auto 3px 1fr auto auto;
     align-items: center;
     gap: clamp(1rem, 3vw, 2.5rem);
     padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
+    padding-inline: clamp(0.5rem, 2vw, 1.25rem);
+    margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
     border-top: 1px solid var(--sl-border-subtle);
+    text-decoration: none;
+    color: inherit;
     transition: background var(--sl-motion-mid) var(--sl-motion-ease);
   }
-  .prow:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
-  :root[data-sl-theme='light'] .prow { --row-accent: var(--row-accent-light); }
+  .products__list li:last-child .prow {
+    border-bottom: 1px solid var(--sl-border-subtle);
+  }
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
   }
+  .prow:focus-visible {
+    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline-offset: 2px;
+  }
+
+  .prow__go {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-lg);
+    color: var(--row-accent);
+    opacity: 0;
+    transform: translateX(-0.4rem);
+    transition: opacity var(--sl-motion-mid) var(--sl-motion-ease),
+      transform var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .prow:hover .prow__go { opacity: 1; transform: translateX(0); }
 
   .prow__no {
     font-family: var(--sl-font-mono);
@@ -179,6 +201,7 @@ const usedStatuses = [...new Set(products.map((p) => p.data.status))];
     }
     .prow__rule { display: none; }
     .prow__surface { display: none; }
+    .prow__go { display: none; }
     .prow__no { grid-area: no; }
     .prow__main { grid-area: main; }
   }

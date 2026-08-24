@@ -56,10 +56,13 @@ rather than aspirational.
   self-hosted fonts, content schema + six product data files, home (hero,
   thesis, editorial product index, contact), audit + type-check + build in CI.
   Host-agnostic — no deploy workflow yet.
-- **Slice 2 — product subpages**: one shared template → six pages, each pinning
-  its registered accent; rigorous verification of every external link against
-  repo visibility (several repos are private — no dead links) before rendering
-  `repo`/`links`; `verified` dates refreshed.
+- **Slice 2 — product subpages** *(done)*: one shared template
+  (`src/pages/products/[slug].astro`) → six pages, each pinning its registered
+  accent via the `--slc-*` role vars (DS components read those, not
+  `--sl-accent-*`); home rows link out; prev/next nav. Repo visibility verified
+  with `gh`: public = spexr, introspect, claude-loadout, claude-skills; private
+  = daos, local-agents (render "Source is currently private", no dead link). The
+  `smartctx` product was renamed to **claude-loadout** (folder to follow).
 - **Slice 3 — contact/social + deploy**: social channels from `SOCIALS` (empty
   until handles exist — no dead links); deploy to the owner's VPS (static build
   behind Caddy, auto-HTTPS) via a small rsync/Action step.
@@ -69,5 +72,6 @@ rather than aspirational.
 - Domain vs brand memory: memory records `sondalab.ai` / org `sondalab-ai`; the
   site canonical and contact use `sondalab.eu` per owner. Reconcile the brand
   record separately.
-- Product `repoPublic` currently `false` for all; flip per-repo in Slice 2 after
-  visibility checks. External links render only where `repoPublic` is true.
+- Product `repoPublic` set per verified visibility (Slice 2). Re-verify with `gh`
+  and refresh `verified` dates when repos change visibility or move under the
+  `sondalab-ai` org.
