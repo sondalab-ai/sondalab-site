@@ -3,6 +3,20 @@ import GlowField from './GlowField.astro';
 import { SITE } from '../lib/site';
 
 const claimParts = SITE.claim.split(', ');
+
+// Down-chevron drawn as individual dots (col x, row y) that echo the logo dot.
+// Each animates on its own: an eased wave ripples top-to-bottom by default, and
+// JS occasionally swaps in an alternate move. `dir` = horizontal sign from the
+// centre column (3), used by the left↔right swap variant.
+const cue = [
+  { x: 0, y: 0 },
+  { x: 6, y: 0 },
+  { x: 1, y: 1 },
+  { x: 5, y: 1 },
+  { x: 2, y: 2 },
+  { x: 4, y: 2 },
+  { x: 3, y: 3 },
+].map((p) => ({ ...p, dir: Math.sign(3 - p.x) }));
 ---
 
 <section class="hero">
@@ -13,7 +27,7 @@ const claimParts = SITE.claim.split(', ');
 
     <h1 class="display hero__claim">
       <span>{claimParts[0]},</span>
-      <span class="hero__claim-accent">{claimParts[1]}.</span>
+      <span class="hero__claim-accent glitch" data-text={`${claimParts[1]}.`}>{claimParts[1]}.</span>
     </h1>
 
     <p class="hero__tagline">{SITE.tagline}</p>
@@ -25,7 +39,11 @@ const claimParts = SITE.claim.split(', ');
   </div>
 
   <a class="hero__scroll" href="/#approach" aria-label="Scroll to content">
-    <span></span>
+    <span class="hero__cue" aria-hidden="true">
+      {cue.map((p) => (
+        <i class="hero__px" style={`--x:${p.x};--y:${p.y};--d:${p.y};--dir:${p.dir}`}></i>
+      ))}
+    </span>
   </a>
 </section>
 
@@ -67,6 +85,7 @@ const claimParts = SITE.claim.split(', ');
     color: var(--sl-accent-default);
     font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
     font-style: italic;
+    --gx: 6px; /* bigger split — the display word is large */
   }
 
   .hero__tagline {
@@ -103,21 +122,89 @@ const claimParts = SITE.claim.split(', ');
     bottom: 1.75rem;
     transform: translateX(-50%);
     z-index: 2;
+    display: grid;
+    place-items: start center;
+    padding: 0.75rem;
   }
-  .hero__scroll span {
+  /* Dot chevron, 7 cols x 4 rows, each dot its own element (echoes logo dot). */
+  .hero__cue {
+    --px: 5px;
+    --gap: 8px; /* dot pitch — a touch airier than the dot size */
+    --c: var(--sl-accent-default);
+    position: relative;
     display: block;
-    width: 1px;
-    height: 3rem;
-    background: linear-gradient(to bottom, transparent, var(--sl-accent-default));
-    animation: drop 2.4s var(--sl-motion-ease) infinite;
-    transform-origin: top;
+    width: calc(6 * var(--gap) + var(--px));
+    height: calc(5 * var(--gap) + var(--px));
   }
-  @keyframes drop {
-    0% { transform: scaleY(0); opacity: 0; }
-    40% { transform: scaleY(1); opacity: 1; }
-    100% { transform: scaleY(1) translateY(1rem); opacity: 0; }
+  .hero__px {
+    position: absolute;
+    width: var(--px);
+    height: var(--px);
+    border-radius: var(--sl-radius-pill);
+    left: calc(var(--x) * var(--gap));
+    top: calc(var(--y) * var(--gap));
+    background: var(--c);
+    opacity: 0.25;
+    animation: pxwave 1.7s var(--sl-motion-ease) infinite;
+    animation-delay: calc(var(--d) * 0.16s);
   }
+  /* Default: eased vertical ripple; row-staggered delay flows top-to-bottom. */
+  @keyframes pxwave {
+    0% { transform: translateY(calc(-1 * var(--gap))); opacity: 0.18; }
+    45% { opacity: 1; }
+    70% { transform: translateY(calc(1.4 * var(--gap))); opacity: 0.85; }
+    100% { transform: translateY(calc(-1 * var(--gap))); opacity: 0.18; }
+  }
+
+  /* Occasional variant A — left half slides right, right half slides left. */
+  .hero__cue.is-swap .hero__px {
+    animation: pxswap 1.3s var(--sl-motion-ease);
+    animation-delay: 0s;
+  }
+  @keyframes pxswap {
+    0%, 100% { transform: translateX(0); opacity: 0.85; }
+    50% { transform: translateX(calc(var(--dir) * 3 * var(--gap))); opacity: 1; }
+  }
+
+  /* Occasional variant B — a bloom that pops outward in a row-staggered wave. */
+  .hero__cue.is-pop .hero__px {
+    animation: pxpop 1.2s var(--sl-motion-ease);
+    animation-delay: calc(var(--d) * 0.1s);
+  }
+  @keyframes pxpop {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    45% { transform: scale(2); opacity: 1; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .hero__scroll span { animation: none; }
+    .hero__px { animation: none; opacity: 0.9; transform: none; }
   }
 </style>
+
+<script>
+  import { autoBurst } from '../lib/glitch';
+
+  // Every few seconds, briefly swap the hero cue's default wave for an alternate
+  // move, chosen at random. Skipped entirely when motion isn't welcome.
+  const cue = document.querySelector('.hero__cue');
+  if (cue && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    const variants: Record<string, number> = { 'is-swap': 1350, 'is-pop': 1250 };
+    const keys = Object.keys(variants);
+    const schedule = () => {
+      const wait = 5000 + Math.random() * 6000;
+      setTimeout(() => {
+        const v = keys[Math.floor(Math.random() * keys.length)];
+        cue.classList.add(v);
+        setTimeout(() => {
+          cue.classList.remove(v);
+          schedule();
+        }, variants[v] + 60);
+      }, wait);
+    };
+    schedule();
+  }
+
+  // Ambient VHS glitch on the hero accent word — random-length bursts.
+  const accent = document.querySelector('.hero__claim-accent.glitch');
+  if (accent) autoBurst(accent, { waitMin: 4000, waitMax: 8000 });
+</script>

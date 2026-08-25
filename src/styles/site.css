@@ -129,3 +129,71 @@ a { color: inherit; }
 .invert .eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
 .invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 .invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
+
+/* ------------------------------------------------------------------ *
+ * VHS glitch — short, staccato RGB pulses repeated in a burst. Three
+ * channels off the brand palette (amber accent, teal depth, amber-hover
+ * via text-shadow), blended with mix-blend-mode: screen so the ghosts
+ * mix where they overlap. Two triggers: .is-glitching (JS-fired burst,
+ * finite) and .glitch--hover:hover (loops while hovered). The element
+ * needs data-text set to its own text for the ghost copies.
+ * `--gx` = split amplitude, tune per element.
+ * ------------------------------------------------------------------ */
+.glitch { position: relative; --gx: 2px; }
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  white-space: inherit;
+  mix-blend-mode: screen;
+}
+/* Looping visual; JS controls burst length (toggling .is-glitching) and sets
+   per-burst randomness via inline vars: --gd* durations, --gph* phase delays,
+   --gmul amplitude multiplier. Fallbacks keep it working without JS vars. */
+@media (prefers-reduced-motion: no-preference) {
+  .glitch.is-glitching {
+    animation: glitch-jit var(--gdj, 0.16s) steps(2) infinite;
+  }
+  .glitch.is-glitching::before {
+    color: var(--sl-accent-default);
+    animation: glitch-a var(--gda, 0.16s) steps(2) infinite;
+    animation-delay: var(--gpha, 0s);
+  }
+  .glitch.is-glitching::after {
+    color: var(--sl-accent-depth);
+    animation: glitch-b var(--gdb, 0.16s) steps(2) infinite;
+    animation-delay: var(--gphb, 0s);
+  }
+}
+/* Base jitter on the real text + a third colour halo via text-shadow.
+   --ga = effective amplitude (--gx scaled by the per-burst --gmul). */
+@keyframes glitch-jit {
+  0%   { transform: translate(0, 0); text-shadow: none; }
+  50%  {
+    transform: translate(calc(-0.4 * var(--gx) * var(--gmul, 1)), 0);
+    text-shadow:
+      calc(0.8 * var(--gx) * var(--gmul, 1)) 0 color-mix(in srgb, var(--sl-accent-hover) 55%, transparent),
+      calc(-0.8 * var(--gx) * var(--gmul, 1)) 0 color-mix(in srgb, var(--sl-accent-depth) 40%, transparent);
+  }
+  100% { transform: translate(calc(0.4 * var(--gx) * var(--gmul, 1)), 0); text-shadow: none; }
+}
+/* Amber ghost — slices flicker; opacity pulses so it strobes. */
+@keyframes glitch-a {
+  0%   { opacity: 0.22; transform: translate(calc(-1 * var(--gx) * var(--gmul, 1)), 0);    clip-path: inset(0 0 68% 0); }
+  50%  { opacity: 0.4;  transform: translate(calc(-1.7 * var(--gx) * var(--gmul, 1)), 1px); clip-path: inset(55% 0 12% 0); }
+  100% { opacity: 0.28; transform: translate(calc(-0.6 * var(--gx) * var(--gmul, 1)), 0);  clip-path: inset(28% 0 42% 0); }
+}
+/* Teal ghost — offset phase so the two channels cross and blend. */
+@keyframes glitch-b {
+  0%   { opacity: 0.38; transform: translate(calc(var(--gx) * var(--gmul, 1)), 0);             clip-path: inset(52% 0 18% 0); }
+  50%  { opacity: 0.2;  transform: translate(calc(1.7 * var(--gx) * var(--gmul, 1)), -1px); clip-path: inset(8% 0 60% 0); }
+  100% { opacity: 0.34; transform: translate(calc(0.6 * var(--gx) * var(--gmul, 1)), 0);  clip-path: inset(30% 0 40% 0); }
+}
+
+/* Product name burst uses the row's own accent tint for the amber channel. */
+@media (prefers-reduced-motion: no-preference) {
+  .prow__name.is-glitching::before { color: var(--row-accent); }
+}

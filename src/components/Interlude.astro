@@ -1,0 +1,137 @@
+---
+import { INTERLUDES } from '../lib/interludes';
+
+interface Props {
+  id: keyof typeof INTERLUDES;
+}
+const { id } = Astro.props;
+const data = INTERLUDES[id];
+// SSR default (no-JS): one line at random from the pool. The client re-rolls per
+// page load and swaps the text while the band is still below the fold + hidden.
+const seed = data.lines[Math.floor(Math.random() * data.lines.length)];
+const pool = JSON.stringify(data.lines);
+---
+
+<aside class:list={['interlude', { invert: data.variant === 'invert' }]}>
+  <div class="wrap interlude__wrap" data-interlude data-pool={pool}>
+    <span class="interlude__marker glitch" data-text={data.marker}>{data.marker}</span>
+    <p class="interlude__body">
+      <span class="interlude__lead">{seed.lead}</span>
+      <span class="interlude__punch">{seed.punch}</span>
+    </p>
+  </div>
+</aside>
+
+<style>
+  .interlude {
+    border-top: 1px solid var(--rule);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .interlude.invert {
+    background: var(--sl-text-primary);
+    color: var(--sl-bg-canvas);
+  }
+
+  .interlude__wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    max-width: 58rem;
+  }
+
+  .interlude__marker {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--sl-accent-default);
+  }
+
+  .interlude__body {
+    margin: 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: clamp(1.05rem, 0.85rem + 1.1vw, 1.6rem);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .interlude__lead,
+  .interlude__punch { display: block; }
+  .interlude__lead {
+    color: var(--sl-text-muted);
+  }
+  .interlude.invert .interlude__lead {
+    color: color-mix(in srgb, var(--sl-bg-canvas) 55%, transparent);
+  }
+  .interlude__punch {
+    margin-top: 0.5em;
+    color: var(--sl-text-primary);
+  }
+  .interlude.invert .interlude__punch { color: var(--sl-bg-canvas); }
+
+  /* Quiet scroll reveal — progressive enhancement: JS arms the hidden state
+     (.reveal-armed) before observing, so no-JS / reduced-motion always shows the
+     copy. Motion only when welcome. */
+  @media (prefers-reduced-motion: no-preference) {
+    .interlude__wrap.reveal-armed {
+      opacity: 0;
+      transform: translateY(0.6rem);
+      transition:
+        opacity var(--sl-motion-slow) var(--sl-motion-ease),
+        transform var(--sl-motion-slow) var(--sl-motion-ease);
+    }
+    .interlude__wrap.reveal-armed.is-in {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { fireBurst, autoBurst } from '../lib/glitch';
+
+  const nodes = document.querySelectorAll('[data-interlude]');
+
+  // Re-roll each band's copy per page load (dynamism on a static site). The band
+  // sits below the fold, so the swap lands before it is ever scrolled into view.
+  for (const n of nodes) {
+    try {
+      const pool = JSON.parse(n.getAttribute('data-pool') || '[]');
+      if (pool.length > 1) {
+        const line = pool[Math.floor(Math.random() * pool.length)];
+        const lead = n.querySelector('.interlude__lead');
+        const punch = n.querySelector('.interlude__punch');
+        if (lead) lead.textContent = line.lead;
+        if (punch) punch.textContent = line.punch;
+      }
+    } catch {}
+  }
+
+  const motionOK =
+    'IntersectionObserver' in window &&
+    matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  if (motionOK) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+            // Glitch the marker at reveal, then keep it glitching periodically.
+            const marker = e.target.querySelector('.interlude__marker.glitch');
+            if (marker) {
+              fireBurst(marker);
+              autoBurst(marker, { waitMin: 5000, waitMax: 10000 });
+            }
+          }
+        }
+      },
+      { threshold: 0.35 },
+    );
+    for (const n of nodes) {
+      n.classList.add('reveal-armed');
+      io.observe(n);
+    }
+  }
+</script>

@@ -40,7 +40,7 @@ const usedStatuses = [
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
                 <div class="prow__headline">
-                  <h3 class="prow__name">{p.data.name}</h3>
+                  <h3 class="prow__name glitch" data-text={p.data.name}>{p.data.name}</h3>
                   {meta && <span class="prow__status">{meta.label}</span>}
                 </div>
                 <p class="prow__tagline">{p.data.tagline}</p>
@@ -148,6 +148,7 @@ const usedStatuses = [
     font-size: var(--step-h3);
     margin: 0;
     letter-spacing: -0.01em;
+    --gx: 3px;
   }
   .prow__status {
     font-family: var(--sl-font-mono);
@@ -217,3 +218,12 @@ const usedStatuses = [
     .prow__main { grid-area: main; }
   }
 </style>
+
+<script>
+  import { hoverBurst } from '../lib/glitch';
+  // Hovering a product row fires intermittent glitch bursts on its name.
+  for (const row of document.querySelectorAll('.prow')) {
+    const name = row.querySelector('.prow__name.glitch');
+    if (name) hoverBurst(row, name);
+  }
+</script>

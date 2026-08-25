@@ -8,8 +8,17 @@ const Tag = as;
 ---
 
 <Tag class="wordmark" style={`--wm-size:${size}`}>
-  <span class="wordmark__name">sondalab</span><span class="wordmark__dot" aria-hidden="true"></span>
+  <span class="wordmark__name glitch glitch--hover" data-text="sondalab">sondalab</span><span class="wordmark__dot" aria-hidden="true"></span>
 </Tag>
+
+<script>
+  import { hoverBurst } from '../lib/glitch';
+  // Intermittent glitch bursts while the wordmark is hovered.
+  for (const name of document.querySelectorAll('.wordmark__name.glitch--hover')) {
+    const host = name.closest('.wordmark') ?? name;
+    hoverBurst(host, name);
+  }
+</script>
 
 <style>
   .wordmark {

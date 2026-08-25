@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Thesis from '../components/Thesis.astro';
+import Interlude from '../components/Interlude.astro';
 import ProductsIndex from '../components/ProductsIndex.astro';
 import Contact from '../components/Contact.astro';
 ---
@@ -9,6 +10,8 @@ import Contact from '../components/Contact.astro';
 <Base>
   <Hero />
   <Thesis />
+  <Interlude id="signal" />
   <ProductsIndex />
+  <Interlude id="after-hours" />
   <Contact />
 </Base>
