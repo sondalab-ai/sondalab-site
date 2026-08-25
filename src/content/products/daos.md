@@ -6,7 +6,7 @@ surface: Library
 order: 3
 repo: https://github.com/sondalab-ai/daos
 repoPublic: false
-summary: The Deterministic Agent Output System, a Python system that makes an agent's output reproducible and verifiable. Results are cached and HMAC-signed so the same input yields the same answer, with the signing key as the trust root and a fail-closed runtime that refuses to run unsigned.
+summary: The Deterministic Agent Output System, a Python system that makes an agent's output <strong>reproducible and verifiable</strong>. Results are cached and <strong>HMAC-signed</strong> so the same input yields the same answer, with the signing key as the trust root and a <strong>fail-closed runtime</strong> that refuses to run unsigned.
 ---
 
 daos, the Deterministic Agent Output System, is the measurement bench for

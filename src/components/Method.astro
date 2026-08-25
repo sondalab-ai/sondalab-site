@@ -2,15 +2,15 @@
 const points = [
   {
     verb: 'The brand',
-    body: 'The name and the visual language were shaped through an agentic process: options generated and explored by machine, the final call made by a person. A family of related identities, not a logo handed down.',
+    body: 'The name and the visual language were <strong>shaped through an agentic process</strong>: options generated and explored by machine, <strong>the final call made by a person</strong>. A family of related identities, not a logo handed down.',
   },
   {
     verb: 'The build',
-    body: 'The tools, and this very site, are developed the agent-centric way we advocate: work driven from written specs and Claude Code sessions, each change tracing back to an intent you can read. Assistance, never autopilot.',
+    body: 'The tools, and this very site, are developed the <strong>agent-centric way we advocate</strong>: work driven from <strong>written specs and agent sessions</strong>, each change tracing back to an intent you can read. <strong>Assistance, never autopilot.</strong>',
   },
   {
     verb: 'The design system',
-    body: 'One shared, token-based design system underpins every surface. Agents maintain and migrate it across products, and an automated audit fails the build on any drift from it. This site\'s content is schema-validated too, so a wrong edit does not ship; it stops the build instead.',
+    body: 'One shared, <strong>token-based design system</strong> underpins every surface. Agents maintain and migrate it across products, and an <strong>automated audit fails the build on any drift</strong>. This site\'s content is <strong>schema-validated</strong> too, so a wrong edit does not ship; it stops the build instead.',
   },
 ];
 ---
@@ -24,9 +24,10 @@ const points = [
       </div>
       <h2 class="h2">Made the way it's meant to run.</h2>
       <p class="lede">
-        Sondalab builds tools for directing agents, and it is built by directing
-        them. People set the intent and hold the switch; the machine does the
-        work, in the open, every step traceable and reversible. The brand, the
+        Sondalab builds tools for directing agents, and it is{' '}
+        <strong>built by directing them</strong>. People set the intent and{' '}
+        <strong>hold the switch</strong>; the machine does the work, in the open,
+        every step <strong>traceable and reversible</strong>. The brand, the
         design system, and this very site came out of that same loop.
       </p>
     </div>
@@ -37,7 +38,7 @@ const points = [
           <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
           <div class="mpoint__body">
             <h3 class="mpoint__verb">{p.verb}</h3>
-            <p>{p.body}</p>
+            <p set:html={p.body}></p>
           </div>
         </li>
       ))}
@@ -93,5 +94,10 @@ const points = [
     margin: 0;
     max-width: 46ch;
     color: var(--sl-text-secondary);
+  }
+  .method__head .lede strong,
+  .mpoint__body :global(strong) {
+    font-weight: 600;
+    color: var(--sl-text-primary);
   }
 </style>

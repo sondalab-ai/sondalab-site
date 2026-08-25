@@ -2,15 +2,15 @@
 const pillars = [
   {
     verb: 'See it',
-    body: 'Whatever a machine is doing, Sondalab keeps it legible: observable, measurable, understandable as it happens. No black boxes.',
+    body: 'Whatever a machine is doing, Sondalab <strong>keeps it legible</strong>: observable, measurable, understandable as it happens. <strong>No black boxes.</strong>',
   },
   {
     verb: 'Steer it',
-    body: 'You stay in the loop and in charge: direct it, correct it, hand off or take the controls back at any moment. Assistance, never autopilot.',
+    body: 'You <strong>stay in the loop and in charge</strong>: direct it, correct it, hand off or take the controls back at any moment. <strong>Assistance, never autopilot.</strong>',
   },
   {
     verb: 'Own it',
-    body: 'The machine, its data and its off-switch stay yours, answering to you, running where you are, not to a service out of reach.',
+    body: 'The machine, its data and <strong>its off-switch stay yours</strong>, answering to you, <strong>running where you are</strong>, not to a service out of reach.',
   },
 ];
 ---
@@ -24,10 +24,11 @@ const pillars = [
       </div>
       <h2 class="h2">Tools that keep you in command of the machines working for you.</h2>
       <p class="lede">
-        Sondalab builds software that runs, watches and improves the agents doing
-        your work, and keeps them legible, controllable and yours. It's a stance
-        that holds as machines grow more capable: from today's software agents
-        toward the physical systems, and robotics, ahead.
+        Sondalab builds software that{' '}
+        <strong>runs, watches and improves</strong> the agents doing your work,
+        and keeps them <strong>legible, controllable and yours</strong>. It's a
+        stance that holds as machines grow more capable: from today's software
+        agents toward the physical systems, and <strong>robotics</strong>, ahead.
       </p>
     </div>
 
@@ -37,7 +38,7 @@ const pillars = [
           <span class="pillar__no">{String(i + 1).padStart(2, '0')}</span>
           <div class="pillar__body">
             <h3 class="pillar__verb">{p.verb}</h3>
-            <p>{p.body}</p>
+            <p set:html={p.body}></p>
           </div>
         </li>
       ))}
@@ -97,5 +98,10 @@ const pillars = [
     margin: 0;
     max-width: 42ch;
     color: color-mix(in srgb, var(--sl-bg-canvas) 76%, transparent);
+  }
+  .thesis__head .lede strong,
+  .pillar__body :global(strong) {
+    font-weight: 600;
+    color: var(--sl-bg-canvas);
   }
 </style>

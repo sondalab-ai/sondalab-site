@@ -38,7 +38,7 @@ const NAV_BANDS = 4;
 const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 ---
 
-<Base title={data.name} description={data.summary}>
+<Base title={data.name} description={data.summary.replace(/<[^>]+>/g, '')}>
   <article
     class="product"
     data-product
