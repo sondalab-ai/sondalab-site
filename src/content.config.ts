@@ -3,16 +3,16 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro:schema';
 
 /**
- * Product status vocabulary — mirrors the PM status legend rendered on the
+ * Product status vocabulary, mirrors the PM status legend rendered on the
  * page. A closed enum is the whole point: an agent editing a product file
- * cannot silently promote a PoC to "shipped" — a wrong value fails the build.
+ * cannot silently promote a PoC to "shipped", a wrong value fails the build.
  */
-const STATUS = ['shipped', 'public-beta', 'beta', 'poc', 'library'] as const;
+const STATUS = ['shipped', 'public-beta', 'beta', 'poc'] as const;
 
 /**
  * Accent keys are the registered products in @sondalab/ui-kit's
  * accent-registry.json. Restricting to this set means a product page can only
- * ever pin an accent the design system actually knows — no invented hues.
+ * ever pin an accent the design system actually knows, no invented hues.
  */
 const ACCENT = ['default', 'spexr', 'introspect', 'local-agents'] as const;
 

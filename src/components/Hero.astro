@@ -26,7 +26,7 @@ const cue = [
   <GlowField />
   <div class="hero__scrim" aria-hidden="true"></div>
   <div class="wrap hero__inner">
-    <p class="eyebrow hero__eyebrow">Sondalab — a lab for operators</p>
+    <p class="eyebrow hero__eyebrow">Sondalab · a lab for operators</p>
 
     <h1 class="display hero__claim">
       <span>{claimParts[0]},</span>
@@ -70,7 +70,7 @@ const cue = [
     align-items: center;
     overflow: hidden;
   }
-  /* Full-bleed readability scrim over the glow — biased to the text side, fades
+  /* Full-bleed readability scrim over the glow, biased to the text side, fades
      fully to transparent so it never reads as a rectangle. */
   .hero__scrim {
     position: absolute;
@@ -99,7 +99,7 @@ const cue = [
     color: var(--sl-accent-default);
     font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
     font-style: italic;
-    --gx: 6px; /* bigger split — the display word is large */
+    --gx: 6px; /* bigger split; the display word is large */
   }
 
   .hero__tagline {
@@ -143,7 +143,7 @@ const cue = [
   /* Dot chevron, 7 cols x 4 rows, each dot its own element (echoes logo dot). */
   .hero__cue {
     --px: 5px;
-    --gap: 8px; /* dot pitch — a touch airier than the dot size */
+    --gap: 8px; /* dot pitch, a touch airier than the dot size */
     --c: var(--sl-accent-default);
     position: relative;
     display: block;
@@ -170,7 +170,7 @@ const cue = [
     100% { transform: translateY(calc(-1 * var(--gap))); opacity: 0.18; }
   }
 
-  /* Occasional variant A — left half slides right, right half slides left. */
+  /* Occasional variant A: left half slides right, right half slides left. */
   .hero__cue.is-swap .hero__px {
     animation: pxswap 1.3s var(--sl-motion-ease);
     animation-delay: 0s;
@@ -180,7 +180,7 @@ const cue = [
     50% { transform: translateX(calc(var(--dir) * 3 * var(--gap))); opacity: 1; }
   }
 
-  /* Occasional variant B — a bloom that pops outward in a row-staggered wave. */
+  /* Occasional variant B: a bloom that pops outward in a row-staggered wave. */
   .hero__cue.is-pop .hero__px {
     animation: pxpop 1.2s var(--sl-motion-ease);
     animation-delay: calc(var(--d) * 0.1s);
@@ -218,7 +218,7 @@ const cue = [
     schedule();
   }
 
-  // Ambient VHS glitch on the hero accent word — random-length bursts.
+  // Ambient VHS glitch on the hero accent word, random-length bursts.
   const accent = document.querySelector('.hero__claim-accent.glitch');
   if (accent) autoBurst(accent, { waitMin: 4000, waitMax: 8000 });
 </script>

@@ -15,12 +15,11 @@ export const STATUS_META: Record<
   shipped: { label: 'Shipped', note: 'in production, available now' },
   'public-beta': { label: 'Public beta', note: 'usable, still stabilising' },
   beta: { label: 'Beta', note: 'early, evolving fast' },
-  poc: { label: 'PoC', note: 'proof of concept — not delivered' },
-  library: { label: 'Library', note: 'code you build on, no UI' },
+  poc: { label: 'PoC', note: 'proof of concept, not delivered' },
 };
 
 /**
- * Social channels — intentionally empty until the handles exist. Rendered only
+ * Social channels: intentionally empty until the handles exist. Rendered only
  * when non-empty, so the site never ships a dead link. Add `{ label, href }`
  * entries here when the accounts are created.
  */

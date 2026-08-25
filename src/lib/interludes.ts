@@ -1,9 +1,9 @@
 /**
- * Interstitial prose — the "transmission" bands between sections. Each block has
+ * Interstitial prose: the "transmission" bands between sections. Each block has
  * a mono marker, a colour variant, and a POOL of lines; the client picks one at
  * random per page load (SSR renders a default for no-JS). Copy lives here so it
  * stays editable without touching markup. `lead` sets the scene; `punch` lands
- * the point. Honest throughline: see it · steer it · own it — never "all local".
+ * the point. Honest throughline: see it · steer it · own it; never "all local".
  */
 export type Line = { lead: string; punch: string };
 
@@ -18,7 +18,7 @@ const signal: Line[] = [
   {
     lead: 'Somewhere a datacenter is quietly deciding things about you.',
     punch:
-      'Here, whatever does the deciding runs on your terms — in the open, where you can watch it work and pull the plug.',
+      'Here, whatever does the deciding runs on your terms, in the open, where you can watch it work and pull the plug.',
   },
   {
     lead: 'The machines are already making calls on your behalf.',
@@ -34,7 +34,7 @@ const signal: Line[] = [
   },
   {
     lead: 'Autonomy sounds great until nobody is holding the reins.',
-    punch: "Assistance, never autopilot — you stay in the loop, or it doesn't run.",
+    punch: "Assistance, never autopilot: you stay in the loop, or it doesn't run.",
   },
   {
     lead: "They call it magic when they don't want you to look inside.",
@@ -50,11 +50,11 @@ const signal: Line[] = [
   },
   {
     lead: 'You can hand a machine the work without handing it the wheel.',
-    punch: 'Direct it, correct it, take the controls back — any moment you like.',
+    punch: 'Direct it, correct it, take the controls back, any moment you like.',
   },
   {
     lead: 'Somewhere your words are quietly becoming someone else training set.',
-    punch: 'Here, your data answers to you — kept where you keep it, used how you say.',
+    punch: 'Here, your data answers to you: kept where you keep it, used how you say.',
   },
   {
     lead: 'A good tool is legible: you can tell what it is doing, and why.',
@@ -66,7 +66,7 @@ const signal: Line[] = [
   },
   {
     lead: 'Command is not a feature you toggle on.',
-    punch: 'It is the whole point — see it, steer it, own it.',
+    punch: 'It is the whole point: see it, steer it, own it.',
   },
   {
     lead: "Soon the agents won't just write code. They'll move things in the world.",
@@ -82,7 +82,7 @@ const signal: Line[] = [
   },
   {
     lead: 'Every session spins up more capability than you asked for.',
-    punch: 'We hand you the loadout — only the tools the job needs, nothing else armed.',
+    punch: 'We hand you the loadout: only the tools the job needs, nothing else armed.',
   },
   {
     lead: 'The interesting question is not what the machine can do.',
@@ -90,7 +90,7 @@ const signal: Line[] = [
   },
   {
     lead: 'Most dashboards show you the output. Few show you the reasoning.',
-    punch: 'We tail the whole thing, live — spawns, tool calls, the current thought.',
+    punch: 'We tail the whole thing, live: spawns, tool calls, the current thought.',
   },
   {
     lead: 'Capability is cheap now. Legibility is the hard part.',
@@ -102,7 +102,7 @@ const afterHours: Line[] = [
   {
     lead: 'Tonight the agents keep working while you sleep.',
     punch:
-      'Come morning, every log is still yours to read — and the switch is still where you left it.',
+      'Come morning, every log is still yours to read, and the switch is still where you left it.',
   },
   {
     lead: 'The night shift never clocks out anymore.',
@@ -134,11 +134,11 @@ const afterHours: Line[] = [
   },
   {
     lead: 'Tomorrow you will review work that ran without you.',
-    punch: 'Not blind trust — a replay you can scrub through, step by step.',
+    punch: 'Not blind trust, but a replay you can scrub through, step by step.',
   },
   {
     lead: 'The agents work the graveyard shift.',
-    punch: 'Every spawn, every tool call, every file touched — on the record.',
+    punch: 'Every spawn, every tool call, every file touched: on the record.',
   },
   {
     lead: 'You handed off the task, not the accountability.',
@@ -146,7 +146,7 @@ const afterHours: Line[] = [
   },
   {
     lead: 'Somewhere your session is still thinking.',
-    punch: 'You can watch it live, or read it later — either way it is an open book.',
+    punch: 'You can watch it live, or read it later; either way it is an open book.',
   },
   {
     lead: 'The lights are off and the work continues.',
@@ -162,7 +162,7 @@ const afterHours: Line[] = [
   },
   {
     lead: 'It will run all night if you let it.',
-    punch: 'And it will show you exactly what it did — no gaps, no black boxes.',
+    punch: 'And it will show you exactly what it did: no gaps, no black boxes.',
   },
   {
     lead: 'The work carried on without supervision.',

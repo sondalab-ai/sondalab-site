@@ -27,7 +27,7 @@ const { Content } = await render(product);
 const novella = NOVELLAS[product.id];
 const chapter = String(data.order + 1).padStart(2, '0');
 const chapterTotal = String(total).padStart(2, '0');
-const logMarker = `// operator's log — ${chapter} / ${chapterTotal}`;
+const logMarker = `// operator's log · ${chapter} / ${chapterTotal}`;
 
 const acc = accentVars(data.accent as AccentKey);
 const meta = data.status ? STATUS_META[data.status] : null;
@@ -48,7 +48,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <a class="product__back" href="/#products">← All tools</a>
 
       <header class="product__head">
-        <p class="eyebrow">Tool — {data.surface}</p>
+        <p class="eyebrow">Tool · {data.surface}</p>
         <h1
           class="product__name glitch glitch--shatter"
           data-text={data.name}
@@ -152,10 +152,10 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 <style>
   /* Repaint the accent from the product's registered hue. DS components read the
      --slc-* role vars (resolved at :root, so a --sl-accent-default override on a
-     descendant would NOT re-derive them — hence we map --slc-* here directly).
+     descendant would NOT re-derive them, hence we map --slc-* here directly).
      --sl-accent-default is also set for this page's own authored CSS. Steps use
      the DS ratios (89/76/12) off --slc-accent, so only the base hue flips per
-     theme. Only var()/color-mix here — the hex lives in the inline style attr. */
+     theme. Only var()/color-mix here; the hex lives in the inline style attr. */
   [data-product] {
     --sl-accent-default: var(--acc-dark);
     --slc-accent: var(--acc-dark);
@@ -173,7 +173,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
     isolation: isolate;
   }
-  /* Full-viewport background wash in the product's hue — fixed, behind content. */
+  /* Full-viewport background wash in the product's hue, fixed, behind content. */
   .product::before {
     content: '';
     position: fixed;
@@ -378,7 +378,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     margin-bottom: 0;
     color: var(--sl-accent-default);
   }
-  /* Staggered reveal — progressive enhancement: JS arms the hidden state. */
+  /* Staggered reveal, progressive enhancement: JS arms the hidden state. */
   @media (prefers-reduced-motion: no-preference) {
     .novella[data-armed] .novella__marker,
     .novella[data-armed] .novella__body {

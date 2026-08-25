@@ -44,7 +44,7 @@ export function fireBurst(el: Element, { burstMin = 200, burstMax = 500 }: Burst
   window.setTimeout(() => el.classList.remove('is-glitching'), dur);
 }
 
-/** Wait a random gap, burst, repeat — for ambient elements like the hero word. */
+/** Wait a random gap, burst, repeat, for ambient elements like the hero word. */
 export function autoBurst(
   el: Element,
   { waitMin = 6000, waitMax = 11000, burstMin = 200, burstMax = 500 }: AutoOpts = {},
@@ -57,6 +57,39 @@ export function autoBurst(
     }, rand(waitMin, waitMax));
   };
   loop();
+}
+
+/**
+ * Decode-scramble a short label (e.g. an index numeral): cycles random glyphs
+ * and locks the real characters in left-to-right, terminal-readout style.
+ * Distinct from the RGB/shatter glitches. Reads the target text from
+ * `data-num` (falls back to current textContent) so repeats stay correct.
+ */
+export function scramble(
+  el: HTMLElement,
+  { duration = 520, tick = 45 }: { duration?: number; tick?: number } = {},
+) {
+  if (!motionOK() || el.dataset.scrambling === '1') return;
+  const final = el.dataset.num ?? el.textContent ?? '';
+  const n = final.length;
+  const glyphs = '0123456789#/\\<>';
+  el.dataset.scrambling = '1';
+  const start = performance.now();
+  const iv = window.setInterval(() => {
+    const t = performance.now() - start;
+    if (t >= duration) {
+      window.clearInterval(iv);
+      el.textContent = final;
+      delete el.dataset.scrambling;
+      return;
+    }
+    const locked = Math.floor((t / duration) * n);
+    let out = '';
+    for (let i = 0; i < n; i++) {
+      out += i < locked ? final[i] : glyphs[(Math.random() * glyphs.length) | 0];
+    }
+    el.textContent = out;
+  }, tick);
 }
 
 /**

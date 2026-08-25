@@ -25,10 +25,17 @@ const usedStatuses = [
     </div>
 
     <div class="products__intro">
-      <h2 class="h2">Six tools, one throughline.</h2>
+      <h2 class="h2">Many tools, one throughline.</h2>
       <p class="lede">
-        Each is a different instrument; all of them keep you seeing, steering and
-        owning what the machine does.
+        Together they cover the whole loop of working with agents:{' '}
+        <strong>writing and running</strong> the work,{' '}
+        <strong>watching</strong> every step as it happens,{' '}
+        <strong>scoping</strong> what a session loads,{' '}
+        <strong>proving</strong> a result repeats,{' '}
+        <strong>hosting</strong> it all on hardware you own, and{' '}
+        <strong>extending</strong> what an agent can do. Different surfaces (an
+        IDE, dashboards, a launcher, libraries), one stance underneath:{' '}
+        <strong>local-first, legible, and yours to switch off</strong>.
       </p>
     </div>
 
@@ -39,7 +46,7 @@ const usedStatuses = [
         return (
           <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
             <a class="prow" href={`/products/${p.id}/`}>
-              <span class="prow__no">{String(i + 1).padStart(2, '0')}</span>
+              <span class="prow__no" data-num={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
                 <div class="prow__headline">
@@ -85,6 +92,10 @@ const usedStatuses = [
     margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
   }
   .products__intro .lede { margin-top: 1.25rem; max-width: 46ch; }
+  .products__intro .lede strong {
+    font-weight: 600;
+    color: var(--sl-text-primary);
+  }
 
   .products__list { list-style: none; margin: 0; padding: 0; }
 
@@ -234,10 +245,13 @@ const usedStatuses = [
 </style>
 
 <script>
-  import { hoverBurst } from '../lib/glitch';
-  // Hovering a product row fires intermittent glitch bursts on its name.
+  import { hoverBurst, scramble } from '../lib/glitch';
+  // Hovering a product row glitches its name (bursts) and decode-scrambles its
+  // index numeral once; two distinct effects on the same trigger.
   for (const row of document.querySelectorAll('.prow')) {
     const name = row.querySelector('.prow__name.glitch');
     if (name) hoverBurst(row, name);
+    const no = row.querySelector('.prow__no');
+    if (no) row.addEventListener('mouseenter', () => scramble(no as HTMLElement));
   }
 </script>

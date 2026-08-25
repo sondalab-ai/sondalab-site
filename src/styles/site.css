@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ *
- * Sondalab site layer — layout + type character on top of the DS.
+ * Sondalab site layer, layout + type character on top of the DS.
  * Colour comes only from @sondalab/ui-kit tokens; nothing hard-coded.
  * ------------------------------------------------------------------ */
 
@@ -14,7 +14,7 @@
   --gutter: clamp(1.25rem, 5vw, 4rem);
   --rule: var(--sl-border-subtle);
 
-  /* Fluid display scale — oversized type as structure. */
+  /* Fluid display scale, oversized type as structure. */
   --step-eyebrow: 0.75rem;
   --step-h3: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
   --step-h2: clamp(1.9rem, 1.2rem + 3vw, 3.25rem);
@@ -106,7 +106,7 @@ a { color: inherit; }
   border-top: 1px solid var(--rule);
 }
 
-/* Section index eyebrow — the numbered ladder down the page. */
+/* Section index eyebrow, the numbered ladder down the page. */
 .section-index {
   display: flex;
   align-items: baseline;
@@ -121,7 +121,7 @@ a { color: inherit; }
   letter-spacing: 0.1em;
 }
 
-/* Inversion band — strongest neutral, foreground flips. */
+/* Inversion band, strongest neutral, foreground flips. */
 .invert {
   background: var(--sl-text-primary);
   color: var(--sl-bg-canvas);
@@ -131,7 +131,7 @@ a { color: inherit; }
 .invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
 
 /* ------------------------------------------------------------------ *
- * VHS glitch — short, staccato RGB pulses repeated in a burst. Three
+ * VHS glitch, short, staccato RGB pulses repeated in a burst. Three
  * channels off the brand palette (amber accent, teal depth, amber-hover
  * via text-shadow), blended with mix-blend-mode: screen so the ghosts
  * mix where they overlap. Two triggers: .is-glitching (JS-fired burst,
@@ -180,13 +180,13 @@ a { color: inherit; }
   }
   100% { transform: translate(calc(0.4 * var(--gx) * var(--gmul, 1)), 0); text-shadow: none; }
 }
-/* Amber ghost — slices flicker; opacity pulses so it strobes. */
+/* Amber ghost, slices flicker; opacity pulses so it strobes. */
 @keyframes glitch-a {
   0%   { opacity: 0.22; transform: translate(calc(-1 * var(--gx) * var(--gmul, 1)), 0);    clip-path: inset(0 0 68% 0); }
   50%  { opacity: 0.4;  transform: translate(calc(-1.7 * var(--gx) * var(--gmul, 1)), 1px); clip-path: inset(55% 0 12% 0); }
   100% { opacity: 0.28; transform: translate(calc(-0.6 * var(--gx) * var(--gmul, 1)), 0);  clip-path: inset(28% 0 42% 0); }
 }
-/* Teal ghost — offset phase so the two channels cross and blend. */
+/* Teal ghost, offset phase so the two channels cross and blend. */
 @keyframes glitch-b {
   0%   { opacity: 0.38; transform: translate(calc(var(--gx) * var(--gmul, 1)), 0);             clip-path: inset(52% 0 18% 0); }
   50%  { opacity: 0.2;  transform: translate(calc(1.7 * var(--gx) * var(--gmul, 1)), -1px); clip-path: inset(8% 0 60% 0); }
@@ -199,7 +199,7 @@ a { color: inherit; }
 }
 
 /* ------------------------------------------------------------------ *
- * Shatter — during a burst the element breaks into horizontal bands that
+ * Shatter, during a burst the element breaks into horizontal bands that
  * jump sideways (datamosh/"no signal"). Bands are stacked copies of the
  * text (.glitch__shard), each clipped to one strip; JS sets a random --sx
  * offset per band per burst. The intact copy hides while shards show.

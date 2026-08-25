@@ -1,0 +1,97 @@
+---
+const points = [
+  {
+    verb: 'The brand',
+    body: 'The name and the visual language were shaped through an agentic process: options generated and explored by machine, the final call made by a person. A family of related identities, not a logo handed down.',
+  },
+  {
+    verb: 'The build',
+    body: 'The tools, and this very site, are developed the agent-centric way we advocate: work driven from written specs and Claude Code sessions, each change tracing back to an intent you can read. Assistance, never autopilot.',
+  },
+  {
+    verb: 'The design system',
+    body: 'One shared, token-based design system underpins every surface. Agents maintain and migrate it across products, and an automated audit fails the build on any drift from it. This site\'s content is schema-validated too, so a wrong edit does not ship; it stops the build instead.',
+  },
+];
+---
+
+<section id="method" class="section method">
+  <div class="wrap method__grid">
+    <div class="method__head">
+      <div class="section-index">
+        <span class="section-index__no">03</span>
+        <span class="eyebrow">The method</span>
+      </div>
+      <h2 class="h2">Made the way it's meant to run.</h2>
+      <p class="lede">
+        Sondalab builds tools for directing agents, and it is built by directing
+        them. People set the intent and hold the switch; the machine does the
+        work, in the open, every step traceable and reversible. The brand, the
+        design system, and this very site came out of that same loop.
+      </p>
+    </div>
+
+    <ol class="method__points">
+      {points.map((p, i) => (
+        <li class="mpoint">
+          <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
+          <div class="mpoint__body">
+            <h3 class="mpoint__verb">{p.verb}</h3>
+            <p>{p.body}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .method__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+  @media (min-width: 52rem) {
+    .method__grid {
+      grid-template-columns: 0.9fr 1.1fr;
+      align-items: start;
+    }
+    .method__head {
+      position: sticky;
+      top: 6rem;
+    }
+  }
+  .method__head .h2 { margin-top: 1.25rem; max-width: 16ch; }
+  .method__head .lede { margin-top: 1.5rem; max-width: 42ch; }
+
+  .method__points { list-style: none; margin: 0; padding: 0; }
+  .mpoint {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(1.75rem, 4vw, 2.75rem);
+    border-top: 1px solid var(--sl-border-subtle);
+  }
+  .mpoint:first-child { border-top: 0; padding-top: 0; }
+
+  .mpoint__no {
+    font-family: var(--sl-font-mono);
+    font-weight: 100;
+    font-size: var(--step-numeral);
+    line-height: 0.8;
+    color: var(--sl-text-muted);
+  }
+  .mpoint__verb {
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 72, 'WONK' 1;
+    font-size: var(--step-h3);
+    margin: 0 0 0.5rem;
+    color: var(--sl-text-primary);
+  }
+  .mpoint__body p {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--sl-text-secondary);
+  }
+</style>
