@@ -22,7 +22,7 @@ import { SITE, SOCIALS } from '../lib/site';
       {SOCIALS.length > 0 && (
         <ul class="contact__socials">
           {SOCIALS.map((s) => (
-            <li><a class="sl-link" href={s.href}>{s.label}</a></li>
+            <li><a class="sl-link" href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a></li>
           ))}
         </ul>
       )}
