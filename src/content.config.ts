@@ -36,8 +36,6 @@ const products = defineCollection({
     links: z
       .array(z.object({ label: z.string(), href: z.string().url() }))
       .default([]),
-    /** When the status + links were last checked against reality. */
-    verified: z.coerce.date(),
     /** One-sentence "does X to solve Y" for the index row. */
     summary: z.string(),
   }),

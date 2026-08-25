@@ -6,6 +6,8 @@ interface Props {
 }
 const { id } = Astro.props;
 const data = INTERLUDES[id];
+const MARKER_BANDS = 4;
+const markerShards = Array.from({ length: MARKER_BANDS }, (_, i) => i);
 // SSR default (no-JS): one line at random from the pool. The client re-rolls per
 // page load and swaps the text while the band is still below the fold + hidden.
 const seed = data.lines[Math.floor(Math.random() * data.lines.length)];
@@ -14,7 +16,18 @@ const pool = JSON.stringify(data.lines);
 
 <aside class:list={['interlude', { invert: data.variant === 'invert' }]}>
   <div class="wrap interlude__wrap" data-interlude data-pool={pool}>
-    <span class="interlude__marker glitch" data-text={data.marker}>{data.marker}</span>
+    <span
+      class="interlude__marker glitch glitch--shatter"
+      data-text={data.marker}
+      style={`--n:${MARKER_BANDS}`}
+    >
+      <span class="glitch__text">{data.marker}</span>
+      <span class="glitch__shards" aria-hidden="true">
+        {markerShards.map((i) => (
+          <span class="glitch__shard" style={`--i:${i}`}>{data.marker}</span>
+        ))}
+      </span>
+    </span>
     <p class="interlude__body">
       <span class="interlude__lead">{seed.lead}</span>
       <span class="interlude__punch">{seed.punch}</span>

@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import { accentVars, type AccentKey } from '../lib/accents';
 import { STATUS_META } from '../lib/site';
 
+const NAME_BANDS = 5;
+const nameShards = Array.from({ length: NAME_BANDS }, (_, i) => i);
+
 const products = (await getCollection('products')).sort(
   (a, b) => a.data.order - b.data.order,
 );
@@ -40,7 +43,18 @@ const usedStatuses = [
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
                 <div class="prow__headline">
-                  <h3 class="prow__name glitch" data-text={p.data.name}>{p.data.name}</h3>
+                  <h3
+                    class="prow__name glitch glitch--shatter"
+                    data-text={p.data.name}
+                    style={`--n:${NAME_BANDS}`}
+                  >
+                    <span class="glitch__text">{p.data.name}</span>
+                    <span class="glitch__shards" aria-hidden="true">
+                      {nameShards.map((i) => (
+                        <span class="glitch__shard" style={`--i:${i}`}>{p.data.name}</span>
+                      ))}
+                    </span>
+                  </h3>
                   {meta && <span class="prow__status">{meta.label}</span>}
                 </div>
                 <p class="prow__tagline">{p.data.tagline}</p>

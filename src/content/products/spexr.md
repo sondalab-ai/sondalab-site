@@ -10,7 +10,6 @@ repoPublic: true
 links:
   - label: Download (releases)
     href: https://github.com/sondalab-ai/spexr-ide/releases
-verified: 2026-08-24
 summary: An agent-centric IDE on Eclipse Theia where the Claude session is the main surface and every change traces back to a spec — plan → tasks → diff → PR. Ships on-device semantic search, built-in Git, and Darkfactory, a live wall of all your local Claude sessions.
 ---
 

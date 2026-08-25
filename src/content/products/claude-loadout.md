@@ -9,7 +9,6 @@ repoPublic: true
 links:
   - label: ccloadout on PyPI
     href: https://pypi.org/project/ccloadout/
-verified: 2026-08-24
 summary: "A launcher that sits in front of Claude Code: it detects what you're working on, ranks your installed MCP servers, plugins and skills against that goal with a local model, and starts the session with only the relevant subset — everything else stays installed, just unloaded for that run."
 ---
 

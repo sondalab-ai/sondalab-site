@@ -26,6 +26,13 @@ function randomizeGhosts(el: HTMLElement) {
   el.style.setProperty('--gpha', phase());
   el.style.setProperty('--gphb', phase());
   el.style.setProperty('--gmul', (0.75 + Math.random() * 0.7).toFixed(2)); // 0.75–1.45
+
+  // Per-band sideways offset for the shatter variant (both directions).
+  const shards = el.querySelectorAll<HTMLElement>('.glitch__shard');
+  shards.forEach((s) => {
+    const px = (5 + Math.random() * 13) * (Math.random() < 0.5 ? -1 : 1);
+    s.style.setProperty('--sx', `${px.toFixed(1)}px`);
+  });
 }
 
 /** One burst of random length (<= CAP_MS). */

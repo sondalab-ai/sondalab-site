@@ -197,3 +197,41 @@ a { color: inherit; }
 @media (prefers-reduced-motion: no-preference) {
   .prow__name.is-glitching::before { color: var(--row-accent); }
 }
+
+/* ------------------------------------------------------------------ *
+ * Shatter — during a burst the element breaks into horizontal bands that
+ * jump sideways (datamosh/"no signal"). Bands are stacked copies of the
+ * text (.glitch__shard), each clipped to one strip; JS sets a random --sx
+ * offset per band per burst. The intact copy hides while shards show.
+ * ------------------------------------------------------------------ */
+.glitch__text { position: relative; z-index: 1; }
+.glitch__shards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.glitch__shard {
+  position: absolute;
+  inset: 0;
+  white-space: nowrap;
+  opacity: 0;
+  /* band = one horizontal strip of the full text */
+  clip-path: inset(
+    calc(var(--i) / var(--n) * 100%) 0
+    calc((var(--n) - 1 - var(--i)) / var(--n) * 100%) 0
+  );
+}
+@media (prefers-reduced-motion: no-preference) {
+  .glitch--shatter.is-glitching .glitch__text { opacity: 0; }
+  .glitch--shatter.is-glitching .glitch__shard {
+    opacity: 1;
+    animation: shatter var(--gda, 0.16s) steps(2) infinite;
+    animation-delay: calc(var(--i) * -0.028s);
+  }
+}
+@keyframes shatter {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(calc(var(--sx, 0px) * var(--gmul, 1))); }
+  100% { transform: translateX(0); }
+}

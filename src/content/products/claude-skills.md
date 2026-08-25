@@ -7,7 +7,6 @@ surface: Library
 order: 5
 repo: https://github.com/marcellobarile/claude-skills
 repoPublic: true
-verified: 2026-08-24
 summary: A collection of Claude Code skills with an interactive installer — pick only the ones you want and it copies them into ~/.claude/skills/, wiring any slash commands and hooks (settings backed up first). The uninstaller removes them cleanly and never deletes your recorded data.
 ---
 

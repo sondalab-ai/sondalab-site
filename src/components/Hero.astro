@@ -3,6 +3,9 @@ import GlowField from './GlowField.astro';
 import { SITE } from '../lib/site';
 
 const claimParts = SITE.claim.split(', ');
+const accentText = `${claimParts[1]}.`;
+const SHARDS = 6;
+const shards = Array.from({ length: SHARDS }, (_, i) => i);
 
 // Down-chevron drawn as individual dots (col x, row y) that echo the logo dot.
 // Each animates on its own: an eased wave ripples top-to-bottom by default, and
@@ -27,13 +30,24 @@ const cue = [
 
     <h1 class="display hero__claim">
       <span>{claimParts[0]},</span>
-      <span class="hero__claim-accent glitch" data-text={`${claimParts[1]}.`}>{claimParts[1]}.</span>
+      <span
+        class="hero__claim-accent glitch glitch--shatter"
+        data-text={accentText}
+        style={`--n:${SHARDS}`}
+      >
+        <span class="glitch__text">{accentText}</span>
+        <span class="glitch__shards" aria-hidden="true">
+          {shards.map((i) => (
+            <span class="glitch__shard" style={`--i:${i}`}>{accentText}</span>
+          ))}
+        </span>
+      </span>
     </h1>
 
     <p class="hero__tagline">{SITE.tagline}</p>
 
     <div class="hero__actions">
-      <a class="sl-btn sl-btn--primary" href="/#products">See the tools</a>
+      <a class="sl-btn sl-btn--primary" href="/#products">See what we wire</a>
       <a class="hero__ghost" href="/#approach">What we believe →</a>
     </div>
   </div>

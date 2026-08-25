@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { accentVars, type AccentKey } from '../../lib/accents';
 import { STATUS_META } from '../../lib/site';
+import { NOVELLAS } from '../../lib/novellas';
 
 export async function getStaticPaths() {
   const products = (await getCollection('products')).sort(
@@ -14,17 +15,27 @@ export async function getStaticPaths() {
       product: p,
       prev: products[i - 1] ?? null,
       next: products[i + 1] ?? null,
+      total: products.length,
     },
   }));
 }
 
-const { product, prev, next } = Astro.props;
+const { product, prev, next, total } = Astro.props;
 const { data } = product;
 const { Content } = await render(product);
 
+const novella = NOVELLAS[product.id];
+const chapter = String(data.order + 1).padStart(2, '0');
+const chapterTotal = String(total).padStart(2, '0');
+const logMarker = `// operator's log — ${chapter} / ${chapterTotal}`;
+
 const acc = accentVars(data.accent as AccentKey);
 const meta = data.status ? STATUS_META[data.status] : null;
-const verified = data.verified.toISOString().slice(0, 10);
+
+const NAME_BANDS = 6;
+const nameShards = Array.from({ length: NAME_BANDS }, (_, i) => i);
+const NAV_BANDS = 4;
+const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 ---
 
 <Base title={data.name} description={data.summary}>
@@ -38,7 +49,18 @@ const verified = data.verified.toISOString().slice(0, 10);
 
       <header class="product__head">
         <p class="eyebrow">Tool — {data.surface}</p>
-        <h1 class="product__name">{data.name}</h1>
+        <h1
+          class="product__name glitch glitch--shatter"
+          data-text={data.name}
+          style={`--n:${NAME_BANDS}`}
+        >
+          <span class="glitch__text">{data.name}</span>
+          <span class="glitch__shards" aria-hidden="true">
+            {nameShards.map((i) => (
+              <span class="glitch__shard" style={`--i:${i}`}>{data.name}</span>
+            ))}
+          </span>
+        </h1>
         <p class="product__tagline">{data.tagline}</p>
 
         {meta && (
@@ -58,7 +80,6 @@ const verified = data.verified.toISOString().slice(0, 10);
           <dl class="factsheet">
             {meta && <div><dt>Status</dt><dd>{meta.label}</dd></div>}
             <div><dt>Surface</dt><dd>{data.surface}</dd></div>
-            <div><dt>Verified</dt><dd>{verified}</dd></div>
           </dl>
 
           {(data.repoPublic || data.links.length > 0) && (
@@ -77,17 +98,50 @@ const verified = data.verified.toISOString().slice(0, 10);
         </aside>
       </div>
 
+      {novella && (
+        <aside class="novella" data-novella>
+          <span class="novella__marker glitch" data-text={logMarker}>{logMarker}</span>
+          <div class="novella__body">
+            {novella.map((para) => (
+              <p class="novella__p">{para}</p>
+            ))}
+          </div>
+        </aside>
+      )}
+
       <nav class="product__nav" aria-label="Other tools">
         {prev ? (
           <a class="product__nav-link product__nav-link--prev" href={`/products/${prev.id}/`}>
             <span class="product__nav-dir">← Previous</span>
-            <span class="product__nav-name">{prev.data.name}</span>
+            <span
+              class="product__nav-name glitch glitch--shatter"
+              data-text={prev.data.name}
+              style={`--n:${NAV_BANDS}`}
+            >
+              <span class="glitch__text">{prev.data.name}</span>
+              <span class="glitch__shards" aria-hidden="true">
+                {navShards.map((i) => (
+                  <span class="glitch__shard" style={`--i:${i}`}>{prev.data.name}</span>
+                ))}
+              </span>
+            </span>
           </a>
         ) : <span />}
         {next ? (
           <a class="product__nav-link product__nav-link--next" href={`/products/${next.id}/`}>
             <span class="product__nav-dir">Next →</span>
-            <span class="product__nav-name">{next.data.name}</span>
+            <span
+              class="product__nav-name glitch glitch--shatter"
+              data-text={next.data.name}
+              style={`--n:${NAV_BANDS}`}
+            >
+              <span class="glitch__text">{next.data.name}</span>
+              <span class="glitch__shards" aria-hidden="true">
+                {navShards.map((i) => (
+                  <span class="glitch__shard" style={`--i:${i}`}>{next.data.name}</span>
+                ))}
+              </span>
+            </span>
           </a>
         ) : <span />}
       </nav>
@@ -115,7 +169,29 @@ const verified = data.verified.toISOString().slice(0, 10);
     --slc-accent: var(--acc-light);
   }
 
-  .product { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+  .product {
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
+    isolation: isolate;
+  }
+  /* Full-viewport background wash in the product's hue — fixed, behind content. */
+  .product::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        120% 85% at 88% -12%,
+        color-mix(in srgb, var(--sl-accent-default) 16%, transparent),
+        transparent 58%
+      ),
+      radial-gradient(
+        100% 75% at -12% 112%,
+        color-mix(in srgb, var(--sl-accent-default) 11%, transparent),
+        transparent 55%
+      );
+  }
 
   .product__back {
     display: inline-block;
@@ -142,6 +218,7 @@ const verified = data.verified.toISOString().slice(0, 10);
     line-height: 1;
     letter-spacing: -0.02em;
     margin: 1.75rem 0 0;
+    --gx: 6px;
   }
   .product__tagline {
     margin: 1.25rem 0 0;
@@ -260,14 +337,70 @@ const verified = data.verified.toISOString().slice(0, 10);
     font-variation-settings: 'opsz' 48, 'WONK' 1;
     font-size: var(--step-h3);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+    --gx: 3px;
   }
   .product__nav-link:hover .product__nav-name { color: var(--sl-accent-default); }
+
+  /* --- operator's log (serial novella) --- */
+  .novella {
+    margin-top: clamp(3rem, 7vw, 6rem);
+    padding-top: clamp(2rem, 5vw, 3rem);
+    border-top: 1px solid var(--sl-border-subtle);
+    max-width: 46rem;
+  }
+  .novella__marker {
+    display: inline-block;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sl-accent-default);
+    --gx: 2px;
+  }
+  .novella__body {
+    margin-top: 1.6rem;
+    padding-left: clamp(1rem, 3vw, 2rem);
+    border-left: 2px solid color-mix(in srgb, var(--sl-accent-default) 40%, transparent);
+  }
+  .novella__p {
+    margin: 0 0 1.15rem;
+    font-family: var(--sl-font-display);
+    font-weight: 360;
+    font-style: italic;
+    font-variation-settings: 'opsz' 40, 'WONK' 0;
+    font-size: clamp(1.2rem, 1.05rem + 0.45vw, 1.35rem);
+    line-height: 1.65;
+    color: var(--sl-text-secondary);
+  }
+  /* The recurring refrain lands in the product's hue. */
+  .novella__p:last-child {
+    margin-bottom: 0;
+    color: var(--sl-accent-default);
+  }
+  /* Staggered reveal — progressive enhancement: JS arms the hidden state. */
+  @media (prefers-reduced-motion: no-preference) {
+    .novella[data-armed] .novella__marker,
+    .novella[data-armed] .novella__body {
+      opacity: 0;
+      transform: translateY(0.5rem);
+      transition:
+        opacity var(--sl-motion-slow) var(--sl-motion-ease),
+        transform var(--sl-motion-slow) var(--sl-motion-ease);
+    }
+    .novella[data-armed].is-in .novella__marker { opacity: 1; transform: none; }
+    .novella[data-armed].is-in .novella__body {
+      opacity: 1;
+      transform: none;
+      transition-delay: 90ms;
+    }
+  }
 
   /* --- rendered markdown --- */
   .prose { max-width: 60ch; }
   .prose :global(p) {
-    margin: 0 0 1.25rem;
-    font-size: var(--sl-text-lg);
+    margin: 0 0 1.35rem;
+    font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.45rem);
     line-height: var(--sl-line-relaxed);
     color: var(--sl-text-secondary);
   }
@@ -281,3 +414,43 @@ const verified = data.verified.toISOString().slice(0, 10);
     border-radius: var(--sl-radius-sm);
   }
 </style>
+
+<script>
+  import { autoBurst, hoverBurst, fireBurst } from '../../lib/glitch';
+
+  // Product title glitches ambiently (per-product accent via the page's --sl-accent-default).
+  const name = document.querySelector('.product__name.glitch');
+  if (name) autoBurst(name, { waitMin: 4000, waitMax: 8000 });
+
+  // Prev/next names glitch on hover, in bursts with random pauses.
+  for (const link of document.querySelectorAll('.product__nav-link')) {
+    const nm = link.querySelector('.product__nav-name.glitch');
+    if (nm) hoverBurst(link, nm);
+  }
+
+  // Operator's log: reveal on scroll + glitch the marker, then keep it ticking.
+  const log = document.querySelector('[data-novella]');
+  const motionOK =
+    'IntersectionObserver' in window &&
+    matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  if (log && motionOK) {
+    log.setAttribute('data-armed', '');
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+            const marker = e.target.querySelector('.novella__marker.glitch');
+            if (marker) {
+              fireBurst(marker);
+              autoBurst(marker, { waitMin: 6000, waitMax: 12000 });
+            }
+          }
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(log);
+  }
+</script>

@@ -5,10 +5,23 @@ interface Props {
 }
 const { size = '1.4rem', as = 'span' } = Astro.props;
 const Tag = as;
+const WM_BANDS = 3;
+const wmShards = Array.from({ length: WM_BANDS }, (_, i) => i);
 ---
 
 <Tag class="wordmark" style={`--wm-size:${size}`}>
-  <span class="wordmark__name glitch glitch--hover" data-text="sondalab">sondalab</span><span class="wordmark__dot" aria-hidden="true"></span>
+  <span
+    class="wordmark__name glitch glitch--shatter glitch--hover"
+    data-text="sondalab"
+    style={`--n:${WM_BANDS}`}
+  >
+    <span class="glitch__text">sondalab</span>
+    <span class="glitch__shards" aria-hidden="true">
+      {wmShards.map((i) => (
+        <span class="glitch__shard" style={`--i:${i}`}>sondalab</span>
+      ))}
+    </span>
+  </span><span class="wordmark__dot" aria-hidden="true"></span>
 </Tag>
 
 <script>

@@ -2,7 +2,7 @@
 
 export const SITE = {
   name: 'Sondalab',
-  claim: 'Built for operators, not passengers',
+  claim: 'Wired for operators, not passengers',
   tagline: 'see it · steer it · own it',
   email: 'info@sondalab.eu',
 } as const;

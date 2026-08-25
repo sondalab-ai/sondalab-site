@@ -7,7 +7,6 @@ surface: App
 order: 1
 repo: https://github.com/sondalab-ai/introspect
 repoPublic: true
-verified: 2026-08-24
 summary: A local, read-only dashboard that reads the files Claude Code already writes — instructions, skills, agents, memories, hooks, permissions — and renders them as a navigable audit. It replays past sessions as execution graphs and tails the active one live over WebSocket, and never writes to your config.
 ---
 
