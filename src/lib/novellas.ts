@@ -33,7 +33,7 @@ export const NOVELLAS: Record<string, string[]> = {
     "The service wanted them in its datacenter, learning from everything they touched. Instead they answer to you, on your GPU, on your network, and what they learn stays in the house. It's the quietest kind of ownership: the machine that never leaves.",
     "The window's going pale. Almost.",
   ],
-  'claude-skills': [
+  skillkit: [
     "7 a.m., and it's the small things that carry a shift: the skills you keep on the shelf, each a plain capability the agent can run on command. You pick the ones tonight needs, install them clean, and when they've served their turn they come off just as cleanly, your recorded work untouched.",
     "The service would rather sell you a suite you can't take apart. You'd rather own a toolbox: add, remove, know exactly what's in your hand.",
     "The sun's up. The machines worked all night, and every log is still yours to read. The switch is still where you left it. End of shift.",
