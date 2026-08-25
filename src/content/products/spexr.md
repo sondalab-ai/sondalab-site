@@ -3,7 +3,7 @@ name: SPEXR
 tagline: The spec-based IDE where agents do the work and you keep command.
 status: public-beta
 accent: spexr
-surface: IDE
+form: IDE
 order: 0
 repo: https://github.com/sondalab-ai/spexr-ide
 repoPublic: true

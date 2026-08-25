@@ -67,7 +67,7 @@ const usedStatuses = [
                 <p class="prow__tagline">{p.data.tagline}</p>
                 <p class="prow__summary" set:html={p.data.summary}></p>
               </div>
-              <span class="prow__surface">{p.data.surface}</span>
+              <span class="prow__form">{p.data.form}</span>
               <span class="prow__go" aria-hidden="true">→</span>
             </a>
           </li>
@@ -202,7 +202,7 @@ const usedStatuses = [
     font-weight: 600;
     color: var(--sl-text-secondary);
   }
-  .prow__surface {
+  .prow__form {
     font-family: var(--sl-font-mono);
     font-weight: 200;
     font-size: var(--sl-text-xs);
@@ -241,7 +241,7 @@ const usedStatuses = [
       gap: 0.75rem 1.25rem;
     }
     .prow__rule { display: none; }
-    .prow__surface { display: none; }
+    .prow__form { display: none; }
     .prow__go { display: none; }
     .prow__no { grid-area: no; }
     .prow__main { grid-area: main; }

@@ -2,7 +2,7 @@
 name: skillkit
 tagline: A pick-and-install kit of agent skills.
 accent: default
-surface: Utils
+form: Utils
 order: 5
 repo: https://github.com/sondalab-ai/skillkit
 repoPublic: true

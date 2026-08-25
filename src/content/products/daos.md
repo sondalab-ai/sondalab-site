@@ -2,7 +2,7 @@
 name: daos
 tagline: Determinism you can measure, and prove.
 accent: default
-surface: Library
+form: Library
 order: 3
 repo: https://github.com/sondalab-ai/daos
 repoPublic: false

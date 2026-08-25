@@ -2,7 +2,7 @@
 name: claude-loadout
 tagline: Start each session with only the tools it needs.
 accent: default
-surface: Term
+form: Term
 order: 2
 repo: https://github.com/sondalab-ai/claude-loadout
 repoPublic: true

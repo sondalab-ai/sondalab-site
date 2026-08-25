@@ -21,7 +21,7 @@ const ACCENT = ['default', 'spexr', 'introspect', 'local-agents'] as const;
  * the design system's substrate matrix (substrate-matrix.json); Library and Utils
  * are site-only labels for products that ship no UI substrate of their own.
  */
-const SURFACE = ['IDE', 'App', 'Page', 'Term', 'Library', 'Utils'] as const;
+const FORM = ['IDE', 'App', 'Page', 'Term', 'Library', 'Utils'] as const;
 
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
@@ -31,7 +31,7 @@ const products = defineCollection({
     // Optional: a product may show no maturity label at all.
     status: z.enum(STATUS).optional(),
     accent: z.enum(ACCENT).default('default'),
-    surface: z.enum(SURFACE),
+    form: z.enum(FORM),
     /** Sort order in the editorial index; flagship first. */
     order: z.number().int().nonnegative(),
     /** Canonical source repo. Rendered as a link only when repoPublic is true. */

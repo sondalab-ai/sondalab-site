@@ -48,7 +48,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <a class="product__back" href="/#products">← All tools</a>
 
       <header class="product__head">
-        <p class="eyebrow">Tool · {data.surface}</p>
+        <p class="eyebrow">Tool · {data.form}</p>
         <h1
           class="product__name glitch glitch--shatter"
           data-text={data.name}
@@ -79,7 +79,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
         <aside class="product__aside">
           <dl class="factsheet">
             {meta && <div><dt>Status</dt><dd>{meta.label}</dd></div>}
-            <div><dt>Form</dt><dd>{data.surface}</dd></div>
+            <div><dt>Form</dt><dd>{data.form}</dd></div>
           </dl>
 
           {(data.repoPublic || data.links.length > 0) && (

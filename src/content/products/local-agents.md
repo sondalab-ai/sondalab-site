@@ -2,7 +2,7 @@
 name: local-agents
 tagline: Your agents, on your machine.
 accent: local-agents
-surface: App
+form: App
 order: 4
 repo: https://github.com/sondalab-ai/local-agents
 repoPublic: false

@@ -3,7 +3,7 @@ name: introspect
 tagline: Audit and observe how your coding agent runs, replay and live.
 status: beta
 accent: introspect
-surface: App
+form: App
 order: 1
 repo: https://github.com/sondalab-ai/introspect
 repoPublic: true
