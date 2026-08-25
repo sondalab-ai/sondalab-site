@@ -16,8 +16,12 @@ const STATUS = ['shipped', 'public-beta', 'beta', 'poc'] as const;
  */
 const ACCENT = ['default', 'spexr', 'introspect', 'local-agents'] as const;
 
-/** Design-system substrate this product lives on (substrate-matrix.json). */
-const SURFACE = ['IDE', 'App', 'Page', 'Term', 'Library'] as const;
+/**
+ * What kind of thing the product is, as shown to a visitor. The first four match
+ * the design system's substrate matrix (substrate-matrix.json); Library and Utils
+ * are site-only labels for products that ship no UI substrate of their own.
+ */
+const SURFACE = ['IDE', 'App', 'Page', 'Term', 'Library', 'Utils'] as const;
 
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
