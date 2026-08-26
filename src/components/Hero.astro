@@ -190,18 +190,15 @@ const cue = [
     45% { transform: scale(2); opacity: 1; }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero__px { animation: none; opacity: 0.9; transform: none; }
-  }
 </style>
 
 <script>
   import { autoBurst } from '../lib/glitch';
 
   // Every few seconds, briefly swap the hero cue's default wave for an alternate
-  // move, chosen at random. Skipped entirely when motion isn't welcome.
+  // move, chosen at random.
   const cue = document.querySelector('.hero__cue');
-  if (cue && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+  if (cue) {
     const variants: Record<string, number> = { 'is-swap': 1350, 'is-pop': 1250 };
     const keys = Object.keys(variants);
     const schedule = () => {

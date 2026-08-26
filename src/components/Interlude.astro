@@ -84,20 +84,17 @@ const pool = JSON.stringify(data.lines);
   .interlude.invert .interlude__punch { color: var(--sl-bg-canvas); }
 
   /* Quiet scroll reveal, progressive enhancement: JS arms the hidden state
-     (.reveal-armed) before observing, so no-JS / reduced-motion always shows the
-     copy. Motion only when welcome. */
-  @media (prefers-reduced-motion: no-preference) {
-    .interlude__wrap.reveal-armed {
-      opacity: 0;
-      transform: translateY(0.6rem);
-      transition:
-        opacity var(--sl-motion-slow) var(--sl-motion-ease),
-        transform var(--sl-motion-slow) var(--sl-motion-ease);
-    }
-    .interlude__wrap.reveal-armed.is-in {
-      opacity: 1;
-      transform: none;
-    }
+     (.reveal-armed) before observing, so no-JS always shows the copy. */
+  .interlude__wrap.reveal-armed {
+    opacity: 0;
+    transform: translateY(0.6rem);
+    transition:
+      opacity var(--sl-motion-slow) var(--sl-motion-ease),
+      transform var(--sl-motion-slow) var(--sl-motion-ease);
+  }
+  .interlude__wrap.reveal-armed.is-in {
+    opacity: 1;
+    transform: none;
   }
 </style>
 
@@ -121,10 +118,7 @@ const pool = JSON.stringify(data.lines);
     } catch {}
   }
 
-  const motionOK =
-    'IntersectionObserver' in window &&
-    matchMedia('(prefers-reduced-motion: no-preference)').matches;
-  if (motionOK) {
+  if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

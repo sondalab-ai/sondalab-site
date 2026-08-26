@@ -24,10 +24,19 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+/* @sondalab/ui-kit zeroes the motion durations under prefers-reduced-motion
+   (tokens.css:52). This site does not honour that query (see
+   scripts/motion-gate.mjs), so restore the DS defaults unconditionally —
+   otherwise every reveal and hover transition still snaps to 0ms on a machine
+   that reports `reduce`, which is exactly the Windows default we are undoing.
+   Values mirror @sondalab/ui-kit tokens.css:32-34. */
+:root {
+  --sl-motion-fast: 120ms;
+  --sl-motion-mid: 220ms;
+  --sl-motion-slow: 360ms;
 }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -134,10 +143,13 @@ a { color: inherit; }
  * VHS glitch, short, staccato RGB pulses repeated in a burst. Three
  * channels off the brand palette (amber accent, teal depth, amber-hover
  * via text-shadow), blended with mix-blend-mode: screen so the ghosts
- * mix where they overlap. Two triggers: .is-glitching (JS-fired burst,
- * finite) and .glitch--hover:hover (loops while hovered). The element
- * needs data-text set to its own text for the ghost copies.
+ * mix where they overlap. Fired by .is-glitching (JS-driven burst, finite).
+ * The element needs data-text set to its own text for the ghost copies.
  * `--gx` = split amplitude, tune per element.
+ *
+ * The glitch is part of the brand, not decoration, so it runs for everyone:
+ * prefers-reduced-motion is deliberately not consulted anywhere on this site.
+ * scripts/motion-gate.mjs keeps that decision from being undone by accident.
  * ------------------------------------------------------------------ */
 .glitch { position: relative; --gx: 2px; }
 .glitch::before,
@@ -153,20 +165,18 @@ a { color: inherit; }
 /* Looping visual; JS controls burst length (toggling .is-glitching) and sets
    per-burst randomness via inline vars: --gd* durations, --gph* phase delays,
    --gmul amplitude multiplier. Fallbacks keep it working without JS vars. */
-@media (prefers-reduced-motion: no-preference) {
-  .glitch.is-glitching {
-    animation: glitch-jit var(--gdj, 0.16s) steps(2) infinite;
-  }
-  .glitch.is-glitching::before {
-    color: var(--sl-accent-default);
-    animation: glitch-a var(--gda, 0.16s) steps(2) infinite;
-    animation-delay: var(--gpha, 0s);
-  }
-  .glitch.is-glitching::after {
-    color: var(--sl-accent-depth);
-    animation: glitch-b var(--gdb, 0.16s) steps(2) infinite;
-    animation-delay: var(--gphb, 0s);
-  }
+.glitch.is-glitching {
+  animation: glitch-jit var(--gdj, 0.16s) steps(2) infinite;
+}
+.glitch.is-glitching::before {
+  color: var(--sl-accent-default);
+  animation: glitch-a var(--gda, 0.16s) steps(2) infinite;
+  animation-delay: var(--gpha, 0s);
+}
+.glitch.is-glitching::after {
+  color: var(--sl-accent-depth);
+  animation: glitch-b var(--gdb, 0.16s) steps(2) infinite;
+  animation-delay: var(--gphb, 0s);
 }
 /* Base jitter on the real text + a third colour halo via text-shadow.
    --ga = effective amplitude (--gx scaled by the per-burst --gmul). */
@@ -194,9 +204,7 @@ a { color: inherit; }
 }
 
 /* Product name burst uses the row's own accent tint for the amber channel. */
-@media (prefers-reduced-motion: no-preference) {
-  .prow__name.is-glitching::before { color: var(--row-accent); }
-}
+.prow__name.is-glitching::before { color: var(--row-accent); }
 
 /* ------------------------------------------------------------------ *
  * Shatter, during a burst the element breaks into horizontal bands that
@@ -222,13 +230,11 @@ a { color: inherit; }
     calc((var(--n) - 1 - var(--i)) / var(--n) * 100%) 0
   );
 }
-@media (prefers-reduced-motion: no-preference) {
-  .glitch--shatter.is-glitching .glitch__text { opacity: 0; }
-  .glitch--shatter.is-glitching .glitch__shard {
-    opacity: 1;
-    animation: shatter var(--gda, 0.16s) steps(2) infinite;
-    animation-delay: calc(var(--i) * -0.028s);
-  }
+.glitch--shatter.is-glitching .glitch__text { opacity: 0; }
+.glitch--shatter.is-glitching .glitch__shard {
+  opacity: 1;
+  animation: shatter var(--gda, 0.16s) steps(2) infinite;
+  animation-delay: calc(var(--i) * -0.028s);
 }
 @keyframes shatter {
   0%   { transform: translateX(0); }

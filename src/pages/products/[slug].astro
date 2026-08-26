@@ -379,21 +379,19 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-accent-default);
   }
   /* Staggered reveal, progressive enhancement: JS arms the hidden state. */
-  @media (prefers-reduced-motion: no-preference) {
-    .novella[data-armed] .novella__marker,
-    .novella[data-armed] .novella__body {
-      opacity: 0;
-      transform: translateY(0.5rem);
-      transition:
-        opacity var(--sl-motion-slow) var(--sl-motion-ease),
-        transform var(--sl-motion-slow) var(--sl-motion-ease);
-    }
-    .novella[data-armed].is-in .novella__marker { opacity: 1; transform: none; }
-    .novella[data-armed].is-in .novella__body {
-      opacity: 1;
-      transform: none;
-      transition-delay: 90ms;
-    }
+  .novella[data-armed] .novella__marker,
+  .novella[data-armed] .novella__body {
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition:
+      opacity var(--sl-motion-slow) var(--sl-motion-ease),
+      transform var(--sl-motion-slow) var(--sl-motion-ease);
+  }
+  .novella[data-armed].is-in .novella__marker { opacity: 1; transform: none; }
+  .novella[data-armed].is-in .novella__body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 90ms;
   }
 
   /* --- rendered markdown --- */
@@ -430,10 +428,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 
   // Operator's log: reveal on scroll + glitch the marker, then keep it ticking.
   const log = document.querySelector('[data-novella]');
-  const motionOK =
-    'IntersectionObserver' in window &&
-    matchMedia('(prefers-reduced-motion: no-preference)').matches;
-  if (log && motionOK) {
+  if (log && 'IntersectionObserver' in window) {
     log.setAttribute('data-armed', '');
     const io = new IntersectionObserver(
       (entries) => {
