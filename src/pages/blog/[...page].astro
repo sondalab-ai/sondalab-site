@@ -411,9 +411,20 @@ const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.
       return loading;
     }
 
+    /**
+     * Lowercase and strip diacritics, so `erdos` finds `Erdős` and `cafe`
+     * finds `café`. Titles here are English but carry borrowed names.
+     */
+    function fold(text: string): string {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
     /** Every whitespace-separated term must appear somewhere in the entry. */
     function match(hit: Hit, terms: string[]): boolean {
-      const hay = `${hit.title} ${hit.summary} ${hit.stamp}`.toLowerCase();
+      const hay = fold(`${hit.title} ${hit.summary} ${hit.stamp}`);
       return terms.every((t) => hay.includes(t));
     }
 
@@ -448,7 +459,7 @@ const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.
     }
 
     function apply() {
-      const q = input!.value.trim().toLowerCase();
+      const q = fold(input!.value.trim());
       if (!q) {
         reset();
         return;
