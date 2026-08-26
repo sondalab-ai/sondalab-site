@@ -139,6 +139,103 @@ a { color: inherit; }
 .invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 .invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
 
+/* --- rendered markdown ------------------------------------------------ *
+ * The base `.prose` is exactly what the product pages have always used, moved
+ * here from their scoped block so the transmissions can share it. Everything
+ * the long-form articles add lives under `.prose--long`, so a product page
+ * renders byte-identically to before the blog existed.
+ * --------------------------------------------------------------------- */
+
+.prose { max-width: 60ch; }
+.prose p {
+  margin: 0 0 1.35rem;
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.45rem);
+  line-height: var(--sl-line-relaxed);
+  color: var(--sl-text-secondary);
+}
+.prose p:first-child { color: var(--sl-text-primary); }
+.prose a { color: var(--sl-accent-default); }
+.prose code {
+  font-family: var(--sl-font-mono);
+  font-size: 0.9em;
+  background: var(--sl-bg-surface);
+  padding: 0.1em 0.35em;
+  border-radius: var(--sl-radius-sm);
+}
+
+/* --- article variant --------------------------------------------------- *
+ * Longer measure, quieter body, an oversized opening paragraph, plus the
+ * markdown vocabulary a post uses and a product page does not.
+ * --------------------------------------------------------------------- */
+
+.prose--long { max-width: 68ch; }
+.prose--long p {
+  font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
+  margin-bottom: 1.5rem;
+}
+.prose--long p:first-child {
+  font-size: clamp(1.2rem, 1.05rem + 0.55vw, 1.42rem);
+  line-height: var(--sl-line-normal);
+  margin-bottom: 1.9rem;
+}
+
+.prose--long h2,
+.prose--long h3 {
+  font-family: var(--sl-font-display);
+  font-variation-settings: 'opsz' 48, 'WONK' 1;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--sl-text-primary);
+}
+.prose--long h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
+.prose--long h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
+/* Section headers read as log markers, matching the transmissions index. */
+.prose--long h2::before {
+  content: '// ';
+  font-family: var(--sl-font-mono);
+  font-weight: 300;
+  font-size: 0.7em;
+  color: var(--sl-accent-default);
+}
+
+.prose--long ul,
+.prose--long ol {
+  margin: 0 0 1.5rem;
+  padding-left: 1.4em;
+  color: var(--sl-text-secondary);
+}
+.prose--long li {
+  margin-bottom: 0.6rem;
+  font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
+  line-height: var(--sl-line-relaxed);
+}
+.prose--long li::marker { color: var(--sl-accent-default); }
+
+.prose--long strong { color: var(--sl-text-primary); font-weight: 600; }
+
+.prose--long blockquote {
+  margin: 1.75rem 0;
+  padding-left: clamp(1rem, 3vw, 1.75rem);
+  border-left: 2px solid color-mix(in srgb, var(--sl-accent-default) 40%, transparent);
+  color: var(--sl-text-secondary);
+}
+
+.prose--long pre {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  background: var(--sl-bg-surface);
+  border: 1px solid var(--sl-border-subtle);
+  border-radius: var(--sl-radius-sm);
+}
+.prose--long pre code { background: none; padding: 0; font-size: var(--sl-text-sm); }
+
+.prose--long hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--sl-border-subtle);
+}
+
 /* ------------------------------------------------------------------ *
  * VHS glitch, short, staccato RGB pulses repeated in a burst. Three
  * channels off the brand palette (amber accent, teal depth, amber-hover

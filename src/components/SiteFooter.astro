@@ -11,7 +11,8 @@ const year = new Date().getFullYear();
       <p class="site-footer__claim">{SITE.tagline}</p>
     </div>
     <p class="site-footer__meta">
-      © {year} Sondalab · a lab for operators
+      © {year} Sondalab · a lab for operators ·{' '}
+      <a class="site-footer__feed" href="/rss.xml">RSS</a>
     </p>
   </div>
 </footer>
@@ -29,6 +30,13 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
   }
   .site-footer__brand { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .site-footer__feed {
+    color: var(--sl-text-muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sl-border-default);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .site-footer__feed:hover { color: var(--sl-accent-default); }
   .site-footer__claim {
     margin: 0;
     font-family: var(--sl-font-mono);

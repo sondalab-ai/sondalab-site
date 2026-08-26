@@ -45,4 +45,24 @@ const products = defineCollection({
   }),
 });
 
-export const collections = { products };
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    /**
+     * Publication date, `YYYY-MM-DD`. Drives ordering, the archive label and
+     * the feed's pubDate, so it is required rather than defaulted: a post with
+     * no date would silently sort to the epoch.
+     */
+    date: z.coerce.date(),
+    /** One-sentence standfirst. Shown in the index row, the feed and the meta description. */
+    summary: z.string().max(200),
+    /**
+     * Work in progress. Still rendered by `astro dev`, dropped from production
+     * builds, so an unfinished post can be committed without shipping it.
+     */
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { products, blog };
