@@ -4,13 +4,19 @@ date: 2026-04-30
 summary: Inference costs have fallen faster than almost any computing commodity in history. The interesting consequence is not cheapness — it is that the frontier stopped being the default.
 ---
 
-In 2020, GPT-3-level performance on MMLU cost around **$60 per million
-tokens**. By March 2026, multiple models cleared that same bar at **$0.06 per
-million tokens or less** — a thousandfold decline, with published estimates of
-the rate ranging from 9x to 900x per year depending on which capability
-milestone you anchor to.
+When GPT-3 launched publicly in late 2021, reaching an MMLU score of 42 cost
+around **$60 per million tokens**. By early 2026, [multiple models clear that
+same bar at **six cents per million or
+less**](https://epoch.ai/data-insights/llm-inference-price-trends).
 
-Nothing in computing has fallen that fast. Not storage, not bandwidth, not
+Epoch AI's dataset puts the rate of decline between **9x and 900x per year**
+depending on which capability threshold you anchor to, with a **median around
+50x**. Restrict the window to January 2024 onward and that median jumps to
+roughly **200x per year** — the collapse is accelerating, not levelling off.
+Matching GPT-4's performance on PhD-level science questions got cheaper by
+about 40x annually.
+
+Nothing else in computing has fallen that fast. Not storage, not bandwidth, not
 transistors.
 
 ## The consequence nobody planned
@@ -32,15 +38,17 @@ work that requires no reasoning.**
 
 ## The local threshold has already been crossed
 
-The numbers here are less quoted and more consequential. A Mac Studio M4 Max
-with 128 GB is roughly **$5,000**, which amortises to about **$139/month over
-three years** and undercuts every cloud API past roughly **50,000 daily
-requests**. Local inference on consumer hardware delivers something like
-**70–85% of frontier quality at zero marginal cost per request**.
+Run the arithmetic yourself rather than trusting anyone's headline. A machine
+with enough unified memory to hold a capable model costs a few thousand
+dollars once. Amortised over three years that is on the order of **$150 a
+month**, and past some daily request volume — for most workloads, tens of
+thousands — it undercuts every metered API, because the marginal cost of the
+next request is zero.
 
-Ollama passed **52 million monthly downloads** in Q1 2026, from around 100,000
-in Q1 2023. Hugging Face hosts something like **135,000 GGUF-format models**.
-That is not a hobbyist ecosystem any more. That is a distribution channel.
+What you give up is the top of the capability range, not the middle of it.
+Reported figures vary and depend heavily on the task, but the practical
+experience is consistent: a well-chosen local model handles the ordinary work
+and visibly does not handle the hard work. The skill is knowing which is which.
 
 ## What this actually buys you
 

@@ -1,17 +1,19 @@
 ---
 title: Nobody wants it next door
 date: 2026-08-14
-summary: 71% of Americans oppose a data centre near them. The AI buildout has hit the one constraint that capital cannot route around — the people who live where the land is cheap.
+summary: Seven in ten Americans oppose a data centre near them. The AI buildout has hit the one constraint capital cannot route around — the people who live where the land is cheap.
 ---
 
 The compute story has been told as a chip story, then a power story. It is
 becoming a **zoning** story, and that is the version that actually stops
 buildings from going up.
 
-A Gallup poll conducted in early March 2026 found **71% of Americans oppose a
-data centre being built near them**, with 48% opposed strongly. That is not a
-polarised number. There is no partisan coalition to assemble against it,
-because there is no other side.
+Gallup polled 1,000 adults across all fifty states between 2 and 18 March
+2026 and found that [**seven in ten Americans oppose an AI data centre being
+built in their local
+area**](https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx),
+including **48% opposed strongly**. That is not a polarised number. There is no
+partisan coalition to assemble against it, because there is no other side.
 
 ## What the objections actually are
 

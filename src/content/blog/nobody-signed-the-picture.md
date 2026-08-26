@@ -1,18 +1,22 @@
 ---
 title: Nobody signed the picture
 date: 2026-06-12
-summary: Content Credentials passed 6,000 members and became the obvious way to satisfy the EU's labelling rules. It still cannot tell you anything about an unsigned file.
+summary: Content Credentials became the obvious way to satisfy the EU's labelling rules. It still cannot tell you anything about an unsigned file — and a signed one is not proof either.
 ---
 
-C2PA — Content Credentials — does something narrow and does it well. It binds
-**cryptographically signed provenance metadata** to a media file: who made it,
-when, with what tool, whether a model was involved, and every meaningful edit
-since capture. As of January 2026 the coalition passed **6,000 members and
-affiliates**, and its AI assertion type maps cleanly onto the EU AI Act's
-Article 50 labelling duty that became enforceable in August.
+C2PA — [Content
+Credentials](https://en.wikipedia.org/wiki/Content_Credentials) — does
+something narrow and does it well. It binds **cryptographically signed
+provenance metadata** to a media file: who made it, when, with what tool,
+whether a model was involved, and every meaningful edit since capture. Its AI
+assertion type maps cleanly onto the EU AI Act's Article 50 labelling duty that
+became enforceable in August, and a conformance programme has been pulling in
+implementers since 2025 — Google in August of that year, the IPTC in April
+2026.
 
 Regulatory pull is the strongest adoption force this standard has ever had. It
-is still not enough, for a reason that is structural rather than technical.
+is still not enough, for two reasons: one structural, one that has already
+happened.
 
 ## The asymmetry that breaks it
 
@@ -30,6 +34,19 @@ That prior only exists inside closed pipelines: a newsroom's own cameras, a
 studio's own render farm, an insurer's own claims app. Inside those, C2PA is
 genuinely excellent. Outside them, it is a green tick that most true things
 will never earn.
+
+## And a valid credential proves less than it looks like
+
+In August 2025 a Nikon firmware update exposed a flaw that let a user **combine
+unauthentic images with authentic photos and still produce a file carrying a
+valid signature**. Nikon revoked the certificates.
+
+That is the failure mode that should worry anyone treating the green tick as an
+answer. The signature attests that a specific device asserted a specific
+history. It does not attest that the history is true — only that the device
+said so, and devices are firmware, and firmware has bugs. Chain of custody is a
+statement about process integrity, and process integrity is exactly what an
+attacker attacks.
 
 ## What it is actually for
 

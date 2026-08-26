@@ -1,7 +1,7 @@
 ---
 title: Everyone finances everyone else's compute
 date: 2026-08-03
-summary: Hyperscaler capex is heading for three quarters of a trillion this year, and a meaningful slice of the demand signal is the vendors buying from each other.
+summary: Hyperscaler capex is heading for three quarters of a trillion this year. The argument that settles whether it is sane is a dispute about how fast a GPU stops being worth running.
 ---
 
 The five largest infrastructure buyers are on track to spend somewhere in the
@@ -17,9 +17,10 @@ Two structural details make it more interesting than a large number.
 A recurring pattern in the deal flow: a chip vendor takes equity in a model
 lab, the lab signs take-or-pay compute commitments with a cloud provider, the
 cloud provider funds GPU purchases with debt, and the GPUs come from the chip
-vendor. Nvidia, OpenAI, Oracle and CoreWeave appear in each other's filings in
-[interlocking
-positions](https://ai-circular-economy.com/).
+vendor. Nvidia, OpenAI, Oracle and CoreWeave appear in each other's
+arrangements in interlocking positions, and capex has [outrun operating cash
+flow far enough that hyperscalers are reaching for external
+financing](https://insight.factset.com/hyperscalers-tap-external-financing-as-ai-capex-outruns-cash-flow).
 
 None of that is illegal or even unusual in a capital-intensive buildout. What
 it does is make **end demand look larger and more independent than it is**. A
@@ -30,20 +31,29 @@ and gets flattened in every summary.
 
 ## The depreciation question
 
-The one that will actually settle the argument, and nobody wants to litigate
-it in public:
+The one that will actually settle the argument:
 
-- Hyperscalers **depreciate AI hardware over five to six years**.
-- Several analysts argue its economic life is closer to **two to three**, given
-  the generational cadence and the power efficiency gap between generations.
-- If the shorter figure is right, reported earnings across the sector are
-  overstated by a large number — estimates run to roughly **$176 billion across
-  2026–2028**.
+- Hyperscalers generally **depreciate AI hardware over four to six years**, and
+  compute is heading toward roughly 60% of capex, up from around 43% in 2022 —
+  so the assumption matters more each quarter.
+- **Michael Burry** has argued the real economic life is closer to **two to
+  three years**, tracking Nvidia's three-year generational cadence, and
+  estimated the cumulative hit to reported earnings at [**over $176 billion
+  across
+  2026–2028**](https://natlawreview.com/article/deep-quarry-useful-lives-gpus-key-considerations)
+  if the schedules were shortened to match.
 
-This is not a fraud allegation. It is an accounting judgement about how fast a
-GPU stops being worth running, and reasonable people hold different views. But
-it is the load-bearing assumption underneath every "the capex is fine"
-argument, and it is being asserted far more often than it is defended.
+Attribute that figure carefully: it is one prominent investor's estimate under
+his own assumptions, not a consensus. But the disagreement is not confined to
+short sellers — **it is live inside the industry**. In January 2025 Amazon
+shortened the useful life of part of its fleet and retired hardware early,
+citing the pace of AI hardware development. **The same month, Meta extended
+its schedule to 5.5 years.**
+
+Two of the most sophisticated operators in the world, looking at the same
+technology cycle, moved their assumptions in opposite directions. That is what
+an unsettled question looks like on a balance sheet, and it is load-bearing
+under every "the capex is fine" argument being made.
 
 ## For anyone building on top
 

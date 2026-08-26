@@ -1,13 +1,17 @@
 ---
 title: The test stopped measuring
 date: 2026-07-29
-summary: Frontier models clear MMLU above 99%. That is not a capability result, it is a broken instrument, and the industry has no agreed replacement.
+summary: Nearly half of the benchmarks in a 60-benchmark study are saturated, and the rate rises with age. That is not a capability result — it is a broken instrument.
 ---
 
-MMLU was hard once. GPT-3 scored 43.9% in 2020. Frontier models in 2026 clear
-**99%**, and the family is functionally saturated above 88% — meaning the gap
-between the top several models is inside the noise, and every reported
+MMLU was hard once. It is now functionally saturated for frontier models —
+meaning the gap between the top several is inside the noise, and every reported
 difference between them is a rounding artefact presented as progress.
+
+It is not one benchmark. A systematic study of **60 language model benchmarks**
+found that [**nearly half exhibit saturation, with rates increasing with
+age**](https://arxiv.org/abs/2602.16763). Benchmarks decay. We keep quoting
+them anyway.
 
 Andrej Karpathy has called the situation an **evaluation crisis**, and the
 phrase is doing real work: it is not that models got too good, it is that we
@@ -16,26 +20,25 @@ lost the instrument and kept publishing the readings.
 ## Contamination is not an edge case
 
 The obvious failure mode is that the answers were in the training data. This is
-routinely dismissed as a solved hygiene problem. It is not. OpenAI's own audit
-found that **every frontier model tested could reproduce verbatim gold patches
-or problem statements** from certain SWE-bench Verified tasks.
+routinely dismissed as a solved hygiene problem. It is not: contamination has
+been reported even against SWE-bench Verified, with frontier models able to
+reproduce task specifics verbatim.
 
-SWE-bench Verified is the benchmark most people currently point to when they
-want to claim a coding result is real. If contamination reaches there, it
-reaches everywhere, and the correct posture toward any single reported score
-is: *this is an upper bound on capability and a lower bound on memorisation,
-and I cannot separate them.*
+SWE-bench Verified is the benchmark most people point to when they want to
+claim a coding result is real. If contamination reaches there, the correct
+posture toward any single reported score is: *this is an upper bound on
+capability and a lower bound on memorisation, and I cannot separate them.*
 
-## The gap that shows up in production
+## What actually resists decay
 
-The number that should end the argument comes from deployment rather than
-research. Enterprise agentic systems show roughly a **37% gap between
-benchmark scores and real-world performance**, with something like **50x cost
-variation** between setups reaching similar accuracy.
+The same 60-benchmark study found the protective factor, and it is not the one
+the field assumed. **Resilience to saturation comes from expert curation, not
+from keeping the test set private.**
 
-Fifty times. On the same task. That is not a measurement of the model at all —
-it is a measurement of scaffolding, retries, context handling and tool design,
-none of which the benchmark touches.
+That is a genuinely useful result and it cuts against the standard remedy.
+Holding out your data delays contamination; it does not make a benchmark
+measure anything better. A carefully constructed test stays informative because
+the items are hard for the right reasons, not because nobody has seen them.
 
 ## What to do instead
 
