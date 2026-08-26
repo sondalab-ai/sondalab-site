@@ -393,24 +393,6 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     transform: none;
     transition-delay: 90ms;
   }
-
-  /* --- rendered markdown --- */
-  .prose { max-width: 60ch; }
-  .prose :global(p) {
-    margin: 0 0 1.35rem;
-    font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.45rem);
-    line-height: var(--sl-line-relaxed);
-    color: var(--sl-text-secondary);
-  }
-  .prose :global(p:first-child) { color: var(--sl-text-primary); }
-  .prose :global(a) { color: var(--sl-accent-default); }
-  .prose :global(code) {
-    font-family: var(--sl-font-mono);
-    font-size: 0.9em;
-    background: var(--sl-bg-surface);
-    padding: 0.1em 0.35em;
-    border-radius: var(--sl-radius-sm);
-  }
 </style>
 
 <script>

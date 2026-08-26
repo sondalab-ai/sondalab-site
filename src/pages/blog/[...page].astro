@@ -1,0 +1,485 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import Base from '../../layouts/Base.astro';
+import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts();
+  return paginate(posts, { pageSize: 8 });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<Post>;
+}
+
+const { page } = Astro.props;
+
+const TITLE_BANDS = 6;
+const titleShards = Array.from({ length: TITLE_BANDS }, (_, i) => i);
+
+// Global, newest-first numbering that survives pagination: the oldest post is
+// always // 01, so a transmission keeps its number as the archive grows.
+const rows = page.data.map((post, i) => ({
+  post,
+  no: String(page.total - (page.start + i)).padStart(2, '0'),
+  stamp: formatDate(post.data.date),
+  iso: isoDate(post.data.date),
+  mins: readingTime(post.body),
+}));
+
+const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.lastPage).padStart(2, '0')}`;
+---
+
+<Base
+  title="Transmissions"
+  description="Field notes from Sondalab on local-first agents, legible runs and the tooling that keeps an operator in the loop."
+>
+  <section class="tlog-page">
+    <div class="wrap">
+      <header class="tlog-head">
+        <div class="tlog-head__title">
+          <p class="eyebrow">Transmissions</p>
+          <h1
+            class="tlog-head__h glitch glitch--shatter"
+            data-text="Transmissions"
+            style={`--n:${TITLE_BANDS}`}
+          >
+            <span class="glitch__text">Transmissions</span>
+            <span class="glitch__shards" aria-hidden="true">
+              {titleShards.map((i) => (
+                <span class="glitch__shard" style={`--i:${i}`}>Transmissions</span>
+              ))}
+            </span>
+          </h1>
+        </div>
+
+        <div class="tlog-head__side">
+          <div class="tsearch" data-tsearch-box hidden>
+            <label class="tsearch__label" for="tsearch">Filter</label>
+            <input
+              class="tsearch__input"
+              id="tsearch"
+              type="search"
+              autocomplete="off"
+              placeholder="// filter transmissions"
+              data-tsearch
+            />
+          </div>
+          <p class="tlog-count" data-tcount aria-live="polite">
+            // {page.total} {page.total === 1 ? 'transmission' : 'transmissions'}
+          </p>
+        </div>
+      </header>
+
+      <ol class="tlog" data-tlist>
+        {rows.map(({ post, no, stamp, iso, mins }) => (
+          <li>
+            <a class="trow" href={`/blog/${post.id}/`}>
+              <span class="trow__stamp">
+                <time class="trow__date" datetime={iso} data-num={stamp}>{stamp}</time>
+                <span class="trow__no">// {no}</span>
+              </span>
+              <span class="trow__rule" aria-hidden="true"></span>
+              <span class="trow__main">
+                <span class="trow__title">{post.data.title}</span>
+                <span class="trow__summary">{post.data.summary}</span>
+              </span>
+              <span class="trow__mins">{mins} min</span>
+              <span class="trow__go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <ol class="tlog" data-tresults hidden></ol>
+
+      {/* Blank row cloned by the filter. Rendered by Astro so the clones carry
+          the same scoping attributes as the rows above, and so no result markup
+          is ever built from a string. */}
+      <template data-trow-template>
+        <li>
+          <a class="trow" href="">
+            <span class="trow__stamp">
+              <time class="trow__date" datetime=""></time>
+              <span class="trow__no"></span>
+            </span>
+            <span class="trow__rule" aria-hidden="true"></span>
+            <span class="trow__main">
+              <span class="trow__title"></span>
+              <span class="trow__summary"></span>
+            </span>
+            <span class="trow__mins"></span>
+            <span class="trow__go" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </template>
+
+      <p class="tlog-empty" data-tempty hidden>
+        // no transmission matches that signal
+      </p>
+
+      {page.lastPage > 1 && (
+        <nav class="tpager" aria-label="Archive pages" data-tpager>
+          {page.url.prev ? (
+            <a class="tpager__link" href={page.url.prev}>← Newer</a>
+          ) : (
+            <span class="tpager__link tpager__link--off">← Newer</span>
+          )}
+          <span class="tpager__pos">{pageLabel}</span>
+          {page.url.next ? (
+            <a class="tpager__link" href={page.url.next}>Older →</a>
+          ) : (
+            <span class="tpager__link tpager__link--off">Older →</span>
+          )}
+        </nav>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tlog-page { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+
+  /* Asymmetric head: oversized wordmark left, the operator controls right,
+     both sitting on the same baseline rule. */
+  .tlog-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 3rem);
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    border-bottom: 1px solid var(--sl-border-subtle);
+  }
+  @media (min-width: 52rem) {
+    .tlog-head { grid-template-columns: 1.5fr 0.85fr; align-items: end; }
+    .tlog-head__side { padding-bottom: 0.5rem; }
+  }
+  .tlog-head__h {
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-size: var(--step-display);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin: 1.75rem 0 0;
+    --gx: 6px;
+  }
+
+  /* Search: a readout line, not a form control. Rule underneath only. */
+  .tsearch { display: block; }
+  .tsearch[hidden] { display: none; }
+  .tsearch__label {
+    display: block;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+    margin-bottom: 0.6rem;
+  }
+  .tsearch__input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--sl-border-default);
+    border-radius: 0;
+    padding: 0.4rem 0 0.55rem;
+    color: var(--sl-text-primary);
+    caret-color: var(--sl-accent-default);
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-sm);
+    letter-spacing: 0.04em;
+    transition: border-color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .tsearch__input::placeholder { color: var(--sl-text-muted); }
+  .tsearch__input:focus {
+    outline: none;
+    border-bottom-color: var(--sl-accent-default);
+  }
+  /* Strip the UA clear button; the readout keeps its own type. */
+  .tsearch__input::-webkit-search-cancel-button { appearance: none; }
+
+  .tlog-count {
+    margin: 1.25rem 0 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+
+  .tlog { list-style: none; margin: 0; padding: 0; }
+  .tlog[hidden] { display: none; }
+
+  .trow {
+    display: grid;
+    grid-template-columns: auto 3px 1fr auto auto;
+    align-items: start;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(1.5rem, 3.5vw, 2.25rem);
+    padding-inline: clamp(0.5rem, 2vw, 1.25rem);
+    margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
+    border-bottom: 1px solid var(--sl-border-subtle);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .trow:hover { background: var(--sl-bg-surface); }
+
+  /* Stamp column: the log's spine. Date over serial, both mono. */
+  .trow__stamp {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+  }
+  .trow__date {
+    font-weight: 300;
+    color: var(--sl-text-secondary);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .trow:hover .trow__date { color: var(--sl-accent-default); }
+  .trow__no { font-weight: 200; color: var(--sl-text-muted); }
+
+  /* Vertical rule fills from the top on hover: the signal locking on. */
+  .trow__rule {
+    align-self: stretch;
+    background: var(--sl-accent-default);
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition:
+      transform var(--sl-motion-mid) var(--sl-motion-ease),
+      opacity var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .trow:hover .trow__rule { opacity: 1; transform: scaleY(1); }
+
+  .trow__main { display: block; min-width: 0; }
+  .trow__title {
+    display: block;
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-size: var(--step-h3);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .trow:hover .trow__title { color: var(--sl-accent-default); }
+  .trow__summary {
+    display: block;
+    margin-top: 0.6rem;
+    max-width: 54ch;
+    font-size: var(--sl-text-sm);
+    line-height: var(--sl-line-normal);
+    color: var(--sl-text-secondary);
+  }
+
+  .trow__mins {
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    color: var(--sl-text-muted);
+    white-space: nowrap;
+  }
+  .trow__go {
+    font-size: var(--sl-text-lg);
+    color: var(--sl-accent-default);
+    opacity: 0;
+    transform: translateX(-0.4rem);
+    transition:
+      opacity var(--sl-motion-mid) var(--sl-motion-ease),
+      transform var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .trow:hover .trow__go { opacity: 1; transform: translateX(0); }
+
+  @media (max-width: 46rem) {
+    .trow {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'stamp mins'
+        'main  main';
+      align-items: baseline;
+      gap: 0.9rem;
+    }
+    .trow__stamp {
+      grid-area: stamp;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+    .trow__mins { grid-area: mins; }
+    .trow__main { grid-area: main; }
+    .trow__rule,
+    .trow__go { display: none; }
+  }
+
+  .tlog-empty {
+    margin: 2.5rem 0 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-sm);
+    letter-spacing: 0.08em;
+    color: var(--sl-text-muted);
+  }
+  .tlog-empty[hidden] { display: none; }
+
+  .tpager {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .tpager[hidden] { display: none; }
+  .tpager__link {
+    text-decoration: none;
+    color: var(--sl-text-secondary);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .tpager__link:hover { color: var(--sl-accent-default); }
+  .tpager__link--off { color: var(--sl-text-muted); opacity: 0.5; }
+  .tpager__pos {
+    color: var(--sl-text-muted);
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<script>
+  import { autoBurst, scramble } from '../../lib/glitch';
+
+  const heading = document.querySelector('.tlog-head__h.glitch');
+  if (heading) autoBurst(heading, { waitMin: 5000, waitMax: 10000 });
+
+  /** Decode-scramble a row's date stamp on hover: the log re-reading itself. */
+  function armRows(root: ParentNode) {
+    for (const row of root.querySelectorAll('.trow')) {
+      const date = row.querySelector<HTMLElement>('.trow__date');
+      if (date) row.addEventListener('mouseenter', () => scramble(date));
+    }
+  }
+  armRows(document);
+
+  type Hit = {
+    slug: string;
+    title: string;
+    summary: string;
+    stamp: string;
+    iso: string;
+    no: string;
+    mins: number;
+  };
+
+  const box = document.querySelector<HTMLElement>('[data-tsearch-box]');
+  const input = document.querySelector<HTMLInputElement>('[data-tsearch]');
+  const list = document.querySelector<HTMLElement>('[data-tlist]');
+  const results = document.querySelector<HTMLElement>('[data-tresults]');
+  const empty = document.querySelector<HTMLElement>('[data-tempty]');
+  const count = document.querySelector<HTMLElement>('[data-tcount]');
+  const pager = document.querySelector<HTMLElement>('[data-tpager]');
+  const tpl = document.querySelector<HTMLTemplateElement>('[data-trow-template]');
+
+  // The field only exists for visitors who can actually use it; without JS the
+  // page stays a paginated archive rather than showing a dead input.
+  if (box && input && list && results && empty && count && tpl) {
+    box.hidden = false;
+    const total = count.textContent ?? '';
+
+    let index: Hit[] | null = null;
+    let loading: Promise<Hit[]> | null = null;
+
+    /** Fetched once, on the first keystroke: an empty filter costs nothing. */
+    function load(): Promise<Hit[]> {
+      if (index) return Promise.resolve(index);
+      if (!loading) {
+        loading = fetch('/blog/search.json')
+          .then((r) => r.json())
+          .then((data: Hit[]) => (index = data));
+      }
+      return loading;
+    }
+
+    /**
+     * Lowercase and strip diacritics, so `erdos` finds `Erdős` and `cafe`
+     * finds `café`. Titles here are English but carry borrowed names.
+     */
+    function fold(text: string): string {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    /** Every whitespace-separated term must appear somewhere in the entry. */
+    function match(hit: Hit, terms: string[]): boolean {
+      const hay = fold(`${hit.title} ${hit.summary} ${hit.stamp}`);
+      return terms.every((t) => hay.includes(t));
+    }
+
+    function row(h: Hit): Node {
+      const li = tpl!.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      const set = (sel: string, text: string) => {
+        li.querySelector(sel)!.textContent = text;
+      };
+      li.querySelector('a')!.setAttribute('href', `/blog/${h.slug}/`);
+      const date = li.querySelector<HTMLElement>('.trow__date')!;
+      date.setAttribute('datetime', h.iso);
+      date.dataset.num = h.stamp;
+      date.textContent = h.stamp;
+      set('.trow__no', `// ${h.no}`);
+      set('.trow__title', h.title);
+      set('.trow__summary', h.summary);
+      set('.trow__mins', `${h.mins} min`);
+      return li;
+    }
+
+    function render(hits: Hit[]) {
+      results!.replaceChildren(...hits.map(row));
+      armRows(results!);
+    }
+
+    function reset() {
+      list!.hidden = false;
+      results!.hidden = true;
+      empty!.hidden = true;
+      if (pager) pager.hidden = false;
+      count!.textContent = total;
+    }
+
+    function apply() {
+      const q = fold(input!.value.trim());
+      if (!q) {
+        reset();
+        return;
+      }
+      load().then((data) => {
+        // The field may have been cleared while the index was in flight.
+        if (!input!.value.trim()) return;
+        const hits = data.filter((h) => match(h, q.split(/\s+/)));
+        render(hits);
+        list!.hidden = true;
+        results!.hidden = hits.length === 0;
+        empty!.hidden = hits.length > 0;
+        if (pager) pager.hidden = true;
+        count!.textContent = `// ${hits.length} of ${data.length} matching`;
+      });
+    }
+
+    input.addEventListener('input', apply);
+    // Escape clears a type=search field; Chrome reports that as `search`, not
+    // `input`, so without this the list would stay filtered on an empty query.
+    input.addEventListener('search', apply);
+  }
+</script>

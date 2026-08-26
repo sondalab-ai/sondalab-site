@@ -39,6 +39,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE.name} · Transmissions`}
+      href="/rss.xml"
+    />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />

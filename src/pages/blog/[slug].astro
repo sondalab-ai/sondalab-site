@@ -1,0 +1,215 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const total = posts.length;
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      // Newest first, so the neighbour above is the newer transmission.
+      newer: posts[i - 1] ?? null,
+      older: posts[i + 1] ?? null,
+      no: String(total - i).padStart(2, '0'),
+    },
+  }));
+}
+
+interface Props {
+  post: Post;
+  newer: Post | null;
+  older: Post | null;
+  no: string;
+}
+
+const { post, newer, older, no } = Astro.props;
+const { Content } = await render(post);
+
+const stamp = formatDate(post.data.date);
+const iso = isoDate(post.data.date);
+const mins = readingTime(post.body);
+
+const TITLE_BANDS = 6;
+const titleShards = Array.from({ length: TITLE_BANDS }, (_, i) => i);
+const NAV_BANDS = 4;
+const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
+---
+
+<Base title={post.data.title} description={post.data.summary}>
+  <article class="post">
+    <div class="wrap">
+      <a class="post__back" href="/blog/">← All transmissions</a>
+
+      <header class="post__head">
+        <p class="eyebrow">Transmission // {no}</p>
+        <h1
+          class="post__title glitch glitch--shatter"
+          data-text={post.data.title}
+          style={`--n:${TITLE_BANDS}`}
+        >
+          <span class="glitch__text">{post.data.title}</span>
+          <span class="glitch__shards" aria-hidden="true">
+            {titleShards.map((i) => (
+              <span class="glitch__shard" style={`--i:${i}`}>{post.data.title}</span>
+            ))}
+          </span>
+        </h1>
+        <p class="post__stamp">
+          <time datetime={iso} data-num={stamp}>{stamp}</time>
+          <span class="post__sep" aria-hidden="true">·</span>
+          <span>{mins} min</span>
+        </p>
+      </header>
+
+      <div class="prose prose--long">
+        <Content />
+      </div>
+
+      <nav class="post__nav" aria-label="Other transmissions">
+        {newer ? (
+          <a class="post__nav-link post__nav-link--prev" href={`/blog/${newer.id}/`}>
+            <span class="post__nav-dir">← Newer</span>
+            <span
+              class="post__nav-title glitch glitch--shatter"
+              data-text={newer.data.title}
+              style={`--n:${NAV_BANDS}`}
+            >
+              <span class="glitch__text">{newer.data.title}</span>
+              <span class="glitch__shards" aria-hidden="true">
+                {navShards.map((i) => (
+                  <span class="glitch__shard" style={`--i:${i}`}>{newer.data.title}</span>
+                ))}
+              </span>
+            </span>
+          </a>
+        ) : <span />}
+        {older ? (
+          <a class="post__nav-link post__nav-link--next" href={`/blog/${older.id}/`}>
+            <span class="post__nav-dir">Older →</span>
+            <span
+              class="post__nav-title glitch glitch--shatter"
+              data-text={older.data.title}
+              style={`--n:${NAV_BANDS}`}
+            >
+              <span class="glitch__text">{older.data.title}</span>
+              <span class="glitch__shards" aria-hidden="true">
+                {navShards.map((i) => (
+                  <span class="glitch__shard" style={`--i:${i}`}>{older.data.title}</span>
+                ))}
+              </span>
+            </span>
+          </a>
+        ) : <span />}
+      </nav>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .post { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+
+  .post__back {
+    display: inline-block;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--sl-text-muted);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .post__back:hover { color: var(--sl-accent-default); }
+
+  /* The rule runs the full measure; only the type is held to a narrow column. */
+  .post__head {
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    border-bottom: 1px solid var(--sl-border-subtle);
+  }
+  .post__title {
+    max-width: 18ch;
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-size: var(--step-h2);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 1.75rem 0 0;
+    --gx: 5px;
+  }
+  .post__stamp {
+    margin: 1.5rem 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 200;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .post__stamp time {
+    color: var(--sl-accent-default);
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+  }
+  .post__sep { opacity: 0.5; }
+
+  .prose--long { padding-top: clamp(2.5rem, 5vw, 4rem); }
+
+  .post__nav {
+    margin-top: clamp(3rem, 7vw, 6rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--sl-border-subtle);
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .post__nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 20rem;
+    text-decoration: none;
+    color: var(--sl-text-primary);
+  }
+  .post__nav-link--next { text-align: right; margin-left: auto; }
+  .post__nav-dir {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .post__nav-title {
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-size: var(--step-h3);
+    line-height: 1.1;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+    --gx: 3px;
+  }
+  .post__nav-link:hover .post__nav-title { color: var(--sl-accent-default); }
+</style>
+
+<script>
+  import { autoBurst, hoverBurst, scramble } from '../../lib/glitch';
+
+  const title = document.querySelector('.post__title.glitch');
+  if (title) autoBurst(title, { waitMin: 5000, waitMax: 10000 });
+
+  // The stamp re-reads itself once the title has settled, like a decoding header.
+  const stamp = document.querySelector<HTMLElement>('.post__stamp time');
+  if (stamp) window.setTimeout(() => scramble(stamp), 400);
+
+  for (const link of document.querySelectorAll('.post__nav-link')) {
+    const t = link.querySelector('.post__nav-title.glitch');
+    if (t) hoverBurst(link, t);
+  }
+</script>
