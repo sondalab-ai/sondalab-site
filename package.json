@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "audit": "node scripts/audit.mjs",
+    "motion-gate": "node scripts/motion-gate.mjs",
     "check": "astro check"
   },
   "dependencies": {

@@ -13,7 +13,6 @@
     var ctx = cv.getContext('2d');
     var root = document.documentElement;
     var host = cv.parentElement;
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function theme() { return root.getAttribute('data-sl-theme') || 'dark'; }
     function css(v) { return getComputedStyle(root).getPropertyValue(v).trim(); }
@@ -94,14 +93,9 @@
       host.addEventListener('pointerleave', function () { mouse = null; });
     }
 
-    if (!reduce) {
-      resize();
-      window.addEventListener('resize', resize);
-      (function loop(now) { render(now, true); requestAnimationFrame(loop); })(performance.now());
-    } else {
-      resize();
-      render(1200, false);
-    }
+    resize();
+    window.addEventListener('resize', resize);
+    (function loop(now) { render(now, true); requestAnimationFrame(loop); })(performance.now());
   })();
 </script>
 

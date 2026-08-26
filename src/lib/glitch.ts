@@ -2,11 +2,12 @@
  * Client-side glitch driver. The visual is pure CSS (.is-glitching, looping);
  * JS owns *timing* so bursts have random, capped length and hover fires
  * intermittent bursts with random pauses rather than glitching continuously.
+ *
+ * No motion gate: the glitch is brand, not decoration, and runs for every
+ * visitor. See scripts/motion-gate.mjs for the guard on that decision.
  */
 const CAP_MS = 1500; // hard ceiling on any single burst
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
-const motionOK = () =>
-  matchMedia('(prefers-reduced-motion: no-preference)').matches;
 
 type BurstOpts = { burstMin?: number; burstMax?: number };
 type AutoOpts = BurstOpts & { waitMin?: number; waitMax?: number };
@@ -37,7 +38,6 @@ function randomizeGhosts(el: HTMLElement) {
 
 /** One burst of random length (<= CAP_MS). */
 export function fireBurst(el: Element, { burstMin = 200, burstMax = 500 }: BurstOpts = {}) {
-  if (!motionOK()) return;
   const dur = Math.min(CAP_MS, rand(burstMin, burstMax));
   randomizeGhosts(el as HTMLElement);
   el.classList.add('is-glitching');
@@ -49,7 +49,6 @@ export function autoBurst(
   el: Element,
   { waitMin = 6000, waitMax = 11000, burstMin = 200, burstMax = 500 }: AutoOpts = {},
 ) {
-  if (!motionOK()) return;
   const loop = () => {
     window.setTimeout(() => {
       fireBurst(el, { burstMin, burstMax });
@@ -69,7 +68,7 @@ export function scramble(
   el: HTMLElement,
   { duration = 520, tick = 45 }: { duration?: number; tick?: number } = {},
 ) {
-  if (!motionOK() || el.dataset.scrambling === '1') return;
+  if (el.dataset.scrambling === '1') return;
   const final = el.dataset.num ?? el.textContent ?? '';
   const n = final.length;
   const glyphs = '0123456789#/\\<>';
@@ -101,7 +100,6 @@ export function hoverBurst(
   targetEl: Element,
   { burstMin = 200, burstMax = 500, pauseMin = 500, pauseMax = 1600 }: HoverOpts = {},
 ) {
-  if (!motionOK()) return;
   let active = false;
   const timers: number[] = [];
   const clear = () => {
