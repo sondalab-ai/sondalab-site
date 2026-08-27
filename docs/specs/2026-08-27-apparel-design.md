@@ -39,16 +39,16 @@ Consequences, all deliberate:
 - **Route**: `/apparel/`, a single static page — `src/pages/apparel/index.astro`.
   Top-level destination like the products pages, indexable, linkable.
 - **Navigation**: one entry in `src/components/SiteHeader.astro`, after
-  "How it's made". No `keep` attribute — on `main` the header nav hides in full
-  below `34rem`, so Apparel behaves exactly like every other entry.
+  "How it's made", carrying `keep: true`. Below `34rem` the header nav hides
+  every entry without it; Apparel, like Blog, is a destination that scrolling
+  cannot reach, so hiding it on a phone would make the section unreachable.
 - **Home page untouched.** No teaser block in `src/pages/index.astro`; the
   section numbering (`01`…`04`) of the home sections stays as it is.
 - **Accent**: `default`. Apparel gets **no** registered accent of its own, which
   would require an entry in `@sondalab/ui-kit`'s `accent-registry.json`, a
   cross-repo change and a package bump for a single page.
-- **Branch**: `feat/apparel`, cut from `main`. Independent of the unmerged
-  `feat/blog`; expect a one-line conflict in `SiteHeader.astro` whenever blog
-  merges.
+- **Branch**: `feat/apparel`, rebased onto `main` at `d81fa1e` once the
+  Transmissions blog merged (https://github.com/sondalab-ai/sondalab-site/pull/2).
 - **Category vocabulary**: `Tees` · `Caps` · `Pants`. English, like the rest of
   the site, and short enough for the mono-uppercase register.
 
@@ -164,5 +164,5 @@ arrangements; verify against the specific provider's terms before committing.)*
 - Manual: both themes via the header toggle; the nav entry; layout at 375px and
   1440px; the `mailto:` opens with the subject prefilled.
 
-(`npm run motion-gate` does not exist on `main` — it arrives with `feat/blog`.
-If this branch is rebased onto a `main` that has it, run it too.)
+- `npm run motion-gate` — the page must not gate its motion behind
+  `prefers-reduced-motion` in a way that disables it for everyone.
