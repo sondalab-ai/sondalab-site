@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+
 import Base from '../../layouts/Base.astro';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
@@ -81,6 +83,10 @@ const ledger = [
               <span class="crow__main">
                 <span class="crow__label">{c.label}</span>
                 <span class="crow__note">{c.note}</span>
+              </span>
+              <span class="crow__img">
+                {/* Decorative: the row's own text already names the piece. */}
+                <Image src={c.image} alt="" widths={[240, 480]} sizes="(min-width: 40rem) 10rem, 100vw" />
               </span>
               <span class="crow__go" aria-hidden="true">{href ? '→' : '·'}</span>
             </Fragment>
@@ -170,7 +176,8 @@ const ledger = [
 
   .crow {
     display: grid;
-    grid-template-columns: auto 3px 1fr auto;
+    grid-template-columns: auto 3px minmax(0, 1fr) auto auto;
+    grid-template-areas: 'no rule main img go';
     align-items: center;
     gap: clamp(1rem, 3vw, 2.5rem);
     padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
@@ -193,6 +200,7 @@ const ledger = [
   }
 
   .crow__no {
+    grid-area: no;
     font-family: var(--sl-font-mono);
     font-weight: 100;
     font-size: var(--step-numeral);
@@ -203,6 +211,7 @@ const ledger = [
   .crow:not(.crow--inert):hover .crow__no { color: var(--sl-accent-default); }
 
   .crow__rule {
+    grid-area: rule;
     align-self: stretch;
     width: 3px;
     background: var(--sl-accent-default);
@@ -215,7 +224,24 @@ const ledger = [
   }
   .crow:not(.crow--inert):hover .crow__rule { transform: scaleY(1); opacity: 1; }
 
-  .crow__main { display: block; }
+  .crow__main { grid-area: main; display: block; }
+
+  .crow__img {
+    grid-area: img;
+    display: block;
+    width: clamp(7rem, 12vw, 10rem);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--sl-border-default);
+  }
+  .crow__img :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .crow:not(.crow--inert):hover .crow__img :global(img) { transform: scale(1.04); }
   .crow__label {
     display: block;
     font-family: var(--sl-font-display);
@@ -231,6 +257,7 @@ const ledger = [
     max-width: 48ch;
   }
   .crow__go {
+    grid-area: go;
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-lg);
     color: var(--sl-text-muted);
@@ -245,8 +272,15 @@ const ledger = [
   .crow:not(.crow--inert):hover .crow__go { opacity: 1; transform: translateX(0); }
 
   @media (max-width: 40rem) {
-    .crow { grid-template-columns: auto 1fr; }
+    .crow {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas:
+        'no main'
+        'img img';
+      row-gap: 1.25rem;
+    }
     .crow__rule, .crow__go { display: none; }
+    .crow__img { width: 100%; aspect-ratio: 3 / 2; }
   }
 
   /* --- status band + call to action ---------------------------------- */

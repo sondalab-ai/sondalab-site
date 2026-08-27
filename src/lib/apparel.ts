@@ -3,11 +3,22 @@
  * is finally chosen. The site is static output on nginx: it cannot own a cart
  * or a checkout, so the whole integration seam is one outbound URL.
  */
+import type { ImageMetadata } from 'astro';
+
+import capsImage from '../assets/apparel/caps.jpg';
+import pantsImage from '../assets/apparel/pants.jpg';
+import teesImage from '../assets/apparel/tees.jpg';
 
 export interface ApparelCategory {
   id: string;
   label: string;
   note: string;
+  /**
+   * Category plate. Generated placeholders until the provider supplies real
+   * product shots; swapping the file in `src/assets/apparel/` is the whole
+   * replacement, no markup changes.
+   */
+  image: ImageMetadata;
   /** Provider collection URL. Falls back to the storefront root when absent. */
   href?: string;
 }
@@ -24,9 +35,9 @@ export const APPAREL: {
   storeUrl: null,
 
   categories: [
-    { id: 'tees', label: 'Tees', note: 'Heavyweight, printed small.' },
-    { id: 'caps', label: 'Caps', note: 'Low profile, no logo wall.' },
-    { id: 'pants', label: 'Pants', note: 'Workwear cut.' },
+    { id: 'tees', label: 'Tees', note: 'Heavyweight, printed small.', image: teesImage },
+    { id: 'caps', label: 'Caps', note: 'Low profile, no logo wall.', image: capsImage },
+    { id: 'pants', label: 'Pants', note: 'Workwear cut.', image: pantsImage },
   ],
 };
 

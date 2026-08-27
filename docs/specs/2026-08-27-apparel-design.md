@@ -97,19 +97,24 @@ the house anti-pattern. Four movements:
    no figures** — a published split is a commitment that has to stay true, and
    it was not asked for.
 3. **The three categories** — a numbered `<ol>` in the same editorial register
-   as `ProductsIndex.astro`: numeral, rule, name, one-line note. Rows are `<li>`
-   while `storeUrl` is `null` and become `<a>` when it is set.
+   as `ProductsIndex.astro`: numeral, rule, name, one-line note, and the
+   category plate. Rows are `<li>` while `storeUrl` is `null` and become `<a>`
+   when it is set. Above `40rem` the plate is a 4:5 thumbnail at the end of the
+   row; below it, a full-width 3:2 band under the text.
 4. **Status band + call to action** — the state from the table above.
 
-**No photography in v1.** The repo has no `astro:assets` pipeline and no image
-directory, and garment mockups normally come from the print-on-demand provider —
-so they depend on a decision that has not been made. The page is typographic,
-which is consistent with the site's voice, and images slot into the category
-rows when they exist.
+**Placeholder plates, not photography.** No garment shots exist yet: they come
+from the print-on-demand provider, which has not been chosen. Each category
+therefore carries a generated placeholder plate — mid-graphite, the accent rule,
+the category name and an explicit `// placeholder` mark, so it can never be
+mistaken for a product shot. The plates live in `src/assets/apparel/` and are
+served through `astro:assets`, which emits responsive WebP at build time.
+Replacing one with a real photograph means swapping the file; no markup or CSS
+changes.
 
-## Copy (draft — owner to review for voice)
+## Copy
 
-Placeholder text carrying the intended meaning, not final wording:
+The wording shipped on the page:
 
 - Headline: *Wear the thesis. Fund the work.*
 - Lede: *Sondalab's tools are open, local, and free to run. Nothing about that
@@ -143,6 +148,7 @@ arrangements; verify against the specific provider's terms before committing.)*
 |---|---|
 | `src/pages/apparel/index.astro` | new — the page |
 | `src/lib/apparel.ts` | new — the store switch and category data |
+| `src/assets/apparel/{tees,caps,pants}.jpg` | new — generated placeholder plates |
 | `src/components/SiteHeader.astro` | edit — one nav entry |
 | `docs/specs/2026-08-27-apparel-design.md` | new — this spec |
 
