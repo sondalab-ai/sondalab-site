@@ -2,12 +2,14 @@
 import Wordmark from './Wordmark.astro';
 
 // `keep` survives the narrow-viewport collapse. The home anchors are
-// reachable by scrolling anyway; Blog is a destination of its own, so hiding
-// it on a phone would make the section unreachable from the header.
+// reachable by scrolling anyway; Apparel and Blog are destinations of their
+// own, so hiding them on a phone would make those sections unreachable from
+// the header.
 const nav: { label: string; href: string; keep?: boolean }[] = [
   { label: 'Products', href: '/#products' },
   { label: 'Approach', href: '/#approach' },
   { label: "How it's made", href: '/#method' },
+  { label: 'Apparel', href: '/apparel/', keep: true },
   { label: 'Blog', href: '/blog/', keep: true },
   { label: 'Contact', href: '/#contact' },
 ];
