@@ -64,9 +64,9 @@ export const APPAREL = {
    *  call to action becomes a live link — no other file changes. */
   storeUrl: null as string | null,
   categories: [
-    { id: 'tees',  label: 'Tees',  note: '…' },
-    { id: 'caps',  label: 'Caps',  note: '…' },
-    { id: 'pants', label: 'Pants', note: '…' },
+    { id: 'tees',  label: 'Tees',  note: 'Heavyweight, printed small.' },
+    { id: 'caps',  label: 'Caps',  note: 'Low profile, no logo wall.' },
+    { id: 'pants', label: 'Pants', note: 'Workwear cut.' },
   ],
 } as const;
 ```
