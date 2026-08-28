@@ -57,7 +57,7 @@
     if (!canvas || !hero) return;
     if (!('gpu' in navigator) || !navigator.gpu) return;
 
-    const { clock, effect, frameLoop, init, sampler, surface } = await import('vgpu');
+    const { clock, effect, frame, frameLoop, init, sampler, surface } = await import('vgpu');
 
     let gpu;
     try {
@@ -130,6 +130,17 @@
     // Re-derive the grid when the tube changes shape. The texture matches the
     // tube's aspect, so leaving it alone would stretch the glyphs; and the
     // column count is a function of that aspect, so the wrap changes too.
+    let onScreen = true;
+    let focused = document.visibilityState === 'visible' && document.hasFocus();
+    let running = false;
+
+    const showSignalLoss = () => {
+      term.drawSignalLoss();
+      upload();
+      fx.set({ params });
+      frame(gpu, (f) => f.pass(surf, fx));
+    };
+
     let resizeTimer = 0;
     const relayout = () => {
       const r = hero.getBoundingClientRect();
@@ -147,18 +158,14 @@
       term.draw(0);
       upload();
       fx.set({ term_tex: texture });
+      // A resize while stopped must redraw the stopped screen, not resume.
+      if (!running) showSignalLoss();
       (previous as any).destroy?.();
     };
     window.addEventListener('resize', () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(relayout, 180);
     });
-
-    let visible = true;
-    new IntersectionObserver(
-      (entries) => { visible = entries.some((e) => e.isIntersecting); },
-      { threshold: 0 },
-    ).observe(canvas);
 
     // Brackets move into the text because the glitch effect owns ::before and
     // ::after (it renders `attr(data-text)` there), so they cannot also carry
@@ -178,19 +185,56 @@
     upload();
 
     let lastT = 0;
-    frameLoop(gpu, (frame) => {
-      if (!visible) return;
+    let loop: { stop(): void } | undefined;
+
+    // Nobody should pay for a tube they cannot see. A fullscreen shader with a
+    // couple of dozen texture taps per pixel is real GPU work, so the loop is
+    // stopped outright — not merely skipped a frame at a time — when the hero
+    // scrolls away or the tab loses focus, and the screen it leaves behind says
+    // so rather than sitting on a frozen frame.
+    const advance = () => {
       params.time = t.time;
       params.resolution = [canvas.width, canvas.height];
-
       const dt = Math.min((t.time as number) - lastT, 0.1);
       lastT = t.time as number;
       term.tick(dt, TYPING);
       if (term.dirty) { term.draw(t.time as number); upload(); }
-
       fx.set({ params });
-      frame.pass(surf, fx);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      // Re-anchor the clock, or the time spent stopped gets typed through in
+      // one jump the moment the hero comes back.
+      lastT = t.time as number;
+      loop = frameLoop(gpu, (f) => { advance(); f.pass(surf, fx); });
+    };
+
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      loop?.stop();
+      loop = undefined;
+      showSignalLoss();
+    };
+
+    const sync = () => (onScreen && focused ? start() : stop());
+
+    new IntersectionObserver(
+      (entries) => { onScreen = entries.some((e) => e.isIntersecting); sync(); },
+      { threshold: 0 },
+    ).observe(canvas);
+
+    document.addEventListener('visibilitychange', () => {
+      focused = document.visibilityState === 'visible' && document.hasFocus();
+      sync();
     });
+    window.addEventListener('blur', () => { focused = false; sync(); });
+    window.addEventListener('focus', () => { focused = true; sync(); });
+
+    // Starts the loop only if the hero is actually on screen and focused.
+    sync();
   }
 
   void boot();

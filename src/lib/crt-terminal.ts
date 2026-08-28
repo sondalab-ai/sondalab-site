@@ -295,10 +295,49 @@ export function createTerminal(opts: TerminalOptions = {}) {
     dirty = false;
   }
 
+  /**
+   * The screen shown while the loop is stopped. Drawn once, rendered once, and
+   * then left on the canvas: nothing is animating behind it, so it has to read
+   * as a deliberate state rather than a frozen frame.
+   */
+  function drawSignalLoss() {
+    ctx.fillStyle = black;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.textBaseline = 'middle';
+
+    const midRow = Math.floor(ROWS / 2);
+    const x = cellW * 3;
+    const mono = (k: number) =>
+      `${Math.round(cellH * k)}px "Martian Mono Variable", ui-monospace, Menlo, monospace`;
+
+    ctx.font = mono(0.62);
+    ctx.fillStyle = style.meta.color;
+    ctx.fillText('-- carrier lost --', x, (midRow - 2) * cellH + cellH / 2);
+
+    ctx.font = mono(1.15);
+    ctx.fillStyle = style.prompt.color;
+    let cx = x;
+    for (const chr of 'SIGNAL LOSS') {
+      ctx.fillText(chr, cx, midRow * cellH + cellH);
+      cx += ctx.measureText(chr).width + 4;
+    }
+
+    ctx.font = mono(0.62);
+    ctx.fillStyle = style.cta.color;
+    const prompt = 'operator@sondalab:~$ ';
+    const py = (midRow + 3) * cellH + cellH / 2;
+    ctx.fillText(prompt, x, py);
+    ctx.fillStyle = style.prompt.color;
+    ctx.fillRect(x + ctx.measureText(prompt).width + 2, py - cellH * 0.34, cellW * 0.6, cellH * 0.68);
+
+    dirty = false;
+  }
+
   return {
     canvas,
     tick,
     draw,
+    drawSignalLoss,
     refreshTokens() { readTokens(); dirty = true; },
     /**
      * Re-derive the grid for a new tube aspect and re-wrap the prose. Progress

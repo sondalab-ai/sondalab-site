@@ -59,8 +59,21 @@ simulation: font, wrapping and colour are ordinary JavaScript.
   `display: none` and `visibility: hidden` would drop the page's headline out of
   the accessibility tree.
 - **No `prefers-reduced-motion` gate**, per the standing decision recorded in
-  `scripts/motion-gate.mjs`. The loop pauses on visibility instead, via
-  `IntersectionObserver`.
+  `scripts/motion-gate.mjs`.
+- **The loop is stopped, not throttled, when nobody is watching.** A fullscreen
+  shader with a couple of dozen texture taps per pixel is real GPU work, so
+  `FrameLoopHandle.stop()` is called outright when the hero leaves the viewport
+  (`IntersectionObserver`) or the tab loses focus (`visibilitychange`, `blur`).
+  Before stopping it renders one last frame carrying a static **SIGNAL LOSS**
+  screen, which the canvas then keeps showing for free — a deliberate state
+  rather than a frozen frame. Measured with a `requestAnimationFrame` counter:
+  240 callbacks per 2 s with the hero in view, 120 scrolled away, 240 again on
+  return. The residual 120 is `GlowField`'s own loop, still ticking but no
+  longer painting.
+- **`GlowField` stops painting when it is not on screen.** It was repainting a
+  full-canvas blur every frame while sitting under `display: none` behind the
+  tube — a larger waste than the thing this change set out to fix. Canvas2D
+  paints per 2 s went from 120 to 0 in that state.
 - **Device pixel ratio capped at 1.25**, matching `GlowField.astro:26`.
 - **`vgpu@0.3.1` pinned exactly.** First published 2026-05-26, twenty releases in
   roughly three months; a minor bump on a 0.x moving this fast needs the full
