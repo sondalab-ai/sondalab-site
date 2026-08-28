@@ -75,8 +75,8 @@
     // absurdly tall screen.
     const rect = hero.getBoundingClientRect();
     const term = createTerminal({
-      cols: narrow ? 46 : 84,
       aspect: Math.max(0.6, rect.width / Math.max(rect.height, 1)),
+      targetRows: narrow ? 34 : 30,
     });
 
     const dpr = Math.min(window.devicePixelRatio || 1, 1.25);

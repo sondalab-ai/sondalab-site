@@ -39,8 +39,10 @@ interface Line {
 export interface TerminalOptions {
   cellW?: number;
   cellH?: number;
+  /** Overrides the aspect-derived column count. */
   cols?: number;
   aspect?: number;
+  targetRows?: number;
 }
 
 export interface TickOptions {
@@ -63,9 +65,19 @@ function wrap(s: string, width: number): string[] {
 export function createTerminal(opts: TerminalOptions = {}) {
   const cellW = opts.cellW ?? 13;
   const cellH = opts.cellH ?? 26;
-  const COLS = opts.cols ?? 84;
   const aspect = opts.aspect ?? 16 / 9;
+  // For a texture that matches the tube's aspect, rows = cols * (cellW/cellH) /
+  // aspect. Fixing the column count therefore starves a wide screen of rows —
+  // which is how the novella ended up with one line. Solve for columns instead,
+  // targeting enough rows to hold the header and a readable stretch of prose.
+  const TARGET_ROWS = opts.targetRows ?? 30;
+  const COLS = opts.cols ?? Math.round(
+    Math.min(132, Math.max(46, (TARGET_ROWS * aspect) / (cellW / cellH))),
+  );
   const ROWS = Math.max(12, Math.round((COLS * cellW) / aspect / cellH));
+
+  /** Rows kept empty at the foot of the tube for the HTML call to action. */
+  const RESERVED_ROWS = 3;
 
   const canvas = document.createElement('canvas');
   canvas.width = COLS * cellW;
@@ -137,9 +149,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
     { kind: 'blank', h: 1 },
     { kind: 'tagline', text: SITE.tagline.toUpperCase(), h: 1 },
     // No painted call to action: the real anchors stay HTML on top of the
-    // canvas, so they are focusable, indexable and actually clickable. A
-    // button drawn inside a shader is none of those.
-    { kind: 'blank', h: 1 },
+    // canvas, so they are focusable, indexable and actually clickable.
     { kind: 'blank', h: 1 },
     { kind: 'rule', text: '─'.repeat(Math.max(8, COLS - 8)), h: 1 },
   ];
@@ -224,7 +234,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
     const pinned = shown.slice(0, PINNED);
     const prose = shown.slice(PINNED);
     const pinnedRows = pinned.reduce((n, l) => n + l.h, 0);
-    const room = Math.max(0, ROWS - pinnedRows);
+    const room = Math.max(0, ROWS - pinnedRows - RESERVED_ROWS);
     const view = pinned.concat(prose.slice(Math.max(0, prose.length - room)));
 
     let row = 0;
