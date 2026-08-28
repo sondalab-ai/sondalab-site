@@ -30,6 +30,11 @@ for (const theme of ['dark', 'light']) {
       await step();
     }
     window.scrollTo(0, 0);
+    // Lazy images are still decoding when the scroll ends, and an undecoded
+    // one photographs as an empty box. Wait for the pixels, not the layout.
+    await Promise.all(
+      [...document.images].map((img) => img.decode().catch(() => {})),
+    );
   });
   // The hero's CRT types its header before it is worth photographing, so the
   // settle time is overridable: SHOOT_SETTLE=16000 for the home page.
