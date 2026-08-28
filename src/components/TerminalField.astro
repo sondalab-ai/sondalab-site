@@ -1,0 +1,254 @@
+---
+// The hero's CRT terminal: a WebGPU tube that types the site's claim and then
+// streams the operator novellas.
+//
+// Progressive enhancement, and the fallback is the default. The server renders
+// nothing but an empty, hidden canvas; the Canvas2D GlowField and the HTML hero
+// copy are what a visitor gets until `init()` has actually resolved. Only then
+// does the hero switch to `data-crt="on"`. If WebGPU is missing, or the adapter
+// refuses, or the device is lost, the page stays exactly as it is today.
+---
+
+<canvas class="crt-field" data-crt-field aria-hidden="true"></canvas>
+
+<script>
+  import { createTerminal } from '../lib/crt-terminal';
+  import { CRT_SHADER } from '../lib/crt-shader';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-crt-field]');
+  const hero = canvas?.closest<HTMLElement>('.hero');
+
+  /** Frozen from the tuning pass; the prototype's slider panel does not ship. */
+  const LOOK = {
+    curvature: 0.07,
+    bezel: 0.055,
+    overscan: 1.1,
+    gain: 0.94,
+    ior: 2,
+    glassDepth: 0.1,
+    rimPower: 0.01,
+    reflectPower: 0.58,
+    scanDepth: 0.32,
+    scanCount: 290,
+    maskDepth: 0.36,
+    glowPower: 0.1,
+    glowRadius: 0.005,
+    splitAmount: 0.004,
+    tearAmount: 0.004,
+    tearRate: 20,
+    trackingAmount: 1.24,
+    dropoutAmount: 0.14,
+    rollAmount: 0.24,
+    noiseAmount: 0.055,
+  };
+  const TYPING = { typeSpeed: 31, eraseSpeed: 420, holdSeconds: 10 };
+
+  function rgb(value: string): [number, number, number] {
+    let h = (value || '').trim().replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    const n = parseInt(h, 16);
+    if (Number.isNaN(n)) return [0, 0, 0];
+    // The shader writes its output already gamma-encoded, so the surround is
+    // passed in the same space rather than linearised.
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+
+  async function boot() {
+    if (!canvas || !hero) return;
+    if (!('gpu' in navigator) || !navigator.gpu) return;
+
+    const { clock, effect, frame, frameLoop, init, sampler, surface } = await import('vgpu');
+
+    let gpu;
+    try {
+      gpu = await init();
+    } catch {
+      // Adapter refused, device lost, or the browser advertises WebGPU without
+      // being able to give us a device. Leave the fallback in place.
+      return;
+    }
+
+    const root = document.documentElement;
+    const narrow = window.matchMedia('(max-width: 40rem)').matches;
+    // Measure the hero, not the canvas: the canvas is still display:none at
+    // this point, so its rect is 0x0 and the terminal would be sized for an
+    // absurdly tall screen.
+    const rect = hero.getBoundingClientRect();
+    const term = createTerminal({
+      aspect: Math.max(0.6, rect.width / Math.max(rect.height, 1)),
+      targetRows: narrow ? 34 : 30,
+    });
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    const surf = surface(gpu, canvas, { dpr: [1, dpr] });
+    // Held in a mutable binding: a resize allocates a new one and rebinds it.
+    let texture: any = gpu.device.createTexture({
+      size: [term.canvas.width, term.canvas.height],
+      format: 'rgba8unorm',
+      usage: ['texture_binding', 'copy_dst', 'render_attachment'],
+    });
+    const samp = sampler(gpu, { minFilter: 'linear', magFilter: 'linear' });
+
+    const rawDevice = (gpu.device as any).gpu ?? gpu.device;
+    const rawQueue = rawDevice.queue?.gpu ?? rawDevice.queue;
+    const upload = () =>
+      rawQueue.copyExternalImageToTexture(
+        { source: term.canvas },
+        { texture: (texture as any).gpu ?? texture },
+        [term.canvas.width, term.canvas.height],
+      );
+
+    const params: Record<string, unknown> = {
+      ...LOOK,
+      resolution: [canvas.width || 1440, canvas.height || 820],
+      time: 0,
+      glowTaps: narrow ? 6 : 12,
+      polarity: term.lightPolarity ? 1 : 0,
+      // A dark tube can take a deep edge falloff; on paper the same amount
+      // reads as dirt and, worse, drops the calls to action sitting on it to
+      // 1.06:1 against their own background. Measured, not guessed.
+      vignette: term.lightPolarity ? 0.1 : 0.35,
+      surround: rgb(getComputedStyle(root).getPropertyValue('--sl-bg-canvas')),
+      screenBg: rgb(term.screenBackground),
+    };
+
+    const fx = effect(gpu, CRT_SHADER, { set: { params, term_tex: texture, term_samp: samp } });
+    const t = clock(gpu);
+
+    // Follow the theme toggle: text colours and the surround both come from
+    // tokens, so a theme change means re-reading them, not a second palette.
+    new MutationObserver(() => {
+      term.refreshTokens();
+      params.polarity = term.lightPolarity ? 1 : 0;
+      params.vignette = term.lightPolarity ? 0.1 : 0.35;
+      params.screenBg = rgb(term.screenBackground);
+      params.surround = rgb(getComputedStyle(root).getPropertyValue('--sl-bg-canvas'));
+    }).observe(root, { attributes: true, attributeFilter: ['data-sl-theme'] });
+
+    // Stop the loop when the hero is off screen: the rest of the page should
+    // not pay for a tube nobody is looking at.
+    // Re-derive the grid when the tube changes shape. The texture matches the
+    // tube's aspect, so leaving it alone would stretch the glyphs; and the
+    // column count is a function of that aspect, so the wrap changes too.
+    let onScreen = true;
+    let focused = document.visibilityState === 'visible' && document.hasFocus();
+    let running = false;
+
+    const showSignalLoss = () => {
+      term.drawSignalLoss();
+      upload();
+      fx.set({ params });
+      frame(gpu, (f) => f.pass(surf, fx));
+    };
+
+    let resizeTimer = 0;
+    const relayout = () => {
+      const r = hero.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      const isNarrow = window.matchMedia('(max-width: 40rem)').matches;
+      term.resize(Math.max(0.6, r.width / r.height), isNarrow ? 34 : 30);
+      const next = gpu.device.createTexture({
+        size: [term.width, term.height],
+        format: 'rgba8unorm',
+        usage: ['texture_binding', 'copy_dst', 'render_attachment'],
+      });
+      const previous = texture;
+      texture = next;
+      params.glowTaps = isNarrow ? 6 : 12;
+      term.draw(0);
+      upload();
+      fx.set({ term_tex: texture });
+      // A resize while stopped must redraw the stopped screen, not resume.
+      if (!running) showSignalLoss();
+      (previous as any).destroy?.();
+    };
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(relayout, 180);
+    });
+
+    // Brackets move into the text because the glitch effect owns ::before and
+    // ::after (it renders `attr(data-text)` there), so they cannot also carry
+    // punctuation. Done in JS so the fallback button is never touched.
+    const primary = hero.querySelector<HTMLElement>('.hero__actions .sl-btn');
+    if (primary) {
+      const label = `[ ${primary.textContent?.trim()} ]`;
+      primary.textContent = label;
+      primary.dataset.text = label;
+      primary.classList.add('glitch');
+      const { hoverBurst } = await import('../lib/glitch');
+      hoverBurst(primary, primary, { burstMin: 120, burstMax: 260 });
+    }
+
+    hero.setAttribute('data-crt', 'on');
+    term.draw(0);
+    upload();
+
+    let lastT = 0;
+    let loop: { stop(): void } | undefined;
+
+    // Nobody should pay for a tube they cannot see. A fullscreen shader with a
+    // couple of dozen texture taps per pixel is real GPU work, so the loop is
+    // stopped outright — not merely skipped a frame at a time — when the hero
+    // scrolls away or the tab loses focus, and the screen it leaves behind says
+    // so rather than sitting on a frozen frame.
+    const advance = () => {
+      params.time = t.time;
+      params.resolution = [canvas.width, canvas.height];
+      const dt = Math.min((t.time as number) - lastT, 0.1);
+      lastT = t.time as number;
+      term.tick(dt, TYPING);
+      if (term.dirty) { term.draw(t.time as number); upload(); }
+      fx.set({ params });
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      // Re-anchor the clock, or the time spent stopped gets typed through in
+      // one jump the moment the hero comes back.
+      lastT = t.time as number;
+      loop = frameLoop(gpu, (f) => { advance(); f.pass(surf, fx); });
+    };
+
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      loop?.stop();
+      loop = undefined;
+      showSignalLoss();
+    };
+
+    const sync = () => (onScreen && focused ? start() : stop());
+
+    new IntersectionObserver(
+      (entries) => { onScreen = entries.some((e) => e.isIntersecting); sync(); },
+      { threshold: 0 },
+    ).observe(canvas);
+
+    document.addEventListener('visibilitychange', () => {
+      focused = document.visibilityState === 'visible' && document.hasFocus();
+      sync();
+    });
+    window.addEventListener('blur', () => { focused = false; sync(); });
+    window.addEventListener('focus', () => { focused = true; sync(); });
+
+    // Starts the loop only if the hero is actually on screen and focused.
+    sync();
+  }
+
+  void boot();
+</script>
+
+<style>
+  .crt-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+  /* Only shown once WebGPU has actually produced a device. `.hero` lives in
+     Hero.astro, so the selector has to escape this component's scope. */
+  :global(.hero[data-crt='on']) .crt-field { display: block; }
+</style>

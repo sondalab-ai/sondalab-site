@@ -1,5 +1,6 @@
 ---
 import GlowField from './GlowField.astro';
+import TerminalField from './TerminalField.astro';
 import { SITE } from '../lib/site';
 
 const claimParts = SITE.claim.split(', ');
@@ -24,6 +25,7 @@ const cue = [
 
 <section class="hero">
   <GlowField />
+  <TerminalField />
   <div class="hero__scrim" aria-hidden="true"></div>
   <div class="wrap hero__inner">
     <p class="eyebrow hero__eyebrow">Sondalab · a lab for operators</p>
@@ -190,6 +192,79 @@ const cue = [
     45% { transform: scale(2); opacity: 1; }
   }
 
+
+  /* --- CRT mode ---------------------------------------------------------
+     Set by TerminalField only after WebGPU has produced a device. Everything
+     above is the fallback and must keep working untouched: this block only
+     adds overrides, so a browser without WebGPU never sees any of it. */
+
+  /* .glow-field is rendered by GlowField.astro, so it needs :global() to be
+     reachable from this component's scoped styles. */
+  .hero[data-crt='on'] :global(.glow-field) { display: none; }
+  .hero[data-crt='on'] .hero__scrim { display: none; }
+
+  /* The tube draws the eyebrow, claim and tagline itself. The HTML copies are
+     clipped rather than removed: display:none and visibility:hidden drop them
+     from the accessibility tree, and this text is the page's headline. */
+  .hero[data-crt='on'] .hero__eyebrow,
+  .hero[data-crt='on'] .hero__claim,
+  .hero[data-crt='on'] .hero__tagline {
+    clip-path: inset(50%);
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Full-bleed and aligned to the terminal's own left margin: the copy is
+     drawn by the tube, so the wrap's centred column no longer applies. */
+  .hero[data-crt='on'] .hero__inner {
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(34rem, 88vh, 52rem);
+    max-width: none;
+    padding-block: 0;
+    padding-inline: 7%;
+  }
+
+  /* Sits in the rows the terminal keeps clear at the foot of the tube. */
+  .hero[data-crt='on'] .hero__actions {
+    margin-top: 0;
+    margin-bottom: clamp(3rem, 9vh, 6rem);
+    gap: 2.5rem;
+  }
+
+  /* Terminal affordances, not web buttons: a filled pill floating over CRT
+     output is what read as pasted on. */
+  .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    border-radius: 0;
+    color: var(--sl-accent-default);
+    font-family: var(--sl-font-mono);
+    font-weight: 400;
+    font-size: var(--sl-text-sm);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+  /* No underline on hover: the glitch is the hover state, wired in
+     TerminalField. The brackets live in the text because .glitch owns
+     ::before/::after. */
+
+  /* The tube now follows the theme — dark screen on dark, paper on light — so
+     the actions sit on a surface that matches the page and the ordinary text
+     tokens are the right ones. The earlier light-theme override existed only
+     because the tube used to stay dark. */
+  .hero[data-crt='on'] .hero__ghost { color: var(--sl-text-primary); }
+  /* The fallback hero fills this button, so its label sits on amber. Here the
+     label is the amber, on paper — and the accent as-is measures 3.0:1 there.
+     Darkening the same token to 52% clears the 4.5:1 floor while staying the
+     brand hue. */
+  :global(:root[data-sl-theme='light']) .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
+    color: color-mix(in srgb, var(--sl-accent-default) 52%, black);
+  }
 </style>
 
 <script>

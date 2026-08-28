@@ -95,7 +95,25 @@
 
     resize();
     window.addEventListener('resize', resize);
-    (function loop(now) { render(now, true); requestAnimationFrame(loop); })(performance.now());
+
+    // Painting costs a full-canvas blur every frame, so skip it whenever the
+    // field is not actually on screen: hidden behind the CRT hero
+    // (offsetParent goes null under display:none), scrolled past, or in a
+    // background tab. The loop itself stays alive so it resumes on its own.
+    var onScreen = true;
+    if (typeof IntersectionObserver === 'function') {
+      new IntersectionObserver(function (entries) {
+        onScreen = entries.some(function (e) { return e.isIntersecting; });
+      }, { threshold: 0 }).observe(cv);
+    }
+    function painting() {
+      return onScreen && !document.hidden && cv.offsetParent !== null;
+    }
+
+    (function loop(now) {
+      if (painting()) render(now, true);
+      requestAnimationFrame(loop);
+    })(performance.now());
   })();
 </script>
 

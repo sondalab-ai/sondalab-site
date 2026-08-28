@@ -31,7 +31,9 @@ for (const theme of ['dark', 'light']) {
     }
     window.scrollTo(0, 0);
   });
-  await new Promise((r) => setTimeout(r, 800)); // let the glow field paint
+  // The hero's CRT types its header before it is worth photographing, so the
+  // settle time is overridable: SHOOT_SETTLE=16000 for the home page.
+  await new Promise((r) => setTimeout(r, Number(process.env.SHOOT_SETTLE) || 800));
   await page.screenshot({ path: `${OUT}/${NAME}-${theme}.png` });
   const full = `${OUT}/${NAME}-${theme}-full.png`;
   await page.screenshot({ path: full, fullPage: true });
