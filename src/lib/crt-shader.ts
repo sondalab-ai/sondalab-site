@@ -32,7 +32,10 @@ struct Params {
   rollAmount: f32,
   noiseAmount: f32,
   glowTaps: f32,
+  polarity: f32,
+  vignette: f32,
   surround: vec3f,
+  screenBg: vec3f,
 }
 
 @group(0) @binding(0) var<uniform> params: Params;
@@ -77,9 +80,20 @@ fn tear(uv: vec2f, t: f32) -> vec2f {
   return out;
 }
 
+/**
+ * Everything below works in emission — how far a pixel is from the screen's own
+ * background — rather than in colour. On the dark theme that is the pixel
+ * itself; on the light theme the screen is paper and the glyphs are ink, so
+ * emission is the distance back towards the paper. Scanlines, the phosphor
+ * halo and the grain then behave the same way on both, and only the final
+ * conversion differs.
+ */
 fn sampleTerm(uv: vec2f) -> vec3f {
-  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) { return vec3f(0.0); }
-  return textureSampleLevel(term_tex, term_samp, uv, 0.0).rgb;
+  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+    return select(vec3f(0.0), vec3f(0.0), params.polarity > 0.5);
+  }
+  let c = textureSampleLevel(term_tex, term_samp, uv, 0.0).rgb;
+  return select(c, max(params.screenBg - c, vec3f(0.0)), params.polarity > 0.5);
 }
 
 /** Misconvergence: the three guns drift apart towards the edge of the tube. */
@@ -140,18 +154,23 @@ fn phosphorGlow(uv: vec2f) -> vec3f {
 
   col *= params.gain;
 
+  col = vec3f(1.0) - exp(-col * 1.15);
+  col = pow(max(col, vec3f(0.0)), vec3f(1.0 / 2.2));
+
+  // Back to colour. The dark path is unchanged; the light path lays the
+  // accumulated emission back onto the paper.
+  col = select(col, max(params.screenBg - col, vec3f(0.0)), params.polarity > 0.5);
+
   // Room light smeared across the faceplate, plus the grazing Fresnel edge.
+  // These are reflections off the glass, so they add light whichever way the
+  // screen behind them is polarised.
   let cs = curve(uv0, params.curvature) * 2.0 - 1.0;
   let r2 = clamp(dot(cs, cs), 0.0, 1.0);
   let band = exp(-pow((uv0.y - 0.22 + uv0.x * 0.10) * 7.0, 2.0));
   col += vec3f(0.55, 0.72, 0.78) * band * 0.035 * params.reflectPower;
   col += vec3f(0.55, 0.85, 0.82) * pow(1.0 - clamp(1.0 - r2, 0.0, 1.0), 6.0)
        * params.rimPower * 0.5;
-
-  col *= 1.0 - 0.35 * r2;
-
-  col = vec3f(1.0) - exp(-col * 1.15);
-  col = pow(max(col, vec3f(0.0)), vec3f(1.0 / 2.2));
+  col *= 1.0 - params.vignette * r2;
 
   // Outside the tube the page's own canvas colour shows through, so the CRT
   // reads as an object in the room rather than a black rectangle. This is what

@@ -81,7 +81,8 @@
 
     const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     const surf = surface(gpu, canvas, { dpr: [1, dpr] });
-    const tex = gpu.device.createTexture({
+    // Held in a mutable binding: a resize allocates a new one and rebinds it.
+    let texture: any = gpu.device.createTexture({
       size: [term.canvas.width, term.canvas.height],
       format: 'rgba8unorm',
       usage: ['texture_binding', 'copy_dst', 'render_attachment'],
@@ -93,7 +94,7 @@
     const upload = () =>
       rawQueue.copyExternalImageToTexture(
         { source: term.canvas },
-        { texture: (tex as any).gpu ?? tex },
+        { texture: (texture as any).gpu ?? texture },
         [term.canvas.width, term.canvas.height],
       );
 
@@ -102,26 +103,75 @@
       resolution: [canvas.width || 1440, canvas.height || 820],
       time: 0,
       glowTaps: narrow ? 6 : 12,
+      polarity: term.lightPolarity ? 1 : 0,
+      // A dark tube can take a deep edge falloff; on paper the same amount
+      // reads as dirt and, worse, drops the calls to action sitting on it to
+      // 1.06:1 against their own background. Measured, not guessed.
+      vignette: term.lightPolarity ? 0.1 : 0.35,
       surround: rgb(getComputedStyle(root).getPropertyValue('--sl-bg-canvas')),
+      screenBg: rgb(term.screenBackground),
     };
 
-    const fx = effect(gpu, CRT_SHADER, { set: { params, term_tex: tex, term_samp: samp } });
+    const fx = effect(gpu, CRT_SHADER, { set: { params, term_tex: texture, term_samp: samp } });
     const t = clock(gpu);
 
     // Follow the theme toggle: text colours and the surround both come from
     // tokens, so a theme change means re-reading them, not a second palette.
     new MutationObserver(() => {
       term.refreshTokens();
+      params.polarity = term.lightPolarity ? 1 : 0;
+      params.vignette = term.lightPolarity ? 0.1 : 0.35;
+      params.screenBg = rgb(term.screenBackground);
       params.surround = rgb(getComputedStyle(root).getPropertyValue('--sl-bg-canvas'));
     }).observe(root, { attributes: true, attributeFilter: ['data-sl-theme'] });
 
     // Stop the loop when the hero is off screen: the rest of the page should
     // not pay for a tube nobody is looking at.
+    // Re-derive the grid when the tube changes shape. The texture matches the
+    // tube's aspect, so leaving it alone would stretch the glyphs; and the
+    // column count is a function of that aspect, so the wrap changes too.
+    let resizeTimer = 0;
+    const relayout = () => {
+      const r = hero.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      const isNarrow = window.matchMedia('(max-width: 40rem)').matches;
+      term.resize(Math.max(0.6, r.width / r.height), isNarrow ? 34 : 30);
+      const next = gpu.device.createTexture({
+        size: [term.width, term.height],
+        format: 'rgba8unorm',
+        usage: ['texture_binding', 'copy_dst', 'render_attachment'],
+      });
+      const previous = texture;
+      texture = next;
+      params.glowTaps = isNarrow ? 6 : 12;
+      term.draw(0);
+      upload();
+      fx.set({ term_tex: texture });
+      (previous as any).destroy?.();
+    };
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(relayout, 180);
+    });
+
     let visible = true;
     new IntersectionObserver(
       (entries) => { visible = entries.some((e) => e.isIntersecting); },
       { threshold: 0 },
     ).observe(canvas);
+
+    // Brackets move into the text because the glitch effect owns ::before and
+    // ::after (it renders `attr(data-text)` there), so they cannot also carry
+    // punctuation. Done in JS so the fallback button is never touched.
+    const primary = hero.querySelector<HTMLElement>('.hero__actions .sl-btn');
+    if (primary) {
+      const label = `[ ${primary.textContent?.trim()} ]`;
+      primary.textContent = label;
+      primary.dataset.text = label;
+      primary.classList.add('glitch');
+      const { hoverBurst } = await import('../lib/glitch');
+      hoverBurst(primary, primary, { burstMin: 120, burstMax: 260 });
+    }
 
     hero.setAttribute('data-crt', 'on');
     term.draw(0);

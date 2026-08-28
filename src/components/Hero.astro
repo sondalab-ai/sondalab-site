@@ -249,17 +249,21 @@ const cue = [
     letter-spacing: 0.08em;
     text-decoration: none;
   }
-  .hero[data-crt='on'] .hero__actions :global(.sl-btn)::before { content: '[ '; }
-  .hero[data-crt='on'] .hero__actions :global(.sl-btn)::after { content: ' ]'; }
-  .hero[data-crt='on'] .hero__actions :global(.sl-btn):hover {
-    text-decoration: underline;
-  }
+  /* No underline on hover: the glitch is the hover state, wired in
+     TerminalField. The brackets live in the text because .glitch owns
+     ::before/::after. */
 
-  /* The actions sit on the tube, which is dark in both themes, so the ghost
-     link takes the theme's light neutral rather than its text colour. */
+  /* The tube now follows the theme — dark screen on dark, paper on light — so
+     the actions sit on a surface that matches the page and the ordinary text
+     tokens are the right ones. The earlier light-theme override existed only
+     because the tube used to stay dark. */
   .hero[data-crt='on'] .hero__ghost { color: var(--sl-text-primary); }
-  :global(:root[data-sl-theme='light']) .hero[data-crt='on'] .hero__ghost {
-    color: var(--sl-bg-canvas);
+  /* The fallback hero fills this button, so its label sits on amber. Here the
+     label is the amber, on paper — and the accent as-is measures 3.0:1 there.
+     Darkening the same token to 52% clears the 4.5:1 floor while staying the
+     brand hue. */
+  :global(:root[data-sl-theme='light']) .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
+    color: color-mix(in srgb, var(--sl-accent-default) 52%, black);
   }
 </style>
 

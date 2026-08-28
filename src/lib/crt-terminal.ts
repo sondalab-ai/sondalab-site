@@ -65,63 +65,76 @@ function wrap(s: string, width: number): string[] {
 export function createTerminal(opts: TerminalOptions = {}) {
   const cellW = opts.cellW ?? 13;
   const cellH = opts.cellH ?? 26;
-  const aspect = opts.aspect ?? 16 / 9;
+
   // For a texture that matches the tube's aspect, rows = cols * (cellW/cellH) /
   // aspect. Fixing the column count therefore starves a wide screen of rows —
   // which is how the novella ended up with one line. Solve for columns instead,
   // targeting enough rows to hold the header and a readable stretch of prose.
-  const TARGET_ROWS = opts.targetRows ?? 30;
-  const COLS = opts.cols ?? Math.round(
-    Math.min(132, Math.max(46, (TARGET_ROWS * aspect) / (cellW / cellH))),
-  );
-  const ROWS = Math.max(12, Math.round((COLS * cellW) / aspect / cellH));
+  let COLS = 84;
+  let ROWS = 30;
+  let targetRows = opts.targetRows ?? 30;
+
+  function geometry(aspect: number, nextTargetRows?: number) {
+    if (nextTargetRows) targetRows = nextTargetRows;
+    COLS = opts.cols ?? Math.round(
+      Math.min(132, Math.max(46, (targetRows * aspect) / (cellW / cellH))),
+    );
+    ROWS = Math.max(12, Math.round((COLS * cellW) / aspect / cellH));
+    canvas.width = COLS * cellW;
+    canvas.height = ROWS * cellH;
+  }
 
   /** Rows kept empty at the foot of the tube for the HTML call to action. */
   const RESERVED_ROWS = 3;
 
   const canvas = document.createElement('canvas');
-  canvas.width = COLS * cellW;
-  canvas.height = ROWS * cellH;
   const ctx = canvas.getContext('2d')!;
+  geometry(opts.aspect ?? 16 / 9);
 
   const root = document.documentElement;
   const token = (name: string) => getComputedStyle(root).getPropertyValue(name).trim();
 
-  /**
-   * The inside of the tube is dark in both themes, so its ink is whichever of
-   * the two neutral tokens is the light one: `--sl-text-primary` on dark,
-   * `--sl-bg-canvas` on light. Using the theme's text colour directly would
-   * paint near-black glyphs on a near-black screen in light mode.
-   */
-  const tubeInk = () =>
-    root.getAttribute('data-sl-theme') === 'light'
-      ? token('--sl-bg-canvas')
-      : token('--sl-text-primary');
+  const isLight = () => root.getAttribute('data-sl-theme') === 'light';
 
-  /** Dim a colour towards the tube's black; the screen has one light source. */
-  function dim(hex: string, k: number): string {
+  /**
+   * The tube follows the theme. On dark it is a lit phosphor screen: near-black
+   * glass, light glyphs. On light it is a paper-white readout: the canvas
+   * colour behind the theme's own ink. Both ends come straight from tokens.
+   */
+  const screenBg = () => (isLight() ? token('--sl-bg-canvas') : '#000000');
+  const screenInk = () => (isLight() ? token('--sl-text-primary') : token('--sl-text-primary'));
+
+  function parse(hex: string): [number, number, number] {
     let h = (hex || '').trim().replace('#', '');
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
     const n = parseInt(h, 16);
-    if (Number.isNaN(n)) return hex;
-    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => Math.round(v * k));
-    return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    if (Number.isNaN(n)) return [0, 0, 0];
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  /** Fade a colour towards the screen's own background, whichever end that is. */
+  function fade(hex: string, k: number): string {
+    const c = parse(hex);
+    const b = parse(screenBg());
+    const m = c.map((v, i) => Math.round(v * k + b[i] * (1 - k)));
+    return `rgb(${m[0]}, ${m[1]}, ${m[2]})`;
   }
 
   /** Palette, resolved from tokens. Re-read whenever the theme toggles. */
   let style: Record<string, { color: string; size: number; track?: number }>;
   let black = '#000';
+  let polarityLight = false;
 
   function readTokens() {
     const accent = token('--sl-accent-default');
     const depth = token('--sl-accent-depth');
-    const ink = tubeInk();
-    const secondary = dim(ink, 0.7);
-    const muted = dim(ink, 0.45);
-    const border = dim(ink, 0.22);
-    // A lit phosphor screen is a dark object in a bright room, so the light
-    // theme changes the surround (handled in the shader), never the screen.
-    black = '#000000';
+    // On dark the ink is the theme's light text; on light it is the theme's
+    // dark text, because the screen itself has flipped.
+    const ink = isLight() ? token('--sl-text-primary') : token('--sl-text-primary');
+    const secondary = fade(ink, 0.7);
+    const muted = fade(ink, 0.45);
+    const border = fade(ink, 0.22);
+    black = screenBg();
     style = {
       boot: { color: muted, size: 0.58 },
       eyebrow: { color: depth, size: 0.56, track: 3 },
@@ -135,11 +148,12 @@ export function createTerminal(opts: TerminalOptions = {}) {
       body: { color: ink, size: 0.62 },
       blank: { color: ink, size: 0.62 },
     };
+    polarityLight = isLight();
   }
   readTokens();
 
   const claimParts = SITE.claim.split(', ');
-  const HEADER: Line[] = [
+  const headerLines = (): Line[] => [
     { kind: 'boot', text: `${SITE.name.toUpperCase()} TERMINAL · booting operator session`, h: 1 },
     { kind: 'boot', text: 'link: local · service: refused · switch: yours', h: 1 },
     { kind: 'blank', h: 1 },
@@ -153,6 +167,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
     { kind: 'blank', h: 1 },
     { kind: 'rule', text: '─'.repeat(Math.max(8, COLS - 8)), h: 1 },
   ];
+  let HEADER = headerLines();
 
   function buildBody(id: string, index: number): Line[] {
     const out: Line[] = [
@@ -170,7 +185,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
   const len = (l: Line) => (l.text ? l.text.length : 0) + 1;
   const sum = (s: Line[]) => s.reduce((n, l) => n + len(l), 0);
 
-  const headerLen = sum(HEADER);
+  let headerLen = sum(HEADER);
   let chapter = 0;
   let body = buildBody(ORDER[chapter], chapter);
   let total = headerLen + sum(body);
@@ -285,6 +300,26 @@ export function createTerminal(opts: TerminalOptions = {}) {
     tick,
     draw,
     refreshTokens() { readTokens(); dirty = true; },
+    /**
+     * Re-derive the grid for a new tube aspect and re-wrap the prose. Progress
+     * is carried across as a fraction, not a character count: the wrap width
+     * changes, so the totals do too, and keeping the raw count would jump the
+     * reader forwards or backwards.
+     */
+    resize(nextAspect: number, nextTargetRows?: number) {
+      const fraction = total > 0 ? revealed / total : 0;
+      geometry(nextAspect, nextTargetRows);
+      HEADER = headerLines();
+      headerLen = sum(HEADER);
+      body = buildBody(ORDER[chapter], chapter);
+      total = headerLen + sum(body);
+      revealed = Math.min(total, Math.max(headerLen * (phase === 'typing' ? 0 : 1), fraction * total));
+      dirty = true;
+    },
+    get width() { return canvas.width; },
+    get height() { return canvas.height; },
+    get lightPolarity() { return polarityLight; },
+    get screenBackground() { return black; },
     get dirty() { return dirty; },
   };
 }
