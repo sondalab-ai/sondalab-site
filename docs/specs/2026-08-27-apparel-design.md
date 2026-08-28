@@ -99,18 +99,46 @@ the house anti-pattern. Four movements:
 3. **The three categories** — a numbered `<ol>` in the same editorial register
    as `ProductsIndex.astro`: numeral, rule, name, one-line note, and the
    category plate. Rows are `<li>` while `storeUrl` is `null` and become `<a>`
-   when it is set. Above `40rem` the plate is a 4:5 thumbnail at the end of the
-   row; below it, a full-width 3:2 band under the text.
+   when it is set. Above `52rem` each row is a half-and-half split with the
+   plate at roughly `26rem`, and the plate alternates side row by row so the
+   column reads as a rhythm rather than as three copies of one card; below it,
+   the row stacks and the plate is capped at `22rem`. The plate keeps its 4:5
+   frame at every width — it holds a drawing, which cropping would damage.
+   Rows reveal on scroll, staggered by index, armed from script so a reader
+   without JavaScript gets the page fully visible.
 4. **Status band + call to action** — the state from the table above.
 
-**Placeholder plates, not photography.** No garment shots exist yet: they come
-from the print-on-demand provider, which has not been chosen. Each category
-therefore carries a generated placeholder plate — mid-graphite, the accent rule,
-the category name and an explicit `// placeholder` mark, so it can never be
-mistaken for a product shot. The plates live in `src/assets/apparel/` and are
-served through `astro:assets`, which emits responsive WebP at build time.
-Replacing one with a real photograph means swapping the file; no markup or CSS
-changes.
+**Stock photography, standing in.** No shots of the actual pieces exist yet:
+they come from the print-on-demand provider, which has not been chosen. The
+plates are therefore stock product photography — three studio shots on neutral
+grounds, chosen as a set so the lighting and background read as one series
+rather than three unrelated pictures.
+
+| Category | Source | Photographer | Licence |
+|---|---|---|---|
+| Tees | https://unsplash.com/photos/4rUYuwJ2vGw | mockupbee | Unsplash License |
+| Caps | https://unsplash.com/photos/ozdzzeBu4Go | personalgraphic.com | Unsplash License |
+| Pants | https://unsplash.com/photos/h6PKsr0wDH4 | TuanAnh Blue (@blueeyeaa) | Unsplash License |
+
+The Unsplash License permits commercial use and modification, requires no
+permission and no attribution, and forbids reselling the images unaltered or
+building a competing image service (https://unsplash.com/license). The credits
+above are recorded because the licence's terms are worth being able to check,
+not because attribution is owed.
+
+Two constraints drove the selection. **No people**: a commercial page using a
+recognisable person needs a model release, and a face on a merchandising tile
+implies an endorsement that does not exist. **No third-party brand marks**: the
+pants shot carries a maker's label on the waistband, and the frame was cropped
+to exclude it rather than retouched — a filled patch was tried first and read
+as a censored block.
+
+These are not Sondalab garments. While `storeUrl` is `null` and the page states
+`// in preparation`, nothing on it claims otherwise. **When the store opens,
+these files have to be replaced with photography of the real pieces**, or the
+page becomes misleading. The plates live in `src/assets/apparel/` and are
+served through `astro:assets`, which emits responsive WebP at build time;
+replacing one means swapping the file, with no markup or CSS changes.
 
 ## Copy
 
@@ -123,9 +151,36 @@ The wording shipped on the page:
 - Pact, left: the argument that independent research without a funding model
   either takes investment and its incentives, or finds its own money.
 - Pact, right (mono list): `compute` · `hardware` · `time`.
-- Categories: `Tees` — *heavyweight, printed small.* / `Caps` — *low profile,
-  no logo wall.* / `Pants` — *workwear cut.*
+- Categories: `Tees` — *Heavy cotton, printed small. Made to outlast the
+  framework it shipped with.* / `Caps` — *Low profile. Nothing on it announces
+  anything, which is the whole specification.* / `Pants` — *Cut for standing at
+  a bench, not for a lookbook.*
+
+  The notes carry voice but **no specifications** — no fabric weights, no
+  pocket counts, no measurements. Nothing is manufactured yet, and a number in
+  this field becomes a promise the eventual garment has to keep.
 - Waiting state: `// in preparation` and *Tell me when it drops.*
+
+**Corrupting plates.** Each photograph carries the site's existing `shatter`
+glitch (`src/lib/glitch.ts`, `.glitch--shatter` in `src/styles/site.css`):
+during a burst the plate breaks into eight horizontal bands that jump sideways.
+Two differences from the text version. The intact image stays visible
+underneath instead of being hidden, so a displaced band doubles over what it
+left behind — which is what datamoshed video actually looks like. And the bands
+are `background-image` layers off a single `getImage()` URL rather than eight
+duplicated `<Image>` tags, so the markup carries one resolved URL per category
+instead of eight srcsets.
+
+Two of the eight bands take a brand channel — amber and teal — as a flat tint
+at 15% and 13%. Not `mix-blend-mode: screen`, which the text glitch uses: two
+of the three photographs are shot on white, and screen over white is a no-op.
+The alpha is low because the first attempt at 34% turned the band into a pastel
+slab that hid the garment.
+
+Bursts fire once as a row reveals, then ambiently every 9–17s, and on hover —
+the same trigger the product rows use for their names. As everywhere on this
+site, `prefers-reduced-motion` is deliberately not consulted; see
+`scripts/motion-gate.mjs`.
 
 ## Out of scope
 
@@ -148,7 +203,7 @@ arrangements; verify against the specific provider's terms before committing.)*
 |---|---|
 | `src/pages/apparel/index.astro` | new — the page |
 | `src/lib/apparel.ts` | new — the store switch and category data |
-| `src/assets/apparel/{tees,caps,pants}.jpg` | new — generated placeholder plates |
+| `src/assets/apparel/{tees,caps,pants}.jpg` | new — stock category photography |
 | `src/components/SiteHeader.astro` | edit — one nav entry |
 | `docs/specs/2026-08-27-apparel-design.md` | new — this spec |
 
