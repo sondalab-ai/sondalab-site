@@ -39,7 +39,7 @@ Consequences, all deliberate:
 - **Route**: `/apparel/`, a single static page — `src/pages/apparel/index.astro`.
   Top-level destination like the products pages, indexable, linkable.
 - **Navigation**: one entry in `src/components/SiteHeader.astro`, after
-  "How it's made", carrying `keep: true`. Below `34rem` the header nav hides
+  "Method" (then labelled "How it's made"), carrying `keep: true`. Below `34rem` the header nav hides
   every entry without it; Apparel, like Blog, is a destination that scrolling
   cannot reach, so hiding it on a phone would make the section unreachable.
 - **Home page untouched.** No teaser block in `src/pages/index.astro`; the
