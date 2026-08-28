@@ -1,0 +1,515 @@
+---
+import { Image, getImage } from 'astro:assets';
+
+import Base from '../../layouts/Base.astro';
+import { APPAREL, categoryHref } from '../../lib/apparel';
+import { SITE } from '../../lib/site';
+
+const { storeUrl, categories } = APPAREL;
+const open = storeUrl !== null;
+
+/**
+ * The corruption bands are background copies of the plate rather than extra
+ * `<Image>` tags: one resolved URL per category instead of seven duplicated
+ * srcsets, and the browser already holds the file from the visible image.
+ */
+const BANDS = 8;
+const plates = await Promise.all(
+  categories.map((c) => getImage({ src: c.image, width: 960, format: 'webp' })),
+);
+
+const waitlistHref = `mailto:${SITE.email}?subject=${encodeURIComponent(
+  'Apparel — tell me when it drops',
+)}`;
+
+// What the proceeds buy. Deliberately no figures and no percentages: a
+// published split is a promise that has to stay true.
+const ledger = [
+  { key: 'compute', note: 'The runs that turn an idea into a result.' },
+  { key: 'hardware', note: 'Machines that keep the work local.' },
+  { key: 'time', note: 'The only input with no substitute.' },
+];
+---
+
+<Base
+  title="Apparel"
+  description="Sondalab apparel: tees, caps and pants. Every piece funds the open-source research behind the tools."
+>
+  <section class="ap-open">
+    <div class="wrap">
+      <p class="eyebrow">Apparel</p>
+      <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
+      <p class="lede ap-open__lede">
+        Sondalab's tools are open, local, and free to run. None of that pays for
+        itself. Apparel is how the research gets funded: you get something worth
+        wearing, the work gets another month.
+      </p>
+    </div>
+  </section>
+
+  <section class="section ap-pact">
+    <div class="wrap ap-pact__grid">
+      <div>
+        <div class="section-index">
+          <span class="section-index__no">01</span>
+          <span class="eyebrow">The pact</span>
+        </div>
+        <h2 class="h2">Independent work needs a source of money.</h2>
+        <p class="ap-pact__body">
+          Research that takes investment takes its incentives with it. The
+          alternative is to find the money elsewhere, in the open, from the
+          people who already believe the tools should stay local and legible.
+          No sponsor, no roadmap sold in advance, no feature waiting on
+          someone else's quarter.
+        </p>
+      </div>
+
+      <ul class="ap-ledger" data-reveal-list>
+        {ledger.map((l, i) => (
+          <li class="ap-ledger__row" data-reveal style={`--i: ${i}`}>
+            <span class="ap-ledger__key">{l.key}</span>
+            <span class="ap-ledger__note">{l.note}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section ap-cats">
+    <div class="wrap">
+      <div class="section-index">
+        <span class="section-index__no">02</span>
+        <span class="eyebrow">The pieces</span>
+      </div>
+
+      <ol class="ap-cats__list" data-reveal-list>
+        {categories.map((c, i) => {
+          const href = categoryHref(c);
+          const no = String(i + 1).padStart(2, '0');
+          // Rows alternate which side the plate falls on, so the column reads
+          // as a rhythm rather than as three copies of one card.
+          const flip = i % 2 === 1;
+          const inner = (
+            <Fragment>
+              <span class="crow__no">{no}</span>
+              <span class="crow__rule" aria-hidden="true"></span>
+              <span class="crow__main">
+                <span class="crow__label">{c.label}</span>
+                <span class="crow__note">{c.note}</span>
+              </span>
+              <span class="crow__img glitch glitch--shatter" style={`--n:${BANDS}`}>
+                <span class="crow__img-base glitch__text">
+                  {/* Decorative: the row's own text already names the piece. */}
+                  <Image
+                    src={c.image}
+                    alt=""
+                    widths={[480, 960, 1200]}
+                    sizes="(min-width: 52rem) 26rem, min(100vw, 22rem)"
+                  />
+                </span>
+                <span class="glitch__shards" aria-hidden="true">
+                  {Array.from({ length: BANDS }, (_, b) => (
+                    <span
+                      class="glitch__shard crow__band"
+                      style={`--i:${b}; background-image:url(${plates[i].src})`}
+                    />
+                  ))}
+                </span>
+              </span>
+              <span class="crow__go" aria-hidden="true">{href ? '→' : '·'}</span>
+            </Fragment>
+          );
+          const cls = `crow${flip ? ' crow--flip' : ''}${href ? '' : ' crow--inert'}`;
+          return (
+            <li class="ap-cats__item" data-reveal style={`--i: ${i}`}>
+              {href ? (
+                <a class={cls} href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
+              ) : (
+                <div class={cls}>{inner}</div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section ap-band">
+    <div class="wrap ap-band__inner">
+      <p class="ap-band__state">{open ? '// open' : '// in preparation'}</p>
+      {open ? (
+        <a class="ap-band__cta" href={storeUrl!} target="_blank" rel="noopener noreferrer">
+          Visit the store
+        </a>
+      ) : (
+        <a class="ap-band__cta" href={waitlistHref}>Tell me when it drops</a>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- opening ------------------------------------------------------- */
+  .ap-open {
+    padding-block: clamp(4rem, 10vw, 9rem) clamp(3rem, 7vw, 6rem);
+  }
+  .ap-open__h {
+    margin-top: 1.5rem;
+    max-width: 14ch;
+  }
+  .ap-open__lede {
+    margin-top: clamp(1.75rem, 4vw, 2.75rem);
+    max-width: 46ch;
+  }
+
+  /* --- the pact ------------------------------------------------------ */
+  .ap-pact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+  @media (min-width: 52rem) {
+    .ap-pact__grid { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
+  }
+  .ap-pact__grid .h2 { margin-top: 1.25rem; max-width: 20ch; }
+  .ap-pact__body {
+    margin-top: 1.5rem;
+    max-width: 52ch;
+    color: var(--sl-text-secondary);
+  }
+
+  .ap-ledger { list-style: none; margin: 0; padding: 0; }
+  .ap-ledger__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--sl-border-subtle);
+  }
+  .ap-ledger__row:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
+  .ap-ledger__key {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sl-accent-default);
+  }
+  .ap-ledger__note {
+    font-size: var(--sl-text-sm);
+    color: var(--sl-text-muted);
+  }
+
+  /* --- categories ---------------------------------------------------- */
+  .ap-cats__list { list-style: none; margin: 0; padding: 0; }
+  .ap-cats__item + .ap-cats__item { margin-top: clamp(2rem, 5vw, 4.5rem); }
+
+  .crow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'no' 'rule' 'main' 'img' 'go';
+    gap: 0;
+    row-gap: 1.25rem;
+    padding-block: clamp(1.75rem, 4vw, 3rem);
+    padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+    margin-inline: clamp(-0.5rem, -2vw, -1.5rem);
+    border-top: 1px solid var(--sl-border-subtle);
+    border-bottom: 1px solid var(--sl-border-subtle);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+
+  /*
+   * Above the split the plate takes half the measure and the text sits beside
+   * it, vertically centred against a plate far taller than the copy. Odd rows
+   * put the plate on the right, so the eye zig-zags down the column instead of
+   * running down one edge.
+   */
+  @media (min-width: 52rem) {
+    .crow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+      /* The empty rows top and bottom take the slack the plate creates, which
+         centres the text against it without wrapping the text in a div. */
+      grid-template-areas:
+        '.    img'
+        'no   img'
+        'rule img'
+        'main img'
+        'go   img'
+        '.    img';
+      grid-template-rows: 1fr auto auto auto auto 1fr;
+      column-gap: clamp(2rem, 6vw, 5rem);
+      row-gap: 1rem;
+    }
+    .crow--flip {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+      grid-template-areas:
+        'img .'
+        'img no'
+        'img rule'
+        'img main'
+        'img go'
+        'img .';
+    }
+  }
+
+  .crow:not(.crow--inert):hover {
+    background: color-mix(in srgb, var(--sl-accent-default) 6%, transparent);
+  }
+  .crow:focus-visible {
+    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline-offset: 2px;
+  }
+
+  .crow__no {
+    grid-area: no;
+    font-family: var(--sl-font-mono);
+    font-weight: 100;
+    font-size: clamp(3.5rem, 1.5rem + 9vw, 9.5rem);
+    line-height: 0.78;
+    color: var(--sl-text-muted);
+    transition: color var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .crow:not(.crow--inert):hover .crow__no { color: var(--sl-accent-default); }
+
+  /* Horizontal now that the numeral sits above the label: a rule that draws
+     itself out under the number when the row is live. */
+  .crow__rule {
+    grid-area: rule;
+    width: clamp(3rem, 8vw, 6rem);
+    height: 3px;
+    background: var(--sl-accent-default);
+    border-radius: var(--sl-radius-pill);
+    transform: scaleX(0.3);
+    transform-origin: left center;
+    opacity: 0.55;
+    transition: transform var(--sl-motion-mid) var(--sl-motion-ease),
+      opacity var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .crow:not(.crow--inert):hover .crow__rule { transform: scaleX(1); opacity: 1; }
+
+  .crow__main { grid-area: main; display: block; }
+
+  .crow__img {
+    grid-area: img;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--sl-border-default);
+  }
+  .crow__img-base {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+  }
+  .crow__img :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.01);
+    transition: transform var(--sl-motion-slow) var(--sl-motion-ease);
+  }
+
+  /*
+   * Corruption bands. The site's shatter variant, applied to a photograph:
+   * horizontal strips of the plate jump sideways over the intact image. The
+   * text version hides the original underneath — here it stays, so a displaced
+   * band doubles over what it left behind, which is what datamoshed video
+   * actually looks like. `--sx` per band and `--gmul` per burst come from
+   * lib/glitch's randomizeGhosts, so the timing contract is the shared one.
+   */
+  .crow__img.glitch::before,
+  .crow__img.glitch::after { content: none; }
+
+  .crow__band {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .crow__band::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .crow__img.glitch--shatter.is-glitching .glitch__text { opacity: 1; }
+  .crow__img.glitch--shatter.is-glitching .crow__band {
+    opacity: 1;
+    animation: plate-shatter var(--gda, 0.16s) steps(2) infinite;
+    animation-delay: calc(var(--i) * -0.031s);
+  }
+  /* Exactly two of the eight bands take a channel, so the tear carries the
+     brand's amber and teal rather than reading as a grey slip. Flat tint at low
+     alpha, not a screen blend: screen leaves a near-white plate untouched, and
+     two of these three photographs are shot on white — but a strong tint on
+     white turns the band into a pastel slab that hides the garment. */
+  .crow__img.glitch--shatter.is-glitching .crow__band:nth-child(5n)::after {
+    background: color-mix(in srgb, var(--sl-accent-default) 15%, transparent);
+    opacity: 1;
+  }
+  .crow__img.glitch--shatter.is-glitching .crow__band:nth-child(7n)::after {
+    background: color-mix(in srgb, var(--sl-accent-depth) 13%, transparent);
+    opacity: 1;
+  }
+  /* Wider throw than the text shatter: a 26rem plate needs the displacement to
+     be visible at a glance, where a word only needs a few pixels. */
+  @keyframes plate-shatter {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(calc(var(--sx, 0px) * var(--gmul, 1) * 2.6)); }
+    100% { transform: translateX(0); }
+  }
+  .crow:not(.crow--inert):hover .crow__img :global(img) { transform: scale(1.06); }
+
+  .crow__label {
+    display: block;
+    font-family: var(--sl-font-display);
+    font-weight: 440;
+    font-variation-settings: 'opsz' 60, 'WONK' 1;
+    font-size: var(--step-h2);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  .crow__note {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: var(--sl-text-lg);
+    color: var(--sl-text-secondary);
+    max-width: 34ch;
+  }
+  .crow__go {
+    grid-area: go;
+    font-family: var(--sl-font-mono);
+    font-size: var(--step-h3);
+    color: var(--sl-text-muted);
+  }
+  /* Nothing to point at while the store does not exist, and at this size a
+     lone marker floating under the note reads as a stray glyph. */
+  .crow--inert .crow__go { display: none; }
+  .crow:not(.crow--inert) .crow__go {
+    color: var(--sl-accent-default);
+    opacity: 0;
+    transform: translateX(-0.5rem);
+    transition: opacity var(--sl-motion-mid) var(--sl-motion-ease),
+      transform var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .crow:not(.crow--inert):hover .crow__go { opacity: 1; transform: translateX(0); }
+
+  /* The plate holds a drawing, not a texture, so it is never cropped: the
+     frame keeps its 4:5 at every width and only the width gives way. */
+  @media (max-width: 52rem) {
+    .crow__img { width: min(100%, 22rem); }
+    .crow__go { display: none; }
+  }
+
+  /*
+   * Scroll reveal. `data-armed` is set by the script, so without JavaScript
+   * every row is simply present — the hidden state never becomes the state a
+   * reader is left with.
+   */
+  [data-reveal-list][data-armed] [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition:
+      opacity var(--sl-motion-slow) var(--sl-motion-ease),
+      transform var(--sl-motion-slow) var(--sl-motion-ease);
+    transition-delay: calc(var(--i, 0) * 110ms);
+  }
+  [data-reveal-list][data-armed] [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+  /* The plate settles a beat behind its row, which is what keeps the reveal
+     from reading as one flat block sliding up. */
+  [data-reveal-list][data-armed] [data-reveal] .crow__img :global(img) {
+    transform: scale(1.09);
+  }
+  [data-reveal-list][data-armed] [data-reveal].is-in .crow__img :global(img) {
+    transform: scale(1.01);
+    transition-delay: calc(var(--i, 0) * 110ms + 120ms);
+  }
+
+  /* --- status band + call to action ---------------------------------- */
+  .ap-band__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .ap-band__state {
+    margin: 0;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+  .ap-band__cta {
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-size: var(--step-h3);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--sl-text-primary);
+    border-bottom: 2px solid var(--sl-accent-default);
+    padding-bottom: 0.15em;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .ap-band__cta:hover { color: var(--sl-accent-default); }
+  .ap-band__cta:focus-visible {
+    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  import { autoBurst, fireBurst, hoverBurst } from '../../lib/glitch';
+
+  // Rows arrive as they come into view, staggered by their --i. Armed from
+  // script so that a reader without JavaScript gets the page fully visible
+  // rather than a column of blanks.
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+          // The plate corrupts once as it lands, then only occasionally: a
+          // photograph that never settles is noise, not an effect.
+          const plate = e.target.querySelector('.crow__img.glitch');
+          if (plate) {
+            window.setTimeout(() => {
+              fireBurst(plate, { burstMin: 260, burstMax: 620 });
+              autoBurst(plate, {
+                waitMin: 9000,
+                waitMax: 17000,
+                burstMin: 180,
+                burstMax: 460,
+              });
+            }, 260);
+          }
+        }
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
+    );
+    for (const list of document.querySelectorAll('[data-reveal-list]')) {
+      list.setAttribute('data-armed', '');
+      for (const row of list.querySelectorAll('[data-reveal]')) io.observe(row);
+    }
+  }
+
+  // Hovering the row corrupts its plate in bursts, the same trigger the
+  // product rows use for their names.
+  for (const row of document.querySelectorAll('.crow')) {
+    const plate = row.querySelector('.crow__img.glitch');
+    if (plate) hoverBurst(row, plate);
+  }
+</script>

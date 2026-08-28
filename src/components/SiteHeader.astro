@@ -2,12 +2,14 @@
 import Wordmark from './Wordmark.astro';
 
 // `keep` survives the narrow-viewport collapse. The home anchors are
-// reachable by scrolling anyway; Blog is a destination of its own, so hiding
-// it on a phone would make the section unreachable from the header.
+// reachable by scrolling anyway; Apparel and Blog are destinations of their
+// own, so hiding them on a phone would make those sections unreachable from
+// the header.
 const nav: { label: string; href: string; keep?: boolean }[] = [
   { label: 'Products', href: '/#products' },
   { label: 'Approach', href: '/#approach' },
   { label: "How it's made", href: '/#method' },
+  { label: 'Apparel', href: '/apparel/', keep: true },
   { label: 'Blog', href: '/blog/', keep: true },
   { label: 'Contact', href: '/#contact' },
 ];
@@ -110,6 +112,10 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
 
   @media (max-width: 34rem) {
     .site-header__nav a:not([data-keep]) { display: none; }
-    .site-header__nav { gap: 0; }
+    /* Two entries survive the collapse, so the gap still has to separate them.
+       The row gap gives back exactly what the nav gap takes, so the header is
+       no wider than it was when the two labels were touching. */
+    .site-header__nav { gap: 1rem; }
+    .site-header__inner { gap: 1rem; }
   }
 </style>
