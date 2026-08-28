@@ -112,6 +112,10 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
 
   @media (max-width: 34rem) {
     .site-header__nav a:not([data-keep]) { display: none; }
-    .site-header__nav { gap: 0; }
+    /* Two entries survive the collapse, so the gap still has to separate them.
+       The row gap gives back exactly what the nav gap takes, so the header is
+       no wider than it was when the two labels were touching. */
+    .site-header__nav { gap: 1rem; }
+    .site-header__inner { gap: 1rem; }
   }
 </style>
