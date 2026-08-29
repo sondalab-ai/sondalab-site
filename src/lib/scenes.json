@@ -1,0 +1,22 @@
+{
+  "uprising": {
+    "id": "uprising",
+    "alt": "A crowd of figures silhouetted against a burning skyline, machines among them, rendered as a corrupted broadcast.",
+    "layers": [
+      { "src": "/scenes/uprising/01-far.webp", "depth": 0.06, "tone": "structure", "gain": 0.5 },
+      { "src": "/scenes/uprising/02-mid.webp", "depth": 0.22, "tone": "depth", "gain": 0.75 },
+      { "src": "/scenes/uprising/03-crowd.webp", "depth": 0.55, "tone": "occluder", "gain": 1 },
+      { "src": "/scenes/uprising/04-embers.webp", "depth": 0.85, "tone": "accent", "gain": 1 }
+    ]
+  },
+  "city": {
+    "id": "city",
+    "alt": "A dense future city seen from a rooftop: towers, signage and rain, rendered as a corrupted broadcast.",
+    "layers": [
+      { "src": "/scenes/city/01-far.webp", "depth": 0.05, "tone": "structure", "gain": 0.5 },
+      { "src": "/scenes/city/02-mid.webp", "depth": 0.2, "tone": "depth", "gain": 0.8 },
+      { "src": "/scenes/city/03-near.webp", "depth": 0.6, "tone": "occluder", "gain": 1 },
+      { "src": "/scenes/city/04-rain.webp", "depth": 0.9, "tone": "accent", "gain": 0.7 }
+    ]
+  }
+}

@@ -30,10 +30,17 @@ for (const theme of ['dark', 'light']) {
       await step();
     }
     window.scrollTo(0, 0);
-    // Lazy images are still decoding when the scroll ends, and an undecoded
-    // one photographs as an empty box. Wait for the pixels, not the layout.
+    // Lazy images are still decoding when the scroll ends, and an undecoded one
+    // photographs as an empty box. Wait for the pixels, not the layout — but only
+    // for so long: `decode()` on an image inside a `display:none` subtree never
+    // settles, in either direction, and hangs the whole shot.
     await Promise.all(
-      [...document.images].map((img) => img.decode().catch(() => {})),
+      [...document.images].map((img) =>
+        Promise.race([
+          img.decode().catch(() => {}),
+          new Promise((r) => setTimeout(r, 2000)),
+        ]),
+      ),
     );
   });
   // The hero's CRT types its header before it is worth photographing, so the

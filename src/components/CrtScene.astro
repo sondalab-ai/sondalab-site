@@ -1,0 +1,267 @@
+---
+// A CRT tube showing a parallax scene, for pages that are not the hero.
+//
+// Progressive enhancement, and the fallback is the default. The server renders
+// the flattened composite as an ordinary <img> wearing the site's corruption
+// bands — the same shatter vocabulary the Apparel plates use — and the canvas
+// stays hidden. Only once a GPU device actually resolves does the tube take
+// over. If WebGPU is missing, or the adapter refuses, the visitor keeps a real
+// picture rather than an empty box.
+//
+// See docs/webgpu-surfaces.md for the pattern, and src/lib/crt-surface.ts for
+// the machinery this shares with the hero.
+import { Image, getImage } from 'astro:assets';
+import { SCENES } from '../lib/scenes';
+
+interface Props {
+  scene: keyof typeof SCENES;
+  flat: ImageMetadata;
+  /** Brightness ceiling. A backdrop carrying text has to run dim. */
+  intensity?: number;
+  /** Extra classes on the wrapper, for per-page sizing. */
+  class?: string;
+  /** Selector for the element whose pointer drives the parallax. Defaults to the tube. */
+  pointerHost?: string;
+}
+
+const { scene, flat, intensity = 1, class: cls = '', pointerHost } = Astro.props;
+
+const BANDS = 8;
+const meta = SCENES[scene];
+
+// One resolved URL for the bands rather than eight duplicated srcsets: the
+// browser already holds the file from the visible image.
+const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
+---
+
+<div
+  class={`crt-scene ${cls}`}
+  data-crt-scene={scene}
+  data-intensity={String(intensity)}
+  data-pointer-host={pointerHost}
+  style={`--scene-dim: ${intensity}`}
+>
+  <span class="crt-scene__flat glitch glitch--shatter" style={`--n:${BANDS}`}>
+    <span class="crt-scene__base glitch__text">
+      <Image src={flat} alt={meta.alt} widths={[720, 1200, 1600]} sizes="100vw" />
+    </span>
+    <span class="glitch__shards" aria-hidden="true">
+      {Array.from({ length: BANDS }, (_, b) => (
+        <span
+          class="glitch__shard crt-scene__band"
+          style={`--i:${b}; background-image:url(${plate.src})`}
+        />
+      ))}
+    </span>
+  </span>
+
+  <canvas class="crt-scene__canvas" data-crt-scene-canvas aria-hidden="true"></canvas>
+</div>
+
+<script>
+  import { mountCrtSurface } from '../lib/crt-surface';
+  import { CRT_SHADER } from '../lib/crt-shader';
+  import { createScene } from '../lib/crt-scene';
+  import { SCENES } from '../lib/scenes';
+  import { autoBurst, fireBurst } from '../lib/glitch';
+
+  /**
+   * Frozen from the hero's tuning pass, then pulled back where a picture behaves
+   * differently from text: less tearing and less dropout, because a torn
+   * photograph reads as a broken file where torn text reads as bad reception,
+   * and a shallower phosphor mask, because a photograph has detail at the scale
+   * the mask operates on and the two fight.
+   */
+  const SCENE_LOOK = {
+    curvature: 0.07,
+    bezel: 0.055,
+    overscan: 1.1,
+    gain: 0.94,
+    ior: 2,
+    glassDepth: 0.1,
+    rimPower: 0.01,
+    reflectPower: 0.58,
+    scanDepth: 0.26,
+    scanCount: 290,
+    maskDepth: 0.2,
+    glowPower: 0.12,
+    glowRadius: 0.005,
+    splitAmount: 0.0035,
+    tearAmount: 0.0025,
+    tearRate: 14,
+    trackingAmount: 0.9,
+    dropoutAmount: 0.09,
+    rollAmount: 0.18,
+    noiseAmount: 0.05,
+  };
+
+  for (const host of document.querySelectorAll<HTMLElement>('[data-crt-scene]')) {
+    void boot(host);
+  }
+
+  async function boot(host: HTMLElement) {
+    const canvas = host.querySelector<HTMLCanvasElement>('[data-crt-scene-canvas]');
+    const id = host.dataset.crtScene;
+    if (!canvas || !id || !SCENES[id]) return;
+
+    const intensity = Number(host.dataset.intensity) || 1;
+    // A backdrop is dimmed twice over: the plates are tinted down, and the tube's
+    // own gain comes off. Only the second one touches the glass reflections, so
+    // dropping just one of them leaves the surface bright where text sits.
+    const look = { ...SCENE_LOOK, gain: SCENE_LOOK.gain * (0.55 + 0.45 * intensity) };
+
+    let sceneSource: Awaited<ReturnType<typeof createScene>> | undefined;
+
+    const handle = await mountCrtSurface({
+      canvas,
+      host,
+      shader: CRT_SHADER,
+      look,
+      glowTaps: [6, 10],
+      // The vignette is what pushes a backdrop's corners under the contrast
+      // floor, so it is nearly off on paper and modest on glass.
+      vignette: [0.08, 0.28],
+      async createSource(aspect) {
+        sceneSource = await createScene(id, { aspect, intensity });
+        return sceneSource;
+      },
+    });
+
+    if (!handle || !sceneSource) return;
+
+    // The canvas carries the accessible name once it is the thing on screen, and
+    // the fallback picture is then taken out of the document rather than merely
+    // hidden. Two reasons: a decoded 1600x900 image nobody will look at is real
+    // memory, and `img.decode()` on a `display:none` image never settles — which
+    // hangs anything waiting on it, scripts/shoot.mjs included.
+    canvas.removeAttribute('aria-hidden');
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', SCENES[id].alt);
+    host.querySelector('.crt-scene__flat')?.remove();
+
+    const pointerTarget =
+      (host.dataset.pointerHost && host.closest(host.dataset.pointerHost)) || host;
+    pointerTarget.addEventListener('pointermove', (e) => {
+      const r = host.getBoundingClientRect();
+      const ev = e as PointerEvent;
+      sceneSource!.pointer(
+        ((ev.clientX - r.left) / Math.max(r.width, 1)) * 2 - 1,
+        ((ev.clientY - r.top) / Math.max(r.height, 1)) * 2 - 1,
+      );
+    });
+    pointerTarget.addEventListener('pointerleave', () => sceneSource!.pointer(0, 0));
+  }
+
+  // The fallback picture corrupts on the same schedule the Apparel plates use, so
+  // a visitor without WebGPU still gets tape rot rather than a still photograph.
+  for (const flat of document.querySelectorAll('[data-crt-scene] .crt-scene__flat')) {
+    fireBurst(flat, { burstMin: 300, burstMax: 700 });
+    autoBurst(flat, { waitMin: 4500, waitMax: 9000, burstMin: 240, burstMax: 620 });
+  }
+</script>
+
+<style>
+  .crt-scene {
+    position: relative;
+    overflow: hidden;
+    background: var(--sl-bg-canvas);
+  }
+
+  .crt-scene__flat,
+  .crt-scene__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .crt-scene__flat {
+    display: block;
+  }
+  .crt-scene__base {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+  }
+  /*
+   * The fallback picture has to arrive where the tube would have left it, not
+   * brighter and not grey. The plate is stored neutral so one file serves both
+   * themes and every accent; the brightness ceiling that the shader applies on
+   * the GPU path is applied here as a filter, and the hue the compositor would
+   * have tinted it with is laid over as a blend. Both read their values from
+   * tokens, so neither can drift off palette.
+   */
+  .crt-scene :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(calc(0.4 + 0.6 * var(--scene-dim, 1)));
+  }
+  .crt-scene__base::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--sl-accent-depth);
+    mix-blend-mode: color;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /* `.glitch` renders attr(data-text) in its pseudo-elements; a picture has no
+     text to ghost, so they are switched off and the bands do all the work. */
+  .crt-scene__flat.glitch::before,
+  .crt-scene__flat.glitch::after {
+    content: none;
+  }
+
+  .crt-scene__band {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .crt-scene__band::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .crt-scene__flat.glitch--shatter.is-glitching .glitch__text {
+    opacity: 1;
+  }
+  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band {
+    opacity: 1;
+    animation: scene-shatter var(--gda, 0.16s) steps(2) infinite;
+    animation-delay: calc(var(--i) * -0.031s);
+  }
+  /* Two bands in eight take a channel, so the tear carries the brand's amber and
+     teal rather than reading as a grey slip. */
+  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band:nth-child(5n)::after {
+    background: color-mix(in srgb, var(--sl-accent-default) 18%, transparent);
+    opacity: 1;
+  }
+  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band:nth-child(7n)::after {
+    background: color-mix(in srgb, var(--sl-accent-depth) 15%, transparent);
+    opacity: 1;
+  }
+  @keyframes scene-shatter {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(calc(var(--sx, 0px) * var(--gmul, 1) * 2.2)); }
+    100% { transform: translateX(0); }
+  }
+
+  /* Insertions only. Everything above describes the fallback, which is what a
+     visitor gets until the GPU answers; these two rules are the whole switch. */
+  .crt-scene__canvas {
+    display: none;
+    z-index: 2;
+  }
+  .crt-scene[data-crt='on'] .crt-scene__canvas {
+    display: block;
+  }
+  .crt-scene[data-crt='on'] .crt-scene__flat {
+    display: none;
+  }
+</style>
