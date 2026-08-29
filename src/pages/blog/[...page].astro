@@ -1,6 +1,8 @@
 ---
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
+import CrtScene from '../../components/CrtScene.astro';
+import uprisingFlat from '../../assets/scenes/uprising-flat.webp';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -70,7 +72,14 @@ const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.
           </p>
         </div>
       </header>
+    </div>
 
+    {/* The archive opens on a transmission before it lists any. Full-bleed, so
+        the tube reads as a broadcast the page is receiving rather than an
+        illustration inside the column. No text sits on the glass. */}
+    <CrtScene scene="uprising" flat={uprisingFlat} class="tlog-band" />
+
+    <div class="wrap">
       <ol class="tlog" data-tlist>
         {rows.map(({ post, no, stamp, iso, mins }) => (
           <li>
@@ -139,6 +148,15 @@ const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.
 
 <style>
   .tlog-page { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+
+  /* The band is the only full-bleed element on the page, and it is deliberately
+     shorter than a hero: it punctuates the archive rather than delaying it.
+     `:global()` because the element it names is rendered by CrtScene.astro and
+     carries that component's scope, not this page's. */
+  :global(.tlog-band) {
+    height: clamp(15rem, 42vh, 26rem);
+    margin-block: clamp(2rem, 5vw, 3.5rem);
+  }
 
   /* Asymmetric head: oversized wordmark left, the operator controls right,
      both sitting on the same baseline rule. */
