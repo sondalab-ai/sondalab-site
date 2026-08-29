@@ -2,6 +2,8 @@
 import { Image, getImage } from 'astro:assets';
 
 import Base from '../../layouts/Base.astro';
+import CrtScene from '../../components/CrtScene.astro';
+import cityFlat from '../../assets/scenes/city-flat.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
 
@@ -36,7 +38,20 @@ const ledger = [
   description="Sondalab apparel: tees, caps and pants. Every piece funds the open-source research behind the tools."
 >
   <section class="ap-open">
-    <div class="wrap">
+    {/* The city sits behind the opening rather than beside it, so the page
+        starts inside the world the clothes come from. It runs at roughly a
+        third of full intensity: the heading and the lede are on the glass, and
+        a tube bright enough to be admired is a tube nobody can read off. The
+        figure is the one scripts/contrast-probe.mjs settled on, not a taste. */}
+    <CrtScene
+      scene="city"
+      flat={cityFlat}
+      intensity={0.35}
+      class="ap-open__field"
+      pointerHost=".ap-open"
+    />
+
+    <div class="wrap ap-open__inner">
       <p class="eyebrow">Apparel</p>
       <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
       <p class="lede ap-open__lede">
@@ -151,7 +166,50 @@ const ledger = [
 <style>
   /* --- opening ------------------------------------------------------- */
   .ap-open {
-    padding-block: clamp(4rem, 10vw, 9rem) clamp(3rem, 7vw, 6rem);
+    position: relative;
+    isolation: isolate;
+    padding-block: clamp(5rem, 12vw, 10rem) clamp(4rem, 9vw, 8rem);
+  }
+  /* `:global()` because the element is rendered by CrtScene.astro and carries
+     that component's scope rather than this page's. The class is doubled up
+     with `.crt-scene` to win on specificity: the component declares
+     `position: relative` for its own children, and a single-class rule here
+     loses to it on source order — which collapses the backdrop to zero height,
+     since everything inside it is absolutely positioned. */
+  :global(.crt-scene.ap-open__field) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  /*
+   * The words need a ground of their own, and dimming the picture until they
+   * get one is the wrong trade: measured with scripts/contrast-probe.mjs, the
+   * light theme bottoms out at 1.00:1 — the tube matching the lede's own colour
+   * exactly — and the scene has to fall to a smudge before it clears 4.5:1.
+   * Both themes are ink-on-paper or light-on-glass, and the text is the same
+   * substance as the picture behind it.
+   *
+   * So the left of the tube is lit to the page's own canvas colour and falls off
+   * across the frame: a broadcast's lower-third rather than a wash over a photo.
+   * The picture survives where nothing is read, which is most of it.
+   */
+  .ap-open::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      95deg,
+      var(--sl-bg-canvas) 0%,
+      var(--sl-bg-canvas) 44%,
+      color-mix(in srgb, var(--sl-bg-canvas) 60%, transparent) 64%,
+      transparent 84%
+    );
+  }
+  .ap-open__inner {
+    position: relative;
+    z-index: 2;
   }
   .ap-open__h {
     margin-top: 1.5rem;

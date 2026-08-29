@@ -9,7 +9,11 @@
     "preview": "astro preview",
     "audit": "node scripts/audit.mjs",
     "motion-gate": "node scripts/motion-gate.mjs",
-    "check": "astro check"
+    "check": "astro check",
+    "scenes:placeholders": "node scripts/make-scene-placeholders.mjs",
+    "scenes:flats": "node scripts/make-scene-flats.mjs",
+    "contrast": "node scripts/contrast-probe.mjs",
+    "shoot:fallback": "node scripts/shoot-fallback.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
