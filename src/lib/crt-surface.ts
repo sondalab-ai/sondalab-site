@@ -201,6 +201,11 @@ export async function mountCrtSurface(
   host.setAttribute('data-crt', 'on');
   source.draw(0);
   upload();
+  // Present it. A surface that mounts below the fold never enters the loop until
+  // it is scrolled to, and without this the visitor arrives at a canvas that has
+  // never painted — an empty rectangle where the picture is.
+  fx.set({ params });
+  frame(gpu, (f) => f.pass(surf, fx));
 
   let lastT = 0;
   let loop: { stop(): void } | undefined;

@@ -51,6 +51,10 @@ export function autoBurst(
 ) {
   const loop = () => {
     window.setTimeout(() => {
+      // Callers may take the element out of the document — the scene fields drop
+      // their fallback picture once the tube is up — and a timer toggling a class
+      // on a detached node would otherwise run for the life of the page.
+      if (!el.isConnected) return;
       fireBurst(el, { burstMin, burstMax });
       loop();
     }, rand(waitMin, waitMax));

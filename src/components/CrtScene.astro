@@ -53,6 +53,7 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
         />
       ))}
     </span>
+    <span class="crt-scene__tint" aria-hidden="true"></span>
   </span>
 
   <canvas class="crt-scene__canvas" data-crt-scene-canvas aria-hidden="true"></canvas>
@@ -175,8 +176,30 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
     height: 100%;
   }
 
+  /*
+   * The fallback picture has to arrive where the tube would have left it, not
+   * brighter and not grey. The plate is stored neutral so one file serves both
+   * themes and every accent; the brightness ceiling the shader applies on the
+   * GPU path is applied here as a filter, and the hue the compositor would have
+   * tinted it with is laid over as a blend.
+   *
+   * Both sit on the whole element rather than on the <img>, because the shatter
+   * bands are separate spans painting the raw plate as a background — a filter
+   * on the image never reaches them, and a burst would flash the picture back to
+   * full-brightness neutral for the length of the burst.
+   */
   .crt-scene__flat {
     display: block;
+    filter: brightness(calc(0.4 + 0.6 * var(--scene-dim, 1)));
+  }
+  .crt-scene__tint {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: var(--sl-accent-depth);
+    mix-blend-mode: color;
+    opacity: 0.55;
+    pointer-events: none;
   }
   .crt-scene__base {
     display: block;
@@ -185,29 +208,11 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
     width: 100%;
     height: 100%;
   }
-  /*
-   * The fallback picture has to arrive where the tube would have left it, not
-   * brighter and not grey. The plate is stored neutral so one file serves both
-   * themes and every accent; the brightness ceiling that the shader applies on
-   * the GPU path is applied here as a filter, and the hue the compositor would
-   * have tinted it with is laid over as a blend. Both read their values from
-   * tokens, so neither can drift off palette.
-   */
   .crt-scene :global(img) {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(calc(0.4 + 0.6 * var(--scene-dim, 1)));
-  }
-  .crt-scene__base::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--sl-accent-depth);
-    mix-blend-mode: color;
-    opacity: 0.55;
-    pointer-events: none;
   }
 
   /* `.glitch` renders attr(data-text) in its pseudo-elements; a picture has no
