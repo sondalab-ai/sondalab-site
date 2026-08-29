@@ -7,8 +7,15 @@
 > hero specifically is; the working code is `src/components/TerminalField.astro`,
 > `src/lib/crt-terminal.ts` and `src/lib/crt-shader.ts`.
 
-Everything below was learned by building the hero. The traps are listed because
-each one cost a debugging cycle, not because they are obvious.
+Everything below was learned by building the hero, then confirmed by building the
+scene fields on `/blog` and `/apparel`. The traps are listed because each one cost
+a debugging cycle, not because they are obvious.
+
+**Most of this is now code.** `src/lib/crt-surface.ts` implements the whole
+pattern — the double-guarded boot, the upload, the relayout, the theme observer,
+the run/stop policy — behind a `CrtSource` contract. A third surface should
+consume it rather than re-derive it; what follows explains what it is doing and
+why, and covers the parts a *source* still has to get right on its own.
 
 ## The shape
 
@@ -137,6 +144,28 @@ re-wrapping changes the totals, so a raw count jumps the reader.
 - **Declaration order in the component script.** A `let` used by a closure
   defined above it throws `Cannot access '...' before initialization` only at
   runtime, and only on the GPU path.
+- **A page rule targeting a component's root loses on source order.** The
+  component declares `position: relative` for its own children; a page rule that
+  says `position: absolute` with the same specificity does not win, and every
+  child being absolutely positioned then collapses the element to **zero
+  height** — with `data-crt="on"` set and the canvas reporting `1440 × 1`, so
+  nothing looks broken from the outside. Double the class:
+  `:global(.crt-scene.ap-open__field)`.
+- **The light path is subtractive, so a source cannot just draw light.** The
+  shader computes `screenBg - col` when `polarity` is set. A picture drawn as
+  emission on the light theme comes back as a photographic negative in an
+  unblessed hue. A source has to flip with the theme the way `crt-terminal.ts`
+  does: black ground and additive planes on dark, the page's paper and covering
+  ink on light.
+- **`copyExternalImageToTexture` does not un-premultiply.** If the canvas has any
+  transparency — which it will, the moment anything is composited with
+  `destination-out` — fill the background back in underneath with
+  `destination-over` before the upload. A transparent pixel otherwise reaches the
+  GPU as a colour nobody chose.
+- **Uploading every frame is the expensive half.** The hero only redraws when the
+  typing changes; a surface that animates continuously will upload a few megabytes
+  per frame if you let it. Cap the redraw below the frame rate — 30Hz is invisible
+  for slow motion — and let the shader keep running at the display's.
 
 ## Accessibility and indexing
 
@@ -148,8 +177,17 @@ which drop it from the accessibility tree.
 
 **Measure contrast for anything sitting on the surface**, in both themes, with
 the real rendered background — the shader's vignette and reflections change it.
-Sample the region with the element hidden, then compute the ratio; the hero's
-calls to action measured 1.06:1 on the light theme before this was checked.
+`scripts/contrast-probe.mjs` does this: it hides the text, photographs the region
+it occupied, and reports the **worst** pixel rather than the average. The hero's
+calls to action measured 1.06:1 on the light theme before this was checked, and
+`/apparel`'s lede measured 1.00:1 — the tube matching the text exactly.
+
+Two results worth carrying forward. First, dimming the picture is the wrong lever:
+on the light theme both the text and the picture are ink on paper, and the scene
+has to fall to a smudge before it clears 4.5:1. Give the text a ground instead.
+Second, **check that the probe is measuring the surface at all** — if the worst
+and mean ratios come back identical, the region was uniform, which means the tube
+was not up and the number is the page background's.
 
 ## Verification checklist
 
