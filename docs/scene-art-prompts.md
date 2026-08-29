@@ -40,11 +40,31 @@ Six constraints, all of them load-bearing:
 6. **2048 × 1152, exported as WebP.** Wider than any tube on the site, because
    the parallax needs slack to slide into.
 
+### The scenes must not read as the same picture
+
+The first pass of the placeholders failed this and it was not obvious until the
+two pages were open side by side: both were built from the same skyline and
+tower generators, so they read as one city with a different random seed.
+
+The two scenes are separated on four axes, and a plate that drifts on any of them
+pulls the whole scene back towards the other one:
+
+| | `uprising` (blog) | `city` (apparel) |
+|---|---|---|
+| Vantage | street level, looking down a road | a rooftop, looking out and down |
+| Dominant direction | horizontal — a low, wide band of light | vertical — towers filling the frame top to bottom |
+| Light source | fire beyond the end of the street | windows, signage, and the wet sheen they throw |
+| Subject scale | figures: people and machines at human height | architecture: nothing in frame is human-sized |
+
+If a prompt for `uprising` produces a skyline, it is the wrong picture, however
+good it looks. The same goes the other way: a person legible in `city` breaks the
+scale that makes the towers read as enormous.
+
 ### Plate budgets
 
 | Plate | Tone in `scenes.json` | Peak luminance | Coverage | Notes |
 |---|---|---|---|---|
-| `01-far` | `structure` | 15–20 % white | broad, low | Haze and a distant skyline. Nothing sharp. |
+| `01-far` | `structure` | 15–20 % white | broad, low | Haze and whatever the scene's light comes from. Nothing sharp. |
 | `02-mid` | `depth` | 30–35 % white | moderate | The body of the scene. Carries the accent-depth hue. |
 | `03-*` | `occluder` | pure white / pure black | 25–40 % of frame | A mask. No midtones, no detail inside the shape. |
 | `04-*` | `accent` | 70–85 % white | under 5 % of frame | Sparse, bright, small: embers, rain, signage. Carries the accent hue. |
@@ -84,19 +104,20 @@ a whole scene. Every prompt below ends with the isolation clause; keep it.
 The archive opens on it. Nothing is read on the glass, so this scene can run at
 full strength.
 
-**Master / `01-far`**
+**Master / `01-far`** — the fire, and nothing that resembles a skyline
 ```
-a vast night skyline burning on the horizon, distant towers under thick smoke,
-volumetric haze, backlit, monochrome, extreme wide shot, low horizon,
-cinematic anamorphic, high contrast between light and deep black,
-no light source in the foreground
+the end of a city street at night, buildings burning out of frame beyond it,
+a wide low band of firelight and smoke catching the light from underneath,
+monochrome, eye-level, very low horizon, no towers, no skyline, nothing tall,
+volumetric haze, high contrast between light and deep black
 ```
 
 **`02-mid` — the machines and the street**
 ```
-mid-ground of a night street, tall industrial structures and the hard geometry of
-humanoid machines standing among them, lit only by fires far behind them,
-rim light, monochrome, no colour, cinematic wide shot
+mid-ground of a night street at eye level, humanoid machines standing among
+overturned debris and barricades, hard industrial geometry, human-scale, lit only
+by fires far behind them, rim light, monochrome, no colour, cinematic wide shot,
+no architecture above the frame
 ```
 
 **`03-crowd` — the occluder**
@@ -118,6 +139,10 @@ pure black background, nothing else in frame, macro particles, high contrast
 The other reading of the brief — people and machines working together rather
 than against each other. Same four plates, same budgets; swap the files in and
 change nothing else.
+
+The same four-axis separation applies: `kinship` is an interior at eye level, lit
+by one lamp, with people at human scale — it must not read as either the street
+or the skyline.
 
 ```
 01-far:  a quiet domestic interior at night seen from deep inside, windows
@@ -223,3 +248,10 @@ floors are 3:1 for the heading and 4.5:1 for the lede.
 Using the `kinship` set instead of `uprising` means renaming its files to the
 `uprising/*` paths, or adding a `kinship` entry to `src/lib/scenes.json` and
 pointing `src/pages/blog/[...page].astro` at it.
+
+## Open: the paginated archive
+
+Every page of `/blog` currently shows the same scene — `/blog/2/` gets the band
+`/blog/` has. Giving each page its own would mean one more scene per page of
+archive, which grows with the post count. If it is wanted, the cheapest version
+is a small pool cycled by page number rather than one scene per page.

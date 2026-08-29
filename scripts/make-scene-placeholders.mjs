@@ -29,12 +29,17 @@ const H = 1152;
  * the flattened composite is built from it by scripts/make-scene-flats.mjs.
  */
 const SCENES = {
+  // Street level, looking down a road at what is burning. Shares no painter with
+  // `city`: two scenes built from the same generators read as one picture with a
+  // different seed, which is exactly what happened the first time.
   uprising: [
-    { name: '01-far', painter: 'farSkyline', depth: 0.06, a: { seed: 7, value: 0.16, haze: 0.1 } },
-    { name: '02-mid', painter: 'midTowers', depth: 0.22, a: { seed: 21, value: 0.3 } },
-    { name: '03-crowd', painter: 'crowd', depth: 0.55, a: { seed: 44, value: 0.95, count: 90 } },
+    { name: '01-far', painter: 'fireGlow', depth: 0.06, a: { seed: 7, value: 0.3, haze: 0.07 } },
+    { name: '02-mid', painter: 'barricade', depth: 0.22, a: { seed: 21, value: 0.34, slabs: 30, machines: 11 } },
+    { name: '03-crowd', painter: 'crowd', depth: 0.55, a: { seed: 44, value: 0.95, count: 150 } },
     { name: '04-embers', painter: 'sparks', depth: 0.85, a: { seed: 91, value: 0.8, count: 220, streak: false } },
   ],
+  // A rooftop over a dense skyline. Vertical where `uprising` is horizontal, and
+  // seen from above where `uprising` is seen from the street.
   city: [
     { name: '01-far', painter: 'farSkyline', depth: 0.05, a: { seed: 3, value: 0.18, haze: 0.14 } },
     { name: '02-mid', painter: 'midTowers', depth: 0.2, a: { seed: 15, value: 0.34 } },

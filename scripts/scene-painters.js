@@ -63,6 +63,80 @@
     }
   }
 
+  /**
+   * Far plane for a street-level scene: no skyline at all, just what is burning
+   * beyond the end of the road. Wide, low and soft — the light the foreground is
+   * silhouetted against.
+   */
+  function fireGlow(ctx, w, h, a) {
+    const rnd = seeded(a.seed);
+    const horizon = h * 0.74;
+
+    // Three overlapping blooms rather than one, so the glow has a shape.
+    for (let i = 0; i < 3; i++) {
+      const cx = w * (0.2 + rnd() * 0.6);
+      const r = w * (0.18 + rnd() * 0.22);
+      const g = ctx.createRadialGradient(cx, horizon, 0, cx, horizon, r);
+      g.addColorStop(0, 'rgba(255,255,255,' + a.value + ')');
+      g.addColorStop(0.45, 'rgba(255,255,255,' + a.value * 0.35 + ')');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // A haze layer above the fire: smoke catching the light from underneath.
+    const sm = ctx.createLinearGradient(0, horizon - h * 0.42, 0, horizon);
+    sm.addColorStop(0, 'rgba(255,255,255,0)');
+    sm.addColorStop(1, 'rgba(255,255,255,' + a.haze + ')');
+    ctx.fillStyle = sm;
+    ctx.fillRect(0, 0, w, horizon);
+  }
+
+  /**
+   * Mid plane for a street-level scene: the things standing between the viewer
+   * and the fire. Barricade slabs at ground level, and tall bipedal machines —
+   * two legs, a torso and a head — which is what makes it read as a street with
+   * machines in it rather than as a skyline.
+   */
+  function barricade(ctx, w, h, a) {
+    const rnd = seeded(a.seed);
+    const ground = h * 0.86;
+
+    // Debris: irregular slabs at angles, low and broken.
+    for (let i = 0; i < a.slabs; i++) {
+      const bw = w * (0.03 + rnd() * 0.09);
+      const bh = h * (0.04 + rnd() * 0.13);
+      const x = rnd() * w;
+      ctx.save();
+      ctx.translate(x, ground - bh * 0.5);
+      ctx.rotate((rnd() - 0.5) * 0.7);
+      ctx.fillStyle = 'rgba(255,255,255,' + a.value * (0.5 + rnd() * 0.5) + ')';
+      ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+      ctx.restore();
+    }
+
+    // Machines: a head and a half taller than the crowd in front of them, and
+    // thinner. Any larger and they stop being figures in a street and become
+    // architecture, which is the other scene's job.
+    for (let i = 0; i < a.machines; i++) {
+      const s = 0.8 + rnd() * 0.5;
+      const cx = w * (0.06 + rnd() * 0.88);
+      const legH = h * 0.15 * s;
+      const torsoH = h * 0.1 * s;
+      const bw = h * 0.036 * s;
+      ctx.fillStyle = 'rgba(255,255,255,' + a.value + ')';
+      // Two legs, splayed.
+      ctx.fillRect(cx - bw * 0.5, ground - legH, bw * 0.22, legH);
+      ctx.fillRect(cx + bw * 0.3, ground - legH, bw * 0.22, legH);
+      // Torso.
+      ctx.fillRect(cx - bw * 0.55, ground - legH - torsoH, bw * 1.1, torsoH);
+      // Head, offset to one side: nothing symmetrical reads as alive.
+      ctx.fillRect(cx - bw * 0.1, ground - legH - torsoH - bw * 0.5, bw * 0.62, bw * 0.5);
+      // One arm, out.
+      ctx.fillRect(cx + bw * 0.5, ground - legH - torsoH * 0.8, bw * 0.75, bw * 0.16);
+    }
+  }
+
   /** Near plane: a hard silhouette edge — a rooftop, or the backs of a crowd. */
   function nearEdge(ctx, w, h, a) {
     const rnd = seeded(a.seed);
@@ -130,7 +204,7 @@
     }
   }
 
-  window.PAINTERS = { farSkyline, midTowers, nearEdge, crowd, sparks };
+  window.PAINTERS = { farSkyline, midTowers, fireGlow, barricade, nearEdge, crowd, sparks };
 
   /** Paint one layer onto the shared canvas and hand back an encoded WebP. */
   window.paintLayer = function (painter, w, h, a, quality) {

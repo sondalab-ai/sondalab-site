@@ -1,7 +1,7 @@
 {
   "uprising": {
     "id": "uprising",
-    "alt": "A crowd of figures silhouetted against a burning skyline, machines among them, rendered as a corrupted broadcast.",
+    "alt": "A street at night seen at eye level: a crowd silhouetted against fires burning beyond the end of the road, machines standing among them, rendered as a corrupted broadcast.",
     "layers": [
       { "src": "/scenes/uprising/01-far.webp", "depth": 0.06, "tone": "structure", "gain": 0.5 },
       { "src": "/scenes/uprising/02-mid.webp", "depth": 0.22, "tone": "depth", "gain": 0.75 },
