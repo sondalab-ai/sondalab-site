@@ -290,6 +290,35 @@ async function normalise(page, pngBase64, occluder, budget) {
       }
 
       ctx.putImageData(data, 0, 0);
+
+      // The model signs its work. Four of the first twelve plates came back with
+      // a fabricated artist's monogram in the bottom-right corner — the brief
+      // forbids it, but Ideogram 4 takes no negative prompt and the positive
+      // wording did not cover it. A uniform feathered wipe beats a list of
+      // affected plates, which would rot on the next re-render: corner luminance
+      // does not separate the signed from the clean (a signed plate measured 2.6
+      // against a clean one at 4.0), so there is nothing to detect.
+      //
+      // After putImageData, so it lands on the finished greyscale rather than on
+      // pixels that are about to be overwritten. Emissive plates only: the
+      // extreme corner carries no scene here — the tube vignettes and the
+      // parallax slides past it — but punching one into an occluder would cut a
+      // notch in the silhouette.
+      if (!isOccluder) {
+        const reach = Math.round(h * 0.17);
+        ctx.save();
+        ctx.translate(w, h);
+        ctx.scale(1.7, 1);
+        const wipe = ctx.createRadialGradient(0, 0, reach * 0.5, 0, 0, reach);
+        wipe.addColorStop(0, 'rgba(0,0,0,1)');
+        wipe.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = wipe;
+        ctx.beginPath();
+        ctx.arc(0, 0, reach, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
       return {
         dataUrl: canvas.toDataURL('image/webp', 0.92),
         min,

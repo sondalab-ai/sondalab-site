@@ -318,6 +318,7 @@ does:
 | text, watermark, logo, caption, ui | every element is `type: "obj"`; no `text` element exists |
 | grey or white background | `background` states pure black, and `#000000` is in the palette |
 | blur, depth of field, bokeh | stated in `lighting` and `medium` |
+| watermark, signature, logo | **nothing catches this** — the model signs its work anyway; `scripts/make-scene-plates.mjs` wipes the bottom-right corner of every emissive plate |
 | low contrast, flat lighting | stated in `aesthetics` |
 | skyline and towers in `uprising` | **cannot be a negation** — it is a `bbox` that leaves no room for one |
 
@@ -813,7 +814,9 @@ positive statements instead; the table in that section says where each one went.
       2K enum returns 2560 × 1440, the same aspect, so downscale by 0.8 rather
       than cropping. A portrait or square plate means the frame was never set —
       see "The frame is set outside the payload".
-- [ ] Nothing legible: no text survived, in any plate.
+- [ ] Nothing legible: no text survived, in any plate. Check the corners at high
+      exposure — four of the first twelve carried a fabricated artist's monogram
+      in the bottom right, faint enough to pass a normal look.
 
 ## Installing the plates
 
