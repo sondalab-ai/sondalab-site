@@ -30,7 +30,9 @@ const { scene, flat, intensity = 1, class: cls = '', pointerHost } = Astro.props
 const BANDS = 8;
 // The fallback picture is the first scene's. Without a GPU there is no tube to
 // change channel on, so the visitor keeps one real picture rather than a slideshow
-// the shatter bands were never built to carry.
+// the shatter bands were never built to carry. The tube itself starts on a scene
+// picked at random, so what the fallback showed and what the tube opens on need
+// not match — the fallback is removed the moment the tube takes over.
 const ids = Array.isArray(scene) ? scene : [scene];
 const meta = SCENES[ids[0]];
 

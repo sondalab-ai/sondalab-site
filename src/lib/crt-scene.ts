@@ -203,8 +203,11 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
     }),
   );
 
-  let active = 0;
-  let plates: Plate[] = sets[0];
+  // Where the sequence starts, not what it is: from here it cycles in order. A
+  // fixed start would mean every visitor who stays under fourteen seconds — most
+  // of them — only ever sees the first scene.
+  let active = sets.length > 1 ? Math.floor(Math.random() * sets.length) : 0;
+  let plates: Plate[] = sets[active];
 
   /** Repaint every plate in this theme's colours. Cheap, and rare. */
   function retint() {
