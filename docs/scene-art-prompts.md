@@ -237,10 +237,13 @@ It buys three things this brief needs and prose cannot express:
 
 Route A splits one render with a depth map, so constraint 5 — the four plates
 share one camera — holds by construction. Ideogram generates each plate as its
-own image, and the first-party reference for `/v1/ideogram-v4/generate` lists
-`text_prompt`, `json_prompt`, `resolution`, `rendering_speed` and
-`enable_copyright_detection`; `seed` appears in the **response**, not documented
-as a request field. Assume the four plates will *not* line up for free.
+own image, so assume the four plates will *not* line up for free.
+
+A seed helps and is available: the REST reference omits it from the request
+fields, but ComfyUI's `IdeogramV4` node exposes `seed` (`INT`, 0 – 2147483647)
+and forwards it, so it is accepted. Fix one seed per scene. It is not enough on
+its own — the four payloads differ, so the same seed gives four related images,
+not four registered ones.
 
 The mitigation is in how the payloads below are written, and it is worth keeping
 if they are edited. Only two plates of a scene are views through that camera —
@@ -262,9 +265,15 @@ it is named differently in each place the model runs:
 
 | Where | What to set | Result |
 |---|---|---|
-| Hosted API, `POST /v1/ideogram-v4/generate` | `resolution` — the 16:9 entry in the 2K enum, `2560x1440` | 2560 × 1440, downscale 0.8 on export |
-| Local weights or a ComfyUI Ideogram node | `width: 2048`, `height: 1152` | the export size exactly, no downscale |
+| ComfyUI `IdeogramV4` node (paid) | `resolution` → `2560x1440 (16:9)` — **its default is `Auto`** | 2560 × 1440, downscale 0.8 on export |
+| ComfyUI, local weights | `Ideogram4Scheduler` `width: 2048`, `height: 1152` | the export size exactly, no downscale |
+| Hosted API, `POST /v1/ideogram-v4/generate` | `resolution`, the 16:9 entry of the 2K enum | 2560 × 1440, downscale 0.8 on export |
 | The Ideogram web app | Prompt Box → Aspect Ratio → **16:9**, before generating | 16:9 at the app's own 2K |
+
+The `IdeogramV4` node ships with `resolution` set to **`Auto`**, and `Auto` is
+what produces a tall narrow plate: with nothing in the payload to say otherwise —
+and there cannot be — the model picks its own shape. It is the first field to
+change on a fresh node.
 
 The model takes any resolution from 256 to 2048 per side in multiples of 16, up
 to 6:1 — so **2048 × 1152 is native**, and running the weights locally skips the
@@ -281,15 +290,21 @@ inside whatever shape was asked for.
 ```jsonc
 {
   "json_prompt": { /* one payload from below */ },
-  "resolution": "2560x1440",   // see the table above — verify the enum string
-  "rendering_speed": "QUALITY" // TURBO | DEFAULT/BALANCED | QUALITY — sources
-                               // disagree on the middle name; FLASH 400s today
+  "resolution": "2560x1440",    // see the table above
+  "rendering_speed": "QUALITY", // TURBO | DEFAULT | QUALITY; FLASH 400s today
+  "seed": 12345                 // one per scene
 }
 ```
 
-with `Api-Key: <key>` as a header. Both enum strings are the part of this
-section that is *not* confirmed first-party: check them against the live
-reference before the first paid call.
+with `Api-Key: <key>` as a header. The enum values are the ones ComfyUI's own
+`IdeogramV4` node offers, read off a live 0.34.2 install — `rendering_speed` is
+`DEFAULT`, `TURBO`, `QUALITY`, and `resolution` is the 22-entry 2K list whose
+16:9 member the node labels `2560x1440 (16:9)`.
+
+**In ComfyUI there is no separate `json_prompt` input.** The node takes a single
+`prompt` string, and a payload from below goes into it serialised as JSON —
+which is also what `BuildJsonPromptIdeogram` produces when you assemble one from
+its parts. Passing the JSON directly skips that node entirely.
 
 ### There is no negative prompt
 
