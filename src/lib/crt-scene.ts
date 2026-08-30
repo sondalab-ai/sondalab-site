@@ -95,6 +95,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 export interface SceneOptions {
   aspect?: number;
+  /** Seconds a scene holds before the tube changes channel. Ignored for one scene. */
+  dwell?: number;
+  /** Called when the channel changes, so the caller can update the accessible name. */
+  onScene?: (id: string) => void;
   /** Overall brightness ceiling. A backdrop carrying text runs dimmer. */
   intensity?: number;
   /** Horizontal drift, in fractions of the frame per second. */
@@ -106,12 +110,20 @@ export interface SceneOptions {
  * half-loaded scene photographs as an empty tube and the caller's fallback is
  * still on screen until this returns.
  */
-export async function createScene(id: string, opts: SceneOptions = {}) {
-  const scene: Scene = SCENES[id];
-  if (!scene) throw new Error(`unknown scene: ${id}`);
+export async function createScene(id: string | string[], opts: SceneOptions = {}) {
+  const ids = Array.isArray(id) ? id : [id];
+  const scenes: Scene[] = ids.map((one) => {
+    const found = SCENES[one];
+    if (!found) throw new Error(`unknown scene: ${one}`);
+    return found;
+  });
 
   const intensity = opts.intensity ?? 1;
   const drift = opts.drift ?? 0.012;
+  const dwell = opts.dwell ?? 14;
+
+  /** How long the channel change lasts. Long enough to read as a decision. */
+  const TUNE = 0.5;
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
@@ -176,20 +188,29 @@ export async function createScene(id: string, opts: SceneOptions = {}) {
     }
   }
 
-  const images = await Promise.all(scene.layers.map((l) => loadImage(l.src)));
-  const plates: Plate[] = scene.layers.map((layer, i) => ({
-    layer,
-    mask: toMask(images[i]),
-    tinted: document.createElement('canvas'),
-    // Irrational spacing, so the planes never come back into phase.
-    phase: i * 2.399963,
-  }));
+  // Every scene's plates are decoded up front. The tube changes channel without
+  // a gap, and a plate that arrived late would show as a hole in the picture.
+  const sets: Plate[][] = await Promise.all(
+    scenes.map(async (s) => {
+      const images = await Promise.all(s.layers.map((l) => loadImage(l.src)));
+      return s.layers.map((layer, i) => ({
+        layer,
+        mask: toMask(images[i]),
+        tinted: document.createElement('canvas'),
+        // Irrational spacing, so the planes never come back into phase.
+        phase: i * 2.399963,
+      }));
+    }),
+  );
+
+  let active = 0;
+  let plates: Plate[] = sets[0];
 
   /** Repaint every plate in this theme's colours. Cheap, and rare. */
   function retint() {
     black = screenBg();
     polarityLight = isLight();
-    for (const p of plates) {
+    for (const p of sets.flat()) {
       p.tinted.width = PLATE_W;
       p.tinted.height = PLATE_H;
       const c = p.tinted.getContext('2d')!;
@@ -212,6 +233,9 @@ export async function createScene(id: string, opts: SceneOptions = {}) {
   let elapsed = 0;
   let sinceDraw = 0;
   let dirty = true;
+  let held = 0;
+  let tuning = 0;
+  let flipped = false;
 
   /** Cover-fit a plate into the frame plus its parallax slack. */
   function place(dx: number, dy: number) {
@@ -274,6 +298,31 @@ export async function createScene(id: string, opts: SceneOptions = {}) {
   }
 
   /**
+   * The channel change. The scene underneath is already the new one for the back
+   * half of it, so what the visitor sees is the picture arriving through the
+   * interference rather than a crossfade between two photographs — which is what
+   * a tube would do, and the only transition this vocabulary has.
+   */
+  function drawTuning(time: number) {
+    draw(time);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = black;
+    const bands = 6 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < bands; i += 1) {
+      const y = Math.random() * canvas.height;
+      ctx.fillRect(0, y, canvas.width, 2 + Math.random() * canvas.height * 0.08);
+    }
+    // The roll bar: one bright sweep travelling down the frame over the change.
+    ctx.globalCompositeOperation = polarityLight ? 'source-over' : 'lighter';
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = polarityLight ? token('--sl-text-primary') : token('--sl-accent-default');
+    ctx.fillRect(0, (1 - tuning / TUNE) * canvas.height, canvas.width, canvas.height * 0.07);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    dirty = false;
+  }
+
+  /**
    * The stopped state. Nothing is animating behind it, so it has to read as a
    * decision rather than a frozen frame: the scene collapses to its far plane
    * and the tube says why.
@@ -309,7 +358,9 @@ export async function createScene(id: string, opts: SceneOptions = {}) {
   return {
     canvas,
     pointer,
-    alt: scene.alt,
+    get alt() {
+      return scenes[active].alt;
+    },
     tick(dt: number) {
       elapsed += dt;
       // Critically damped enough to feel like weight rather than lag.
@@ -320,9 +371,32 @@ export async function createScene(id: string, opts: SceneOptions = {}) {
         sinceDraw = 0;
         dirty = true;
       }
+
+      if (sets.length < 2) return;
+      if (tuning > 0) {
+        tuning -= dt;
+        // The swap happens halfway through, under the interference.
+        if (!flipped && tuning <= TUNE / 2) {
+          active = (active + 1) % sets.length;
+          plates = sets[active];
+          flipped = true;
+          opts.onScene?.(ids[active]);
+        }
+        if (tuning <= 0) {
+          tuning = 0;
+          flipped = false;
+          held = 0;
+        }
+        // A change that redraws at the scene's usual rate reads as a stutter.
+        dirty = true;
+        return;
+      }
+      held += dt;
+      if (held >= dwell) tuning = TUNE;
     },
     draw(time: number) {
-      draw(time || elapsed);
+      if (tuning > 0) drawTuning(time || elapsed);
+      else draw(time || elapsed);
     },
     drawSignalLoss,
     refreshTokens() {

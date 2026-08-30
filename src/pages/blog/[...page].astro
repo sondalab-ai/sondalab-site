@@ -3,7 +3,6 @@ import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
 import CrtScene from '../../components/CrtScene.astro';
 import uprisingFlat from '../../assets/scenes/uprising-flat.webp';
-import kinshipFlat from '../../assets/scenes/kinship-flat.webp';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -32,15 +31,10 @@ const rows = page.data.map((post, i) => ({
 
 const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.lastPage).padStart(2, '0')}`;
 
-// The archive alternates between the two readings of the same brief — machines
-// against us, machines alongside us — one per page rather than one per site, so
-// paging through is not paging past the same picture. A pool rather than a scene
-// per page: the asset budget stays fixed as the archive grows.
-const BANDS_POOL = [
-  { scene: 'uprising', flat: uprisingFlat },
-  { scene: 'kinship', flat: kinshipFlat },
-] as const;
-const band = BANDS_POOL[(page.currentPage - 1) % BANDS_POOL.length];
+// Both readings of the same brief — machines against us, machines alongside us.
+// The tube changes channel between them on a timer rather than one per archive
+// page, so a visitor sees both without paging.
+const BAND_SCENES = ['uprising', 'kinship'];
 ---
 
 <Base
@@ -88,7 +82,7 @@ const band = BANDS_POOL[(page.currentPage - 1) % BANDS_POOL.length];
     {/* The archive opens on a transmission before it lists any. Full-bleed, so
         the tube reads as a broadcast the page is receiving rather than an
         illustration inside the column. No text sits on the glass. */}
-    <CrtScene scene={band.scene} flat={band.flat} class="tlog-band" />
+    <CrtScene scene={BAND_SCENES} flat={uprisingFlat} class="tlog-band" />
 
     <div class="wrap">
       <ol class="tlog" data-tlist>

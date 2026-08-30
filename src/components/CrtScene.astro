@@ -14,7 +14,8 @@ import { Image, getImage } from 'astro:assets';
 import { SCENES } from '../lib/scenes';
 
 interface Props {
-  scene: keyof typeof SCENES;
+  /** One scene, or several: the tube changes channel between them on a timer. */
+  scene: keyof typeof SCENES | (keyof typeof SCENES)[];
   flat: ImageMetadata;
   /** Brightness ceiling. A backdrop carrying text has to run dim. */
   intensity?: number;
@@ -27,7 +28,11 @@ interface Props {
 const { scene, flat, intensity = 1, class: cls = '', pointerHost } = Astro.props;
 
 const BANDS = 8;
-const meta = SCENES[scene];
+// The fallback picture is the first scene's. Without a GPU there is no tube to
+// change channel on, so the visitor keeps one real picture rather than a slideshow
+// the shatter bands were never built to carry.
+const ids = Array.isArray(scene) ? scene : [scene];
+const meta = SCENES[ids[0]];
 
 // One resolved URL for the bands rather than eight duplicated srcsets: the
 // browser already holds the file from the visible image.
@@ -36,7 +41,7 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
 
 <div
   class={`crt-scene ${cls}`}
-  data-crt-scene={scene}
+  data-crt-scene={ids.join(',')}
   data-intensity={String(intensity)}
   data-pointer-host={pointerHost}
   style={`--scene-dim: ${intensity}`}
@@ -102,8 +107,8 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
 
   async function boot(host: HTMLElement) {
     const canvas = host.querySelector<HTMLCanvasElement>('[data-crt-scene-canvas]');
-    const id = host.dataset.crtScene;
-    if (!canvas || !id || !SCENES[id]) return;
+    const ids = (host.dataset.crtScene ?? '').split(',').filter((s) => SCENES[s]);
+    if (!canvas || !ids.length) return;
 
     const intensity = Number(host.dataset.intensity) || 1;
     // A backdrop is dimmed twice over: the plates are tinted down, and the tube's
@@ -123,7 +128,13 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
       // floor, so it is nearly off on paper and modest on glass.
       vignette: [0.08, 0.28],
       async createSource(aspect) {
-        sceneSource = await createScene(id, { aspect, intensity });
+        sceneSource = await createScene(ids, {
+          aspect,
+          intensity,
+          // The name has to follow the picture, or a screen reader describes a
+          // scene that left the glass some seconds ago.
+          onScene: (next) => canvas.setAttribute('aria-label', SCENES[next].alt),
+        });
         return sceneSource;
       },
     });
@@ -137,7 +148,7 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
     // hangs anything waiting on it, scripts/shoot.mjs included.
     canvas.removeAttribute('aria-hidden');
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', SCENES[id].alt);
+    canvas.setAttribute('aria-label', sceneSource.alt);
     host.querySelector('.crt-scene__flat')?.remove();
 
     const pointerTarget =
