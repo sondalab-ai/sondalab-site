@@ -453,8 +453,9 @@ black, no midtones.
 > before export.
 
 **`04-embers`** — the accent. The only bright plate, and only because almost
-nothing is in it. No `bbox`: the scatter is the point, and a full-frame box
-would say nothing.
+nothing is in it. The first pass left both elements un-boxed on the reasoning
+that a scatter has no place to be; what came back was a plume up the centre of
+the frame. Left free, the model centres. The boxes below are wide on purpose.
 
 ```json
 {
@@ -471,12 +472,14 @@ would say nothing.
     "elements": [
       {
         "type": "obj",
-        "desc": "a scattering of small bright embers rising on a draught, irregularly spaced, denser towards the lower half and thinning out towards the top, each one a hard point a few pixels across, covering well under five percent of the frame in total",
+        "bbox": [80, 20, 940, 980],
+        "desc": "a scattering of small bright embers rising on a draught, spread evenly across the entire width of the frame from edge to edge, irregularly spaced, denser towards the lower half and thinning out towards the top, each one a hard point a few pixels across, never gathered into a plume or a column or a single rising stream, covering well under five percent of the frame in total",
         "color_palette": ["#8A8A8A", "#CCCCCC"]
       },
       {
         "type": "obj",
-        "desc": "a few larger flakes of ash tumbling among them, slightly dimmer than the embers, still small and sparse",
+        "bbox": [200, 60, 980, 940],
+        "desc": "a few larger flakes of ash tumbling among them, slightly dimmer than the embers, still small and sparse, also spread right across the frame rather than clustered",
         "color_palette": ["#3D3D3D", "#8A8A8A"]
       }
     ]
@@ -612,7 +615,8 @@ separates this scene from `uprising`, so the `bbox` spans the full frame height.
     "elements": [
       {
         "type": "obj",
-        "desc": "fine diagonal rain streaks falling steeply from upper left to lower right, thin and broken, widely spaced, covering only a small fraction of the frame",
+        "bbox": [0, 420, 1000, 1000],
+        "desc": "fine diagonal rain streaks falling steeply from upper left to lower right, thin and broken, widely spaced, confined to the right of the frame and absent from its left third, covering only a small fraction of the frame",
         "color_palette": ["#3D3D3D", "#8A8A8A"]
       },
       {
