@@ -679,7 +679,7 @@ either the street or the skyline.
       {
         "type": "obj",
         "bbox": [0, 0, 1000, 1000],
-        "desc": "a doorframe seen from just outside the room, forming a solid white border around all four edges of the frame with a large empty black opening in the middle, flat white with no moulding detail",
+        "desc": "a doorframe seen from just outside the room, forming a solid white border around all four edges of the frame with a large empty black opening in the middle, flat white with no moulding detail. The full-frame bbox is deliberate: the shape is the border, not the opening",
         "color_palette": ["#FFFFFF"]
       },
       {
