@@ -14,8 +14,11 @@
 // Usage:
 //   node scripts/make-scene-plates.mjs --host http://192.168.88.212:8188
 //   node scripts/make-scene-plates.mjs --scene uprising --plate 02-mid --seed 21
+//   node scripts/make-scene-plates.mjs --levels           # pull white points to budget
+//   node scripts/make-scene-plates.mjs --from-raw --levels # redo the pass, no GPU
+//   node scripts/make-scene-plates.mjs --resume --levels  # reuse whatever rendered already
 //   node scripts/make-scene-plates.mjs --dry-run          # parse and report only
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import puppeteer from 'puppeteer-core';
 
@@ -34,6 +37,19 @@ const PRESETS = {
   default: { steps: 20, mu: 0.0, std: 1.75 },
   quality: { steps: 48, mu: 0.0, std: 1.5 },
 };
+
+/**
+ * Peak luminance each plate is allowed, from the budget table in the brief.
+ * Four plates at full value clip to white the moment two of them overlap.
+ */
+const BUDGET = { '01': 46, '02': 84, '03': 255, '04': 204 };
+
+/**
+ * Where the untouched render is kept. Rendering a plate costs about five
+ * minutes, so the raw PNG is worth a few megabytes: a different Levels decision
+ * is then a re-run of --from-raw rather than an hour of GPU.
+ */
+const RAW = '.scenes-raw';
 
 /** Model files, as ComfyUI names them. Verified against /object_info on boot. */
 const MODELS = {
@@ -59,6 +75,9 @@ for (let i = 2; i < process.argv.length; i += 1) {
 const HOST = (args.get('host') || process.env.COMFY_HOST || 'http://127.0.0.1:8188').replace(/\/$/, '');
 const PRESET = String(args.get('preset') || 'quality').toLowerCase();
 const DRY = Boolean(args.get('dry-run'));
+const LEVELS = Boolean(args.get('levels'));
+const FROM_RAW = Boolean(args.get('from-raw'));
+const RESUME = Boolean(args.get('resume'));
 const ONLY_SCENE = args.get('scene');
 const ONLY_PLATE = args.get('plate');
 const BASE_SEED = Number(args.get('seed') ?? 1);
@@ -157,10 +176,30 @@ function graph(caption, seed) {
   };
 }
 
-async function api(path, init) {
-  const res = await fetch(`${HOST}${path}`, init);
-  if (!res.ok) throw new Error(`${path} → ${res.status} ${(await res.text()).slice(0, 400)}`);
-  return res;
+/**
+ * One request, retried.
+ *
+ * ComfyUI serves HTTP from the same process that runs the sampler, so while a
+ * 2048x1152 plate is on the GPU the server can simply stop answering for long
+ * enough that the socket times out. A dropped poll is not a failed render — the
+ * job is still queued — so every request backs off and tries again rather than
+ * taking the run down with it.
+ */
+async function api(path, init, attempts = 6) {
+  let last;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const res = await fetch(`${HOST}${path}`, { ...init, signal: AbortSignal.timeout(120_000) });
+      if (res.status >= 500) throw new Error(`${path} → ${res.status}`);
+      if (!res.ok) throw new Error(`${path} → ${res.status} ${(await res.text()).slice(0, 400)}`);
+      return res;
+    } catch (error) {
+      last = error;
+      if (String(error).includes('→ 4')) throw error;
+      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+    }
+  }
+  throw last;
 }
 
 /** Submits a graph and waits for it, polling history rather than holding a socket. */
@@ -195,9 +234,9 @@ async function render(caption, seed) {
  * plate over its budget is a prompt problem or a Levels decision, and silently
  * pulling it down would hide a picture that came back wrong.
  */
-async function normalise(page, pngBase64, occluder) {
+async function normalise(page, pngBase64, occluder, budget) {
   return page.evaluate(
-    async (b64, isOccluder, w, h) => {
+    async (b64, isOccluder, w, h, ceiling) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
       await img.decode();
@@ -235,6 +274,21 @@ async function normalise(page, pngBase64, occluder) {
           px[i + 2] = px[i];
         }
       }
+      // Levels: scale the plate so its brightest pixel lands on its budget.
+      // Linear and monotonic, so nothing in the picture moves relative to
+      // anything else — it is the editor step from the checklist, done to
+      // twelve files instead of by hand.
+      const peak = inverted ? 255 - min : max;
+      const scale = ceiling && peak > ceiling ? ceiling / peak : 1;
+      if (scale !== 1) {
+        for (let i = 0; i < px.length; i += 4) {
+          const v = Math.round(px[i] * scale);
+          px[i] = v;
+          px[i + 1] = v;
+          px[i + 2] = v;
+        }
+      }
+
       ctx.putImageData(data, 0, 0);
       return {
         dataUrl: canvas.toDataURL('image/webp', 0.92),
@@ -242,13 +296,20 @@ async function normalise(page, pngBase64, occluder) {
         max,
         mean: Math.round(mean),
         inverted,
+        scaled: scale !== 1 ? Math.round(peak * scale) : null,
       };
     },
     pngBase64,
     occluder,
     W,
     H,
+    ceilingFor(budget),
   );
+}
+
+/** Levels only runs when asked; without --levels the plate is reported, not changed. */
+function ceilingFor(budget) {
+  return LEVELS ? budget : 0;
 }
 
 const payloads = readPayloads('docs/scene-art-prompts.md');
@@ -267,7 +328,9 @@ for (const [key, caption] of payloads) {
     plate,
     caption,
     occluder: layer ? layer.tone === 'occluder' : /^03-/.test(plate),
+    budget: BUDGET[plate.slice(0, 2)] ?? 255,
     path: layer ? `public${layer.src}` : `public/scenes/${scene}/${plate}.webp`,
+    raw: `${RAW}/${scene}/${plate}.png`,
   });
 }
 
@@ -277,15 +340,21 @@ if (!targets.length) {
 }
 
 console.log(`${payloads.size} payloads in the brief, ${targets.length} selected`);
-console.log(`${W}x${H}, preset ${PRESET} (${PRESETS[PRESET].steps} steps), host ${HOST}\n`);
+console.log(
+  `${W}x${H}, preset ${PRESET} (${PRESETS[PRESET].steps} steps)` +
+    `${LEVELS ? ', levels on' : ''}${FROM_RAW ? ', from raw' : `, host ${HOST}`}\n`,
+);
 
 if (DRY) {
   for (const t of targets) {
-    console.log(`${t.key.padEnd(22)} ${t.occluder ? 'occluder' : 'emissive'}  → ${t.path}`);
+    console.log(
+      `${t.key.padEnd(22)} ${t.occluder ? 'occluder' : 'emissive'}  budget ${String(t.budget).padStart(3)}  → ${t.path}`,
+    );
   }
   process.exit(0);
 }
 
+if (!FROM_RAW) {
 const info = await api('/object_info/UNETLoader').then((r) => r.json());
 const available = info.UNETLoader.input.required.unet_name[0];
 for (const name of [MODELS.unet, MODELS.unetNegative]) {
@@ -293,6 +362,7 @@ for (const name of [MODELS.unet, MODELS.unetNegative]) {
     console.error(`ComfyUI has no ${name} — the open Ideogram 4 weights are not installed`);
     process.exit(1);
   }
+}
 }
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'] });
@@ -305,28 +375,54 @@ const seedFor = (scene) => BASE_SEED + [...new Set([...payloads.keys()].map((k) 
 for (const t of targets) {
   const started = Date.now();
   process.stdout.write(`${t.key.padEnd(22)} `);
-  const image = await render(t.caption, seedFor(t.scene));
-  const params = new URLSearchParams({
-    filename: image.filename,
-    subfolder: image.subfolder ?? '',
-    type: image.type ?? 'output',
-  });
-  const png = Buffer.from(await (await api(`/view?${params}`)).arrayBuffer());
-  const { dataUrl, min, max, mean, inverted } = await normalise(page, png.toString('base64'), t.occluder);
+  let png;
+  const kept = RESUME && existsSync(t.raw);
+  if (FROM_RAW || kept) {
+    if (!existsSync(t.raw)) {
+      console.log('no raw render kept — run it without --from-raw first');
+      continue;
+    }
+    png = readFileSync(t.raw);
+  } else {
+    const image = await render(t.caption, seedFor(t.scene));
+    const params = new URLSearchParams({
+      filename: image.filename,
+      subfolder: image.subfolder ?? '',
+      type: image.type ?? 'output',
+    });
+    png = Buffer.from(await (await api(`/view?${params}`)).arrayBuffer());
+    mkdirSync(dirname(t.raw), { recursive: true });
+    writeFileSync(t.raw, png);
+  }
+  const { dataUrl, min, max, mean, inverted, scaled } = await normalise(
+    page,
+    png.toString('base64'),
+    t.occluder,
+    t.budget,
+  );
   const webp = Buffer.from(dataUrl.split(',')[1], 'base64');
   mkdirSync(dirname(t.path), { recursive: true });
   writeFileSync(t.path, webp);
   const seconds = Math.round((Date.now() - started) / 1000);
   console.log(
-    `${String(seconds).padStart(4)}s  black ${min}  white ${max}  mean ${mean}` +
-      `${inverted ? '  inverted' : ''}  ${(webp.length / 1024).toFixed(1)}KB`,
+    (kept ? 'kept ' : '     ') +
+    `${String(seconds).padStart(4)}s  black ${String(min).padStart(3)}  white ${String(max).padStart(3)}` +
+      `${scaled === null ? '' : ` → ${String(scaled).padStart(3)}`}  mean ${String(mean).padStart(3)}` +
+      `  budget ${String(t.budget).padStart(3)}${inverted ? '  inverted' : ''}` +
+      `  ${(webp.length / 1024).toFixed(1)}KB`,
   );
 }
 
 await browser.close();
 
-console.log(`
-Next: check the white point of each plate against docs/scene-art-prompts.md.
-Budgets are 01-far 46, 02-mid 84, 03-* 255, 04-* 204. A plate well over its
-number needs a Levels pass before it goes in — the palette is guidance, not a
-contract. Then: npm run scenes:flats && npm run build`);
+console.log(
+  LEVELS
+    ? `
+Every plate is inside its budget. Next: npm run scenes:flats && npm run build`
+    : `
+White points above are what the model produced; the budget beside each is what
+the compositor wants. The renders are kept in ${RAW}/, so pulling them into
+budget costs no GPU:
+
+  node scripts/make-scene-plates.mjs --from-raw --levels`,
+);

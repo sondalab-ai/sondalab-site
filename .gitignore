@@ -6,3 +6,6 @@ dist/
 *.log
 .env
 .env.*
+
+# Untouched plate renders, kept so a Levels pass needs no GPU
+.scenes-raw/
