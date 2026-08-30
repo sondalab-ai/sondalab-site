@@ -211,15 +211,25 @@ magic-prompt**, the rewriting layer that would otherwise put back exactly what
 this pipeline forbids: colour, a named art movement, and text burned into the
 frame. What is below is what the model receives.
 
+> **The payload does not set the frame shape.** Ideogram's own note is blunt
+> about it: *"The JSON prompt does not control output dimensions."* Send a
+> payload on its own and you get the tool's default aspect — square, or whatever
+> the picker was last left on — and every scene comes back tall and narrow with
+> its composition crushed into a column. The width and height are a **sibling**
+> setting, and they have to be set every time. See "The frame is set outside the
+> payload" below.
+
 It buys three things this brief needs and prose cannot express:
 
 - **`color_palette`, up to 16 hex entries.** The luminance budget stops being a
   hope and becomes a number in the request. Grayscale is `R = G = B` in every
   entry; the plate's white point is the brightest entry.
-- **`bbox`, four integers, normalised 0–1000, `[y_min, x_min, y_max, x_max]`
-  (row first).** This is where the four-axis separation table above becomes
-  enforceable: `uprising` is a low wide band, `city` fills the frame top to
-  bottom, and each is stated as coordinates rather than adjectives.
+- **`bbox`, four integers, normalised 0–1000, `[y_min, x_min, y_max, x_max]`,
+  origin top-left — y before x.** Swapping the two is the documented common
+  mistake, and it transposes the picture: a wide low band becomes a tall narrow
+  column. This is where the four-axis separation table above becomes
+  enforceable: `uprising` is a low wide band `[620, 0, 900, 1000]`, `city` fills
+  the frame top to bottom, and each is coordinates rather than adjectives.
 - **Everything is an `obj`.** No element carries `type: "text"`, anywhere, in
   any of the payloads — which is what keeps the frames legible-free.
 
@@ -244,25 +254,42 @@ regenerate a plate or two until the horizon agrees; Route A remains the
 recommended way to produce a whole scene, and Route C the better way to produce
 one plate.
 
-### The request envelope
+### The frame is set outside the payload
 
-The 12 payloads below are the value of `json_prompt` only. Everything around it
-is the envelope, and it is the part to check against the live reference before
-the first call — the enum strings are versioned and every third-party host
-(fal, Runware, Together) renames them:
+This is the first thing to get right and the easiest to miss: the 12 payloads
+below are the value of `json_prompt` **only**. The frame is a sibling of it, and
+it is named differently in each place the model runs:
+
+| Where | What to set | Result |
+|---|---|---|
+| Hosted API, `POST /v1/ideogram-v4/generate` | `resolution` — the 16:9 entry in the 2K enum, `2560x1440` | 2560 × 1440, downscale 0.8 on export |
+| Local weights or a ComfyUI Ideogram node | `width: 2048`, `height: 1152` | the export size exactly, no downscale |
+| The Ideogram web app | Prompt Box → Aspect Ratio → **16:9**, before generating | 16:9 at the app's own 2K |
+
+The model takes any resolution from 256 to 2048 per side in multiples of 16, up
+to 6:1 — so **2048 × 1152 is native**, and running the weights locally skips the
+downscale entirely. The hosted API is the one path that only offers fixed 2K
+enums; there the 16:9 entry is 2560 × 1440, which is the same aspect and comes
+back needing an 0.8 downscale.
+
+An image that comes out tall and narrow is this setting, not the payload. The
+`bbox` values cannot change the shape of the frame — they only place things
+inside whatever shape was asked for.
+
+### The rest of the envelope
 
 ```jsonc
 {
   "json_prompt": { /* one payload from below */ },
-  "resolution": "2560x1440",   // 16:9 at 2K — verify the exact enum string
+  "resolution": "2560x1440",   // see the table above — verify the enum string
   "rendering_speed": "QUALITY" // TURBO | DEFAULT/BALANCED | QUALITY — sources
                                // disagree on the middle name; FLASH 400s today
 }
 ```
 
-with `Api-Key: <key>` as a header. **2560 × 1440 is not the export size**: it is
-16:9, the same as the 2048 × 1152 the pipeline wants, so downscale by 0.8 on the
-way out. That step is in the checklist below.
+with `Api-Key: <key>` as a header. Both enum strings are the part of this
+section that is *not* confirmed first-party: check them against the live
+reference before the first paid call.
 
 ### There is no negative prompt
 
@@ -763,8 +790,10 @@ positive statements instead; the table in that section says where each one went.
       the whole tube once the shader lifts it.
 - [ ] White point is at the plate's budget from the table above.
 - [ ] The occluder has no midtones except a 1–2 px edge.
-- [ ] 2048 × 1152. Ideogram's 16:9 plates come back at 2560 × 1440 — the same
-      aspect ratio, so downscale by 0.8 rather than cropping.
+- [ ] 2048 × 1152. Native if the frame was set to 2048 × 1152; the hosted API's
+      2K enum returns 2560 × 1440, the same aspect, so downscale by 0.8 rather
+      than cropping. A portrait or square plate means the frame was never set —
+      see "The frame is set outside the payload".
 - [ ] Nothing legible: no text survived, in any plate.
 
 ## Installing the plates
