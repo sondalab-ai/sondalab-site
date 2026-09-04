@@ -17,6 +17,12 @@ interface Props {
   /** One scene, or several: the tube changes channel between them on a timer. */
   scene: keyof typeof SCENES | (keyof typeof SCENES)[];
   flat: ImageMetadata;
+  /**
+   * The light theme's composite, where the scene has one. Both are rendered and
+   * the theme picks; a page that passes only `flat` keeps a single picture on
+   * both themes, which is what the site did before the light set existed.
+   */
+  flatLight?: ImageMetadata;
   /** Brightness ceiling. A backdrop carrying text has to run dim. */
   intensity?: number;
   /** Extra classes on the wrapper, for per-page sizing. */
@@ -25,7 +31,7 @@ interface Props {
   pointerHost?: string;
 }
 
-const { scene, flat, intensity = 1, class: cls = '', pointerHost } = Astro.props;
+const { scene, flat, flatLight, intensity = 1, class: cls = '', pointerHost } = Astro.props;
 
 const BANDS = 8;
 // The fallback picture is the first scene's. Without a GPU there is no tube to
@@ -39,10 +45,11 @@ const meta = SCENES[ids[0]];
 // One resolved URL for the bands rather than eight duplicated srcsets: the
 // browser already holds the file from the visible image.
 const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
+const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, format: 'webp' }) : null;
 ---
 
 <div
-  class={`crt-scene ${cls}`}
+  class={`crt-scene ${flatLight ? 'crt-scene--dual' : ''} ${cls}`}
   data-crt-scene={ids.join(',')}
   data-intensity={String(intensity)}
   data-pointer-host={pointerHost}
@@ -50,7 +57,28 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
 >
   <span class="crt-scene__flat glitch glitch--shatter" style={`--n:${BANDS}`}>
     <span class="crt-scene__base glitch__text">
-      <Image src={flat} alt={meta.alt} widths={[720, 1200, 1600]} sizes="100vw" />
+      <Image
+        src={flat}
+        alt={flatLight ? '' : meta.alt}
+        aria-hidden={flatLight ? 'true' : undefined}
+        class="crt-scene__pic crt-scene__pic--dark"
+        widths={[720, 1200, 1600]}
+        sizes="100vw"
+      />
+      {flatLight && (
+        <Image
+          src={flatLight}
+          alt=""
+          aria-hidden="true"
+          class="crt-scene__pic crt-scene__pic--light"
+          widths={[720, 1200, 1600]}
+          sizes="100vw"
+        />
+      )}
+      {/* One name for a pair of pictures. Both images are decorative and the
+          text sits here instead, or a screen reader would announce the scene
+          twice — once per theme — with only one of them on screen. */}
+      {flatLight && <span class="crt-scene__name">{meta.alt}</span>}
     </span>
     <span class="glitch__shards" aria-hidden="true">
       {Array.from({ length: BANDS }, (_, b) => (
@@ -60,6 +88,16 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
         />
       ))}
     </span>
+    {plateLight && (
+      <span class="glitch__shards crt-scene__shards--light" aria-hidden="true">
+        {Array.from({ length: BANDS }, (_, b) => (
+          <span
+            class="glitch__shard crt-scene__band"
+            style={`--i:${b}; background-image:url(${plateLight.src})`}
+          />
+        ))}
+      </span>
+    )}
     <span class="crt-scene__tint" aria-hidden="true"></span>
   </span>
 
@@ -134,8 +172,10 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
           aspect,
           intensity,
           // The name has to follow the picture, or a screen reader describes a
-          // scene that left the glass some seconds ago.
-          onScene: (next) => canvas.setAttribute('aria-label', SCENES[next].alt),
+          // scene that left the glass some seconds ago. The text comes from the
+          // source rather than from SCENES here, because a theme change can swap
+          // the artwork and only the source knows which set is mounted.
+          onScene: (_next, alt) => canvas.setAttribute('aria-label', alt),
         });
         return sceneSource;
       },
@@ -220,6 +260,33 @@ const plate = await getImage({ src: flat, width: 1200, format: 'webp' });
     z-index: 1;
     width: 100%;
     height: 100%;
+  }
+
+  /* Two composites, one visible. A scene's light set is a different picture, not
+     the same one lit differently, so the fallback has to change with the theme
+     the way the tube does. Both are in the document because the theme is an
+     attribute rather than a media query, and the pair is small next to a page. */
+  .crt-scene__pic--light,
+  .crt-scene__shards--light {
+    display: none;
+  }
+  :global([data-sl-theme='light']) .crt-scene--dual .crt-scene__pic--dark,
+  :global([data-sl-theme='light']) .crt-scene--dual .glitch__shards:not(.crt-scene__shards--light) {
+    display: none;
+  }
+  :global([data-sl-theme='light']) .crt-scene--dual .crt-scene__pic--light,
+  :global([data-sl-theme='light']) .crt-scene--dual .crt-scene__shards--light {
+    display: block;
+  }
+
+  /* The accessible name for a pair of pictures that are themselves decorative. */
+  .crt-scene__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .crt-scene :global(img) {
     display: block;

@@ -18,6 +18,11 @@
  * accumulated picture from paper, so a plate drawn as emission on the light
  * theme comes back as a photographic negative.
  *
+ * **Which is why a scene can carry two sets of artwork.** Plate luminance is ink
+ * coverage on paper, so a night scene prints inverted: black sky as blank paper,
+ * fires as black. A scene with a `light` set swaps to plates authored for
+ * daylight when the theme does; one without keeps its night, as before.
+ *
  * **The redraw is capped below the frame rate.** The drift is slow enough that
  * 30Hz is invisible, and the texture upload is the expensive half of the loop.
  */
@@ -97,8 +102,13 @@ export interface SceneOptions {
   aspect?: number;
   /** Seconds a scene holds before the tube changes channel. Ignored for one scene. */
   dwell?: number;
-  /** Called when the channel changes, so the caller can update the accessible name. */
-  onScene?: (id: string) => void;
+  /**
+   * Called when the picture on the glass changes — a channel change, or a theme
+   * change that swapped in the other polarity's artwork. `alt` is resolved here
+   * rather than by the caller, because which name is right depends on which set
+   * is mounted and only this module knows that.
+   */
+  onScene?: (id: string, alt: string) => void;
   /** Overall brightness ceiling. A backdrop carrying text runs dimmer. */
   intensity?: number;
   /** Horizontal drift, in fractions of the frame per second. */
@@ -190,26 +200,97 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
     }
   }
 
+  /** Which polarity's artwork is on the glass. Not the same thing as the theme. */
+  type Variant = 'dark' | 'light';
+
+  /** A scene without a light set keeps its night on paper, as it did before. */
+  const layersFor = (s: Scene, v: Variant) => (v === 'light' && s.light?.length ? s.light : s.layers);
+  const altFor = (s: Scene, v: Variant) =>
+    v === 'light' && s.light?.length ? (s.lightAlt ?? s.alt) : s.alt;
+
   // Every scene's plates are decoded up front. The tube changes channel without
   // a gap, and a plate that arrived late would show as a hole in the picture.
-  const sets: Plate[][] = await Promise.all(
-    scenes.map(async (s) => {
-      const images = await Promise.all(s.layers.map((l) => loadImage(l.src)));
-      return s.layers.map((layer, i) => ({
-        layer,
-        mask: toMask(images[i]),
-        tinted: document.createElement('canvas'),
-        // Irrational spacing, so the planes never come back into phase.
-        phase: i * 2.399963,
-      }));
-    }),
-  );
+  // One variant at a time, though: the other polarity's plates are bytes the
+  // visitor may never look at.
+  const built = new Map<Variant, Plate[][]>();
+  async function buildSets(v: Variant): Promise<Plate[][]> {
+    const cached = built.get(v);
+    if (cached) return cached;
+    const made = await Promise.all(
+      scenes.map(async (s) => {
+        const layers = layersFor(s, v);
+        const images = await Promise.all(layers.map((l) => loadImage(l.src)));
+        return layers.map((layer, i) => ({
+          layer,
+          mask: toMask(images[i]),
+          tinted: document.createElement('canvas'),
+          // Irrational spacing, so the planes never come back into phase.
+          phase: i * 2.399963,
+        }));
+      }),
+    );
+    built.set(v, made);
+    return made;
+  }
+
+  /**
+   * A variant that will not load is not an error worth taking the tube down for.
+   * A scene can declare a light set before its plates have been rendered, and a
+   * single missing file should cost the visitor the daylight artwork, not the
+   * picture. Failures are remembered so a theme toggled back and forth does not
+   * re-request the same 404s.
+   */
+  const unavailable = new Set<Variant>();
+  async function mountable(v: Variant): Promise<Plate[][] | null> {
+    if (unavailable.has(v)) return null;
+    try {
+      return await buildSets(v);
+    } catch {
+      unavailable.add(v);
+      return null;
+    }
+  }
+
+  // The theme is known at first paint, so the right set is the one that loads.
+  // Fetching dark first and swapping would make every light-theme visitor
+  // download a night they never see.
+  let variant: Variant = isLight() ? 'light' : 'dark';
+  const opening = await mountable(variant);
+  let sets: Plate[][];
+  if (opening) {
+    sets = opening;
+  } else {
+    variant = 'dark';
+    sets = await buildSets('dark');
+  }
 
   // Where the sequence starts, not what it is: from here it cycles in order. A
   // fixed start would mean every visitor who stays under fourteen seconds — most
   // of them — only ever sees the first scene.
   let active = sets.length > 1 ? Math.floor(Math.random() * sets.length) : 0;
   let plates: Plate[] = sets[active];
+
+  /**
+   * Follow a theme change onto the other set of artwork. Asynchronous, and the
+   * picture on the glass stays correct throughout: the current set keeps drawing
+   * until the new plates have decoded.
+   */
+  let swapping: Variant | null = null;
+  async function useVariant(next: Variant) {
+    if (next === variant || next === swapping) return;
+    swapping = next;
+    const ready = await mountable(next);
+    swapping = null;
+    if (!ready) return;
+    // The theme can have moved again while those were decoding.
+    if (next !== (isLight() ? 'light' : 'dark')) return;
+    variant = next;
+    sets = ready;
+    plates = sets[active];
+    retint();
+    dirty = true;
+    opts.onScene?.(ids[active], altFor(scenes[active], variant));
+  }
 
   /** Repaint every plate in this theme's colours. Cheap, and rare. */
   function retint() {
@@ -364,7 +445,7 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
     canvas,
     pointer,
     get alt() {
-      return scenes[active].alt;
+      return altFor(scenes[active], variant);
     },
     tick(dt: number) {
       elapsed += dt;
@@ -385,7 +466,7 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
           active = (active + 1) % sets.length;
           plates = sets[active];
           flipped = true;
-          opts.onScene?.(ids[active]);
+          opts.onScene?.(ids[active], altFor(scenes[active], variant));
         }
         if (tuning <= 0) {
           tuning = 0;
@@ -405,8 +486,12 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
     },
     drawSignalLoss,
     refreshTokens() {
+      // A theme change is two things at once: different tokens, and — where the
+      // scene has a light set — different artwork. The tint is immediate, the
+      // artwork arrives when it has decoded.
       retint();
       dirty = true;
+      void useVariant(isLight() ? 'light' : 'dark');
     },
     resize(nextAspect: number) {
       geometry(nextAspect);

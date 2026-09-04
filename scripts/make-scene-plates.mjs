@@ -14,6 +14,7 @@
 // Usage:
 //   node scripts/make-scene-plates.mjs --host http://192.168.88.212:8188
 //   node scripts/make-scene-plates.mjs --scene uprising --plate 02-mid --seed 21
+//   node scripts/make-scene-plates.mjs --theme light      # the daylight set
 //   node scripts/make-scene-plates.mjs --levels           # pull white points to budget
 //   node scripts/make-scene-plates.mjs --from-raw --levels # redo the pass, no GPU
 //   node scripts/make-scene-plates.mjs --resume --levels  # reuse whatever rendered already
@@ -39,10 +40,18 @@ const PRESETS = {
 };
 
 /**
- * Peak luminance each plate is allowed, from the budget table in the brief.
- * Four plates at full value clip to white the moment two of them overlap.
+ * Peak luminance each plate is allowed, from the budget tables in the brief.
+ *
+ * On dark the number is emission: four plates at full value clip to white the
+ * moment two of them overlap. On light it is ink coverage, and the two are not
+ * interchangeable — the light path tonemaps in emission space, so a higher ink
+ * load saturates rather than deepens. The light row is a first cut to be
+ * calibrated on screen with --from-raw --levels, which costs no GPU.
  */
-const BUDGET = { '01': 46, '02': 84, '03': 255, '04': 204 };
+const BUDGET = {
+  dark: { '01': 46, '02': 84, '03': 255, '04': 204 },
+  light: { '01': 70, '02': 120, '03': 255, '04': 140 },
+};
 
 /**
  * Where the untouched render is kept. Rendering a plate costs about five
@@ -80,29 +89,38 @@ const FROM_RAW = Boolean(args.get('from-raw'));
 const RESUME = Boolean(args.get('resume'));
 const ONLY_SCENE = args.get('scene');
 const ONLY_PLATE = args.get('plate');
+const THEME = String(args.get('theme') || 'dark').toLowerCase();
 const BASE_SEED = Number(args.get('seed') ?? 1);
 
 if (!PRESETS[PRESET]) {
   console.error(`unknown preset: ${PRESET} (${Object.keys(PRESETS).join(' | ')})`);
   process.exit(2);
 }
+if (!BUDGET[THEME]) {
+  console.error(`unknown theme: ${THEME} (${Object.keys(BUDGET).join(' | ')})`);
+  process.exit(2);
+}
 
 /**
- * Pulls every payload out of the brief, keyed `<scene>/<plate>`.
+ * Pulls every payload out of the brief, keyed `<scene>/<theme>/<plate>`.
  *
  * Anchors on the two headings the doc uses: `### \`<scene>\` payloads` opens a
- * scene, and a bolded plate name opens a plate whose payload is the next fenced
- * json block. Anything else in between is prose and is skipped.
+ * scene's dark set and `### \`<scene>\` light payloads` its light one, while a
+ * bolded plate name opens a plate whose payload is the next fenced json block.
+ * Anything else in between is prose and is skipped — including whatever follows
+ * `payloads` on the heading line, so a heading can still carry a subtitle.
  */
 function readPayloads(path) {
   const lines = readFileSync(path, 'utf8').split('\n');
   const out = new Map();
   let scene = null;
+  let theme = null;
   let plate = null;
   for (let i = 0; i < lines.length; i += 1) {
-    const sceneHead = lines[i].match(/^###\s+`([\w-]+)`\s+payloads/);
+    const sceneHead = lines[i].match(/^###\s+`([\w-]+)`\s+(light\s+)?payloads/);
     if (sceneHead) {
       scene = sceneHead[1];
+      theme = sceneHead[2] ? 'light' : 'dark';
       plate = null;
       continue;
     }
@@ -115,7 +133,7 @@ function readPayloads(path) {
     if (plate && lines[i].trim() === '```json') {
       const body = [];
       for (i += 1; i < lines.length && lines[i].trim() !== '```'; i += 1) body.push(lines[i]);
-      out.set(`${scene}/${plate}`, JSON.parse(body.join('\n')));
+      out.set(`${scene}/${theme}/${plate}`, JSON.parse(body.join('\n')));
       plate = null;
     }
   }
@@ -227,16 +245,16 @@ async function render(caption, seed) {
 
 /**
  * Forces the plate into the shape the compositor expects and reports what it
- * found: grayscale, and — for an occluder — white-on-black rather than the
- * black-on-white silhouette a model tends to produce.
+ * found: grayscale, and — for an occluder, or for any plate in the light set —
+ * white-on-black rather than the black-on-white a model tends to produce.
  *
  * The white point is measured and printed but deliberately not corrected. A
  * plate over its budget is a prompt problem or a Levels decision, and silently
  * pulling it down would hide a picture that came back wrong.
  */
-async function normalise(page, pngBase64, occluder, budget) {
+async function normalise(page, pngBase64, occluder, budget, force) {
   return page.evaluate(
-    async (b64, isOccluder, w, h, ceiling) => {
+    async (b64, isOccluder, w, h, ceiling, forceInvert) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
       await img.decode();
@@ -263,10 +281,13 @@ async function normalise(page, pngBase64, occluder, budget) {
       }
       const mean = sum / (px.length / 4);
 
-      // An occluder is a mask, and a model asked for a silhouette will usually
-      // answer with the conventional dark shape on a light ground. Mean
-      // luminance says which way round it came back.
-      const inverted = isOccluder && mean > 127;
+      // Two reasons to flip. An occluder is a mask, and a model asked for a
+      // silhouette will usually answer with the conventional dark shape on a
+      // light ground — mean luminance says which way round it came back. A light
+      // emissive plate is flipped unconditionally: it was authored as a daylight
+      // picture and what the compositor wants is an ink-density map, where the
+      // brightest pixel is the densest mark.
+      const inverted = forceInvert || (isOccluder && mean > 127);
       if (inverted) {
         for (let i = 0; i < px.length; i += 4) {
           px[i] = 255 - px[i];
@@ -333,6 +354,7 @@ async function normalise(page, pngBase64, occluder, budget) {
     W,
     H,
     ceilingFor(budget),
+    Boolean(force),
   );
 }
 
@@ -347,19 +369,31 @@ const scenes = JSON.parse(readFileSync('src/lib/scenes.json', 'utf8'));
 /** Where a plate lands. Scenes the site knows about own their paths; others get a folder. */
 const targets = [];
 for (const [key, caption] of payloads) {
-  const [scene, plate] = key.split('/');
+  const [scene, theme, plate] = key.split('/');
+  if (theme !== THEME) continue;
   if (ONLY_SCENE && scene !== ONLY_SCENE) continue;
   if (ONLY_PLATE && plate !== ONLY_PLATE) continue;
-  const layer = scenes[scene]?.layers.find((l) => l.src.endsWith(`/${plate}.webp`));
+  const planes = theme === 'light' ? scenes[scene]?.light : scenes[scene]?.layers;
+  const layer = planes?.find((l) => l.src.endsWith(`/${plate}.webp`));
+  const occluder = layer ? layer.tone === 'occluder' : /^03-/.test(plate);
   targets.push({
     key,
     scene,
+    theme,
     plate,
     caption,
-    occluder: layer ? layer.tone === 'occluder' : /^03-/.test(plate),
-    budget: BUDGET[plate.slice(0, 2)] ?? 255,
-    path: layer ? `public${layer.src}` : `public/scenes/${scene}/${plate}.webp`,
-    raw: `${RAW}/${scene}/${plate}.png`,
+    occluder,
+    // The light set is authored as an ordinary daylight picture and turned into
+    // an ink-density map here, because asking a model for a negative gets a
+    // negative-looking picture rather than an inverted one. Occluders are left
+    // to the mean-luminance heuristic: a dark silhouette on a light ground
+    // already comes back the right way round, and forcing it twice undoes it.
+    invert: theme === 'light' && !occluder,
+    budget: BUDGET[theme][plate.slice(0, 2)] ?? 255,
+    path: layer
+      ? `public${layer.src}`
+      : `public/scenes/${scene}/${theme === 'light' ? 'light/' : ''}${plate}.webp`,
+    raw: `${RAW}/${scene}/${theme}/${plate}.png`,
   });
 }
 
@@ -377,7 +411,8 @@ console.log(
 if (DRY) {
   for (const t of targets) {
     console.log(
-      `${t.key.padEnd(22)} ${t.occluder ? 'occluder' : 'emissive'}  budget ${String(t.budget).padStart(3)}  → ${t.path}`,
+      `${t.key.padEnd(28)} ${t.occluder ? 'occluder' : 'emissive'}` +
+        `${t.invert ? '  invert' : '        '}  budget ${String(t.budget).padStart(3)}  → ${t.path}`,
     );
   }
   process.exit(0);
@@ -399,11 +434,14 @@ const page = await browser.newPage();
 await page.setContent('<body></body>');
 
 /** One seed per scene, so the plates of a scene are at least related. */
-const seedFor = (scene) => BASE_SEED + [...new Set([...payloads.keys()].map((k) => k.split('/')[0]))].indexOf(scene) * 1000;
+const seedFor = (scene) =>
+  BASE_SEED +
+  [...new Set([...payloads.keys()].map((k) => k.split('/')[0]))].indexOf(scene) * 1000 +
+  (THEME === 'light' ? 500 : 0);
 
 for (const t of targets) {
   const started = Date.now();
-  process.stdout.write(`${t.key.padEnd(22)} `);
+  process.stdout.write(`${t.key.padEnd(28)} `);
   let png;
   const kept = RESUME && existsSync(t.raw);
   if (FROM_RAW || kept) {
@@ -428,6 +466,7 @@ for (const t of targets) {
     png.toString('base64'),
     t.occluder,
     t.budget,
+    t.invert,
   );
   const webp = Buffer.from(dataUrl.split(',')[1], 'base64');
   mkdirSync(dirname(t.path), { recursive: true });
@@ -453,5 +492,5 @@ White points above are what the model produced; the budget beside each is what
 the compositor wants. The renders are kept in ${RAW}/, so pulling them into
 budget costs no GPU:
 
-  node scripts/make-scene-plates.mjs --from-raw --levels`,
+  node scripts/make-scene-plates.mjs --theme ${THEME} --from-raw --levels`,
 );

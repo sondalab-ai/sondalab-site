@@ -27,6 +27,33 @@
         "tone": "accent",
         "gain": 0.35
       }
+    ],
+    "lightAlt": "A street in full daylight: people and machines raising a timber frame together along a road planted up its facades, rendered as a corrupted broadcast.",
+    "light": [
+      {
+        "src": "/scenes/uprising/light/01-far.webp",
+        "depth": 0.06,
+        "tone": "structure",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/uprising/light/02-mid.webp",
+        "depth": 0.22,
+        "tone": "depth",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/uprising/light/03-frame.webp",
+        "depth": 0.55,
+        "tone": "occluder",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/uprising/light/04-sun.webp",
+        "depth": 0.85,
+        "tone": "accent",
+        "gain": 0.35
+      }
     ]
   },
   "city": {
@@ -57,6 +84,33 @@
         "tone": "accent",
         "gain": 0.3
       }
+    ],
+    "lightAlt": "A greened skyline seen from a rooftop at midday: canopy walkways, rotors and a water channel running down to the near parapet, rendered as a corrupted broadcast.",
+    "light": [
+      {
+        "src": "/scenes/city/light/01-far.webp",
+        "depth": 0.05,
+        "tone": "structure",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/city/light/02-mid.webp",
+        "depth": 0.2,
+        "tone": "depth",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/city/light/03-parapet.webp",
+        "depth": 0.6,
+        "tone": "occluder",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/city/light/04-water.webp",
+        "depth": 0.9,
+        "tone": "accent",
+        "gain": 0.3
+      }
     ]
   },
   "kinship": {
@@ -83,6 +137,33 @@
       },
       {
         "src": "/scenes/kinship/04-warm.webp",
+        "depth": 0.85,
+        "tone": "accent",
+        "gain": 0.35
+      }
+    ],
+    "lightAlt": "A room in daylight seen from close to the table: a seed tray passing between a human hand and a machine hand beside a tall open window, rendered as a corrupted broadcast.",
+    "light": [
+      {
+        "src": "/scenes/kinship/light/01-far.webp",
+        "depth": 0.06,
+        "tone": "structure",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/kinship/light/02-mid.webp",
+        "depth": 0.22,
+        "tone": "depth",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/kinship/light/03-window.webp",
+        "depth": 0.55,
+        "tone": "occluder",
+        "gain": 1
+      },
+      {
+        "src": "/scenes/kinship/light/04-leaf.webp",
         "depth": 0.85,
         "tone": "accent",
         "gain": 0.35

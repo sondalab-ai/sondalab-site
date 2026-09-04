@@ -36,9 +36,22 @@ export interface SceneLayer {
 
 export interface Scene {
   id: string;
-  /** Read by a screen reader in place of the canvas. */
+  /** Read by a screen reader in place of the canvas, on the dark theme. */
   alt: string;
   layers: SceneLayer[];
+  /**
+   * The light theme's plates, if the scene has any.
+   *
+   * Not a brightness variant. The shader's light path lays the picture down as
+   * ink, so plate luminance becomes ink coverage and a night scene prints as a
+   * tonal negative — black sky as bare paper, fires as black. The only fix is a
+   * second set authored for daylight. Optional throughout: a scene without one
+   * falls back to `layers`, which is what the site did before the light set
+   * existed.
+   */
+  light?: SceneLayer[];
+  /** The light set is a different picture, so it needs its own name. */
+  lightAlt?: string;
 }
 
 export const SCENES: Record<string, Scene> = data as Record<string, Scene>;

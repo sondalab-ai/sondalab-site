@@ -219,20 +219,48 @@
     return c.toDataURL('image/webp', quality);
   };
 
+  /** Luminance lifted into alpha, on a white plate. What tinting works against. */
+  function toMask(img, w, h) {
+    const m = document.createElement('canvas');
+    m.width = w;
+    m.height = h;
+    const mc = m.getContext('2d', { willReadFrequently: true });
+    mc.drawImage(img, 0, 0, w, h);
+    const d = mc.getImageData(0, 0, w, h);
+    const px = d.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const a = (px[i] * 0.2126 + px[i + 1] * 0.7152 + px[i + 2] * 0.0722) | 0;
+      px[i] = 255;
+      px[i + 1] = 255;
+      px[i + 2] = 255;
+      px[i + 3] = a;
+    }
+    mc.putImageData(d, 0, 0);
+    return m;
+  }
+
   /**
-   * Stack already-encoded layers the way the runtime compositor does on the dark
-   * theme, so the file a visitor without WebGPU sees is the same picture the tube
-   * would have shown rather than a different arrangement of the same parts.
+   * Stack already-encoded layers the way the runtime compositor does, so the file
+   * a visitor without WebGPU sees is the same picture the tube would have shown
+   * rather than a different arrangement of the same parts.
    *
-   * Emissive planes add — black contributes nothing under `lighter`, which is why
-   * the plates need no alpha channel. An occluder subtracts instead: it is the
-   * shape standing in front of the light, and adding it would turn a silhouette
-   * into a slab. The background goes on last, underneath, filling the holes the
+   * Two polarities, and they are not the same operation. On glass the emissive
+   * planes add — black contributes nothing under `lighter`, which is why the
+   * plates need no alpha channel — and an occluder subtracts, because it is the
+   * shape standing in front of the light. On paper every plane is ink laid over
+   * what is already there, the occluder included, and plate luminance becomes ink
+   * coverage rather than emission.
+   *
+   * The background goes on last in both cases, underneath, filling the holes the
    * occluders opened.
    *
-   * `layers` is [{ src, occluder }].
+   * `layers` is [{ src, occluder }]. `paperInk` is `{ ground, ink, wash }` and
+   * passing it is what selects the paper path — this runs in a page with none of
+   * the site's CSS, so it cannot resolve a token for itself and the caller reads
+   * them out of the theme instead.
    */
-  window.flatten = async function (layers, w, h, quality) {
+  window.flatten = async function (layers, w, h, quality, paperInk) {
+    const paper = Boolean(paperInk);
     const c = document.getElementById('c');
     c.width = w;
     c.height = h;
@@ -244,26 +272,27 @@
       const img = new Image();
       img.src = layer.src;
       await img.decode();
+
+      if (paper) {
+        // Ink: the mask carries the coverage and the fill carries the value.
+        // Held under full strength for the same reason crt-scene.ts holds it —
+        // several planes of solid ink stacked on paper reach the value of the
+        // type that has to be read over them.
+        const m = toMask(img, w, h);
+        const mc = m.getContext('2d');
+        mc.globalCompositeOperation = 'source-in';
+        mc.fillStyle = layer.occluder ? paperInk.ink : paperInk.wash;
+        mc.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(m, 0, 0, w, h);
+        continue;
+      }
+
       if (layer.occluder) {
         // The plates are opaque, so the alpha `destination-out` needs has to be
         // lifted out of the luminance first, exactly as crt-scene.ts does.
-        const m = document.createElement('canvas');
-        m.width = w;
-        m.height = h;
-        const mc = m.getContext('2d', { willReadFrequently: true });
-        mc.drawImage(img, 0, 0, w, h);
-        const d = mc.getImageData(0, 0, w, h);
-        const px = d.data;
-        for (let i = 0; i < px.length; i += 4) {
-          const a = (px[i] * 0.2126 + px[i + 1] * 0.7152 + px[i + 2] * 0.0722) | 0;
-          px[i] = 255;
-          px[i + 1] = 255;
-          px[i + 2] = 255;
-          px[i + 3] = a;
-        }
-        mc.putImageData(d, 0, 0);
         ctx.globalCompositeOperation = 'destination-out';
-        ctx.drawImage(m, 0, 0, w, h);
+        ctx.drawImage(toMask(img, w, h), 0, 0, w, h);
         continue;
       }
       ctx.globalCompositeOperation = 'lighter';
@@ -271,7 +300,7 @@
     }
 
     ctx.globalCompositeOperation = 'destination-over';
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = paper ? paperInk.ground : '#000';
     ctx.fillRect(0, 0, w, h);
     return c.toDataURL('image/webp', quality);
   };

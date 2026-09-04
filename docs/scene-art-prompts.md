@@ -74,6 +74,10 @@ scale that makes the towers read as enormous.
 The `04` plate is the only one allowed to be bright, and only because almost
 none of the frame is covered. If it fills the frame, the tube blows out.
 
+These are the **dark set's** numbers, and they are emission. The light set is
+ink on paper and has its own table under *Route D — light plate budgets*; the
+two do not convert into one another.
+
 ## Route A — depth-split from one master render (recommended)
 
 Generating four independent images that share a camera is the hard part, and a
@@ -202,6 +206,10 @@ high contrast
 ---
 
 ## Route C — Ideogram 4.0, one plate per request
+
+> The payloads below are the **dark theme's** night. The light theme has its own
+> set, authored as daylight, under *Route D* — a night laid down as ink prints as
+> a tonal negative, which is a picture problem and not an exposure one.
 
 Ideogram 4.0 accepts a **structured** prompt instead of a sentence:
 `json_prompt` replaces `text_prompt` on `POST
@@ -343,6 +351,53 @@ palette makes it a small correction instead of a large one.
 
 ---
 
+### What the first set got wrong
+
+Twelve plates came back and two complaints survived the levelling: in some of
+them the point of the scene is not legible — `kinship`'s people-and-machine-at-
+one-table worst of all — and the set as a whole reads as unadventurous. Neither
+is a model problem. Both are traceable to lines in the payloads below, and the
+five rules that came out of it apply to every payload in this document.
+
+**1. Interlock the bboxes; do not tile them.** In the first `kinship/02-mid` the
+machine sat at `[300, 380, 900, 640]` and the two people at `[320, 100, 920, 380]`
+— side by side, not overlapping. The scene's whole argument is that they are
+doing the same work, and the geometry said the opposite: a machine, and
+separately some people. **One box around the group.**
+
+**2. Name the thing they share.** "hands down on the same task as theirs" is not
+drawable. A model cannot render a relationship, only an object and the hands on
+it. Every scene where two parties are meant to be cooperating now names one
+object — a beam, a tray, a channel — and puts every hand on it.
+
+**3. Stage the geometry instead of describing the mood.** Hidden faces, seen
+from behind, "relaxed posture": every cue of contact was removed on purpose and
+what was left was figures near a table. Say where the hands converge, which tool
+crosses from whom to whom, which two bodies lean over the same thing.
+
+**4. The budget is a ceiling, not a description.** `02-mid` is capped at 84/255,
+and the first pass spent that range on the table while the figures sat at
+`#141414` — near-black on near-black. **Put the subject at the top of the plate's
+range and the ground at the bottom.** Every subject has to read as a *shape* at
+the plate's own contrast, because the runtime tints it and the shader vignettes
+it before anyone sees it.
+
+**5. Do not ask for the least striking image possible.** "documentary framing",
+"natural unstaged composition", "restrained contrast", "ordinary clothes", "no
+spectacle" — plus a frontal eye-level medium-wide in every plate. Nothing was
+left to make a picture with. The wording the *pipeline* needs stays (no colour,
+no text, no blur, no depth of field, pure black ground); the taste words that
+flatten it are gone, and each scene now carries **one deliberate camera
+decision** so no two plates share a framing.
+
+| scene | camera decision | shared object |
+|---|---|---|
+| `uprising` | low, near the road surface; the street's vanishing point pushed into the right third | the raised-arm gesture running through people and machines alike, one rank |
+| `city` | the near parapet cutting the frame as a diagonal, the tower mass anchored off-centre right | — (no two parties; the scale contrast is the subject) |
+| `kinship` | close three-quarter over the table, the table filling the lower frame, hands at readable size | one open machine casing with its panel off, a human hand and a machine hand both inside it |
+
+---
+
 ### `uprising` payloads
 
 **`01-far`** — the firelight, and no skyline. The band is pinned to the bottom
@@ -350,12 +405,12 @@ palette makes it a small correction instead of a large one.
 
 ```json
 {
-  "high_level_description": "The end of a city street at night, seen at eye level from the middle of the road, lit only by fires burning out of frame beyond the far end. Monochrome, rendered on pure black.",
+  "high_level_description": "The end of a city street at night, seen from close to the road surface, lit only by fires burning out of frame beyond the far end. Monochrome, rendered on pure black.",
   "style_description": {
-    "aesthetics": "stark documentary realism, unglamorous, extreme contrast between light and deep crushed black, monochrome, no colour of any kind",
+    "aesthetics": "stark and graphic, extreme contrast between light and deep crushed black, monochrome, no colour of any kind",
     "lighting": "a single source of firelight beyond the end of the street, low and far away, throwing hard rim light towards the camera, heavy volumetric smoke, no fill light, everything in perfect focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, eye-level anamorphic wide shot, very low horizon, strongly horizontal composition",
+    "art_style": "cinematic concept art, camera close to the road surface looking down the street, anamorphic wide shot, the street's vanishing point pushed into the right third of the frame, strongly horizontal composition",
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
@@ -363,20 +418,20 @@ palette makes it a small correction instead of a large one.
     "elements": [
       {
         "type": "obj",
-        "bbox": [620, 0, 900, 1000],
-        "desc": "a wide, low, continuous band of firelight lying along the far end of the street, spanning the full width of the frame, brightest at its centre, dimming to nothing at both edges, soft-edged, no flame shapes readable",
+        "bbox": [600, 0, 900, 1000],
+        "desc": "a wide, low, continuous band of firelight lying along the far end of the street, spanning the full width of the frame, at its brightest around the vanishing point in the right third and dimming towards the left edge, soft-edged, no flame shapes readable, the brightest thing in the plate",
         "color_palette": ["#1A1A1A", "#2E2E2E"]
       },
       {
         "type": "obj",
-        "bbox": [280, 0, 660, 1000],
-        "desc": "thick smoke drifting upward off the fire and catching its light from underneath, dense and low, thinning to pure black well before the top of the frame",
+        "bbox": [240, 0, 660, 1000],
+        "desc": "thick smoke drifting upward off the fire and catching its light from underneath, dense and low, leaning to the left as it rises, thinning to pure black well before the top of the frame",
         "color_palette": ["#000000", "#0A0A0A", "#1A1A1A"]
       },
       {
         "type": "obj",
         "bbox": [700, 0, 1000, 1000],
-        "desc": "the wet road surface in the near foreground picking up a faint reflection of the fire, flat and horizontal, very dark",
+        "desc": "the wet road surface running away from the camera in the near foreground, its reflections stretched into long horizontal streaks by the low vantage, very dark",
         "color_palette": ["#000000", "#0A0A0A"]
       }
     ]
@@ -384,17 +439,19 @@ palette makes it a small correction instead of a large one.
 }
 ```
 
-**`02-mid`** — the machines and the street. Human scale is the whole point: the
-machines are a head and a half taller than a person, not architecture.
+**`02-mid`** — one rank, not two groups. The people and the machines stand in the
+same line, facing the same way, making the same gesture; that is what the scene
+is about and it has to be inside a single box or it will come back as two
+separate crowds.
 
 ```json
 {
-  "high_level_description": "The end of a city street at night, seen at eye level from the middle of the road, lit only by fires burning out of frame beyond the far end. Monochrome, rendered on pure black.",
+  "high_level_description": "The end of a city street at night, seen from close to the road surface, lit only by fires burning out of frame beyond the far end. Monochrome, rendered on pure black.",
   "style_description": {
-    "aesthetics": "stark documentary realism, unglamorous, extreme contrast between light and deep crushed black, monochrome, no colour of any kind",
+    "aesthetics": "stark and graphic, extreme contrast between light and deep crushed black, monochrome, no colour of any kind",
     "lighting": "a single source of firelight beyond the end of the street, low and far away, throwing hard rim light towards the camera, heavy volumetric smoke, no fill light, everything in perfect focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, eye-level anamorphic wide shot, very low horizon, strongly horizontal composition",
+    "art_style": "cinematic concept art, camera close to the road surface looking down the street, anamorphic wide shot, the street's vanishing point pushed into the right third of the frame, strongly horizontal composition",
     "color_palette": ["#000000", "#141414", "#2E2E2E", "#545454"]
   },
   "compositional_deconstruction": {
@@ -402,20 +459,20 @@ machines are a head and a half taller than a person, not architecture.
     "elements": [
       {
         "type": "obj",
-        "bbox": [430, 60, 880, 940],
-        "desc": "a row of humanoid machines standing in the middle distance across the road, roughly a head and a half taller than a person, two legs, a blocky torso, a small offset head, hard industrial geometry, lit only along their edges by the fire behind them, bodies otherwise black",
+        "bbox": [420, 40, 900, 960],
+        "desc": "one continuous rank standing across the road facing away from the camera towards the fire, people and humanoid machines alternating along it shoulder to shoulder and overlapping, the machines roughly a head and a half taller than the people beside them, two legs and a blocky torso and a small offset head, the same raised-arm gesture running through the whole rank so that a human arm and a machine arm are up side by side, every edge caught by the fire behind them and the rim light the brightest thing in the plate, bodies otherwise black",
         "color_palette": ["#141414", "#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
-        "bbox": [620, 0, 960, 1000],
-        "desc": "overturned debris and improvised barricades built across the street, angled slabs and tipped vehicles, rim-lit from behind, no detail on the near faces",
+        "bbox": [640, 0, 960, 1000],
+        "desc": "overturned debris and improvised barricades built across the street below the rank, angled slabs and tipped vehicles, rim-lit along their top edges only, no detail on the near faces",
         "color_palette": ["#141414", "#2E2E2E"]
       },
       {
         "type": "obj",
         "bbox": [560, 0, 720, 1000],
-        "desc": "the low silhouetted edge of single-storey street frontage running away from the camera on both sides, nothing taller than the machines, no upper floors, no skyline",
+        "desc": "the low silhouetted edge of single-storey street frontage running away from the camera on both sides towards the vanishing point on the right, nothing taller than the machines, no upper floors, no skyline",
         "color_palette": ["#000000", "#141414"]
       }
     ]
@@ -441,8 +498,8 @@ black, no midtones.
     "elements": [
       {
         "type": "obj",
-        "bbox": [620, 0, 1000, 1000],
-        "desc": "a dense crowd of people seen from behind, heads, shoulders and raised arms overlapping into one continuous solid white shape, filling the lower third of the frame across its full width, ragged along its top edge, completely flat white inside with no faces, no clothing and no separation between figures",
+        "bbox": [600, 0, 1000, 1000],
+        "desc": "a dense crowd of people seen from very close and slightly below, heads, shoulders and raised arms overlapping into one continuous solid white shape, filling the lower third of the frame across its full width and rising higher on the left than on the right, ragged along its top edge with several arms breaking well clear of it, completely flat white inside with no faces, no clothing and no separation between figures",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -504,7 +561,7 @@ The `bbox` values below already do this; preserve it when editing.
     "aesthetics": "oppressive scale, dense and vertical, extreme contrast between lit windows and deep crushed black, monochrome, no colour of any kind",
     "lighting": "thousands of small window lights and hanging signage glowing through rain haze, no sun, no moon, no sky light, strong atmospheric falloff with distance, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, strongly vertical composition, extreme wide shot",
+    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, the tower mass anchored off-centre to the right and the left third left almost empty, strongly vertical composition, extreme wide shot",
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
@@ -513,22 +570,21 @@ The `bbox` values below already do this; preserve it when editing.
       {
         "type": "obj",
         "bbox": [80, 0, 860, 1000],
-        "desc": "innumerable distant towers receding layer behind layer into haze, each one reduced to a soft vertical block of dimly glowing haze with no readable windows, densest and tallest towards the right of the frame, nothing sharp anywhere",
+        "desc": "innumerable distant towers receding layer behind layer into haze, each one reduced to a soft vertical block of dimly glowing haze with no readable windows, densest and tallest towards the right of the frame and falling away to almost nothing on the left, the right-hand mass the brightest thing in the plate, nothing sharp anywhere",
         "color_palette": ["#0A0A0A", "#1A1A1A", "#2E2E2E"]
       },
       {
         "type": "obj",
-        "bbox": [400, 0, 900, 1000],
-        "desc": "a broad bank of rain haze lying across the middle distance, catching the collective light of the city from below and diffusing it",
-        "color_palette": ["#000000", "#1A1A1A"]
+        "bbox": [300, 0, 900, 1000],
+        "desc": "rain haze lying between the layers of towers and thickening with distance, a soft horizontal gradient that swallows the furthest ranks completely",
+        "color_palette": ["#000000", "#0A0A0A", "#1A1A1A"]
       }
     ]
   }
 }
 ```
 
-**`02-mid`** — the towers, floor to ceiling. Vertical dominance is what
-separates this scene from `uprising`, so the `bbox` spans the full frame height.
+**`02-mid`**
 
 ```json
 {
@@ -537,29 +593,29 @@ separates this scene from `uprising`, so the `bbox` spans the full frame height.
     "aesthetics": "oppressive scale, dense and vertical, extreme contrast between lit windows and deep crushed black, monochrome, no colour of any kind",
     "lighting": "thousands of small window lights and hanging signage glowing through rain haze, no sun, no moon, no sky light, strong atmospheric falloff with distance, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, strongly vertical composition, extreme wide shot",
+    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, the tower mass anchored off-centre to the right and the left third left almost empty, strongly vertical composition, extreme wide shot",
     "color_palette": ["#000000", "#141414", "#2E2E2E", "#545454"]
   },
   "compositional_deconstruction": {
-    "background": "pure black between and behind the towers, no sky, nothing legible in the gaps",
+    "background": "pure black, nothing behind the towers, no sky, no haze glow",
     "elements": [
       {
         "type": "obj",
-        "bbox": [0, 300, 1000, 1000],
-        "desc": "colossal residential towers running the full height of the frame, top edge cropped off, thousands of small lit windows in irregular grids, weathered slab construction, concentrated on the right two thirds of the frame",
+        "bbox": [0, 380, 1000, 1000],
+        "desc": "a close rank of enormous towers filling the frame from top edge to bottom edge on the right, their faces gridded with small bright window lights, the grids the brightest thing in the plate, the concrete between them black, no readable interiors and nothing human-sized anywhere on them",
         "color_palette": ["#141414", "#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
-        "bbox": [0, 0, 1000, 340],
-        "desc": "a single tower face closest to the camera on the far left, only partly in frame, its windows dimmer and more widely spaced, mostly in shadow",
-        "color_palette": ["#000000", "#141414"]
+        "bbox": [120, 420, 780, 980],
+        "desc": "hanging signage banners and gantries strung between the towers, tall narrow rectangles catching the light along one edge, abstract marks with no letters or characters",
+        "color_palette": ["#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
-        "bbox": [180, 340, 760, 1000],
-        "desc": "hanging signage boards, gantries and slack cables strung between the towers, unreadable, no letters or characters of any kind on them, silhouetted against the lit facades behind",
-        "color_palette": ["#141414", "#2E2E2E"]
+        "bbox": [200, 0, 900, 420],
+        "desc": "a single much lower tower standing alone in the left third, far dimmer than the rank on the right, giving the frame something to fall away to",
+        "color_palette": ["#000000", "#141414"]
       }
     ]
   }
@@ -570,7 +626,7 @@ separates this scene from `uprising`, so the `bbox` spans the full frame height.
 
 ```json
 {
-  "high_level_description": "A stencil mask: the solid white silhouette of a rooftop edge with antennae and vents, on a pure black ground. Two tones only.",
+  "high_level_description": "A stencil mask: the solid white silhouette of a rooftop parapet and an aerial mast, on a pure black ground. Two tones only.",
   "style_description": {
     "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
     "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
@@ -579,18 +635,18 @@ separates this scene from `uprising`, so the `bbox` spans the full frame height.
     "color_palette": ["#000000", "#FFFFFF"]
   },
   "compositional_deconstruction": {
-    "background": "pure black, completely flat and empty, value zero everywhere the silhouette is not",
+    "background": "pure black, completely flat and empty, value zero everywhere the silhouettes are not",
     "elements": [
       {
         "type": "obj",
-        "bbox": [660, 0, 1000, 1000],
-        "desc": "the near parapet of a rooftop running across the full width of the bottom of the frame, a solid unbroken white band, flat white inside with no surface detail",
+        "bbox": [560, 0, 1000, 1000],
+        "desc": "the near edge of a rooftop crossing the frame as a diagonal, high on the left and dropping away to the right, one continuous solid white shape with a flat unbroken top edge, no texture and no detail inside it",
         "color_palette": ["#FFFFFF"]
       },
       {
         "type": "obj",
-        "bbox": [240, 40, 700, 420],
-        "desc": "antennae, ducting and railings rising off the parapet on the left, thin hard-edged white shapes against the black, joined to the band below them",
+        "bbox": [180, 620, 700, 780],
+        "desc": "a single aerial mast rising from the parapet on the right, a narrow solid white vertical with two short crossbars, no guy wires, no lattice",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -635,19 +691,21 @@ separates this scene from `uprising`, so the `bbox` spans the full frame height.
 
 ### `kinship` payloads — the alternative blog scene
 
-An interior at eye level, one lamp, people at human scale. It must not read as
-either the street or the skyline.
+An interior, and the one scene in the set that is *about* two parties doing one
+thing. It must not read as either the street or the skyline, and it must not read
+as a machine standing near some people: the camera is close enough that hands are
+legible, and both pairs of hands are inside the same object.
 
 **`01-far`**
 
 ```json
 {
-  "high_level_description": "A quiet domestic interior at night seen from deep inside the room, its windows glowing faintly onto a still city beyond. Monochrome, rendered on pure black.",
+  "high_level_description": "A room at night behind a table, seen from close in and slightly above, the far wall falling away into darkness beyond the reach of one lamp. Monochrome, rendered on pure black.",
   "style_description": {
-    "aesthetics": "quiet domestic realism, warm and unhurried, restrained contrast, deep blacks, monochrome, no colour of any kind",
-    "lighting": "one overhead lamp above a table out of frame, soft falloff into darkness, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
+    "aesthetics": "warm and close, deep blacks, a single pool of light with everything outside it gone, monochrome, no colour of any kind",
+    "lighting": "one low overhead lamp hanging just out of frame above the table, hard falloff into darkness within a metre of it, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, interior eye-level medium wide shot, documentary framing, natural unstaged composition",
+    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
@@ -655,14 +713,14 @@ either the street or the skyline.
     "elements": [
       {
         "type": "obj",
-        "bbox": [160, 80, 700, 920],
-        "desc": "a bank of tall windows across the far wall, each pane a soft dim rectangle of light, the city beyond them reduced to indistinct low blocks with no towers and nothing sharp",
+        "bbox": [120, 60, 620, 660],
+        "desc": "a bank of tall windows across the far wall on the left, each pane a soft dim rectangle of light, the city beyond them reduced to indistinct low blocks with no towers and nothing sharp, the brightest thing in the plate",
         "color_palette": ["#1A1A1A", "#2E2E2E"]
       },
       {
         "type": "obj",
         "bbox": [80, 0, 900, 1000],
-        "desc": "faint haze in the room's air softening the light coming off the windows, very low contrast",
+        "desc": "faint haze in the room's air softening the light coming off the windows, very low contrast, thickest across the upper half",
         "color_palette": ["#000000", "#0A0A0A"]
       }
     ]
@@ -670,16 +728,17 @@ either the street or the skyline.
 }
 ```
 
-**`02-mid`**
+**`02-mid`** — the plate the scene lives or dies on. One box, one object, four
+hands.
 
 ```json
 {
-  "high_level_description": "A quiet domestic interior at night seen from deep inside the room, its windows glowing faintly onto a still city beyond. Monochrome, rendered on pure black.",
+  "high_level_description": "A room at night behind a table, seen from close in and slightly above, the far wall falling away into darkness beyond the reach of one lamp. Monochrome, rendered on pure black.",
   "style_description": {
-    "aesthetics": "quiet domestic realism, warm and unhurried, restrained contrast, deep blacks, monochrome, no colour of any kind",
-    "lighting": "one overhead lamp above a table out of frame, soft falloff into darkness, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
+    "aesthetics": "warm and close, deep blacks, a single pool of light with everything outside it gone, monochrome, no colour of any kind",
+    "lighting": "one low overhead lamp hanging just out of frame above the table, hard falloff into darkness within a metre of it, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, interior eye-level medium wide shot, documentary framing, natural unstaged composition",
+    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
     "color_palette": ["#000000", "#141414", "#2E2E2E", "#545454"]
   },
   "compositional_deconstruction": {
@@ -687,20 +746,20 @@ either the street or the skyline.
     "elements": [
       {
         "type": "obj",
-        "bbox": [420, 60, 940, 940],
-        "desc": "a long kitchen table lit from directly above, its surface the brightest thing in the plate, plates and tools laid across it",
+        "bbox": [300, 180, 900, 860],
+        "desc": "one open machine casing lying on its side in the middle of the table with its panel off, its lit interior the brightest thing in the plate, and four hands reaching into that single opening from opposite sides: two human hands from the near right, and from the far left two jointed metal manipulators on the same scale, fingers and manipulator tips converging on the same point inside the casing, forearms overlapping across the opening, nothing between them",
         "color_palette": ["#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
-        "bbox": [300, 380, 900, 640],
-        "desc": "a humanoid machine standing at the table, the same height as the people beside it, plain functional construction, hands down on the same task as theirs, no spectacle, no menace",
-        "color_palette": ["#141414", "#2E2E2E", "#545454"]
+        "bbox": [200, 120, 720, 900],
+        "desc": "the upper bodies the hands belong to, leaning in over the casing from both sides and meeting above it, one a person in a work shirt and one a humanoid machine of plain functional construction at the same height, heads bowed to the same point, edges caught by the lamp and everything else black",
+        "color_palette": ["#141414", "#2E2E2E"]
       },
       {
         "type": "obj",
-        "bbox": [320, 100, 920, 380],
-        "desc": "two people working at the table alongside it, seen three-quarters from behind, ordinary clothes, relaxed posture, faces not visible",
+        "bbox": [520, 0, 940, 1000],
+        "desc": "the table itself running out of frame on both sides, its lit surface scattered with laid-out tools and small parts, the wood dark and the parts catching the lamp",
         "color_palette": ["#141414", "#2E2E2E"]
       }
     ]
@@ -712,7 +771,7 @@ either the street or the skyline.
 
 ```json
 {
-  "high_level_description": "A stencil mask: the solid white silhouettes of a doorframe and the back of a seated figure, on a pure black ground. Two tones only.",
+  "high_level_description": "A stencil mask: the solid white silhouettes of a table's near edge and a forearm crossing the foreground, on a pure black ground. Two tones only.",
   "style_description": {
     "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
     "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
@@ -725,14 +784,14 @@ either the street or the skyline.
     "elements": [
       {
         "type": "obj",
-        "bbox": [0, 0, 1000, 1000],
-        "desc": "a doorframe seen from just outside the room, forming a solid white border around all four edges of the frame with a large empty black opening in the middle, flat white with no moulding detail. The full-frame bbox is deliberate: the shape is the border, not the opening",
+        "bbox": [820, 0, 1000, 1000],
+        "desc": "the near edge of a table crossing the very bottom of the frame from side to side, one continuous solid white band with a flat top edge, no legs, no grain, no detail",
         "color_palette": ["#FFFFFF"]
       },
       {
         "type": "obj",
-        "bbox": [480, 580, 1000, 940],
-        "desc": "the back of a seated figure in the near foreground on the right, head and shoulders only, one continuous solid white shape with no hair, clothing or feature detail",
+        "bbox": [520, 620, 1000, 1000],
+        "desc": "a bare forearm and hand entering from the lower right corner and reaching towards the middle of the frame, one continuous solid white shape with fingers separated, no clothing detail and no interior line work",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -758,20 +817,533 @@ either the street or the skyline.
     "elements": [
       {
         "type": "obj",
-        "bbox": [120, 380, 460, 640],
-        "desc": "a single small lamp bloom high in the frame, a bright core with a tight falloff, no visible fixture around it",
+        "bbox": [60, 300, 460, 700],
+        "desc": "one soft round bloom of lamplight hanging in the upper middle of the frame, brightest at its centre and falling away to nothing within its own width, no fitting, no shade, no cable",
         "color_palette": ["#8A8A8A", "#CCCCCC"]
       },
       {
         "type": "obj",
-        "bbox": [500, 200, 900, 860],
-        "desc": "a scattering of small specular highlights on metal and glass below it, short hard glints, widely spaced, covering only a small fraction of the frame",
+        "bbox": [420, 60, 940, 940],
+        "desc": "a scattering of small hard specular highlights below it where the lamp catches metal and glass, spread right across the width of the frame rather than clustered under the bloom, each one a point or a short bright edge a few pixels across, covering well under five percent of the frame in total",
         "color_palette": ["#3D3D3D", "#8A8A8A"]
       }
     ]
   }
 }
 ```
+
+---
+
+## Route D — the light set
+
+### Why there is a second set at all
+
+The tube follows the theme. On dark it is a lit screen and the plates are added
+together as emission; on light it is paper, and `src/lib/crt-shader.ts` lays the
+picture down as **ink** — plate luminance becomes ink coverage.
+
+A night scene put through that comes back as a tonal negative: the black sky
+prints as bare paper and the fires and the machines print as black. It is not
+dim, it is inverted, and no gain or exposure fixes it. So the light theme gets
+its own plates, authored for daylight, and `src/lib/scenes.json` carries them
+under `light` alongside the night set.
+
+### Author them as daylight; the script inverts
+
+**Write the payload as an ordinary daylight picture.** Do not try to describe an
+ink-density map, and do not pre-invert anything: asking a model for a negative
+gets a picture that looks like a negative rather than an inverted picture.
+
+`scripts/make-scene-plates.mjs --theme light` flips every emissive plate on the
+way out, so the brightest pixel of the finished file is the densest mark on
+paper. Occluders are left alone — a dark silhouette on a white ground already
+comes back the right way round and the script's mean-luminance check handles it.
+
+Two consequences for the wording:
+
+- **The ground is pure white, not pure black.** After inversion white becomes
+  black, which is no ink at all, which is bare paper. Say "on a pure white
+  ground" in every emissive payload and give it a high-key palette.
+- **The accent plane is not the light source.** On paper, sunlight is the
+  *absence* of ink; it cannot be drawn. The `04` plate carries what is warm in
+  hue rather than what is bright in value — terracotta, banner cloth, dry husks,
+  wet channel stone — because it is tinted with `--sl-accent-default`, which on
+  the light theme is a burnt ochre.
+
+### Light plate budgets
+
+Ink coverage, not emission, and the two do not convert. The light path tonemaps
+in emission space, so a heavier ink load saturates rather than deepens and local
+contrast is not monotonic in the budget. **These are a first cut.** Calibrate
+them on screen — `.scenes-raw/` keeps every render, so
+`--theme light --from-raw --levels` is seconds rather than an hour of GPU.
+
+| Plate | Tone | Peak after inversion | Coverage | Notes |
+|---|---|---|---|---|
+| `01-far` | `structure` | 70 / 255 | broad, low | Sky and distance. On paper this is the palest wash. |
+| `02-mid` | `depth` | 120 / 255 | moderate | The body of the scene. Carries the teal `accent-depth`. |
+| `03-*` | `occluder` | pure white / pure black | 25–40 % of frame | A mask, exactly as on dark. |
+| `04-*` | `accent` | 140 / 255 | under 8 % of frame | What is ochre, not what is bright. |
+
+Everything else from Route C still holds: no colour, no text, no blur, no depth
+of field, every element gets a `bbox`, and the five rules under *What the first
+set got wrong* apply here first rather than last.
+
+### `uprising` light payloads
+
+The same street, rebuilt. The camera decision is a low vantage from under the
+beam, so the frame is cut by a strong upward diagonal; the shared object is one
+roof beam with every hand on it.
+
+**`01-far`**
+
+```json
+{
+  "high_level_description": "A city street in full midday sun, seen from low down near the road surface, its facades planted with terraced greenery all the way up. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, bright flat daylight, soft shadows, airy, monochrome, no colour of any kind",
+    "lighting": "hard overhead midday sun with a wide bright sky, light bouncing back up off a pale road, no artificial light anywhere, everything in perfect focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, camera close to the road surface looking up the street, anamorphic wide shot, the street's vanishing point pushed into the right third of the frame, strong upward diagonal",
+    "color_palette": ["#FFFFFF", "#E0E0E0", "#B8B8B8", "#8A8A8A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, an empty blown-out sky filling the whole upper frame, no clouds, no sun disc, no birds",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [120, 0, 780, 1000],
+        "desc": "the facades on both sides of the street terraced with planting from pavement to roofline, tier above tier of foliage spilling over each ledge, the two sides converging towards the vanishing point in the right third, the leaf mass the darkest thing in the plate and the sky behind it left completely empty",
+        "color_palette": ["#8A8A8A", "#B8B8B8"]
+      },
+      {
+        "type": "obj",
+        "bbox": [700, 0, 1000, 1000],
+        "desc": "the pale road surface running away from the camera in the near foreground, catching the sky, almost as light as the sky itself, marked only by the long soft shadows of the planting falling across it",
+        "color_palette": ["#E0E0E0", "#FFFFFF"]
+      }
+    ]
+  }
+}
+```
+
+**`02-mid`** — one beam, every hand on it.
+
+```json
+{
+  "high_level_description": "A city street in full midday sun, seen from low down near the road surface, its facades planted with terraced greenery all the way up. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, bright flat daylight, soft shadows, airy, monochrome, no colour of any kind",
+    "lighting": "hard overhead midday sun with a wide bright sky, light bouncing back up off a pale road, no artificial light anywhere, everything in perfect focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, camera close to the road surface looking up the street, anamorphic wide shot, the street's vanishing point pushed into the right third of the frame, strong upward diagonal",
+    "color_palette": ["#FFFFFF", "#D0D0D0", "#9A9A9A", "#5A5A5A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, an empty sky, nothing behind the figures",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [180, 40, 820, 960],
+        "desc": "one long timber roof beam lifted overhead and running as a steep diagonal from the lower left of the frame up into the upper right, and along its whole length a single mixed line of people and humanoid machines carrying it, alternating and overlapping, arms up and hands gripping the same beam, human hands and jointed metal manipulators side by side on it, the machines the same height as the people beside them, every figure seen from below against the empty sky",
+        "color_palette": ["#5A5A5A", "#9A9A9A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [420, 0, 940, 1000],
+        "desc": "the part-built timber frame the beam is going onto, a lattice of uprights and cross-members rising on both sides of the street, open and light, seen against the sky",
+        "color_palette": ["#9A9A9A", "#D0D0D0"]
+      },
+      {
+        "type": "obj",
+        "bbox": [520, 0, 900, 1000],
+        "desc": "planting boxes and young trees along both pavements below the frame, small against it, giving the street its floor",
+        "color_palette": ["#9A9A9A", "#D0D0D0"]
+      }
+    ]
+  }
+}
+```
+
+**`03-frame`** — the occluder. Black on white here, and the script flips it.
+
+```json
+{
+  "high_level_description": "A stencil mask: the solid black silhouettes of two timber uprights and a pair of near shoulders, on a pure white ground. Two tones only.",
+  "style_description": {
+    "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
+    "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
+    "medium": "flat two-tone vector stencil, pure black shapes on a pure white ground",
+    "art_style": "silhouette matte, clean unbroken outlines, no interior detail whatsoever",
+    "color_palette": ["#000000", "#FFFFFF"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely flat and empty everywhere the silhouettes are not",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [0, 60, 1000, 260],
+        "desc": "one timber upright standing in the near foreground on the left, a solid black vertical running the full height of the frame, slightly wider at the base, no grain and no fixings",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [0, 740, 1000, 900],
+        "desc": "a second timber upright in the near foreground on the right, the same solid black vertical, narrower than the first",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [720, 240, 1000, 780],
+        "desc": "the heads and shoulders of two people standing with their backs to the camera between the uprights, low in the frame, one continuous solid black shape with no faces, no hair detail and no separation between them",
+        "color_palette": ["#000000"]
+      }
+    ]
+  }
+}
+```
+> The script flips this one on mean luminance. If it comes back white-on-black
+> already, that is fine too — the check handles both.
+
+**`04-sun`** — the accent. What is ochre, not what is bright.
+
+```json
+{
+  "high_level_description": "Scattered banner cloth, terracotta planters and dry seed husks, on a pure white ground, nothing else in frame. Monochrome.",
+  "style_description": {
+    "aesthetics": "sparse, minimal, isolated dark marks on an empty white field, monochrome",
+    "lighting": "flat even daylight, no modelling, no cast shadows, everything sharp, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no film grain",
+    "art_style": "isolated element study, empty composition",
+    "color_palette": ["#FFFFFF", "#B8B8B8", "#6E6E6E", "#3D3D3D"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely empty, no street, no sky, no context of any kind",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [60, 40, 720, 960],
+        "desc": "a few long banners of cloth hanging at different heights, spread right across the width of the frame rather than clustered, each one a narrow soft-edged rectangle with a rippled lower edge, no letters, no characters, no emblems",
+        "color_palette": ["#6E6E6E", "#3D3D3D"]
+      },
+      {
+        "type": "obj",
+        "bbox": [520, 20, 980, 980],
+        "desc": "a scattering of terracotta planters and dry seed husks along the lower half, spread evenly from edge to edge and never gathered into a row or a pile, each one a small compact shape, covering well under eight percent of the frame in total",
+        "color_palette": ["#B8B8B8", "#6E6E6E"]
+      }
+    ]
+  }
+}
+```
+
+### `city` light payloads
+
+The same skyline, greened. Keep the interest on the **right half of the frame** —
+the left is under type, exactly as in the night set. The camera decision is the
+water channel cutting the frame corner to corner.
+
+**`01-far`**
+
+```json
+{
+  "high_level_description": "A dense city seen from a high rooftop at midday, its towers grown over with planting and terracing, receding into clear bright haze. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, enormous scale seen in flat daylight, airy, monochrome, no colour of any kind",
+    "lighting": "clear overhead midday sun, a wide blown-out sky, light haze thinning the distance rather than darkening it, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, the tower mass anchored off-centre to the right and the left third left almost empty, strongly vertical composition, extreme wide shot",
+    "color_palette": ["#FFFFFF", "#E0E0E0", "#B8B8B8", "#8A8A8A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, an empty blown-out sky, no clouds, no sun disc",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [80, 0, 860, 1000],
+        "desc": "rank behind rank of distant towers receding into haze, each one softened until it is barely separable from the sky, every roofline and ledge carrying planting, densest and tallest towards the right of the frame and falling away to almost nothing on the left, the right-hand mass the darkest thing in the plate, nothing sharp anywhere",
+        "color_palette": ["#8A8A8A", "#B8B8B8"]
+      },
+      {
+        "type": "obj",
+        "bbox": [300, 0, 900, 1000],
+        "desc": "clear daylight haze lying between the ranks and thickening with distance, a soft horizontal gradient that bleaches the furthest towers into the sky completely",
+        "color_palette": ["#E0E0E0", "#FFFFFF"]
+      }
+    ]
+  }
+}
+```
+
+**`02-mid`**
+
+```json
+{
+  "high_level_description": "A dense city seen from a high rooftop at midday, its towers grown over with planting and terracing, receding into clear bright haze. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, enormous scale seen in flat daylight, airy, monochrome, no colour of any kind",
+    "lighting": "clear overhead midday sun, a wide blown-out sky, light haze thinning the distance rather than darkening it, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, high rooftop vantage looking out and slightly down, the tower mass anchored off-centre to the right and the left third left almost empty, strongly vertical composition, extreme wide shot",
+    "color_palette": ["#FFFFFF", "#D0D0D0", "#9A9A9A", "#5A5A5A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, an empty sky, nothing behind the towers",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [0, 380, 1000, 1000],
+        "desc": "a close rank of enormous towers filling the frame from top edge to bottom edge on the right, every setback and balcony planted, canopy walkways bridging between them at several heights, the foliage the darkest thing in the plate and the structure between it pale, nothing human-sized readable anywhere on them",
+        "color_palette": ["#5A5A5A", "#9A9A9A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [0, 300, 1000, 1000],
+        "desc": "one open water channel running as a single unbroken diagonal from between the far towers in the upper right down to the near bottom edge of the frame, a narrow pale ribbon with a dark lip on each side, the one line that crosses the whole picture",
+        "color_palette": ["#D0D0D0", "#5A5A5A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [120, 420, 640, 980],
+        "desc": "slow vertical-axis wind rotors standing on the tower tops, tall narrow open helices, seen against the empty sky",
+        "color_palette": ["#9A9A9A", "#D0D0D0"]
+      },
+      {
+        "type": "obj",
+        "bbox": [200, 0, 900, 380],
+        "desc": "a single much lower planted tower standing alone in the left third, far paler than the rank on the right, giving the frame something to fall away to",
+        "color_palette": ["#D0D0D0", "#FFFFFF"]
+      }
+    ]
+  }
+}
+```
+
+**`03-parapet`** — the occluder.
+
+```json
+{
+  "high_level_description": "A stencil mask: the solid black silhouettes of a rooftop parapet, a planter box and a wind rotor, on a pure white ground. Two tones only.",
+  "style_description": {
+    "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
+    "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
+    "medium": "flat two-tone vector stencil, pure black shapes on a pure white ground",
+    "art_style": "silhouette matte, clean unbroken outlines, no interior detail whatsoever",
+    "color_palette": ["#000000", "#FFFFFF"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely flat and empty everywhere the silhouettes are not",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [560, 0, 1000, 1000],
+        "desc": "the near edge of a rooftop crossing the frame as a diagonal, high on the left and dropping away to the right, one continuous solid black shape with a flat unbroken top edge, no texture and no detail inside it",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [420, 40, 700, 340],
+        "desc": "a long planter box sitting on the parapet at the left, a solid black rectangle with a ragged top edge where the planting overhangs it, no individual leaves",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [140, 660, 620, 800],
+        "desc": "one vertical-axis wind rotor standing on the parapet at the right, a narrow solid black column with three curved blades, no lattice and no guy wires",
+        "color_palette": ["#000000"]
+      }
+    ]
+  }
+}
+```
+> The script flips this one on mean luminance.
+
+**`04-water`** — the accent.
+
+```json
+{
+  "high_level_description": "The wet stone lip of a water channel and a line of catchment basins, on a pure white ground, nothing else in frame. Monochrome.",
+  "style_description": {
+    "aesthetics": "sparse, minimal, isolated dark marks on an empty white field, monochrome",
+    "lighting": "flat even daylight, no modelling, no cast shadows, everything sharp, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no film grain",
+    "art_style": "isolated element study, empty composition",
+    "color_palette": ["#FFFFFF", "#B8B8B8", "#6E6E6E", "#3D3D3D"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely empty, no city, no towers, no horizon, no context of any kind",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [0, 420, 1000, 1000],
+        "desc": "the wet stone lip of a channel running as a single narrow diagonal from the upper right down to the lower edge, broken into short segments where the water passes over it, confined to the right of the frame and absent from its left third",
+        "color_palette": ["#6E6E6E", "#3D3D3D"]
+      },
+      {
+        "type": "obj",
+        "bbox": [260, 480, 900, 980],
+        "desc": "a line of small catchment basins along it at different heights, each a short compact dark mark, widely spaced and never touching, covering well under eight percent of the frame in total",
+        "color_palette": ["#B8B8B8", "#6E6E6E"]
+      }
+    ]
+  }
+}
+```
+
+### `kinship` light payloads
+
+The same table, in daylight. The camera decision is a close three-quarter with
+the table filling the lower frame; the shared object is one seed tray passing
+between a human hand and a machine hand.
+
+**`01-far`**
+
+```json
+{
+  "high_level_description": "A room in full daylight behind a table, seen from close in and slightly above, a tall open window filling the far wall. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, bright even daylight, soft shadows, airy, monochrome, no colour of any kind",
+    "lighting": "one tall open window carrying almost all the light, a wide blown-out sky beyond it, soft bounce filling the room, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "color_palette": ["#FFFFFF", "#E0E0E0", "#B8B8B8", "#8A8A8A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, the room's far wall bleached out, no detail",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [80, 60, 700, 620],
+        "desc": "one tall window standing open across the far wall on the left, its frame and mullions the darkest thing in the plate, the view beyond it blown out to nothing but a few soft low shapes",
+        "color_palette": ["#8A8A8A", "#B8B8B8"]
+      },
+      {
+        "type": "obj",
+        "bbox": [200, 40, 820, 540],
+        "desc": "potted plants crowding the sill and the floor below the window, leaves overlapping into a soft mass, darker at the base and thinning upward",
+        "color_palette": ["#8A8A8A", "#B8B8B8"]
+      },
+      {
+        "type": "obj",
+        "bbox": [80, 0, 900, 1000],
+        "desc": "daylight haze filling the room's air and lifting everything away from the window towards white, very low contrast",
+        "color_palette": ["#E0E0E0", "#FFFFFF"]
+      }
+    ]
+  }
+}
+```
+
+**`02-mid`** — one box, one tray, four hands.
+
+```json
+{
+  "high_level_description": "A room in full daylight behind a table, seen from close in and slightly above, a tall open window filling the far wall. Monochrome, rendered on a pure white ground.",
+  "style_description": {
+    "aesthetics": "open and high-key, bright even daylight, soft shadows, airy, monochrome, no colour of any kind",
+    "lighting": "one tall open window carrying almost all the light, a wide blown-out sky beyond it, soft bounce filling the room, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
+    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "color_palette": ["#FFFFFF", "#D0D0D0", "#9A9A9A", "#5A5A5A"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, the room behind bleached out, no walls, no furniture",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [300, 180, 900, 860],
+        "desc": "one shallow seed tray held in mid-air over the middle of the table and gripped from both sides at once: two human hands on the near right rim, and on the far left rim two jointed metal manipulators on the same scale, all four contacts on the same tray, forearms overlapping above it, the tray level and nothing between them",
+        "color_palette": ["#5A5A5A", "#9A9A9A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [200, 120, 720, 900],
+        "desc": "the upper bodies the hands belong to, leaning in over the tray from both sides and meeting above it, one a person in a work shirt and one a humanoid machine of plain functional construction at the same height, heads bowed to the same point, both dark against the blown-out window behind them",
+        "color_palette": ["#5A5A5A", "#9A9A9A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [520, 0, 940, 1000],
+        "desc": "the table itself running out of frame on both sides, its pale surface covered in seed trays, small pots and hand tools laid out in rows, everything catching the window light",
+        "color_palette": ["#9A9A9A", "#D0D0D0"]
+      }
+    ]
+  }
+}
+```
+
+**`03-window`** — the occluder.
+
+```json
+{
+  "high_level_description": "A stencil mask: the solid black silhouettes of a window mullion, a table's near edge and a forearm, on a pure white ground. Two tones only.",
+  "style_description": {
+    "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
+    "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
+    "medium": "flat two-tone vector stencil, pure black shapes on a pure white ground",
+    "art_style": "silhouette matte, clean unbroken outlines, no interior detail whatsoever",
+    "color_palette": ["#000000", "#FFFFFF"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely flat and empty everywhere the silhouettes are not",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [0, 40, 820, 200],
+        "desc": "one window mullion standing in the near foreground on the left, a solid black vertical running from the top of the frame down to the table line, plain and unmoulded",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [820, 0, 1000, 1000],
+        "desc": "the near edge of a table crossing the very bottom of the frame from side to side, one continuous solid black band with a flat top edge, no legs, no grain, no detail",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [520, 620, 1000, 1000],
+        "desc": "a bare forearm and hand entering from the lower right corner and reaching towards the middle of the frame, one continuous solid black shape with fingers separated, no clothing detail and no interior line work",
+        "color_palette": ["#000000"]
+      }
+    ]
+  }
+}
+```
+> The script flips this one on mean luminance.
+
+**`04-leaf`** — the accent.
+
+```json
+{
+  "high_level_description": "Terracotta pots, dry seed husks and the rim of a woven tray, on a pure white ground, nothing else in frame. Monochrome.",
+  "style_description": {
+    "aesthetics": "sparse, minimal, isolated dark marks on an empty white field, monochrome",
+    "lighting": "flat even daylight, no modelling, no cast shadows, everything sharp, no depth of field, no bokeh, no blur",
+    "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no film grain",
+    "art_style": "isolated element study, empty composition",
+    "color_palette": ["#FFFFFF", "#B8B8B8", "#6E6E6E", "#3D3D3D"]
+  },
+  "compositional_deconstruction": {
+    "background": "pure white, completely empty, no room, no table, no context of any kind",
+    "elements": [
+      {
+        "type": "obj",
+        "bbox": [80, 300, 520, 720],
+        "desc": "the woven rim of one shallow tray sitting high in the middle of the frame, a single closed oval band of dark hatching with nothing inside it",
+        "color_palette": ["#6E6E6E", "#3D3D3D"]
+      },
+      {
+        "type": "obj",
+        "bbox": [420, 40, 960, 960],
+        "desc": "a scattering of small terracotta pots and dry seed husks across the lower half, spread evenly from edge to edge and never gathered into a row or a pile, each one a small compact shape, covering well under eight percent of the frame in total",
+        "color_palette": ["#B8B8B8", "#6E6E6E"]
+      }
+    ]
+  }
+}
+```
+
+---
 
 ### Checking a payload before spending a call
 
@@ -817,23 +1389,36 @@ positive statements instead; the table in that section says where each one went.
 - [ ] Nothing legible: no text survived, in any plate. Check the corners at high
       exposure — four of the first twelve carried a fabricated artist's monogram
       in the bottom right, faint enough to pass a normal look.
+- [ ] **Light set only:** the file on disk is *inverted* relative to the picture
+      that was rendered — bright where the daylight scene was dark. If it still
+      looks like a photograph, `--theme light` was not passed and the plate is
+      the wrong way round.
+- [ ] **Light set only:** the subject reads as a shape. Open the plate at the
+      size the tube will show it and look at it for a second: if the people and
+      the machine are not obviously doing the same thing, the payload is wrong
+      and no amount of levelling will fix it.
 
 ## Installing the plates
 
-Filenames are fixed — they are referenced by `src/lib/scenes.json`.
+`scripts/make-scene-plates.mjs` writes them where they belong; the paths below
+are what it is aiming at, and they come from `src/lib/scenes.json`.
 
 ```
-public/scenes/uprising/01-far.webp
-public/scenes/uprising/02-mid.webp
-public/scenes/uprising/03-crowd.webp
-public/scenes/uprising/04-embers.webp
-public/scenes/city/01-far.webp
-public/scenes/city/02-mid.webp
-public/scenes/city/03-near.webp
-public/scenes/city/04-rain.webp
+public/scenes/uprising/{01-far,02-mid,03-crowd,04-embers}.webp
+public/scenes/city/{01-far,02-mid,03-near,04-rain}.webp
+public/scenes/kinship/{01-far,02-mid,03-near,04-warm}.webp
+
+public/scenes/uprising/light/{01-far,02-mid,03-frame,04-sun}.webp
+public/scenes/city/light/{01-far,02-mid,03-parapet,04-water}.webp
+public/scenes/kinship/light/{01-far,02-mid,03-window,04-leaf}.webp
 ```
 
-Then rebuild the flattened composite that visitors without WebGPU download, and
+`uprising` and `kinship` share the blog band and the tube changes channel between
+them on a timer; `city` is the `/apparel` opening. The light folders are optional
+— a scene whose light plates are absent keeps its night on both themes, which is
+what the site did before the light set existed.
+
+Then rebuild the flattened composites that visitors without WebGPU download, and
 re-check the pages:
 
 ```sh
@@ -842,17 +1427,11 @@ npm run build
 npm run contrast -- http://localhost:4321/apparel/ .ap-open__h .ap-open__lede
 ```
 
+`scenes:flats` builds one composite per polarity per scene and skips a light set
+whose plates are not on disk yet. Once a `<scene>-flat-light.webp` exists, pass
+it to the tube as `flatLight` alongside `flat` — see `src/pages/apparel/index.astro`.
+
 The contrast check is not optional on `/apparel`: the heading and the lede sit on
 the glass, and a brighter plate than the placeholder will move those numbers. The
-floors are 3:1 for the heading and 4.5:1 for the lede.
-
-Using the `kinship` set instead of `uprising` means renaming its files to the
-`uprising/*` paths, or adding a `kinship` entry to `src/lib/scenes.json` and
-pointing `src/pages/blog/[...page].astro` at it.
-
-## Open: the paginated archive
-
-Every page of `/blog` currently shows the same scene — `/blog/2/` gets the band
-`/blog/` has. Giving each page its own would mean one more scene per page of
-archive, which grows with the post count. If it is wanted, the cheapest version
-is a small pool cycled by page number rather than one scene per page.
+floors are 3:1 for the heading and 4.5:1 for the lede, and they have to hold on
+**both** themes, which is why `city` is the constrained scene of the three.
