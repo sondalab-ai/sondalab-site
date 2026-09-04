@@ -7,13 +7,13 @@
         "src": "/scenes/uprising/01-far.webp",
         "depth": 0.06,
         "tone": "structure",
-        "gain": 0.5
+        "gain": 1
       },
       {
         "src": "/scenes/uprising/02-mid.webp",
         "depth": 0.22,
         "tone": "depth",
-        "gain": 0.75
+        "gain": 1
       },
       {
         "src": "/scenes/uprising/03-crowd.webp",
@@ -25,7 +25,7 @@
         "src": "/scenes/uprising/04-embers.webp",
         "depth": 0.85,
         "tone": "accent",
-        "gain": 1
+        "gain": 0.35
       }
     ]
   },
@@ -37,13 +37,13 @@
         "src": "/scenes/city/01-far.webp",
         "depth": 0.05,
         "tone": "structure",
-        "gain": 0.5
+        "gain": 1
       },
       {
         "src": "/scenes/city/02-mid.webp",
         "depth": 0.2,
         "tone": "depth",
-        "gain": 0.8
+        "gain": 1
       },
       {
         "src": "/scenes/city/03-near.webp",
@@ -55,7 +55,7 @@
         "src": "/scenes/city/04-rain.webp",
         "depth": 0.9,
         "tone": "accent",
-        "gain": 0.7
+        "gain": 0.3
       }
     ]
   },
@@ -67,13 +67,13 @@
         "src": "/scenes/kinship/01-far.webp",
         "depth": 0.06,
         "tone": "structure",
-        "gain": 0.5
+        "gain": 1
       },
       {
         "src": "/scenes/kinship/02-mid.webp",
         "depth": 0.22,
         "tone": "depth",
-        "gain": 0.75
+        "gain": 1
       },
       {
         "src": "/scenes/kinship/03-near.webp",
@@ -85,7 +85,7 @@
         "src": "/scenes/kinship/04-warm.webp",
         "depth": 0.85,
         "tone": "accent",
-        "gain": 1
+        "gain": 0.35
       }
     ]
   }

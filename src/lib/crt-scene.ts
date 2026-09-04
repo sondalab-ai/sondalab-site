@@ -181,10 +181,12 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
       case 'depth':
         return fade(token('--sl-accent-depth'), Math.min(1, layer.gain * k));
       default:
-        // Structure is the bulk of the picture and it stacks: four planes at the
-        // ink's full value clip to white the moment two of them overlap on the
-        // dark theme, where compositing is additive. It is held well under.
-        return fade(ink, Math.min(1, 0.55 * layer.gain * k));
+        // Full value. The damping this branch used to carry was written for the
+        // procedural stand-ins, where several planes were structure at once; the
+        // artwork has exactly one, and its plate is already exposed to a white
+        // point of 46/255, so the sum of the three additive planes stays well
+        // clear of clipping on the dark theme.
+        return fade(ink, Math.min(1, layer.gain * k));
     }
   }
 
