@@ -54,6 +54,18 @@ const BUDGET = {
 };
 
 /**
+ * Per-scene overrides on the table above, because a budget is a peak and a peak
+ * is not a brightness. `city` spends its range on small window grids scattered
+ * over black, so at the same white point as `kinship` — which has broad lit
+ * surfaces — it composites far darker, and on the night theme the two figures at
+ * the parapet all but disappeared. Raising its peaks lifts the lit city they are
+ * silhouetted against. Scenes absent here take the table unchanged.
+ */
+const SCENE_BUDGET = {
+  'city/dark': { '01': 74, '02': 132, '04': 230 },
+};
+
+/**
  * Where the untouched render is kept. Rendering a plate costs about five
  * minutes, so the raw PNG is worth a few megabytes: a different Levels decision
  * is then a re-run of --from-raw rather than an hour of GPU.
@@ -281,13 +293,35 @@ async function normalise(page, pngBase64, occluder, budget, force) {
       }
       const mean = sum / (px.length / 4);
 
-      // Two reasons to flip. An occluder is a mask, and a model asked for a
-      // silhouette will usually answer with the conventional dark shape on a
-      // light ground — mean luminance says which way round it came back. A light
-      // emissive plate is flipped unconditionally: it was authored as a daylight
-      // picture and what the compositor wants is an ink-density map, where the
-      // brightest pixel is the densest mark.
-      const inverted = forceInvert || (isOccluder && mean > 127);
+      // Two reasons to flip. A light emissive plate is flipped unconditionally:
+      // it was authored as a daylight picture and what the compositor wants is an
+      // ink-density map, where the brightest pixel is the densest mark.
+      //
+      // An occluder is a mask, and which way round the model drew it has to be
+      // measured. This used to compare the whole plate's mean against 127, which
+      // is a coin toss for any mask covering roughly half the frame: uprising's
+      // light `03-frame` came back at mean 123, was left unflipped, and composited
+      // as its own negative — the two uprights and the pair of figures ended up as
+      // the holes and everything else as the mask.
+      //
+      // The ground is what touches the edges. A silhouette sits inside the frame
+      // and the ground runs around it, so the border ring says which tone is the
+      // ground whatever the coverage is. Shapes that do reach an edge — a table
+      // lip across the bottom, an upright running full height — take a share of
+      // the ring but not the majority of it.
+      let borderBright = 0;
+      let borderTotal = 0;
+      const band = Math.max(2, Math.round(Math.min(w, h) * 0.02));
+      for (let y = 0; y < h; y += 1) {
+        const edgeRow = y < band || y >= h - band;
+        for (let x = 0; x < w; x += 1) {
+          if (!edgeRow && x >= band && x < w - band) continue;
+          borderTotal += 1;
+          if (px[(y * w + x) * 4] > 127) borderBright += 1;
+        }
+      }
+      const groundIsLight = borderBright / borderTotal > 0.5;
+      const inverted = forceInvert || (isOccluder && groundIsLight);
       if (inverted) {
         for (let i = 0; i < px.length; i += 4) {
           px[i] = 255 - px[i];
@@ -327,17 +361,24 @@ async function normalise(page, pngBase64, occluder, budget, force) {
       // notch in the silhouette.
       if (!isOccluder) {
         const reach = Math.round(h * 0.17);
-        ctx.save();
-        ctx.translate(w, h);
-        ctx.scale(1.7, 1);
-        const wipe = ctx.createRadialGradient(0, 0, reach * 0.5, 0, 0, reach);
-        wipe.addColorStop(0, 'rgba(0,0,0,1)');
-        wipe.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = wipe;
-        ctx.beginPath();
-        ctx.arc(0, 0, reach, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        // Both bottom corners, not just the right one. The wipe was written
+        // against a run that happened to sign on the right every time, and a
+        // signature on the left would have gone straight through it. Which
+        // corner the model picks is not a property worth betting on, and the
+        // second wipe costs nothing: the corner carries no scene either side.
+        for (const x of [w, 0]) {
+          ctx.save();
+          ctx.translate(x, h);
+          ctx.scale(1.7, 1);
+          const wipe = ctx.createRadialGradient(0, 0, reach * 0.5, 0, 0, reach);
+          wipe.addColorStop(0, 'rgba(0,0,0,1)');
+          wipe.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = wipe;
+          ctx.beginPath();
+          ctx.arc(0, 0, reach, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
       }
 
       return {
@@ -389,7 +430,7 @@ for (const [key, caption] of payloads) {
     // to the mean-luminance heuristic: a dark silhouette on a light ground
     // already comes back the right way round, and forcing it twice undoes it.
     invert: theme === 'light' && !occluder,
-    budget: BUDGET[theme][plate.slice(0, 2)] ?? 255,
+    budget: SCENE_BUDGET[`${scene}/${theme}`]?.[plate.slice(0, 2)] ?? BUDGET[theme][plate.slice(0, 2)] ?? 255,
     path: layer
       ? `public${layer.src}`
       : `public/scenes/${scene}/${theme === 'light' ? 'light/' : ''}${plate}.webp`,
