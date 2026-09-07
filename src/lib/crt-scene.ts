@@ -32,8 +32,18 @@ import { SCENES, type Scene, type SceneLayer } from './scenes';
 const PLATE_W = 1200;
 const PLATE_H = 675;
 
-/** Texture height; width follows the tube's aspect. */
+/** Texture height; width follows the tube's aspect, up to TEX_MAX_W. */
 const TEX_H = 640;
+
+/**
+ * Texture width ceiling. The aspect used to be clamped at 3:1, which is fine up
+ * to a laptop and wrong beyond it: the shader stretches the whole texture across
+ * the whole screen, so on a 3440px display the blog band ran at 9:1 and the
+ * picture came out three times too wide. Bounding the width instead of the
+ * aspect keeps the cost fixed and the proportions honest — the plate is
+ * cover-fitted, so a wider tube crops more of it rather than stretching it.
+ */
+const TEX_MAX_W = 3840;
 
 /** Slack around the frame so parallax never exposes a plate's edge. */
 const MARGIN = 0.07;
@@ -139,8 +149,10 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
   const ctx = canvas.getContext('2d')!;
 
   function geometry(aspect: number) {
-    canvas.height = TEX_H;
-    canvas.width = Math.round(TEX_H * Math.min(3, Math.max(0.6, aspect)));
+    const a = Math.max(0.6, aspect);
+    const w = Math.min(TEX_MAX_W, Math.round(TEX_H * a));
+    canvas.width = w;
+    canvas.height = Math.round(w / a);
   }
   geometry(opts.aspect ?? 16 / 9);
 
@@ -196,7 +208,14 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
         // artwork has exactly one, and its plate is already exposed to a white
         // point of 46/255, so the sum of the three additive planes stays well
         // clear of clipping on the dark theme.
-        return fade(ink, Math.min(1, layer.gain * k));
+        //
+        // On glass the ink token is near-white and structure reads as the lit
+        // distance. On paper it is near-black, and since this is the largest
+        // plane by area it dragged the whole daylight picture to grey. There it
+        // takes the depth token instead: the far plane separates from the mid by
+        // value, as it already does on glass, and the accent stays ochre because
+        // the light `04` payloads were authored for that hue.
+        return fade(polarityLight ? token('--sl-accent-depth') : ink, Math.min(1, layer.gain * k));
     }
   }
 

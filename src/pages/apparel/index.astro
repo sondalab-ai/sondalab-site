@@ -4,6 +4,7 @@ import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import CrtScene from '../../components/CrtScene.astro';
 import cityFlat from '../../assets/scenes/city-flat.webp';
+import cityFlatLight from '../../assets/scenes/city-flat-light.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
 
@@ -46,6 +47,7 @@ const ledger = [
     <CrtScene
       scene="city"
       flat={cityFlat}
+      flatLight={cityFlatLight}
       intensity={0.35}
       class="ap-open__field"
       pointerHost=".ap-open"

@@ -3,6 +3,7 @@ import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
 import CrtScene from '../../components/CrtScene.astro';
 import uprisingFlat from '../../assets/scenes/uprising-flat.webp';
+import uprisingFlatLight from '../../assets/scenes/uprising-flat-light.webp';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -82,7 +83,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
     {/* The archive opens on a transmission before it lists any. Full-bleed, so
         the tube reads as a broadcast the page is receiving rather than an
         illustration inside the column. No text sits on the glass. */}
-    <CrtScene scene={BAND_SCENES} flat={uprisingFlat} class="tlog-band" />
+    <CrtScene scene={BAND_SCENES} flat={uprisingFlat} flatLight={uprisingFlatLight} class="tlog-band" />
 
     <div class="wrap">
       <ol class="tlog" data-tlist>
@@ -159,7 +160,12 @@ const BAND_SCENES = ['uprising', 'kinship'];
      `:global()` because the element it names is rendered by CrtScene.astro and
      carries that component's scope, not this page's. */
   :global(.tlog-band) {
-    height: clamp(15rem, 42vh, 26rem);
+    /* Height has to follow the width, not just the viewport height. The band is
+       full-bleed, so on a wide display a height fixed to `vh` alone turns it into
+       a slit: at 3440px the tube ran at 9:1 and the scene was a horizontal sliver
+       of itself. `vw` in the max() keeps the aspect sane as the screen widens,
+       and the outer clamp still bounds it at both ends. */
+    height: clamp(15rem, max(42vh, 20vw), 40rem);
     margin-block: clamp(2rem, 5vw, 3.5rem);
   }
 
