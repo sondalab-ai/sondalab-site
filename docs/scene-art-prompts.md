@@ -394,18 +394,59 @@ decision** so no two plates share a framing.
 |---|---|---|
 | `uprising` | low, near the road surface; the street's vanishing point pushed into the right third | the raised-arm gesture running through people and machines alike, one rank |
 | `city` | the near parapet cutting the frame as a diagonal, the tower mass anchored off-centre right | — (no two parties; the scale contrast is the subject) |
-| `kinship` | close three-quarter over the table, the table filling the lower frame, hands at readable size | one open machine casing with its panel off, a human hand and a machine hand both inside it |
+| `kinship` | side-on across the table at just above table height, the two figures facing each other in profile from opposite edges of the frame | one open machine casing lying flat with its removed panel set down beside it, two human hands and two machine manipulators inside the same opening |
 
 ---
 
 ### `uprising` payloads
 
-**`01-far`** — the firelight, and no skyline. The band is pinned to the bottom
-40 % of the frame; there is nothing above it but smoke.
+Rewritten from zero after the first composite. What that composite showed: the
+four planes stack well — an accent plate measuring 1/255 still becomes the
+sparks in the air — but the scene's argument only lived on `02-mid`, and
+`02-mid` is not the plane a visitor looks at. `03-crowd` is nearest, largest and
+covers the lower third; it was a crowd of people only, so the picture read as a
+human riot with a machine somewhere behind it. Two rules came out of that and
+both are applied below.
+
+**Every plane carries the argument.** People and machines appear together in the
+far plane, the mid plane and the near mask. A plane that shows only one of the
+two parties is a plane arguing against the scene.
+
+**In a stencil the outline is the only channel.** `03-crowd` has no interior
+detail by construction, so a machine in it has to be legible from its edge
+alone: a flat-topped sensor head with no neck, an angular shoulder yoke, an arm
+ending in three jointed fingers. "A humanoid machine" is not drawable in two
+tones; those three shapes are.
+
+**`01-far`** — the deep plane. Its predecessor was a wet road under the rank,
+which `03-crowd` covered completely: 290 seconds of GPU that reached nobody. It
+now holds the one thing nothing else occludes — the upper half of the frame —
+and puts the machines at the scale the street cannot show.
+
+Nothing in it may sit below the rank's shoulder line, and that is a hard
+constraint rather than a composition preference. The emissive planes are summed
+with `lighter` and only the occluder subtracts, so a bright element here does not
+go *behind* the rank on `02-mid` — it shines straight through bodies the brief
+paints black. The first version of this plate kept the old fire band at
+`[560, 0, 700, 1000]`, level with the rank's shoulders, and the fire crossed the
+figures. The band is gone: `02-mid` already carries the firelight as rim light on
+its own edges, so this plate only needs what the fire strikes from below.
+
+Two things the first attempt at this plate got wrong, both fixed below. **One box
+per machine.** All three were asked for inside a single full-width box and came
+back bunched in the middle at nearly the same size — the same "left free, the
+model centres" failure the embers had, which a wide box does not prevent when it
+holds three objects instead of one. They now have a narrow box each, left,
+middle and right, with the size difference stated per machine rather than as
+"three different distances". **A form that is not a walker.** Legs plus a blocky
+body plus a small flat head is the silhouette of a film walker and that is
+exactly what came back. The far machines are now a different class of thing from
+the humanoid ones on `02-mid`: a tapering mast on one foot, a ring of folded arms
+near the top, no head at all.
 
 ```json
 {
-  "high_level_description": "The end of a city street at night, seen from close to the road surface, lit only by fires burning out of frame beyond the far end. Monochrome, rendered on pure black.",
+  "high_level_description": "The upper air over a city street at night, above the rooftops, lit from below by fires burning out of frame, with the standing forms of very large machines rising out of the smoke. Monochrome, rendered on pure black.",
   "style_description": {
     "aesthetics": "stark and graphic, extreme contrast between light and deep crushed black, monochrome, no colour of any kind",
     "lighting": "a single source of firelight beyond the end of the street, low and far away, throwing hard rim light towards the camera, heavy volumetric smoke, no fill light, everything in perfect focus, no depth of field, no bokeh, no blur",
@@ -414,25 +455,31 @@ decision** so no two plates share a framing.
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
-    "background": "pure black, absolutely empty above the smoke line, no sky detail, no stars, no buildings, no towers, no structures of any height",
+    "background": "pure black, no stars, no moon, no city glow, and the whole lower half of the frame pure black and completely empty, no ground, no road, no figures, no fire visible in frame",
     "elements": [
       {
         "type": "obj",
-        "bbox": [600, 0, 900, 1000],
-        "desc": "a wide, low, continuous band of firelight lying along the far end of the street, spanning the full width of the frame, at its brightest around the vanishing point in the right third and dimming towards the left edge, soft-edged, no flame shapes readable, the brightest thing in the plate",
-        "color_palette": ["#1A1A1A", "#2E2E2E"]
+        "bbox": [120, 30, 400, 250],
+        "desc": "one enormous standing machine far down the street on the left, the smallest of the three because it is the furthest away, a single tapering mast rising from one broad circular foot with a ring of long articulated arms folded down against it near the top and no head of any kind, motionless and upright, seen only as a dark outline with a thin hard edge of firelight along its underside where the fire below strikes it and no surface detail at all",
+        "color_palette": ["#0A0A0A", "#1A1A1A", "#2E2E2E"]
       },
       {
         "type": "obj",
-        "bbox": [240, 0, 660, 1000],
-        "desc": "thick smoke drifting upward off the fire and catching its light from underneath, dense and low, leaning to the left as it rises, thinning to pure black well before the top of the frame",
+        "bbox": [30, 380, 400, 610],
+        "desc": "a second machine of the same kind standing in the middle of the frame, the largest of the three because it is the nearest, its mast reaching almost to the top edge, one broad circular foot, a ring of long articulated arms folded down against the mast near the top, no head, the same thin hard underside edge of firelight and no surface detail, the brightest thing in the plate",
+        "color_palette": ["#0A0A0A", "#1A1A1A", "#2E2E2E"]
+      },
+      {
+        "type": "obj",
+        "bbox": [80, 740, 400, 970],
+        "desc": "a third machine of the same kind standing well over on the right, middling in size between the other two, the same tapering mast on one broad circular foot with a ring of folded articulated arms near the top and no head, leaning very slightly, the same thin underside edge of firelight and no surface detail",
+        "color_palette": ["#0A0A0A", "#1A1A1A", "#2E2E2E"]
+      },
+      {
+        "type": "obj",
+        "bbox": [150, 0, 430, 1000],
+        "desc": "thick smoke drifting upward from below and catching the firelight from underneath, dense and low, leaning to the left as it rises, passing across the legs of the machines, brightest along its lower edge and thinning to pure black well before the top of the frame, its lower edge stopping short of the middle of the frame",
         "color_palette": ["#000000", "#0A0A0A", "#1A1A1A"]
-      },
-      {
-        "type": "obj",
-        "bbox": [700, 0, 1000, 1000],
-        "desc": "the wet road surface running away from the camera in the near foreground, its reflections stretched into long horizontal streaks by the low vantage, very dark",
-        "color_palette": ["#000000", "#0A0A0A"]
       }
     ]
   }
@@ -442,7 +489,8 @@ decision** so no two plates share a framing.
 **`02-mid`** — one rank, not two groups. The people and the machines stand in the
 same line, facing the same way, making the same gesture; that is what the scene
 is about and it has to be inside a single box or it will come back as two
-separate crowds.
+separate crowds. The machine description is by silhouette, because at this
+exposure the bodies are black and the edge is all there is.
 
 ```json
 {
@@ -460,7 +508,7 @@ separate crowds.
       {
         "type": "obj",
         "bbox": [420, 40, 900, 960],
-        "desc": "one continuous rank standing across the road facing away from the camera towards the fire, people and humanoid machines alternating along it shoulder to shoulder and overlapping, the machines roughly a head and a half taller than the people beside them, two legs and a blocky torso and a small offset head, the same raised-arm gesture running through the whole rank so that a human arm and a machine arm are up side by side, every edge caught by the fire behind them and the rim light the brightest thing in the plate, bodies otherwise black",
+        "desc": "one continuous rank standing across the road facing away from the camera towards the fire, people and humanoid machines alternating along it shoulder to shoulder and overlapping, never grouped by kind, roughly every third figure a machine. Each machine is a head and a half taller than the people beside it and is told apart by its outline alone: a flat-topped head sitting straight on the shoulders with no neck, a wide angular shoulder yoke squarer than a human's, legs that bend backwards at a second joint, and a raised arm ending in three long jointed fingers instead of a hand. The same raised-arm gesture runs through the whole rank so that a human arm and a machine arm are up side by side in several places. Every edge is caught by the fire behind and the rim light is the brightest thing in the plate; the bodies are otherwise black",
         "color_palette": ["#141414", "#2E2E2E", "#545454"]
       },
       {
@@ -480,12 +528,13 @@ separate crowds.
 }
 ```
 
-**`03-crowd`** — the occluder. A mask, not a picture: white shapes on pure
-black, no midtones.
+**`03-crowd`** — the occluder, and the plane the scene is won or lost on. A mask,
+not a picture: white shapes on pure black, no midtones. The machines have to be
+readable from the outline, because there is nothing else in a stencil.
 
 ```json
 {
-  "high_level_description": "A stencil mask: solid white silhouettes of a dense crowd seen from behind, on a pure black ground. Two tones only.",
+  "high_level_description": "A stencil mask: solid white silhouettes of a dense crowd of people and humanoid machines standing together seen from behind, on a pure black ground. Two tones only.",
   "style_description": {
     "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
     "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
@@ -499,7 +548,7 @@ black, no midtones.
       {
         "type": "obj",
         "bbox": [600, 0, 1000, 1000],
-        "desc": "a dense crowd of people seen from very close and slightly below, heads, shoulders and raised arms overlapping into one continuous solid white shape, filling the lower third of the frame across its full width and rising higher on the left than on the right, ragged along its top edge with several arms breaking well clear of it, completely flat white inside with no faces, no clothing and no separation between figures",
+        "desc": "a dense crowd of people and humanoid machines standing mixed together, seen from very close and slightly below, heads, shoulders and raised arms overlapping into one continuous solid white shape, filling the lower third of the frame across its full width and rising higher on the left than on the right, ragged along its top edge with several arms breaking well clear of it, completely flat white inside with no faces, no clothing and no separation between figures. Roughly one head in three is a machine, told apart by its outline alone: flat-topped and square where a human head is round, sitting straight on a wide angular shoulder yoke with no neck between them. Four or five of the arms breaking clear of the top edge end in three long jointed fingers instead of a hand, and they are spread along the width rather than gathered in one place",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -511,9 +560,9 @@ black, no midtones.
 > before export.
 
 **`04-embers`** — the accent. The only bright plate, and only because almost
-nothing is in it. The first pass left both elements un-boxed on the reasoning
-that a scatter has no place to be; what came back was a plume up the centre of
-the frame. Left free, the model centres. The boxes below are wide on purpose.
+nothing is in it. The boxes are wide on purpose: the first pass left both
+elements un-boxed on the reasoning that a scatter has no place to be, and what
+came back was a plume up the centre of the frame. Left free, the model centres.
 
 ```json
 {
@@ -549,10 +598,26 @@ the frame. Left free, the model centres. The boxes below are wide on purpose.
 
 ### `city` payloads
 
-Keep the interest on the **right half of the frame** — the left is under type.
-The `bbox` values below already do this; preserve it when editing.
+Rewritten from zero alongside `uprising`, and under one constraint the other two
+scenes do not have: **the left third of every plate is under type.** `/apparel`
+lays its heading and lede over this scene's glass and the contrast probe holds
+them to 3:1 and 4.5:1, so brightness on the left is not a taste question. The
+`bbox` values below keep the interest on the right; preserve that when editing.
 
-**`01-far`**
+Two things carried over from `uprising`. **Every plane carries the argument.**
+This scene used to be the exception — the brief said "no two parties; the scale
+contrast is the subject" — and what came back was a competent generic megacity
+with nothing of the site in it. The scale contrast stays the subject, but it is
+now a contrast *between* the two parties and the city rather than between the
+camera and the city: one person and one machine at the parapet, together, dwarfed
+by the thing they are looking at. **In a stencil the outline is the only
+channel**, so on `03-near` the machine is a flat-topped head with no neck on a
+wide angular shoulder yoke, which is drawable in two tones, and not "a humanoid
+machine", which is not.
+
+**`01-far`** — the deep plane. It sits behind the tower mass and shows through
+wherever that mass is black concrete, because the emissive planes are summed
+rather than stacked. Here that is wanted: what shows through reads as depth haze.
 
 ```json
 {
@@ -565,7 +630,7 @@ The `bbox` values below already do this; preserve it when editing.
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
-    "background": "pure black, no sky detail, no stars, no moon, no horizon glow",
+    "background": "pure black, no sky detail, no stars, no moon, no horizon glow, and the left third of the frame near black and almost empty",
     "elements": [
       {
         "type": "obj",
@@ -584,11 +649,14 @@ The `bbox` values below already do this; preserve it when editing.
 }
 ```
 
-**`02-mid`**
+**`02-mid`** — the tower mass, and the depth at which the city is shown to be
+worked on rather than merely standing there. The service machines are small on
+purpose: they are the scale reference that makes the towers read as enormous, and
+they are all on the right, clear of the type.
 
 ```json
 {
-  "high_level_description": "A dense future megacity at night seen from a high rooftop, looking out and slightly down over endless towers receding into rain haze. Monochrome, rendered on pure black.",
+  "high_level_description": "A dense future megacity at night seen from a high rooftop, looking out and slightly down over endless towers receding into rain haze, with small articulated machines working on the near tower faces. Monochrome, rendered on pure black.",
   "style_description": {
     "aesthetics": "oppressive scale, dense and vertical, extreme contrast between lit windows and deep crushed black, monochrome, no colour of any kind",
     "lighting": "thousands of small window lights and hanging signage glowing through rain haze, no sun, no moon, no sky light, strong atmospheric falloff with distance, everything in focus, no depth of field, no bokeh, no blur",
@@ -597,13 +665,19 @@ The `bbox` values below already do this; preserve it when editing.
     "color_palette": ["#000000", "#141414", "#2E2E2E", "#545454"]
   },
   "compositional_deconstruction": {
-    "background": "pure black, nothing behind the towers, no sky, no haze glow",
+    "background": "pure black, nothing behind the towers, no sky, no haze glow, the left third of the frame near black",
     "elements": [
       {
         "type": "obj",
         "bbox": [0, 380, 1000, 1000],
-        "desc": "a close rank of enormous towers filling the frame from top edge to bottom edge on the right, their faces gridded with small bright window lights, the grids the brightest thing in the plate, the concrete between them black, no readable interiors and nothing human-sized anywhere on them",
+        "desc": "a close rank of enormous towers filling the frame from top edge to bottom edge on the right, their faces gridded with small bright window lights, the grids the brightest thing in the plate, the concrete between them black, no readable interiors",
         "color_palette": ["#141414", "#2E2E2E", "#545454"]
+      },
+      {
+        "type": "obj",
+        "bbox": [180, 520, 760, 960],
+        "desc": "five or six small articulated machines out on the faces of those towers, each one a compact body with a cluster of long jointed arms gripping the wall and no head, hanging at clearly different heights and clearly different distances so they read at different sizes, each one tiny against the tower it is on and giving the wall its scale, rim-lit along one edge by the windows behind them and black otherwise",
+        "color_palette": ["#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
@@ -622,11 +696,15 @@ The `bbox` values below already do this; preserve it when editing.
 }
 ```
 
-**`03-near`** — the occluder.
+**`03-near`** — the occluder, and the plane the scene is won or lost on. It used
+to be a bare parapet and a mast: a flat white wedge that said nothing. It now
+carries the two figures. They are an occluder, so at runtime they subtract and
+come out as solid black shapes against the lit city — which is what a person and
+a machine at a parapet should look like from behind.
 
 ```json
 {
-  "high_level_description": "A stencil mask: the solid white silhouette of a rooftop parapet and an aerial mast, on a pure black ground. Two tones only.",
+  "high_level_description": "A stencil mask: the solid white silhouette of a rooftop parapet with a person and a humanoid machine standing at it side by side seen from behind, and an aerial mast, on a pure black ground. Two tones only.",
   "style_description": {
     "aesthetics": "hard-edged high contrast stencil, two tones only, absolutely no midtones, no shading, no gradient",
     "lighting": "none, this is a flat mask and not a lit scene, no shadows, no depth of field, no blur",
@@ -640,13 +718,19 @@ The `bbox` values below already do this; preserve it when editing.
       {
         "type": "obj",
         "bbox": [560, 0, 1000, 1000],
-        "desc": "the near edge of a rooftop crossing the frame as a diagonal, high on the left and dropping away to the right, one continuous solid white shape with a flat unbroken top edge, no texture and no detail inside it",
+        "desc": "the near edge of a rooftop crossing the frame as a diagonal, low on the left and rising to the right, one continuous solid white shape with a flat unbroken top edge, no texture and no detail inside it",
         "color_palette": ["#FFFFFF"]
       },
       {
         "type": "obj",
-        "bbox": [180, 620, 700, 780],
-        "desc": "a single aerial mast rising from the parapet on the right, a narrow solid white vertical with two short crossbars, no guy wires, no lattice",
+        "bbox": [300, 600, 720, 850],
+        "desc": "one person and one humanoid machine standing at that parapet on the right, seen from behind, shoulder to shoulder and close enough that their arms overlap, both cut off by the parapet at roughly waist height, together forming one connected solid white shape rising above its top edge. The person is on the left of the pair with a round head and sloping shoulders; the machine is on the right, half a head taller, and is told apart by its outline alone: a flat square top to the head, no neck at all, and a wide angular shoulder yoke squarer than the person's. Completely flat white inside, no faces, no clothing, no detail of any kind",
+        "color_palette": ["#FFFFFF"]
+      },
+      {
+        "type": "obj",
+        "bbox": [180, 880, 700, 980],
+        "desc": "a single aerial mast rising from the parapet at the far right edge, a narrow solid white vertical with two short crossbars, well clear of the two figures, no guy wires, no lattice",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -655,7 +739,8 @@ The `bbox` values below already do this; preserve it when editing.
 ```
 > Invert if the model returns black-on-white.
 
-**`04-rain`** — the accent.
+**`04-rain`** — the accent. Left as it was: it measures almost nothing on its own
+and that is correct, because the runtime tints it and stacks it at low gain.
 
 ```json
 {
@@ -705,7 +790,7 @@ legible, and both pairs of hands are inside the same object.
     "aesthetics": "warm and close, deep blacks, a single pool of light with everything outside it gone, monochrome, no colour of any kind",
     "lighting": "one low overhead lamp hanging just out of frame above the table, hard falloff into darkness within a metre of it, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "art_style": "cinematic concept art, seen side-on across the table from just above table height, the two figures facing each other in profile from opposite edges of the frame, the table running as a broad horizontal band through the lower half",
     "color_palette": ["#000000", "#0A0A0A", "#1A1A1A", "#2E2E2E"]
   },
   "compositional_deconstruction": {
@@ -738,7 +823,7 @@ hands.
     "aesthetics": "warm and close, deep blacks, a single pool of light with everything outside it gone, monochrome, no colour of any kind",
     "lighting": "one low overhead lamp hanging just out of frame above the table, hard falloff into darkness within a metre of it, windows glowing faintly from the city behind them, no other source, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure black ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "art_style": "cinematic concept art, seen side-on across the table from just above table height, the two figures facing each other in profile from opposite edges of the frame, the table running as a broad horizontal band through the lower half",
     "color_palette": ["#000000", "#141414", "#2E2E2E", "#545454"]
   },
   "compositional_deconstruction": {
@@ -747,13 +832,13 @@ hands.
       {
         "type": "obj",
         "bbox": [300, 180, 900, 860],
-        "desc": "one open machine casing lying on its side in the middle of the table with its panel off, its lit interior the brightest thing in the plate, and four hands reaching into that single opening from opposite sides: two human hands from the near right, and from the far left two jointed metal manipulators on the same scale, fingers and manipulator tips converging on the same point inside the casing, forearms overlapping across the opening, nothing between them",
+        "desc": "one open machine casing lying flat and face up in the middle of the table, its removed panel set down flat on the table beside it, everything on the table lying flat and nothing standing upright, its lit interior the brightest thing in the plate and the point everything else in the picture is directed at",
         "color_palette": ["#2E2E2E", "#545454"]
       },
       {
         "type": "obj",
         "bbox": [200, 120, 720, 900],
-        "desc": "the upper bodies the hands belong to, leaning in over the casing from both sides and meeting above it, one a person in a work shirt and one a humanoid machine of plain functional construction at the same height, heads bowed to the same point, edges caught by the lamp and everything else black",
+        "desc": "exactly two figures and no others, alone in the room, leaning in over the casing from opposite sides and meeting above it: on the near right a person in a work shirt, on the far left a humanoid machine of plain functional construction at the same height, heads bowed to the same point, edges caught by the lamp and everything else black. The person reaches in with both bare hands, nearer the camera; the machine reaches in with both jointed metal manipulators, from beyond the casing; four limbs in total and four hands in total, converging on the same point inside the opening",
         "color_palette": ["#141414", "#2E2E2E"]
       },
       {
@@ -767,7 +852,11 @@ hands.
 }
 ```
 
-**`03-near`** — the occluder.
+**`03-near`** — the occluder. It used to carry one bare human forearm, which
+made the nearest and largest plane of this scene argue for one party only — the
+same fault `uprising`'s crowd mask had. There are two arms now, entering from
+opposite corners to match the figures on `02-mid`: the human from the right where
+the person stands, the machine from the left where the machine does.
 
 ```json
 {
@@ -791,7 +880,13 @@ hands.
       {
         "type": "obj",
         "bbox": [520, 620, 1000, 1000],
-        "desc": "a bare forearm and hand entering from the lower right corner and reaching towards the middle of the frame, one continuous solid white shape with fingers separated, no clothing detail and no interior line work",
+        "desc": "a bare human forearm and hand entering from the lower right corner and reaching towards the middle of the frame, one continuous solid white shape with fingers separated, no clothing detail and no interior line work",
+        "color_palette": ["#FFFFFF"]
+      },
+      {
+        "type": "obj",
+        "bbox": [540, 0, 1000, 380],
+        "desc": "a machine manipulator arm entering from the lower left corner and reaching towards the middle of the frame to meet the human one, at the same scale, one continuous solid white shape told apart from it by its outline alone: a straight segmented forearm of two plain blocks with a clear notch at the elbow between them, and a hand of three long straight fingers with an open gap between each, no clothing and no interior line work",
         "color_palette": ["#FFFFFF"]
       }
     ]
@@ -880,7 +975,7 @@ them on screen — `.scenes-raw/` keeps every render, so
 
 | Plate | Tone | Peak after inversion | Coverage | Notes |
 |---|---|---|---|---|
-| `01-far` | `structure` | 70 / 255 | broad, low | Sky and distance. On paper this is the palest wash. |
+| `01-far` | `structure` | 70 / 255 | broad, low | Sky and distance, the palest wash on paper. On the light theme this plane is tinted with `accent-depth` too, not with ink: ink is near-black there and this is the largest plane by area, so it dragged the whole daylight picture to grey. It separates from `02-mid` by value, not by hue. |
 | `02-mid` | `depth` | 120 / 255 | moderate | The body of the scene. Carries the teal `accent-depth`. |
 | `03-*` | `occluder` | pure white / pure black | 25–40 % of frame | A mask, exactly as on dark. |
 | `04-*` | `accent` | 140 / 255 | under 8 % of frame | What is ochre, not what is bright. |
@@ -915,6 +1010,24 @@ roof beam with every hand on it.
         "bbox": [120, 0, 780, 1000],
         "desc": "the facades on both sides of the street terraced with planting from pavement to roofline, tier above tier of foliage spilling over each ledge, the two sides converging towards the vanishing point in the right third, the leaf mass the darkest thing in the plate and the sky behind it left completely empty",
         "color_palette": ["#8A8A8A", "#B8B8B8"]
+      },
+      {
+        "type": "obj",
+        "bbox": [40, 40, 420, 240],
+        "desc": "one very large standing machine far up the street on the left, the smallest of the three because it is the furthest away, a single tapering mast rising from one broad circular foot with a ring of long articulated arms folded down against it near the top and no head of any kind, motionless and upright above the rooflines, a plain flat silhouette against the empty sky with no surface detail",
+        "color_palette": ["#B8B8B8", "#8A8A8A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [20, 400, 400, 600],
+        "desc": "a second machine of the same kind standing further up the middle of the street, the largest of the three because it is the nearest, its mast reaching almost to the top edge, the same broad circular foot, ring of folded articulated arms and absence of a head, the same flat silhouette against the sky",
+        "color_palette": ["#B8B8B8", "#8A8A8A"]
+      },
+      {
+        "type": "obj",
+        "bbox": [60, 760, 420, 960],
+        "desc": "a third machine of the same kind well over on the right, middling in size between the other two, leaning very slightly, the same mast on one foot with folded arms near the top and no head",
+        "color_palette": ["#B8B8B8", "#8A8A8A"]
       },
       {
         "type": "obj",
@@ -982,20 +1095,20 @@ roof beam with every hand on it.
     "elements": [
       {
         "type": "obj",
-        "bbox": [0, 60, 1000, 260],
-        "desc": "one timber upright standing in the near foreground on the left, a solid black vertical running the full height of the frame, slightly wider at the base, no grain and no fixings",
+        "bbox": [0, 90, 1000, 190],
+        "desc": "one narrow timber upright standing in the near foreground on the left, a solid black vertical running the full height of the frame, no wider than a post and slightly wider at the base, no grain and no fixings",
         "color_palette": ["#000000"]
       },
       {
         "type": "obj",
-        "bbox": [0, 740, 1000, 900],
-        "desc": "a second timber upright in the near foreground on the right, the same solid black vertical, narrower than the first",
+        "bbox": [0, 820, 1000, 900],
+        "desc": "a second narrow timber upright in the near foreground on the right, the same solid black vertical, narrower than the first",
         "color_palette": ["#000000"]
       },
       {
         "type": "obj",
-        "bbox": [720, 240, 1000, 780],
-        "desc": "the heads and shoulders of two people standing with their backs to the camera between the uprights, low in the frame, one continuous solid black shape with no faces, no hair detail and no separation between them",
+        "bbox": [800, 240, 1000, 780],
+        "desc": "a row of ten or twelve small figures standing across the frame between the uprights with their backs to the camera, people and humanoid machines mixed along it and never grouped by kind, seen from far enough off that only their heads and shoulders show above the bottom edge, overlapping into one continuous solid black band with a ragged top edge, completely flat inside with no faces and no separation between figures. Roughly one head in three is a machine, told apart by its outline alone: flat-topped and square where a human head is round, sitting straight on a wide angular shoulder yoke with no neck between them",
         "color_palette": ["#000000"]
       }
     ]
@@ -1104,6 +1217,12 @@ water channel cutting the frame corner to corner.
       },
       {
         "type": "obj",
+        "bbox": [180, 520, 760, 960],
+        "desc": "five or six small articulated machines out on the planted faces of those towers, each one a compact body with a cluster of long jointed arms gripping the wall and no head, hanging at clearly different heights and clearly different distances so they read at different sizes, each one tiny against the tower it is on and giving the wall its scale, dark against the pale structure",
+        "color_palette": ["#5A5A5A", "#9A9A9A"]
+      },
+      {
+        "type": "obj",
         "bbox": [120, 420, 640, 980],
         "desc": "slow vertical-axis wind rotors standing on the tower tops, tall narrow open helices, seen against the empty sky",
         "color_palette": ["#9A9A9A", "#D0D0D0"]
@@ -1137,7 +1256,7 @@ water channel cutting the frame corner to corner.
       {
         "type": "obj",
         "bbox": [560, 0, 1000, 1000],
-        "desc": "the near edge of a rooftop crossing the frame as a diagonal, high on the left and dropping away to the right, one continuous solid black shape with a flat unbroken top edge, no texture and no detail inside it",
+        "desc": "the near edge of a rooftop crossing the frame as a diagonal, low on the left and rising to the right, one continuous solid black shape with a flat unbroken top edge, no texture and no detail inside it",
         "color_palette": ["#000000"]
       },
       {
@@ -1148,8 +1267,14 @@ water channel cutting the frame corner to corner.
       },
       {
         "type": "obj",
-        "bbox": [140, 660, 620, 800],
-        "desc": "one vertical-axis wind rotor standing on the parapet at the right, a narrow solid black column with three curved blades, no lattice and no guy wires",
+        "bbox": [300, 600, 720, 850],
+        "desc": "one person and one humanoid machine standing at that parapet on the right, seen from behind, shoulder to shoulder and close enough that their arms overlap, both cut off by the parapet at roughly waist height, together forming one connected solid black shape rising above its top edge. The person is on the left of the pair with a round head and sloping shoulders; the machine is on the right, half a head taller, and is told apart by its outline alone: a flat square top to the head, no neck at all, and a wide angular shoulder yoke squarer than the person's. Completely flat inside, no faces, no clothing, no detail of any kind",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [140, 880, 620, 980],
+        "desc": "one vertical-axis wind rotor standing on the parapet at the far right edge, a narrow solid black column with three curved blades, well clear of the two figures, no lattice and no guy wires",
         "color_palette": ["#000000"]
       }
     ]
@@ -1192,9 +1317,9 @@ water channel cutting the frame corner to corner.
 
 ### `kinship` light payloads
 
-The same table, in daylight. The camera decision is a close three-quarter with
-the table filling the lower frame; the shared object is one seed tray passing
-between a human hand and a machine hand.
+The same table, in daylight. The camera decision is side-on across the table
+with the two figures facing each other in profile; the shared object is one seed
+tray passing between a human hand and a machine hand.
 
 **`01-far`**
 
@@ -1205,7 +1330,7 @@ between a human hand and a machine hand.
     "aesthetics": "open and high-key, bright even daylight, soft shadows, airy, monochrome, no colour of any kind",
     "lighting": "one tall open window carrying almost all the light, a wide blown-out sky beyond it, soft bounce filling the room, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "art_style": "cinematic concept art, seen side-on across the table from just above table height, the two figures facing each other in profile from opposite edges of the frame, the table running as a broad horizontal band through the lower half",
     "color_palette": ["#FFFFFF", "#E0E0E0", "#B8B8B8", "#8A8A8A"]
   },
   "compositional_deconstruction": {
@@ -1243,7 +1368,7 @@ between a human hand and a machine hand.
     "aesthetics": "open and high-key, bright even daylight, soft shadows, airy, monochrome, no colour of any kind",
     "lighting": "one tall open window carrying almost all the light, a wide blown-out sky beyond it, soft bounce filling the room, no artificial light anywhere, everything in focus, no depth of field, no bokeh, no blur",
     "medium": "monochrome digital matte painting on a pure white ground, greyscale only, no paper texture, no film grain",
-    "art_style": "cinematic concept art, close three-quarter view across a table from just above head height, the table's far edge running as a diagonal into the upper left, intimate framing",
+    "art_style": "cinematic concept art, seen side-on across the table from just above table height, the two figures facing each other in profile from opposite edges of the frame, the table running as a broad horizontal band through the lower half",
     "color_palette": ["#FFFFFF", "#D0D0D0", "#9A9A9A", "#5A5A5A"]
   },
   "compositional_deconstruction": {
@@ -1252,13 +1377,13 @@ between a human hand and a machine hand.
       {
         "type": "obj",
         "bbox": [300, 180, 900, 860],
-        "desc": "one shallow seed tray held in mid-air over the middle of the table and gripped from both sides at once: two human hands on the near right rim, and on the far left rim two jointed metal manipulators on the same scale, all four contacts on the same tray, forearms overlapping above it, the tray level and nothing between them",
+        "desc": "one shallow seed tray held level in mid-air over the middle of the table, the thing the whole picture is directed at, its rim the point everything converges on",
         "color_palette": ["#5A5A5A", "#9A9A9A"]
       },
       {
         "type": "obj",
         "bbox": [200, 120, 720, 900],
-        "desc": "the upper bodies the hands belong to, leaning in over the tray from both sides and meeting above it, one a person in a work shirt and one a humanoid machine of plain functional construction at the same height, heads bowed to the same point, both dark against the blown-out window behind them",
+        "desc": "exactly two figures and no others, alone in the room, leaning in over the tray from opposite sides and meeting above it: on the near right a person in a work shirt, on the far left a humanoid machine of plain functional construction at the same height, heads bowed to the same point, both dark against the blown-out window behind them. The person grips the near rim of the tray with both bare hands, nearer the camera; the machine grips the far rim with both jointed metal manipulators, from beyond it; four limbs in total and four hands in total, all four on the same tray",
         "color_palette": ["#5A5A5A", "#9A9A9A"]
       },
       {
@@ -1301,8 +1426,14 @@ between a human hand and a machine hand.
       },
       {
         "type": "obj",
-        "bbox": [520, 620, 1000, 1000],
-        "desc": "a bare forearm and hand entering from the lower right corner and reaching towards the middle of the frame, one continuous solid black shape with fingers separated, no clothing detail and no interior line work",
+        "bbox": [700, 720, 1000, 1000],
+        "desc": "a bare human forearm and hand entering from the lower right corner and reaching a little way towards the middle of the frame, slender and kept low, one continuous solid black shape with fingers separated, no clothing detail and no interior line work",
+        "color_palette": ["#000000"]
+      },
+      {
+        "type": "obj",
+        "bbox": [720, 260, 1000, 520],
+        "desc": "a machine manipulator arm entering from the lower left of the frame between the mullion and the human arm, reaching a little way towards the middle to meet it, slender and kept low, at the same scale as the human arm, one continuous solid black shape told apart from it by its outline alone: a straight segmented forearm of two plain blocks with a clear notch at the elbow between them, and a hand of three long straight fingers with an open gap between each, no clothing and no interior line work",
         "color_palette": ["#000000"]
       }
     ]
@@ -1328,8 +1459,8 @@ between a human hand and a machine hand.
     "elements": [
       {
         "type": "obj",
-        "bbox": [80, 300, 520, 720],
-        "desc": "the woven rim of one shallow tray sitting high in the middle of the frame, a single closed oval band of dark hatching with nothing inside it",
+        "bbox": [420, 380, 620, 560],
+        "desc": "the woven rim of one small shallow tray, a single closed oval band of dark hatching with nothing inside it, no wider than a hand and sitting well below the middle of the frame",
         "color_palette": ["#6E6E6E", "#3D3D3D"]
       },
       {
