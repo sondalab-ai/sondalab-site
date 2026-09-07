@@ -70,6 +70,11 @@ export function createTerminal(opts: TerminalOptions = {}) {
   // aspect. Fixing the column count therefore starves a wide screen of rows —
   // which is how the novella ended up with one line. Solve for columns instead,
   // targeting enough rows to hold the header and a readable stretch of prose.
+  //
+  // The ceiling used to be 132, which a 2560px display already hit: past that the
+  // texture stopped growing, the shader stretched a 1716px picture across the
+  // whole screen — so the glyphs came out half again too big — and the row count
+  // fell from 30 to 15. It is raised far enough that the texture keeps up.
   let COLS = 84;
   let ROWS = 30;
   let targetRows = opts.targetRows ?? 30;
@@ -77,12 +82,25 @@ export function createTerminal(opts: TerminalOptions = {}) {
   function geometry(aspect: number, nextTargetRows?: number) {
     if (nextTargetRows) targetRows = nextTargetRows;
     COLS = opts.cols ?? Math.round(
-      Math.min(132, Math.max(46, (targetRows * aspect) / (cellW / cellH))),
+      Math.min(240, Math.max(46, (targetRows * aspect) / (cellW / cellH))),
     );
     ROWS = Math.max(12, Math.round((COLS * cellW) / aspect / cellH));
     canvas.width = COLS * cellW;
     canvas.height = ROWS * cellH;
   }
+
+  /**
+   * Longest line of prose, in characters. Separate from `COLS` on purpose: the
+   * column count is the tube's resolution and now runs to 240 on a wide display,
+   * but a 232-character line is not prose. The text keeps a measure and the extra
+   * columns go into resolution instead.
+   *
+   * Set above the column count of every normal screen, so nothing below an
+   * ultrawide changes: at 1440px the tube is 109 columns and wraps at 101 either
+   * way. It only bites past that, where the choice is a long line or an empty
+   * half — this leans towards the line.
+   */
+  const MEASURE = 140;
 
   /** Rows kept empty at the foot of the tube for the HTML call to action. */
   const RESERVED_ROWS = 3;
@@ -176,7 +194,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
       { kind: 'blank', h: 1 },
     ];
     for (const para of NOVELLAS[id] ?? []) {
-      for (const w of wrap(para, COLS - 8)) out.push({ kind: 'body', text: w, h: 1 });
+      for (const w of wrap(para, Math.min(COLS - 8, MEASURE))) out.push({ kind: 'body', text: w, h: 1 });
       out.push({ kind: 'blank', h: 1 });
     }
     return out;
