@@ -7,7 +7,7 @@ form: App
 order: 1
 repo: https://github.com/sondalab-ai/introspect
 repoPublic: true
-summary: A <strong>local, read-only dashboard</strong> that reads the files your coding agent already writes (instructions, skills, agents, memories, hooks, permissions) and renders them as a navigable audit. It <strong>replays past sessions</strong> as execution graphs and <strong>tails the active one live</strong> over WebSocket, and <strong>never writes to your config</strong>.
+summary: "A <strong>local, read-only dashboard</strong> over the files your coding agent already writes — instructions, skills, memories, hooks, permissions — with past sessions replayed as execution graphs. It <strong>never writes to your config</strong>."
 ---
 
 introspect is a window onto how your coding agent is set up and what it's doing. It

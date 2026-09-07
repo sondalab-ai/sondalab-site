@@ -6,7 +6,7 @@ form: Utils
 order: 5
 repo: https://github.com/sondalab-ai/skillkit
 repoPublic: true
-summary: "Five skills that give a coding agent <strong>durable working habits</strong>: architectural decisions recorded with a revert plan, specs and memories filed where the repo can see them, the whole set kept in step across machines. An <strong>interactive installer</strong> wires each skill's slash commands and hooks, and the uninstaller removes them cleanly <strong>without ever deleting your recorded data</strong>."
+summary: "Five skills that give a coding agent <strong>durable working habits</strong>: decisions with a revert plan, specs and memories the repo can see, the set synced across machines. Two of the five now ride inside claude-loadout too."
 ---
 
 skillkit is a catalog of skills for your coding agent, each a concrete, repeatable
@@ -26,6 +26,15 @@ are set up on request, with your settings backed up first and the change made
 idempotently. The uninstaller runs each skill's teardown, removes its commands and
 hooks, and deletes the directory, but never touches recorded user data, which you
 remove by hand if you want it gone.
+
+Two of those five now have a second home. claude-loadout implements the same jobs
+as commands, writing the identical decision records into the identical directory
+and following `memory-org`'s layout for its note store, and does per session what
+the skills leave to you by hand. If you run the launcher, take `debug-decisions`
+and `memory-org` from there. skillkit stays the standalone route, no Python and no
+wrapper around your agent command, and it keeps the one thing a launcher will not
+ship: the guided revert of a decision it recorded. `spec-versioning`, `sync-skills`
+and `mind-gym` live here and nowhere else.
 
 The shared toolbox the rest of the suite reaches for when an agent needs to *do*
 something specific rather than reason it out from scratch. Public and open.
