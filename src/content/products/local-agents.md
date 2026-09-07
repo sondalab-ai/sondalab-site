@@ -6,7 +6,7 @@ form: App
 order: 4
 repo: https://github.com/sondalab-ai/local-agents
 repoPublic: false
-summary: A <strong>home network of local LLM agents</strong>, an <strong>intelligent router</strong> in front of LM Studio that sends each request to the right specialist (a coder, a creative and a home/utility agent), with integrated voice and a dashboard to assign models, all running on <strong>your own GPU</strong>.
+summary: "A <strong>router in front of LM Studio</strong> that sends each request to the right local specialist — coder, creative, home assistant — with voice and a dashboard to assign models, all on <strong>your own GPU</strong>."
 ---
 
 local-agents turns a machine at home into a small network of specialised LLM

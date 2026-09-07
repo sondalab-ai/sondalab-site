@@ -10,7 +10,7 @@ repoPublic: true
 links:
   - label: Download (releases)
     href: https://github.com/sondalab-ai/spexr-ide/releases
-summary: An <strong>agent-centric IDE</strong> on Eclipse Theia where the agent session is the main surface and <strong>every change traces back to a spec</strong>, from plan to tasks to diff to PR. Ships <strong>on-device semantic search</strong>, built-in Git, and <strong>Darkfactory</strong>, a live wall of all your local agent sessions.
+summary: "An IDE on <strong>Eclipse Theia</strong> where the agent session is the main surface and <strong>every change traces back to a spec</strong> — plan, tasks, diff, PR. With on-device semantic search and <strong>Darkfactory</strong>, a live wall of your agent sessions."
 ---
 
 SPEXR inverts the usual layout: instead of bolting an agent into a sidebar, the
