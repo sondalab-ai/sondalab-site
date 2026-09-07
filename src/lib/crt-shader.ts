@@ -170,7 +170,15 @@ fn phosphorGlow(uv: vec2f) -> vec3f {
   col += vec3f(0.55, 0.72, 0.78) * band * 0.035 * params.reflectPower;
   col += vec3f(0.55, 0.85, 0.82) * pow(1.0 - clamp(1.0 - r2, 0.0, 1.0), 6.0)
        * params.rimPower * 0.5;
-  col *= 1.0 - params.vignette * r2;
+  // The vignette darkens towards the screen's own background, not towards
+  // black. Multiplying works on glass, where the edge of the picture is already
+  // near zero and the falloff is invisible as a colour; on paper the colour here
+  // is the page itself, so the same multiply dragged the corners towards black
+  // and put a bulged grey halo on the white. Fading towards the screen
+  // background instead means the picture runs out at the edge on both
+  // polarities, rather than the sheet going dark on one of them.
+  let vig = params.vignette * r2;
+  col = select(col * (1.0 - vig), mix(col, params.screenBg, vig), params.polarity > 0.5);
 
   // Outside the tube the page's own canvas colour shows through, so the CRT
   // reads as an object in the room rather than a black rectangle. This is what
