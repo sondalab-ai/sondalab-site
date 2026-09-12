@@ -53,14 +53,14 @@ const BAND_SCENES = ['uprising', 'kinship'];
           <div class="tlog-head__title">
             <p class="eyebrow">Transmissions</p>
             <h1
-              class="tlog-head__h glitch glitch--shatter"
+              class="tlog-head__h sl-fx-glitch sl-fx-glitch--shatter"
               data-text="Transmissions"
-              style={`--n:${TITLE_BANDS}`}
+              style={`--slfx-n:${TITLE_BANDS}`}
             >
-              <span class="glitch__text">Transmissions</span>
-              <span class="glitch__shards" aria-hidden="true">
+              <span class="sl-fx-glitch__text">Transmissions</span>
+              <span class="sl-fx-glitch__shards" aria-hidden="true">
                 {titleShards.map((i) => (
-                  <span class="glitch__shard" style={`--i:${i}`}>Transmissions</span>
+                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>Transmissions</span>
                 ))}
               </span>
             </h1>
@@ -445,9 +445,9 @@ const BAND_SCENES = ['uprising', 'kinship'];
 </style>
 
 <script>
-  import { autoBurst, scramble } from '../../lib/glitch';
+  import { autoBurst, scramble } from '@sondalab/ui-kit/effects.js';
 
-  const heading = document.querySelector('.tlog-head__h.glitch');
+  const heading = document.querySelector('.tlog-head__h.sl-fx-glitch');
   if (heading) autoBurst(heading, { waitMin: 5000, waitMax: 10000 });
 
   /** Decode-scramble a row's date stamp on hover: the log re-reading itself. */

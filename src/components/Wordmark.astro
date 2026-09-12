@@ -11,23 +11,23 @@ const wmShards = Array.from({ length: WM_BANDS }, (_, i) => i);
 
 <Tag class="wordmark" style={`--wm-size:${size}`}>
   <span
-    class="wordmark__name glitch glitch--shatter glitch--hover"
+    class="wordmark__name sl-fx-glitch sl-fx-glitch--shatter wordmark__name--hover"
     data-text="sondalab"
-    style={`--n:${WM_BANDS}`}
+    style={`--slfx-n:${WM_BANDS}`}
   >
-    <span class="glitch__text">sondalab</span>
-    <span class="glitch__shards" aria-hidden="true">
+    <span class="sl-fx-glitch__text">sondalab</span>
+    <span class="sl-fx-glitch__shards" aria-hidden="true">
       {wmShards.map((i) => (
-        <span class="glitch__shard" style={`--i:${i}`}>sondalab</span>
+        <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>sondalab</span>
       ))}
     </span>
   </span><span class="wordmark__dot" aria-hidden="true"></span>
 </Tag>
 
 <script>
-  import { hoverBurst } from '../lib/glitch';
-  // Intermittent glitch bursts while the wordmark is hovered.
-  for (const name of document.querySelectorAll('.wordmark__name.glitch--hover')) {
+  import { hoverBurst } from '@sondalab/ui-kit/effects.js';
+  // Intermittent sl-fx-glitch bursts while the wordmark is hovered.
+  for (const name of document.querySelectorAll('.wordmark__name.wordmark__name--hover')) {
     const host = name.closest('.wordmark') ?? name;
     hoverBurst(host, name);
   }

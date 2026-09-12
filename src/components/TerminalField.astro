@@ -86,7 +86,7 @@
       },
 
       async onReady() {
-        // Brackets move into the text because the glitch effect owns ::before
+        // Brackets move into the text because the sl-fx-glitch effect owns ::before
         // and ::after (it renders `attr(data-text)` there), so they cannot also
         // carry punctuation. Done in JS so the fallback button is never touched.
         const primary = hero!.querySelector<HTMLElement>('.hero__actions .sl-btn');
@@ -94,8 +94,8 @@
         const label = `[ ${primary.textContent?.trim()} ]`;
         primary.textContent = label;
         primary.dataset.text = label;
-        primary.classList.add('glitch');
-        const { hoverBurst } = await import('../lib/glitch');
+        primary.classList.add('sl-fx-glitch');
+        const { hoverBurst } = await import('@sondalab/ui-kit/effects.js');
         hoverBurst(primary, primary, { burstMin: 120, burstMax: 260 });
       },
     });

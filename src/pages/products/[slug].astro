@@ -50,14 +50,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <header class="product__head">
         <p class="eyebrow">Tool · {data.form}</p>
         <h1
-          class="product__name glitch glitch--shatter"
+          class="product__name sl-fx-glitch sl-fx-glitch--shatter"
           data-text={data.name}
-          style={`--n:${NAME_BANDS}`}
+          style={`--slfx-n:${NAME_BANDS}`}
         >
-          <span class="glitch__text">{data.name}</span>
-          <span class="glitch__shards" aria-hidden="true">
+          <span class="sl-fx-glitch__text">{data.name}</span>
+          <span class="sl-fx-glitch__shards" aria-hidden="true">
             {nameShards.map((i) => (
-              <span class="glitch__shard" style={`--i:${i}`}>{data.name}</span>
+              <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{data.name}</span>
             ))}
           </span>
         </h1>
@@ -85,7 +85,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           {(data.repoPublic || data.links.length > 0) && (
             <div class="product__links">
               {data.repoPublic && data.repo && (
-                <a class="sl-btn sl-btn--primary" href={data.repo} target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+                <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-glass--pane sl-fx-aurora sl-fx-aurora--rim" href={data.repo} target="_blank" rel="noopener noreferrer">Source on GitHub</a>
               )}
               {data.links.map((l) => (
                 <a class="sl-link" href={l.href} target="_blank" rel="noopener noreferrer">{l.label} →</a>
@@ -100,7 +100,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 
       {novella && (
         <aside class="novella" data-novella>
-          <span class="novella__marker glitch" data-text={logMarker}>{logMarker}</span>
+          <span class="novella__marker sl-fx-glitch" data-text={logMarker}>{logMarker}</span>
           <div class="novella__body">
             {novella.map((para) => (
               <p class="novella__p">{para}</p>
@@ -114,14 +114,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           <a class="product__nav-link product__nav-link--prev" href={`/products/${prev.id}/`}>
             <span class="product__nav-dir">← Previous</span>
             <span
-              class="product__nav-name glitch glitch--shatter"
+              class="product__nav-name sl-fx-glitch sl-fx-glitch--shatter"
               data-text={prev.data.name}
-              style={`--n:${NAV_BANDS}`}
+              style={`--slfx-n:${NAV_BANDS}`}
             >
-              <span class="glitch__text">{prev.data.name}</span>
-              <span class="glitch__shards" aria-hidden="true">
+              <span class="sl-fx-glitch__text">{prev.data.name}</span>
+              <span class="sl-fx-glitch__shards" aria-hidden="true">
                 {navShards.map((i) => (
-                  <span class="glitch__shard" style={`--i:${i}`}>{prev.data.name}</span>
+                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{prev.data.name}</span>
                 ))}
               </span>
             </span>
@@ -131,14 +131,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           <a class="product__nav-link product__nav-link--next" href={`/products/${next.id}/`}>
             <span class="product__nav-dir">Next →</span>
             <span
-              class="product__nav-name glitch glitch--shatter"
+              class="product__nav-name sl-fx-glitch sl-fx-glitch--shatter"
               data-text={next.data.name}
-              style={`--n:${NAV_BANDS}`}
+              style={`--slfx-n:${NAV_BANDS}`}
             >
-              <span class="glitch__text">{next.data.name}</span>
-              <span class="glitch__shards" aria-hidden="true">
+              <span class="sl-fx-glitch__text">{next.data.name}</span>
+              <span class="sl-fx-glitch__shards" aria-hidden="true">
                 {navShards.map((i) => (
-                  <span class="glitch__shard" style={`--i:${i}`}>{next.data.name}</span>
+                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{next.data.name}</span>
                 ))}
               </span>
             </span>
@@ -396,19 +396,19 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 </style>
 
 <script>
-  import { autoBurst, hoverBurst, fireBurst } from '../../lib/glitch';
+  import { autoBurst, hoverBurst, burst } from '@sondalab/ui-kit/effects.js';
 
   // Product title glitches ambiently (per-product accent via the page's --sl-accent-default).
-  const name = document.querySelector('.product__name.glitch');
+  const name = document.querySelector('.product__name.sl-fx-glitch');
   if (name) autoBurst(name, { waitMin: 4000, waitMax: 8000 });
 
-  // Prev/next names glitch on hover, in bursts with random pauses.
+  // Prev/next names sl-fx-glitch on hover, in bursts with random pauses.
   for (const link of document.querySelectorAll('.product__nav-link')) {
-    const nm = link.querySelector('.product__nav-name.glitch');
+    const nm = link.querySelector('.product__nav-name.sl-fx-glitch');
     if (nm) hoverBurst(link, nm);
   }
 
-  // Operator's log: reveal on scroll + glitch the marker, then keep it ticking.
+  // Operator's log: reveal on scroll + sl-fx-glitch the marker, then keep it ticking.
   const log = document.querySelector('[data-novella]');
   if (log && 'IntersectionObserver' in window) {
     log.setAttribute('data-armed', '');
@@ -418,9 +418,9 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           if (e.isIntersecting) {
             e.target.classList.add('is-in');
             io.unobserve(e.target);
-            const marker = e.target.querySelector('.novella__marker.glitch');
+            const marker = e.target.querySelector('.novella__marker.sl-fx-glitch');
             if (marker) {
-              fireBurst(marker);
+              burst(marker);
               autoBurst(marker, { waitMin: 6000, waitMax: 12000 });
             }
           }

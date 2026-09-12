@@ -138,6 +138,15 @@ a { color: inherit; }
 .invert .eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
 .invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 .invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
+/* An inversion band is its own ground, and the effects layer cannot see that:
+   its substance is derived from the THEME, so inside a band that flipped
+   locally the goo painted the dark theme's raised surface behind pillars
+   sitting on a light one — dark slabs with barely legible text. The band knows
+   what it is made of, so the band rebinds it: one step off its own ground, in
+   the direction of the page's. This is the dark-invert regression the DS's own
+   migrate workflow tells you to check for, arriving through a different
+   property. */
+.invert { --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary)); }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
@@ -236,105 +245,13 @@ a { color: inherit; }
   border-top: 1px solid var(--sl-border-subtle);
 }
 
-/* ------------------------------------------------------------------ *
- * VHS glitch, short, staccato RGB pulses repeated in a burst. Three
- * channels off the brand palette (amber accent, teal depth, amber-hover
- * via text-shadow), blended with mix-blend-mode: screen so the ghosts
- * mix where they overlap. Fired by .is-glitching (JS-driven burst, finite).
- * The element needs data-text set to its own text for the ghost copies.
- * `--gx` = split amplitude, tune per element.
+/* The glitch is @sondalab/ui-kit's now: sl-fx-glitch in effects.css, and
+ * burst / autoBurst / hoverBurst in effects.js. This file carried its own for
+ * as long as the kit had none; 0.9.2 took autoBurst, hoverBurst and a settable
+ * burst budget FROM here, so the two are one system again and only one of them
+ * should exist.
  *
- * The glitch is part of the brand, not decoration, so it runs for everyone:
- * prefers-reduced-motion is deliberately not consulted anywhere on this site.
- * scripts/motion-gate.mjs keeps that decision from being undone by accident.
- * ------------------------------------------------------------------ */
-.glitch { position: relative; --gx: 2px; }
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  white-space: inherit;
-  mix-blend-mode: screen;
-}
-/* Looping visual; JS controls burst length (toggling .is-glitching) and sets
-   per-burst randomness via inline vars: --gd* durations, --gph* phase delays,
-   --gmul amplitude multiplier. Fallbacks keep it working without JS vars. */
-.glitch.is-glitching {
-  animation: glitch-jit var(--gdj, 0.16s) steps(2) infinite;
-}
-.glitch.is-glitching::before {
-  color: var(--sl-accent-default);
-  animation: glitch-a var(--gda, 0.16s) steps(2) infinite;
-  animation-delay: var(--gpha, 0s);
-}
-.glitch.is-glitching::after {
-  color: var(--sl-accent-depth);
-  animation: glitch-b var(--gdb, 0.16s) steps(2) infinite;
-  animation-delay: var(--gphb, 0s);
-}
-/* Base jitter on the real text + a third colour halo via text-shadow.
-   --ga = effective amplitude (--gx scaled by the per-burst --gmul). */
-@keyframes glitch-jit {
-  0%   { transform: translate(0, 0); text-shadow: none; }
-  50%  {
-    transform: translate(calc(-0.4 * var(--gx) * var(--gmul, 1)), 0);
-    text-shadow:
-      calc(0.8 * var(--gx) * var(--gmul, 1)) 0 color-mix(in srgb, var(--sl-accent-hover) 55%, transparent),
-      calc(-0.8 * var(--gx) * var(--gmul, 1)) 0 color-mix(in srgb, var(--sl-accent-depth) 40%, transparent);
-  }
-  100% { transform: translate(calc(0.4 * var(--gx) * var(--gmul, 1)), 0); text-shadow: none; }
-}
-/* Amber ghost, slices flicker; opacity pulses so it strobes. */
-@keyframes glitch-a {
-  0%   { opacity: 0.22; transform: translate(calc(-1 * var(--gx) * var(--gmul, 1)), 0);    clip-path: inset(0 0 68% 0); }
-  50%  { opacity: 0.4;  transform: translate(calc(-1.7 * var(--gx) * var(--gmul, 1)), 1px); clip-path: inset(55% 0 12% 0); }
-  100% { opacity: 0.28; transform: translate(calc(-0.6 * var(--gx) * var(--gmul, 1)), 0);  clip-path: inset(28% 0 42% 0); }
-}
-/* Teal ghost, offset phase so the two channels cross and blend. */
-@keyframes glitch-b {
-  0%   { opacity: 0.38; transform: translate(calc(var(--gx) * var(--gmul, 1)), 0);             clip-path: inset(52% 0 18% 0); }
-  50%  { opacity: 0.2;  transform: translate(calc(1.7 * var(--gx) * var(--gmul, 1)), -1px); clip-path: inset(8% 0 60% 0); }
-  100% { opacity: 0.34; transform: translate(calc(0.6 * var(--gx) * var(--gmul, 1)), 0);  clip-path: inset(30% 0 40% 0); }
-}
-
-/* Product name burst uses the row's own accent tint for the amber channel. */
-.prow__name.is-glitching::before { color: var(--row-accent); }
-
-/* ------------------------------------------------------------------ *
- * Shatter, during a burst the element breaks into horizontal bands that
- * jump sideways (datamosh/"no signal"). Bands are stacked copies of the
- * text (.glitch__shard), each clipped to one strip; JS sets a random --sx
- * offset per band per burst. The intact copy hides while shards show.
- * ------------------------------------------------------------------ */
-.glitch__text { position: relative; z-index: 1; }
-.glitch__shards {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-.glitch__shard {
-  position: absolute;
-  inset: 0;
-  white-space: nowrap;
-  opacity: 0;
-  /* band = one horizontal strip of the full text */
-  clip-path: inset(
-    calc(var(--i) / var(--n) * 100%) 0
-    calc((var(--n) - 1 - var(--i)) / var(--n) * 100%) 0
-  );
-}
-.glitch--shatter.is-glitching .glitch__text { opacity: 0; }
-.glitch--shatter.is-glitching .glitch__shard {
-  opacity: 1;
-  animation: shatter var(--gda, 0.16s) steps(2) infinite;
-  animation-delay: calc(var(--i) * -0.028s);
-}
-@keyframes shatter {
-  0%   { transform: translateX(0); }
-  50%  { transform: translateX(calc(var(--sx, 0px) * var(--gmul, 1))); }
-  100% { transform: translateX(0); }
-}
+ * The decision that lived in the comment this replaces is not lost. "The
+ * glitch is brand, not decoration, so it runs for everyone" is now
+ * mount()'s `ignoreReducedMotion`, taken explicitly in Base.astro, and
+ * scripts/motion-gate.mjs still guards it from being undone by accident. */

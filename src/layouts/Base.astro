@@ -5,11 +5,20 @@ import '@fontsource-variable/fraunces/full.css';
 import '@fontsource-variable/instrument-sans';
 import '@fontsource-variable/martian-mono';
 
-// Design system, Tier A (Page substrate): tokens + both themes + components.
+// Design system, Tier A (Page substrate): tokens + both themes + components,
+// then the two opt-in layers above them — the glass material and the effects.
+//
+// ORDER IS LOAD-BEARING and scripts/motion-gate.mjs enforces it: tokens.css
+// zeroes --sl-motion-* under prefers-reduced-motion, and site.css restores
+// them unconditionally, so site.css must stay last. effects.css goes after
+// components.css because it composes onto the shipped .sl-* classes and never
+// replaces them.
 import '@sondalab/ui-kit/tokens.css';
 import '@sondalab/ui-kit/themes/light.css';
 import '@sondalab/ui-kit/themes/dark.css';
 import '@sondalab/ui-kit/components.css';
+import '@sondalab/ui-kit/glass.css';
+import '@sondalab/ui-kit/effects.css';
 
 import '../styles/site.css';
 import { SITE } from '../lib/site';
@@ -54,6 +63,25 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     <meta name="twitter:card" content="summary_large_image" />
 
     {/* Set theme before paint: stored choice → OS preference → dark default. */}
+    <script>
+      // Tier 1 of the effects layer, armed once for every page. Tier 0 — the
+      // glass material and the aurora's static arc on focus — is the CSS alone
+      // and is already correct without this; mount() adds the motion.
+      //
+      // ignoreReducedMotion: this site's documented decision, now expressed
+      // through the kit instead of by keeping a driver of its own. Windows
+      // reports `reduce` by default under "adjust for best performance", and
+      // the glitch here is brand, not decoration. scripts/motion-gate.mjs
+      // still guards it. The derogation reaches the glitch alone; high
+      // contrast refuses regardless.
+      //
+      // bursts: the ambient ceiling. The hero claim, both interlude markers
+      // and a product name all burst on their own timers, and at the default
+      // of 1 most of them would simply be dropped.
+      import { mount } from '@sondalab/ui-kit/effects.js';
+      mount(document, { ignoreReducedMotion: true, bursts: 3 });
+    </script>
+
     <script is:inline>
       (function () {
         try {
