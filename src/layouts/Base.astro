@@ -5,11 +5,20 @@ import '@fontsource-variable/fraunces/full.css';
 import '@fontsource-variable/instrument-sans';
 import '@fontsource-variable/martian-mono';
 
-// Design system, Tier A (Page substrate): tokens + both themes + components.
+// Design system, Tier A (Page substrate): tokens + both themes + components,
+// then the two opt-in layers above them — the glass material and the effects.
+//
+// ORDER IS LOAD-BEARING and scripts/motion-gate.mjs enforces it: tokens.css
+// zeroes --sl-motion-* under prefers-reduced-motion, and site.css restores
+// them unconditionally, so site.css must stay last. effects.css goes after
+// components.css because it composes onto the shipped .sl-* classes and never
+// replaces them.
 import '@sondalab/ui-kit/tokens.css';
 import '@sondalab/ui-kit/themes/light.css';
 import '@sondalab/ui-kit/themes/dark.css';
 import '@sondalab/ui-kit/components.css';
+import '@sondalab/ui-kit/glass.css';
+import '@sondalab/ui-kit/effects.css';
 
 import '../styles/site.css';
 import { SITE } from '../lib/site';
