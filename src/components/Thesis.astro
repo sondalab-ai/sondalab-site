@@ -16,6 +16,7 @@ const pillars = [
 ---
 
 <section id="approach" class="section invert thesis">
+  <div class="thesis__bed" aria-hidden="true"></div>
   <div class="wrap thesis__grid">
     <div class="thesis__head">
       <div class="section-index">
@@ -32,9 +33,9 @@ const pillars = [
       </p>
     </div>
 
-    <ol class="thesis__pillars sl-fx-goo">
+    <ol class="thesis__pillars">
       {pillars.map((p, i) => (
-        <li class="pillar sl-fx-goo__member">
+        <li class="pillar sl-fx-glass sl-fx-glass--pane">
           <span class="pillar__no">{String(i + 1).padStart(2, '0')}</span>
           <div class="pillar__body">
             <h3 class="pillar__verb">{p.verb}</h3>
@@ -47,7 +48,42 @@ const pillars = [
 </section>
 
 <style>
+  /* The bed. A pane laid on a flat slab shows nothing — it has no structure
+     to blur and no colour to carry — so the band gets a field of soft blooms
+     in the brand pair for the glass to read. Painted first and left under the
+     content, which is what puts it in each pane's backdrop. */
+  .thesis { position: relative; }
+  .thesis__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(58% 52% at 16% 20%,
+        color-mix(in srgb, var(--sl-accent-default) 34%, transparent) 0%, transparent 70%),
+      radial-gradient(48% 58% at 88% 36%,
+        color-mix(in srgb, var(--sl-accent-depth) 30%, transparent) 0%, transparent 72%),
+      radial-gradient(66% 48% at 54% 98%,
+        color-mix(in srgb, var(--sl-accent-default) 18%, transparent) 0%, transparent 76%);
+  }
+  /* A ruled measure over the blooms: the blur needs an edge to bend, and a
+     field of pure gradients blurs into itself. Faded top and bottom so the
+     rules never meet the band's own boundary. */
+  .thesis__bed::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in srgb, var(--sl-bg-canvas) 8%, transparent) 0 1px,
+      transparent 1px 4.5rem);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
+  }
+
   .thesis__grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(2.5rem, 6vw, 5rem);
@@ -69,15 +105,16 @@ const pillars = [
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    gap: clamp(0.85rem, 2vw, 1.4rem);
   }
   .pillar {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: clamp(1rem, 3vw, 2.5rem);
-    padding-block: clamp(1.75rem, 4vw, 2.75rem);
-    border-top: 1px solid color-mix(in srgb, var(--sl-bg-canvas) 18%, transparent);
+    padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    --slg-radius: var(--sl-radius-lg);
   }
-  .pillar:first-child { border-top: 0; padding-top: 0; }
 
   .pillar__no {
     font-family: var(--sl-font-mono);
