@@ -46,7 +46,7 @@ const usedStatuses = [
         const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
           <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow sl-fx-glass sl-fx-aurora" href={`/products/${p.id}/`}>
+            <a class="prow sl-fx-glass sl-fx-glass--pane sl-fx-aurora" href={`/products/${p.id}/`}>
               <span class="prow__no" data-num={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
@@ -98,7 +98,13 @@ const usedStatuses = [
     color: var(--sl-text-primary);
   }
 
-  .products__list { list-style: none; margin: 0; padding: 0; }
+  .products__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(0.85rem, 2vw, 1.4rem);
+  }
 
   .products__list li { --row-accent: var(--row-accent-dark); }
   :root[data-sl-theme='light'] .products__list li { --row-accent: var(--row-accent-light); }
@@ -111,13 +117,9 @@ const usedStatuses = [
     padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
     padding-inline: clamp(0.5rem, 2vw, 1.25rem);
     margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
-    border-top: 1px solid var(--sl-border-subtle);
     text-decoration: none;
     color: inherit;
     transition: background var(--sl-motion-mid) var(--sl-motion-ease);
-  }
-  .products__list li:last-child .prow {
-    border-bottom: 1px solid var(--sl-border-subtle);
   }
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);

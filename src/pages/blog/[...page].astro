@@ -240,6 +240,9 @@ const BAND_SCENES = ['uprising', 'kinship'];
     .tlog-head__side { padding-bottom: 0.5rem; }
   }
   .tlog-head__h {
+    /* .sl-fx-glitch is inline-block, and .eyebrow above is inline-flex: left
+       as an inline box this heading shares a line with the eyebrow. */
+    display: block;
     font-family: var(--sl-font-display);
     font-weight: 400;
     font-variation-settings: 'opsz' 144, 'WONK' 1;

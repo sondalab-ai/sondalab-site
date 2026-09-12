@@ -145,8 +145,22 @@ a { color: inherit; }
    what it is made of, so the band rebinds it: one step off its own ground, in
    the direction of the page's. This is the dark-invert regression the DS's own
    migrate workflow tells you to check for, arriving through a different
-   property. */
-.invert { --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary)); }
+   property.
+
+   The role-vars are the same story reached through the front door. --slc-text
+   is the sheen every glint is mirrored from, --slc-surface is what a pane
+   tints toward, and the border roles default to an alpha over the canvas — so
+   a glass pane on this band would be lit for the page behind it. components.css
+   prescribes fixing --slc-border at the band; this is that fix, widened to
+   every role the material reads. */
+.invert {
+  --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary));
+  --slc-text: var(--sl-bg-canvas);
+  --slc-surface: color-mix(in srgb, var(--sl-bg-canvas) 10%, var(--sl-text-primary));
+  --slc-border: color-mix(in srgb, currentColor 22%, transparent);
+  --slc-border-subtle: color-mix(in srgb, currentColor 12%, transparent);
+  --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
+}
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
