@@ -33,14 +33,14 @@ const cue = [
     <h1 class="display hero__claim">
       <span>{claimParts[0]},</span>
       <span
-        class="hero__claim-accent glitch glitch--shatter"
+        class="hero__claim-accent sl-fx-glitch sl-fx-glitch--shatter"
         data-text={accentText}
-        style={`--n:${SHARDS}`}
+        style={`--slfx-n:${SHARDS}`}
       >
-        <span class="glitch__text">{accentText}</span>
-        <span class="glitch__shards" aria-hidden="true">
+        <span class="sl-fx-glitch__text">{accentText}</span>
+        <span class="sl-fx-glitch__shards" aria-hidden="true">
           {shards.map((i) => (
-            <span class="glitch__shard" style={`--i:${i}`}>{accentText}</span>
+            <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{accentText}</span>
           ))}
         </span>
       </span>
@@ -255,8 +255,8 @@ const cue = [
     letter-spacing: 0.08em;
     text-decoration: none;
   }
-  /* No underline on hover: the glitch is the hover state, wired in
-     TerminalField. The brackets live in the text because .glitch owns
+  /* No underline on hover: the sl-fx-glitch is the hover state, wired in
+     TerminalField. The brackets live in the text because .sl-fx-glitch owns
      ::before/::after. */
 
   /* The tube now follows the theme — dark screen on dark, paper on light — so
@@ -274,7 +274,7 @@ const cue = [
 </style>
 
 <script>
-  import { autoBurst } from '../lib/glitch';
+  import { autoBurst } from '@sondalab/ui-kit/effects.js';
 
   // Every few seconds, briefly swap the hero cue's default wave for an alternate
   // move, chosen at random.
@@ -296,7 +296,7 @@ const cue = [
     schedule();
   }
 
-  // Ambient VHS glitch on the hero accent word, random-length bursts.
-  const accent = document.querySelector('.hero__claim-accent.glitch');
+  // Ambient VHS sl-fx-glitch on the hero accent word, random-length bursts.
+  const accent = document.querySelector('.hero__claim-accent.sl-fx-glitch');
   if (accent) autoBurst(accent, { waitMin: 4000, waitMax: 8000 });
 </script>

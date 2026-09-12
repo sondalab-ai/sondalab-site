@@ -68,12 +68,18 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // glass material and the aurora's static arc on focus — is the CSS alone
       // and is already correct without this; mount() adds the motion.
       //
-      // Deliberately NOT taking the reduced-motion derogation yet: the site's
-      // own glitch still runs unguarded (src/lib/glitch.ts), so nothing the kit
-      // owns needs to animate for a visitor reporting the preference until that
-      // system is retired in favour of sl-fx-glitch.
+      // ignoreReducedMotion: this site's documented decision, now expressed
+      // through the kit instead of by keeping a driver of its own. Windows
+      // reports `reduce` by default under "adjust for best performance", and
+      // the glitch here is brand, not decoration. scripts/motion-gate.mjs
+      // still guards it. The derogation reaches the glitch alone; high
+      // contrast refuses regardless.
+      //
+      // bursts: the ambient ceiling. The hero claim, both interlude markers
+      // and a product name all burst on their own timers, and at the default
+      // of 1 most of them would simply be dropped.
       import { mount } from '@sondalab/ui-kit/effects.js';
-      mount();
+      mount(document, { ignoreReducedMotion: true, bursts: 3 });
     </script>
 
     <script is:inline>

@@ -52,14 +52,14 @@ const usedStatuses = [
               <div class="prow__main">
                 <div class="prow__headline">
                   <h3
-                    class="prow__name glitch glitch--shatter"
+                    class="prow__name sl-fx-glitch sl-fx-glitch--shatter"
                     data-text={p.data.name}
-                    style={`--n:${NAME_BANDS}`}
+                    style={`--slfx-n:${NAME_BANDS}`}
                   >
-                    <span class="glitch__text">{p.data.name}</span>
-                    <span class="glitch__shards" aria-hidden="true">
+                    <span class="sl-fx-glitch__text">{p.data.name}</span>
+                    <span class="sl-fx-glitch__shards" aria-hidden="true">
                       {nameShards.map((i) => (
-                        <span class="glitch__shard" style={`--i:${i}`}>{p.data.name}</span>
+                        <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{p.data.name}</span>
                       ))}
                     </span>
                   </h3>
@@ -250,11 +250,11 @@ const usedStatuses = [
 </style>
 
 <script>
-  import { hoverBurst, scramble } from '../lib/glitch';
+  import { hoverBurst, scramble } from '@sondalab/ui-kit/effects.js';
   // Hovering a product row glitches its name (bursts) and decode-scrambles its
   // index numeral once; two distinct effects on the same trigger.
   for (const row of document.querySelectorAll('.prow')) {
-    const name = row.querySelector('.prow__name.glitch');
+    const name = row.querySelector('.prow__name.sl-fx-glitch');
     if (name) hoverBurst(row, name);
     const no = row.querySelector('.prow__no');
     if (no) row.addEventListener('mouseenter', () => scramble(no as HTMLElement));

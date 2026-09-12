@@ -46,14 +46,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <header class="post__head">
         <p class="eyebrow">Transmission // {no}</p>
         <h1
-          class="post__title glitch glitch--shatter"
+          class="post__title sl-fx-glitch sl-fx-glitch--shatter"
           data-text={post.data.title}
-          style={`--n:${TITLE_BANDS}`}
+          style={`--slfx-n:${TITLE_BANDS}`}
         >
-          <span class="glitch__text">{post.data.title}</span>
-          <span class="glitch__shards" aria-hidden="true">
+          <span class="sl-fx-glitch__text">{post.data.title}</span>
+          <span class="sl-fx-glitch__shards" aria-hidden="true">
             {titleShards.map((i) => (
-              <span class="glitch__shard" style={`--i:${i}`}>{post.data.title}</span>
+              <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{post.data.title}</span>
             ))}
           </span>
         </h1>
@@ -73,14 +73,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           <a class="post__nav-link post__nav-link--prev" href={`/blog/${newer.id}/`}>
             <span class="post__nav-dir">← Newer</span>
             <span
-              class="post__nav-title glitch glitch--shatter"
+              class="post__nav-title sl-fx-glitch sl-fx-glitch--shatter"
               data-text={newer.data.title}
-              style={`--n:${NAV_BANDS}`}
+              style={`--slfx-n:${NAV_BANDS}`}
             >
-              <span class="glitch__text">{newer.data.title}</span>
-              <span class="glitch__shards" aria-hidden="true">
+              <span class="sl-fx-glitch__text">{newer.data.title}</span>
+              <span class="sl-fx-glitch__shards" aria-hidden="true">
                 {navShards.map((i) => (
-                  <span class="glitch__shard" style={`--i:${i}`}>{newer.data.title}</span>
+                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{newer.data.title}</span>
                 ))}
               </span>
             </span>
@@ -90,14 +90,14 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           <a class="post__nav-link post__nav-link--next" href={`/blog/${older.id}/`}>
             <span class="post__nav-dir">Older →</span>
             <span
-              class="post__nav-title glitch glitch--shatter"
+              class="post__nav-title sl-fx-glitch sl-fx-glitch--shatter"
               data-text={older.data.title}
-              style={`--n:${NAV_BANDS}`}
+              style={`--slfx-n:${NAV_BANDS}`}
             >
-              <span class="glitch__text">{older.data.title}</span>
-              <span class="glitch__shards" aria-hidden="true">
+              <span class="sl-fx-glitch__text">{older.data.title}</span>
+              <span class="sl-fx-glitch__shards" aria-hidden="true">
                 {navShards.map((i) => (
-                  <span class="glitch__shard" style={`--i:${i}`}>{older.data.title}</span>
+                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{older.data.title}</span>
                 ))}
               </span>
             </span>
@@ -199,9 +199,9 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 </style>
 
 <script>
-  import { autoBurst, hoverBurst, scramble } from '../../lib/glitch';
+  import { autoBurst, hoverBurst, scramble } from '@sondalab/ui-kit/effects.js';
 
-  const title = document.querySelector('.post__title.glitch');
+  const title = document.querySelector('.post__title.sl-fx-glitch');
   if (title) autoBurst(title, { waitMin: 5000, waitMax: 10000 });
 
   // The stamp re-reads itself once the title has settled, like a decoding header.
@@ -209,7 +209,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   if (stamp) window.setTimeout(() => scramble(stamp), 400);
 
   for (const link of document.querySelectorAll('.post__nav-link')) {
-    const t = link.querySelector('.post__nav-title.glitch');
+    const t = link.querySelector('.post__nav-title.sl-fx-glitch');
     if (t) hoverBurst(link, t);
   }
 </script>

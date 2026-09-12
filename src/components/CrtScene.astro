@@ -55,8 +55,8 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
   data-pointer-host={pointerHost}
   style={`--scene-dim: ${intensity}`}
 >
-  <span class="crt-scene__flat glitch glitch--shatter" style={`--n:${BANDS}`}>
-    <span class="crt-scene__base glitch__text">
+  <span class="crt-scene__flat sl-fx-glitch sl-fx-glitch--shatter" style={`--slfx-n:${BANDS}`}>
+    <span class="crt-scene__base sl-fx-glitch__text">
       <Image
         src={flat}
         alt={flatLight ? '' : meta.alt}
@@ -80,19 +80,19 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
           twice — once per theme — with only one of them on screen. */}
       {flatLight && <span class="crt-scene__name">{meta.alt}</span>}
     </span>
-    <span class="glitch__shards" aria-hidden="true">
+    <span class="sl-fx-glitch__shards" aria-hidden="true">
       {Array.from({ length: BANDS }, (_, b) => (
         <span
-          class="glitch__shard crt-scene__band"
+          class="sl-fx-glitch__shard crt-scene__band"
           style={`--i:${b}; background-image:url(${plate.src})`}
         />
       ))}
     </span>
     {plateLight && (
-      <span class="glitch__shards crt-scene__shards--light" aria-hidden="true">
+      <span class="sl-fx-glitch__shards crt-scene__shards--light" aria-hidden="true">
         {Array.from({ length: BANDS }, (_, b) => (
           <span
-            class="glitch__shard crt-scene__band"
+            class="sl-fx-glitch__shard crt-scene__band"
             style={`--i:${b}; background-image:url(${plateLight.src})`}
           />
         ))}
@@ -109,7 +109,7 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
   import { CRT_SHADER } from '../lib/crt-shader';
   import { createScene } from '../lib/crt-scene';
   import { SCENES } from '../lib/scenes';
-  import { autoBurst, fireBurst } from '../lib/glitch';
+  import { autoBurst, burst } from '@sondalab/ui-kit/effects.js';
 
   /**
    * Frozen from the hero's tuning pass, then pulled back where a picture behaves
@@ -209,7 +209,7 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
   // The fallback picture corrupts on the same schedule the Apparel plates use, so
   // a visitor without WebGPU still gets tape rot rather than a still photograph.
   for (const flat of document.querySelectorAll('[data-crt-scene] .crt-scene__flat')) {
-    fireBurst(flat, { burstMin: 300, burstMax: 700 });
+    burst(flat, { burstMin: 300, burstMax: 700 });
     autoBurst(flat, { waitMin: 4500, waitMax: 9000, burstMin: 240, burstMax: 620 });
   }
 </script>
@@ -271,7 +271,7 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
     display: none;
   }
   :global([data-sl-theme='light']) .crt-scene--dual .crt-scene__pic--dark,
-  :global([data-sl-theme='light']) .crt-scene--dual .glitch__shards:not(.crt-scene__shards--light) {
+  :global([data-sl-theme='light']) .crt-scene--dual .sl-fx-glitch__shards:not(.crt-scene__shards--light) {
     display: none;
   }
   :global([data-sl-theme='light']) .crt-scene--dual .crt-scene__pic--light,
@@ -295,10 +295,10 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
     object-fit: cover;
   }
 
-  /* `.glitch` renders attr(data-text) in its pseudo-elements; a picture has no
+  /* `.sl-fx-glitch` renders attr(data-text) in its pseudo-elements; a picture has no
      text to ghost, so they are switched off and the bands do all the work. */
-  .crt-scene__flat.glitch::before,
-  .crt-scene__flat.glitch::after {
+  .crt-scene__flat.sl-fx-glitch::before,
+  .crt-scene__flat.sl-fx-glitch::after {
     content: none;
   }
 
@@ -313,21 +313,21 @@ const plateLight = flatLight ? await getImage({ src: flatLight, width: 1200, for
     inset: 0;
     opacity: 0;
   }
-  .crt-scene__flat.glitch--shatter.is-glitching .glitch__text {
+  .crt-scene__flat.sl-fx-glitch--shatter.is-glitching .sl-fx-glitch__text {
     opacity: 1;
   }
-  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band {
+  .crt-scene__flat.sl-fx-glitch--shatter.is-glitching .crt-scene__band {
     opacity: 1;
     animation: scene-shatter var(--gda, 0.16s) steps(2) infinite;
     animation-delay: calc(var(--i) * -0.031s);
   }
   /* Two bands in eight take a channel, so the tear carries the brand's amber and
      teal rather than reading as a grey slip. */
-  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band:nth-child(5n)::after {
+  .crt-scene__flat.sl-fx-glitch--shatter.is-glitching .crt-scene__band:nth-child(5n)::after {
     background: color-mix(in srgb, var(--sl-accent-default) 18%, transparent);
     opacity: 1;
   }
-  .crt-scene__flat.glitch--shatter.is-glitching .crt-scene__band:nth-child(7n)::after {
+  .crt-scene__flat.sl-fx-glitch--shatter.is-glitching .crt-scene__band:nth-child(7n)::after {
     background: color-mix(in srgb, var(--sl-accent-depth) 15%, transparent);
     opacity: 1;
   }

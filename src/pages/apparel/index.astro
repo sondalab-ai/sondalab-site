@@ -114,8 +114,8 @@ const ledger = [
                 <span class="crow__label">{c.label}</span>
                 <span class="crow__note">{c.note}</span>
               </span>
-              <span class="crow__img glitch glitch--shatter" style={`--n:${BANDS}`}>
-                <span class="crow__img-base glitch__text">
+              <span class="crow__img sl-fx-glitch sl-fx-glitch--shatter" style={`--slfx-n:${BANDS}`}>
+                <span class="crow__img-base sl-fx-glitch__text">
                   {/* Decorative: the row's own text already names the piece. */}
                   <Image
                     src={c.image}
@@ -124,10 +124,10 @@ const ledger = [
                     sizes="(min-width: 52rem) 26rem, min(100vw, 22rem)"
                   />
                 </span>
-                <span class="glitch__shards" aria-hidden="true">
+                <span class="sl-fx-glitch__shards" aria-hidden="true">
                   {Array.from({ length: BANDS }, (_, b) => (
                     <span
-                      class="glitch__shard crow__band"
+                      class="sl-fx-glitch__shard crow__band"
                       style={`--i:${b}; background-image:url(${plates[i].src})`}
                     />
                   ))}
@@ -381,10 +381,10 @@ const ledger = [
    * text version hides the original underneath — here it stays, so a displaced
    * band doubles over what it left behind, which is what datamoshed video
    * actually looks like. `--sx` per band and `--gmul` per burst come from
-   * lib/glitch's randomizeGhosts, so the timing contract is the shared one.
+   * @sondalab/ui-kit's own randomizeGhosts, so the timing contract is the shared one.
    */
-  .crow__img.glitch::before,
-  .crow__img.glitch::after { content: none; }
+  .crow__img.sl-fx-glitch::before,
+  .crow__img.sl-fx-glitch::after { content: none; }
 
   .crow__band {
     background-size: cover;
@@ -397,8 +397,8 @@ const ledger = [
     inset: 0;
     opacity: 0;
   }
-  .crow__img.glitch--shatter.is-glitching .glitch__text { opacity: 1; }
-  .crow__img.glitch--shatter.is-glitching .crow__band {
+  .crow__img.sl-fx-glitch--shatter.is-glitching .sl-fx-glitch__text { opacity: 1; }
+  .crow__img.sl-fx-glitch--shatter.is-glitching .crow__band {
     opacity: 1;
     animation: plate-shatter var(--gda, 0.16s) steps(2) infinite;
     animation-delay: calc(var(--i) * -0.031s);
@@ -408,11 +408,11 @@ const ledger = [
      alpha, not a screen blend: screen leaves a near-white plate untouched, and
      two of these three photographs are shot on white — but a strong tint on
      white turns the band into a pastel slab that hides the garment. */
-  .crow__img.glitch--shatter.is-glitching .crow__band:nth-child(5n)::after {
+  .crow__img.sl-fx-glitch--shatter.is-glitching .crow__band:nth-child(5n)::after {
     background: color-mix(in srgb, var(--sl-accent-default) 15%, transparent);
     opacity: 1;
   }
-  .crow__img.glitch--shatter.is-glitching .crow__band:nth-child(7n)::after {
+  .crow__img.sl-fx-glitch--shatter.is-glitching .crow__band:nth-child(7n)::after {
     background: color-mix(in srgb, var(--sl-accent-depth) 13%, transparent);
     opacity: 1;
   }
@@ -530,7 +530,7 @@ const ledger = [
 </style>
 
 <script>
-  import { autoBurst, fireBurst, hoverBurst } from '../../lib/glitch';
+  import { autoBurst, burst, hoverBurst } from '@sondalab/ui-kit/effects.js';
 
   // Rows arrive as they come into view, staggered by their --i. Armed from
   // script so that a reader without JavaScript gets the page fully visible
@@ -544,10 +544,10 @@ const ledger = [
           io.unobserve(e.target);
           // The plate corrupts once as it lands, then only occasionally: a
           // photograph that never settles is noise, not an effect.
-          const plate = e.target.querySelector('.crow__img.glitch');
+          const plate = e.target.querySelector('.crow__img.sl-fx-glitch');
           if (plate) {
             window.setTimeout(() => {
-              fireBurst(plate, { burstMin: 260, burstMax: 620 });
+              burst(plate, { burstMin: 260, burstMax: 620 });
               autoBurst(plate, {
                 waitMin: 9000,
                 waitMax: 17000,
@@ -569,7 +569,7 @@ const ledger = [
   // Hovering the row corrupts its plate in bursts, the same trigger the
   // product rows use for their names.
   for (const row of document.querySelectorAll('.crow')) {
-    const plate = row.querySelector('.crow__img.glitch');
+    const plate = row.querySelector('.crow__img.sl-fx-glitch');
     if (plate) hoverBurst(row, plate);
   }
 </script>

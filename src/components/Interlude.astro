@@ -17,14 +17,14 @@ const pool = JSON.stringify(data.lines);
 <aside class:list={['interlude', { invert: data.variant === 'invert' }]}>
   <div class="wrap interlude__wrap" data-interlude data-pool={pool}>
     <span
-      class="interlude__marker glitch glitch--shatter"
+      class="interlude__marker sl-fx-glitch sl-fx-glitch--shatter"
       data-text={data.marker}
-      style={`--n:${MARKER_BANDS}`}
+      style={`--slfx-n:${MARKER_BANDS}`}
     >
-      <span class="glitch__text">{data.marker}</span>
-      <span class="glitch__shards" aria-hidden="true">
+      <span class="sl-fx-glitch__text">{data.marker}</span>
+      <span class="sl-fx-glitch__shards" aria-hidden="true">
         {markerShards.map((i) => (
-          <span class="glitch__shard" style={`--i:${i}`}>{data.marker}</span>
+          <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{data.marker}</span>
         ))}
       </span>
     </span>
@@ -99,7 +99,7 @@ const pool = JSON.stringify(data.lines);
 </style>
 
 <script>
-  import { fireBurst, autoBurst } from '../lib/glitch';
+  import { burst, autoBurst } from '@sondalab/ui-kit/effects.js';
 
   const nodes = document.querySelectorAll('[data-interlude]');
 
@@ -126,9 +126,9 @@ const pool = JSON.stringify(data.lines);
             e.target.classList.add('is-in');
             io.unobserve(e.target);
             // Glitch the marker at reveal, then keep it glitching periodically.
-            const marker = e.target.querySelector('.interlude__marker.glitch');
+            const marker = e.target.querySelector('.interlude__marker.sl-fx-glitch');
             if (marker) {
-              fireBurst(marker);
+              burst(marker);
               autoBurst(marker, { waitMin: 5000, waitMax: 10000 });
             }
           }
