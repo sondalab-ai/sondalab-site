@@ -15,7 +15,7 @@ const pillars = [
 ];
 ---
 
-<section id="approach" class="section invert thesis">
+<section id="approach" class="section invert thesis" data-sl-fx-backdrop>
   <div class="thesis__bed" aria-hidden="true"></div>
   <div class="wrap thesis__grid">
     <div class="thesis__head">
@@ -50,35 +50,29 @@ const pillars = [
 <style>
   /* The bed. A pane laid on a flat slab shows nothing — it has no structure
      to blur and no colour to carry — so the band gets a field of soft blooms
-     in the brand pair for the glass to read. Painted first and left under the
-     content, which is what puts it in each pane's backdrop. */
-  .thesis { position: relative; }
+     in the brand pair, ruled so the blur has an edge to bend rather than a
+     gradient blurring into itself. Painted first and left under the content,
+     which is what puts it in each pane's backdrop.
+
+     It is a PLATE, not a stack of CSS gradients, and that is not a style
+     choice: the GPU tier bends what a pane declares through --slfx-backdrop,
+     and effects-gpu.js takes a url() and nothing else, because a gradient
+     cannot be sampled. So the same file paints the bed and feeds the shader,
+     which is what keeps the two from drifting. scripts/make-backdrops.mjs
+     generates it from the kit's own theme tokens. */
+  .thesis {
+    position: relative;
+    --slfx-backdrop: url('/backdrops/thesis-dark.svg');
+  }
+  :root[data-sl-theme='light'] .thesis {
+    --slfx-backdrop: url('/backdrops/thesis-light.svg');
+  }
   .thesis__bed {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background:
-      radial-gradient(58% 52% at 16% 20%,
-        color-mix(in srgb, var(--sl-accent-default) 34%, transparent) 0%, transparent 70%),
-      radial-gradient(48% 58% at 88% 36%,
-        color-mix(in srgb, var(--sl-accent-depth) 30%, transparent) 0%, transparent 72%),
-      radial-gradient(66% 48% at 54% 98%,
-        color-mix(in srgb, var(--sl-accent-default) 18%, transparent) 0%, transparent 76%);
-  }
-  /* A ruled measure over the blooms: the blur needs an edge to bend, and a
-     field of pure gradients blurs into itself. Faded top and bottom so the
-     rules never meet the band's own boundary. */
-  .thesis__bed::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in srgb, var(--sl-bg-canvas) 8%, transparent) 0 1px,
-      transparent 1px 4.5rem);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
-    mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
+    background: var(--slfx-backdrop) center / cover no-repeat;
   }
 
   .thesis__grid {

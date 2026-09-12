@@ -79,6 +79,17 @@ const points = [
     list-style: none;
     margin: 0;
     --slfx-goo-weld: 28px;
+    /* The kit's defaults were too quiet here, measured rather than guessed.
+       --sl-bg-surface-raised against the canvas is 1.15:1 — the default suits a
+       member that carries a colour of its own, and these carry none, so the
+       whole slab was that grey. Lifting it toward the ink puts it near 1.7:1,
+       which reads as material without becoming a card.
+
+       6px over a 17s period is a peak speed of about 2px a second, which is
+       below what anyone watches. At 12px the necks cross the 28px weld visibly
+       — and it is still inside the kit's own bound of half the weld. */
+    --slfx-goo-fill: color-mix(in srgb, var(--sl-text-primary) 15%, var(--sl-bg-surface-raised));
+    --slfx-goo-drift: 12px;
     padding: clamp(1.25rem, 3vw, 2rem);
     margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem));
     display: grid;

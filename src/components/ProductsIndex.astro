@@ -17,7 +17,8 @@ const usedStatuses = [
 ] as string[];
 ---
 
-<section id="products" class="section products">
+<section id="products" class="section products" data-sl-fx-backdrop>
+  <div class="products__bed" aria-hidden="true"></div>
   <div class="wrap">
     <div class="section-index">
       <span class="section-index__no">02</span>
@@ -88,6 +89,31 @@ const usedStatuses = [
 </section>
 
 <style>
+  /* The rows sat on the page's flat ground, which is the whole reason they did
+     not read as glass: a backdrop filter with nothing behind it blurs nothing,
+     and the GPU tier has nothing to bend. So the section declares a bed of its
+     own — the same plate the stance uses, at 45% of its strength, because a
+     list of tools is something to read and not a statement.
+
+     The plate is a file rather than CSS gradients for the reason written out
+     in Thesis.astro and in scripts/make-backdrops.mjs: effects-gpu.js samples
+     a url() and nothing else. */
+  .products {
+    position: relative;
+    --slfx-backdrop: url('/backdrops/products-dark.svg');
+  }
+  :root[data-sl-theme='light'] .products {
+    --slfx-backdrop: url('/backdrops/products-light.svg');
+  }
+  .products__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--slfx-backdrop) center / cover no-repeat;
+  }
+  .products .wrap { position: relative; z-index: 1; }
+
   .products__intro {
     max-width: 40rem;
     margin-bottom: clamp(2.5rem, 6vw, 4.5rem);

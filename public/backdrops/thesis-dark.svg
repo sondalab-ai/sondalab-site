@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" preserveAspectRatio="none">
+  <defs>
+    <radialGradient id="b1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F5A83C" stop-opacity="0.34"/>
+      <stop offset="70%" stop-color="#F5A83C" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#35A0B4" stop-opacity="0.3"/>
+      <stop offset="70%" stop-color="#35A0B4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F5A83C" stop-opacity="0.18"/>
+      <stop offset="70%" stop-color="#F5A83C" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="rules" width="72" height="1200" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1200" fill="#070A0D" fill-opacity="0.08"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="22%" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="78%" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="fadeMask"><rect width="1600" height="1200" fill="url(#fade)"/></mask>
+  </defs>
+  <rect width="1600" height="1200" fill="#DAE3E4"/>
+  <ellipse cx="16%" cy="20%" rx="58%" ry="52%" fill="url(#b1)"/>
+  <ellipse cx="88%" cy="36%" rx="48%" ry="58%" fill="url(#b2)"/>
+  <ellipse cx="54%" cy="98%" rx="66%" ry="48%" fill="url(#b3)"/>
+  <rect width="1600" height="1200" fill="url(#rules)" mask="url(#fadeMask)"/>
+</svg>
