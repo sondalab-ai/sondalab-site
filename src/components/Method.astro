@@ -32,7 +32,7 @@ const points = [
       </p>
     </div>
 
-    <ol class="method__points sl-fx-goo">
+    <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       {points.map((p, i) => (
         <li class="mpoint sl-fx-goo__member">
           <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
@@ -65,15 +65,33 @@ const points = [
   .method__head .h2 { margin-top: 1.25rem; max-width: 16ch; }
   .method__head .lede { margin-top: 1.5rem; max-width: 42ch; }
 
-  .method__points { list-style: none; margin: 0; padding: 0; }
+  /* The three points are one substance that will not hold still. The gap is
+     laid out a hair INSIDE the field's own weld, so the members start joined
+     and the drift is what parts them: at 28px a 1.6rem gap welds, and an
+     amplitude of 6px per member swings the distance between two of them by up
+     to 12px either way — enough to cross the threshold and come back.
+
+     The padding is what the container owes them. The substance reaches
+     --slfx-goo-reach plus three blur sigmas past the outermost member, and the
+     drift adds its amplitude on top; the negative inline margin gives it back,
+     so the type stays aligned with the column beside it. */
+  .method__points {
+    list-style: none;
+    margin: 0;
+    --slfx-goo-weld: 28px;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem));
+    display: grid;
+    gap: 1.6rem;
+  }
+  /* No rule between them. A border draws a line straight across a merged mass,
+     which is the defect the substance exists to replace. */
   .mpoint {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: clamp(1rem, 3vw, 2.5rem);
-    padding-block: clamp(1.75rem, 4vw, 2.75rem);
-    border-top: 1px solid var(--sl-border-subtle);
+    padding: clamp(1.5rem, 3.5vw, 2.25rem);
   }
-  .mpoint:first-child { border-top: 0; padding-top: 0; }
 
   .mpoint__no {
     font-family: var(--sl-font-mono);
