@@ -138,6 +138,15 @@ a { color: inherit; }
 .invert .eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
 .invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 .invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
+/* An inversion band is its own ground, and the effects layer cannot see that:
+   its substance is derived from the THEME, so inside a band that flipped
+   locally the goo painted the dark theme's raised surface behind pillars
+   sitting on a light one — dark slabs with barely legible text. The band knows
+   what it is made of, so the band rebinds it: one step off its own ground, in
+   the direction of the page's. This is the dark-invert regression the DS's own
+   migrate workflow tells you to check for, arriving through a different
+   property. */
+.invert { --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary)); }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
