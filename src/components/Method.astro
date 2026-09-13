@@ -36,10 +36,7 @@ const points = [
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       {points.map((p, i) => (
         <li class="mpoint sl-fx-goo__member glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
-          <span class="mpoint__no">
-            <span class="mpoint__blob" aria-hidden="true"></span>
-            <span class="mpoint__digits">{String(i + 1).padStart(2, '0')}</span>
-          </span>
+          <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
           <div class="mpoint__body">
             <h3 class="mpoint__verb">{p.verb}</h3>
             <p set:html={p.body}></p>
@@ -152,50 +149,39 @@ const points = [
     --slg-radius: var(--sl-radius-lg);
   }
 
+  /* THE FOLIO. It was a hairline mono numeral, which is this site's TECHNICAL
+     register — the one the section index uses, where `01` sits beside a rule
+     and an uppercase eyebrow and reads as a coordinate. Beside a display
+     heading, at seven rems, that voice is the wrong one: the figure is the
+     largest thing in the card and it was the only element in it speaking mono.
+
+     So it takes the voice of the heading it introduces. Fraunces at the
+     display optical size is a high-contrast serif figure — thick stems, hair
+     thin joins — and at 200 the contrast does the work that weight used to,
+     which is what makes a folio read as drawn rather than as labelled. WONK on,
+     as every other display setting on this site has it.
+
+     Lining and tabular: these are FIGURES IN A COLUMN, one above another, and
+     `01` over `02` over `03` has to align on the stem or the column reads as
+     ragged. Oldstyle figures would drop the 0 below the baseline and break it.
+
+     The rule under it is the folio's own, not the card's: it spans the digits
+     and stops, which is what marks a number as a numbering rather than as a
+     quantity. */
   .mpoint__no {
-    position: relative;
     display: block;
-    /* Hug the numeral. A grid item stretches to its row by default, so this
-       box was the full height of the card and the blob behind it came out a
-       242px column rather than a lozenge around two digits. */
     align-self: start;
-    font-family: var(--sl-font-mono);
-    font-weight: 100;
+    width: max-content;
+    font-family: var(--sl-font-display);
+    font-weight: 200;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
+    font-variant-numeric: lining-nums tabular-nums;
     font-size: var(--step-numeral);
-    line-height: 0.8;
-    color: var(--sl-text-muted);
-  }
-  .mpoint__digits { position: relative; z-index: 1; }
-
-  /* The numeral's own weather. It was a second member of the goo field, which
-     welded it to its card and blurred the colour boundary inside the filter —
-     good to look at and the wrong price: a --drift field re-derives every
-     silhouette per frame, so three blobs doubled that work, and the owner read
-     the cost before the effect. A radial gradient gives the same soft edge for
-     nothing, and the card keeps the goo it needs, which is the weld to its
-     neighbours.
-
-     It leans toward the pointer. --slfx-ptr is the bearing the pane driver
-     already writes on the host as an inline style, so it inherits down here
-     and this needs no JavaScript of its own; +20deg undoes PANE_HOT_DEG, the
-     rotation the kit bakes in for its conic gradient's hot stop. --slfx-lit is
-     the same driver's eased 0..1, so the lean arrives and leaves with the
-     light rather than snapping. Both are absent until Tier 1 arms, and the
-     fallbacks are a blob that sits still — which is the whole of the
-     degradation. */
-  .mpoint__blob {
-    position: absolute;
-    inset: -0.16em -0.08em;
-    z-index: 0;
-    background: radial-gradient(
-      closest-side circle,
-      color-mix(in srgb, var(--sl-accent-default) 38%, transparent) 0%,
-      color-mix(in srgb, var(--sl-accent-default) 26%, transparent) 55%,
-      transparent 100%);
-    --blob-reach: 0.09em;
-    translate:
-      calc(sin(var(--slfx-ptr, 0deg) + 20deg) * var(--blob-reach) * var(--slfx-lit, 0))
-      calc(cos(var(--slfx-ptr, 0deg) + 20deg) * var(--blob-reach) * var(--slfx-lit, 0) * -1);
+    line-height: 0.82;
+    letter-spacing: -0.03em;
+    color: color-mix(in srgb, var(--sl-text-primary) 62%, transparent);
+    padding-bottom: 0.14em;
+    border-bottom: 1px solid color-mix(in srgb, var(--sl-text-primary) 28%, transparent);
   }
   .mpoint__verb {
     font-family: var(--sl-font-display);
