@@ -59,6 +59,7 @@ function cut(el: HTMLElement, id: string) {
     ['letter-spacing', cs.letterSpacing],
   ] as const) text.setAttribute(k, v);
 
+  el.dataset.maskId = id;
   el.style.setProperty('-webkit-mask-image', `url(#${id})`);
   el.style.setProperty('mask-image', `url(#${id})`);
 }
@@ -66,34 +67,41 @@ cut.canvas = undefined as HTMLCanvasElement | undefined;
 
 /** @param selector the numerals to cut */
 export function glassNumerals(selector: string) {
+  // Observed on the way past, inside apply(), never in one pass at the end.
+  // This module is imported from a script in <head> and in dev it runs BEFORE
+  // the body is parsed: a querySelectorAll at that moment returns nothing, so
+  // observers attached there watch nothing at all. The masks still appeared —
+  // document.fonts.ready cut them later — and the decode silently stopped
+  // reaching the glass, which is a failure that looks like a working feature.
+  const watched = new WeakSet<Element>();
+  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => apply()) : null;
+  const mo =
+    typeof MutationObserver === 'function'
+      ? new MutationObserver((records) => {
+          // ONE element per record, never the whole set. The first version
+          // called apply() here, and a row's decode — a dozen swaps a second —
+          // became twelve canvas measures a dozen times a second, on the frames
+          // the glitch bursts needed.
+          const seen = new Set<HTMLElement>();
+          for (const r of records) {
+            const from = (r.target.nodeType === 1 ? r.target : r.target.parentElement) as Element | null;
+            const num = from?.closest<HTMLElement>(selector);
+            if (num) seen.add(num);
+          }
+          for (const num of seen) if (num.dataset.maskId) cut(num, num.dataset.maskId);
+        })
+      : null;
+
   const apply = () => {
-    document.querySelectorAll<HTMLElement>(selector).forEach((el, i) => cut(el, `glass-num-${i}`));
+    document.querySelectorAll<HTMLElement>(selector).forEach((el, i) => {
+      cut(el, el.dataset.maskId ?? `glass-num-${i}`);
+      if (watched.has(el)) return;
+      watched.add(el);
+      ro?.observe(el);
+      mo?.observe(el, { characterData: true, childList: true, subtree: true });
+    });
   };
   // The face has to have arrived, or the ascent is a fallback font's.
   document.fonts?.ready.then(apply);
   apply();
-  // A resize changes the clamped font size, and with it every measurement here.
-  if (typeof ResizeObserver === 'function') {
-    const ro = new ResizeObserver(apply);
-    for (const el of document.querySelectorAll(selector)) ro.observe(el);
-  }
-  // And so does the TEXT, for anything that rewrites a numeral after the fact.
-  // ONE element per record, never the whole set: a first version called apply()
-  // from the callback, and a product row's decode-scramble — which swaps the
-  // digits a dozen times a second — turned that into twelve canvas measures
-  // twelve times a second, which starved the glitch bursts sharing the same
-  // frames. The scramble is gone from the numerals for the same reason; this
-  // stays scoped in case anything else ever writes one.
-  if (typeof MutationObserver === 'function') {
-    const mo = new MutationObserver((records) => {
-      for (const r of records) {
-        const el = (r.target.nodeType === 1 ? r.target : r.target.parentElement) as HTMLElement | null;
-        const num = el?.closest<HTMLElement>(selector);
-        if (num) cut(num, num.style.maskImage.replace(/^url\("?#|"?\)$/g, '') || `glass-num-x`);
-      }
-    });
-    for (const el of document.querySelectorAll(selector)) {
-      mo.observe(el, { characterData: true, childList: true, subtree: true });
-    }
-  }
 }
