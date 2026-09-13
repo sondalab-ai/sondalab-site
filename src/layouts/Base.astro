@@ -97,11 +97,6 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // theirs; see scripts/make-backdrops.mjs for why the bed exists twice.
       mountGpu();
 
-      // The curtains visit the cards, one at a time. See ambient-light.ts:
-      // the kit's coordinator allows exactly one lit host per document, so
-      // this walks the grant rather than writing the attribute on each.
-      import { rotateAmbientLight } from '../lib/ambient-light';
-      rotateAmbientLight('[data-ambient-light]');
     </script>
 
     <script is:inline>

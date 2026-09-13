@@ -35,9 +35,9 @@ const points = [
 
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       {points.map((p, i) => (
-        <li class="mpoint sl-fx-goo__member sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-ambient-light>
+        <li class="mpoint sl-fx-goo__member sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains>
           <span class="mpoint__no">
-            <span class="mpoint__blob sl-fx-goo__member" aria-hidden="true"></span>
+            <span class="mpoint__blob" aria-hidden="true"></span>
             <span class="mpoint__digits">{String(i + 1).padStart(2, '0')}</span>
           </span>
           <div class="mpoint__body">
@@ -167,12 +167,13 @@ const points = [
   }
   .mpoint__digits { position: relative; z-index: 1; }
 
-  /* The numeral's own weather. A second member of the SAME field, not a nested
-     one: goo-field.js collects members across the whole subtree, so a field
-     inside a member would have both fields drawing this blob. Sharing the
-     field is also what makes it weld to the card it sits in — and a weld puts
-     the colour boundary INSIDE the filter, where the goo's identity-on-RGB
-     matrix turns it into a gradient the width of sigma instead of an edge.
+  /* The numeral's own weather. It was a second member of the goo field, which
+     welded it to its card and blurred the colour boundary inside the filter —
+     good to look at and the wrong price: a --drift field re-derives every
+     silhouette per frame, so three blobs doubled that work, and the owner read
+     the cost before the effect. A radial gradient gives the same soft edge for
+     nothing, and the card keeps the goo it needs, which is the weld to its
+     neighbours.
 
      It leans toward the pointer. --slfx-ptr is the bearing the pane driver
      already writes on the host as an inline style, so it inherits down here
@@ -182,22 +183,15 @@ const points = [
      light rather than snapping. Both are absent until Tier 1 arms, and the
      fallbacks are a blob that sits still — which is the whole of the
      degradation. */
-  .method__points .mpoint__blob {
-    /* The drift is the kit's, and it applies to every member of a --drift
-       field — including this one, where it would slide the blob around inside
-       its own card and, worse, silently win: an animation beats a plain
-       `translate` declaration, so the lean below would never have rendered.
-       The blob needs none of it. It is a DESCENDANT of the card, so the card's
-       own drift already carries it, and turning the animation off here is what
-       frees `translate` for the pointer. */
-    animation: none;
-  }
   .mpoint__blob {
     position: absolute;
     inset: -0.16em -0.08em;
     z-index: 0;
-    border-radius: var(--sl-radius-pill);
-    background: color-mix(in srgb, var(--sl-accent-default) 34%, transparent);
+    background: radial-gradient(
+      closest-side circle,
+      color-mix(in srgb, var(--sl-accent-default) 38%, transparent) 0%,
+      color-mix(in srgb, var(--sl-accent-default) 26%, transparent) 55%,
+      transparent 100%);
     --blob-reach: 0.09em;
     translate:
       calc(sin(var(--slfx-ptr, 0deg) + 20deg) * var(--blob-reach) * var(--slfx-lit, 0))
