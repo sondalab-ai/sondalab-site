@@ -173,8 +173,14 @@ a { color: inherit; }
      and the chrome's poles, which are not this band's to re-decide. */
   --slfx-pillar-a: var(--sl-accent-default);
   --slfx-pillar-b: var(--sl-accent-depth);
-  /* …and the glass numerals' glow, same story: the band's ink, not the page's. */
+  /* …and the glass numerals' glow, same story: the band's ink, not the page's.
+     QUIETER WITH IT. The alphas were fitted for a light figure lifting off a
+     dark card; the same figures on a light band are DARK ones pressing into a
+     pale card, and ink carries much further than light does — at 46/26 they
+     read as heavy blots rather than as glass. Halved. */
   --gnum-light: var(--sl-bg-canvas);
+  --gnum-core-a: 22%;
+  --gnum-halo-a: 12%;
 }
 
 /* --- the house glass ---------------------------------------------------- *
@@ -303,8 +309,8 @@ a { color: inherit; }
      rebinding out of reach. glass.css states the same rule about its own
      defaults, and this is the second time the trap has been paid for here. */
   text-shadow:
-    0 0 6px color-mix(in srgb, var(--gnum-light, var(--sl-text-primary)) 46%, transparent),
-    0 0 30px color-mix(in srgb, var(--gnum-light, var(--sl-text-primary)) 26%, transparent);
+    0 0 6px color-mix(in srgb, var(--gnum-light, var(--sl-text-primary)) var(--gnum-core-a, 46%), transparent),
+    0 0 30px color-mix(in srgb, var(--gnum-light, var(--sl-text-primary)) var(--gnum-halo-a, 26%), transparent);
 }
 .gnum {
   z-index: 2;
@@ -319,8 +325,18 @@ a { color: inherit; }
 /* The slot each surface wraps its pair in. It is the positioning context, and
    where a surface welds (the method) it is also the goo member — the numeral
    is out of flow, so the slot's box stays the card's. */
+/* THE SWELL BELONGS TO THE SLOT, not to the card inside it. The kit scales a
+   pane 3% under the pointer, and a numeral scaling about its OWN centre while
+   the card scales about the card's would drift — 3% of the distance between
+   the two centres is about 9px, which is a figure visibly sliding off its
+   card. Scaling the slot scales both about the same point, since the slot's
+   box IS the card's, and the card's own transform stands down to keep the two
+   from compounding. The seated aurora glow is inside the slot too and comes
+   along; the kit's mirror on it is then redundant and harmless, being a
+   transform on an element whose ancestor already carries the same one. */
 .gnum-slot {
   position: relative;
+  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.28, 1);
   /* THE GUTTER, declared once because getting it wrong is an overlap. The
      figure is 168px at the 7rem cap and starts --gnum-inset from the slot's
      left edge, so the card's own content has to begin past the sum of the two
@@ -330,6 +346,19 @@ a { color: inherit; }
   --gnum-inset: clamp(0.9rem, 2.4vw, 1.7rem);
   --gnum-gutter: clamp(7rem, 18vw, 14.5rem);
 }
+.gnum-slot:has(> .sl-fx-glass--pane:hover:not(:disabled)),
+.gnum-slot:has(> .sl-fx-glass--pane:focus-visible) {
+  transform: scale(1.03);
+  transition-timing-function: cubic-bezier(0.34, 1.12, 0.36, 1);
+  transition-duration: 320ms;
+}
+.gnum-slot:has(> .sl-fx-glass--pane:active:not(:disabled)) {
+  transform: scale(0.99);
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.28, 1);
+}
+/* …and the card gives its own up, or the two compound to 6%. */
+.gnum-slot > .sl-fx-glass--pane { transform: none !important; }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved

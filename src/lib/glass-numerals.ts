@@ -77,11 +77,21 @@ export function glassNumerals(selector: string) {
     const ro = new ResizeObserver(apply);
     for (const el of document.querySelectorAll(selector)) ro.observe(el);
   }
-  // And so does the TEXT. A product row decode-scrambles its numeral on hover,
-  // which swaps the digits a dozen times a second; a mask cut from the old
-  // string would leave the glass in the shape of a figure no longer there.
+  // And so does the TEXT, for anything that rewrites a numeral after the fact.
+  // ONE element per record, never the whole set: a first version called apply()
+  // from the callback, and a product row's decode-scramble — which swaps the
+  // digits a dozen times a second — turned that into twelve canvas measures
+  // twelve times a second, which starved the glitch bursts sharing the same
+  // frames. The scramble is gone from the numerals for the same reason; this
+  // stays scoped in case anything else ever writes one.
   if (typeof MutationObserver === 'function') {
-    const mo = new MutationObserver(apply);
+    const mo = new MutationObserver((records) => {
+      for (const r of records) {
+        const el = (r.target.nodeType === 1 ? r.target : r.target.parentElement) as HTMLElement | null;
+        const num = el?.closest<HTMLElement>(selector);
+        if (num) cut(num, num.style.maskImage.replace(/^url\("?#|"?\)$/g, '') || `glass-num-x`);
+      }
+    });
     for (const el of document.querySelectorAll(selector)) {
       mo.observe(el, { characterData: true, childList: true, subtree: true });
     }

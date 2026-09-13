@@ -299,16 +299,16 @@ const usedStatuses = [
 </style>
 
 <script>
-  import { hoverBurst, scramble } from '@sondalab/ui-kit/effects.js';
-  // Hovering a product row glitches its name (bursts) and decode-scrambles its
-  // index numeral once; two distinct effects on the same trigger.
+  import { hoverBurst } from '@sondalab/ui-kit/effects.js';
+  // Hovering a product row glitches its name.
+  //
+  // The numeral no longer decode-scrambles with it. That effect was written for
+  // a cheap text node; the numeral is now glass cut to its own letterforms, so
+  // every swapped character costs a re-measure and a fresh mask — twelve times
+  // a second, on frames the glitch burst needs. The glitch is brand and the
+  // decode was decoration, so the decode is what goes.
   for (const row of document.querySelectorAll('.prow')) {
     const name = row.querySelector('.prow__name.sl-fx-glitch');
     if (name) hoverBurst(row, name);
-    // The numeral is the row's SIBLING now — it cannot be a child, because a
-    // pane inside a pane gets no lens. glass-numerals.ts re-cuts the mask when
-    // the text changes, so the decode still reads through the glass.
-    const no = row.parentElement?.querySelector('.gnum');
-    if (no) row.addEventListener('mouseenter', () => scramble(no as HTMLElement));
   }
 </script>
