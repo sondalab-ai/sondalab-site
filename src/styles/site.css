@@ -162,6 +162,44 @@ a { color: inherit; }
   --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
 }
 
+/* --- the house glass ---------------------------------------------------- *
+ * No light follows the pointer. The owner's ruling, and this pseudo-element is
+ * the whole of it: the kit's own comment says what is left on it is "the
+ * pointer's own light and nothing else", the slab and the thickness having
+ * moved to glass.css's __tint and __shine. So the glow goes and no material
+ * goes with it. The --pane variant STAYS — its driver is what writes
+ * --slfx-ptr and --slfx-lit on the host, which the method's numerals read to
+ * lean, and an edge that turns to face the pointer is an edge, not a glow.
+ * ----------------------------------------------------------------------- */
+.sl-fx-glass--pane::before { background: none; }
+
+/* And the glass itself is a GHOST pane. The owner, having seen the material at
+ * its shipped weight: he expects the aesthetic of the transparent buttons.
+ * That is a recipe the kit already has — what it gives a component with no
+ * fill of its own — so this binds the same properties rather than inventing a
+ * fifth look: a transparent fill, the page's own ground as the veil instead of
+ * the raised surface, and the blur doing the work.
+ *
+ * --slg-tint-lens as well as --slg-tint-a, because a LENSED pane floors the
+ * ground veil at 34% and that floor is what would otherwise put the weight
+ * straight back. The kit calls that floor a legibility figure, so every label
+ * that now sits on a thinner veil is measured, not assumed.
+ * ----------------------------------------------------------------------- */
+.glass-ghost {
+  --slfx-fill: transparent;
+  --slg-tint-color: var(--sl-bg-canvas);
+  --slg-tint-a: 25%;
+  --slg-tint-deep-a: 22%;
+  --slg-tint-lens: 25%;
+}
+/* The inversion-band pitfall again, arriving through a third property. The
+   recipe veils with THE PAGE's own ground, and inside a band that is the
+   opposite of the local one — a 25% near-black film over a light band, which
+   is how three quiet panes came out as grey slabs. The band knows what it is
+   made of, so the band rebinds it, as it already does for --slc-surface and
+   --slfx-goo-fill above. */
+.invert .glass-ghost { --slg-tint-color: var(--sl-text-primary); }
+
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
  * here from their scoped block so the transmissions can share it. Everything

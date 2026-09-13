@@ -35,7 +35,7 @@ const pillars = [
 
     <ol class="thesis__pillars">
       {pillars.map((p, i) => (
-        <li class="pillar sl-fx-glass sl-fx-glass--pane">
+        <li class="pillar glass-ghost sl-fx-glass sl-fx-glass--pane">
           <span class="pillar__no">{String(i + 1).padStart(2, '0')}</span>
           <div class="pillar__body">
             <h3 class="pillar__verb">{p.verb}</h3>
@@ -108,6 +108,11 @@ const pillars = [
     gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(1.5rem, 3.5vw, 2.25rem);
     --slg-radius: var(--sl-radius-lg);
+    /* The hairline the transparent buttons have. The glass ring on ::after
+       lights on hover and is quiet at rest by the owner's own earlier ruling,
+       so at rest a ghost pane needs an edge of its own or it has none. */
+    border: 1px solid var(--slc-border);
+    border-radius: var(--sl-radius-lg);
   }
 
   .pillar__no {

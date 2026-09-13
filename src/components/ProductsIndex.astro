@@ -47,7 +47,7 @@ const usedStatuses = [
         const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
           <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow sl-fx-glass sl-fx-glass--pane sl-fx-aurora" href={`/products/${p.id}/`}>
+            <a class="prow glass-ghost sl-fx-glass sl-fx-glass--pane sl-fx-aurora" href={`/products/${p.id}/`}>
               <span class="prow__no" data-num={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
@@ -146,6 +146,9 @@ const usedStatuses = [
     text-decoration: none;
     color: inherit;
     transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+    /* See Thesis.astro: at rest a ghost pane carries no edge of its own. */
+    border: 1px solid var(--slc-border);
+    border-radius: var(--sl-radius-md);
   }
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
