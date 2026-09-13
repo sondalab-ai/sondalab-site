@@ -36,7 +36,7 @@ const points = [
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       {points.map((p, i) => (
         <li class="mpoint sl-fx-goo__member glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
-          <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
+          <span class="mpoint__no" data-num={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</span>
           <div class="mpoint__body">
             <h3 class="mpoint__verb">{p.verb}</h3>
             <p set:html={p.body}></p>
@@ -149,40 +149,56 @@ const points = [
     --slg-radius: var(--sl-radius-lg);
   }
 
-  /* THE FOLIO. It was a hairline mono numeral, which is this site's TECHNICAL
-     register — the one the section index uses, where `01` sits beside a rule
-     and an uppercase eyebrow and reads as a coordinate. Beside a display
-     heading, at seven rems, that voice is the wrong one: the figure is the
-     largest thing in the card and it was the only element in it speaking mono.
+  /* THE NUMERAL STAYS MONO. Not a default — a ruling. design-language.md:66
+     makes the mono label "the single strongest family signal", and the owner
+     reads the same face at display scale as the project's tech register. A
+     display serif was tried here and is the wrong voice: it makes the card
+     look like a magazine rather than like an instrument. What the figure gets
+     instead is shape and colour.
 
-     So it takes the voice of the heading it introduces. Fraunces at the
-     display optical size is a high-contrast serif figure — thick stems, hair
-     thin joins — and at 200 the contrast does the work that weight used to,
-     which is what makes a folio read as drawn rather than as labelled. WONK on,
-     as every other display setting on this site has it.
+     COLOUR: the brand pair, clipped to the glyphs. A diagonal from the accent
+     to its depth companion — the same two colours the curtains and the prism
+     are made of, so the numeral belongs to the light in the pane rather than
+     sitting on top of it. Prefixed FIRST: Lightning CSS drops the unprefixed
+     background-clip as redundant if it comes first, and the site has paid for
+     that once already.
 
-     Lining and tabular: these are FIGURES IN A COLUMN, one above another, and
-     `01` over `02` over `03` has to align on the stem or the column reads as
-     ragged. Oldstyle figures would drop the 0 below the baseline and break it.
+     SHAPE: the same figure again, outlined and off register, behind. It is the
+     registration slip this site's glitch is built out of — held still, because
+     a numeral that jitters is a glitch and this is a NUMBER. Martian's slashed
+     zero does the rest: it is the one glyph that says terminal on sight.
 
-     The rule under it is the folio's own, not the card's: it spans the digits
-     and stops, which is what marks a number as a numbering rather than as a
-     quantity. */
+     isolation, so the ghost's negative z-index stays inside the numeral. The
+     card is a glass pane whose own material sits at -3..-1, and without a
+     stacking context of its own the ghost would fall behind it. */
   .mpoint__no {
+    position: relative;
+    isolation: isolate;
     display: block;
     align-self: start;
     width: max-content;
-    font-family: var(--sl-font-display);
-    font-weight: 200;
-    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
-    font-variant-numeric: lining-nums tabular-nums;
+    font-family: var(--sl-font-mono);
+    font-weight: 100;
     font-size: var(--step-numeral);
-    line-height: 0.82;
-    letter-spacing: -0.03em;
-    color: color-mix(in srgb, var(--sl-text-primary) 62%, transparent);
-    padding-bottom: 0.14em;
-    border-bottom: 1px solid color-mix(in srgb, var(--sl-text-primary) 28%, transparent);
+    line-height: 0.8;
+    letter-spacing: -0.02em;
+    background-image: linear-gradient(145deg,
+      color-mix(in srgb, var(--sl-accent-default) 88%, transparent) 0%,
+      color-mix(in srgb, var(--sl-accent-depth) 76%, transparent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
+  .mpoint__no::before {
+    content: attr(data-num);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    translate: 0.05em 0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--sl-text-primary) 24%, transparent);
+  }
+
   .mpoint__verb {
     font-family: var(--sl-font-display);
     font-weight: 440;
