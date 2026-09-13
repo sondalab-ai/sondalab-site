@@ -232,6 +232,15 @@ const points = [
     /* No radius: the mask is the shape now, and a rounded rect under a
        letterform mask only rounds corners nobody can see. */
     --slg-radius: 0;
+    /* AND NO RIM. glass.css gives a pane its thickness with an inset shadow
+       along the top of its BOX; masked to a letterform that line survives
+       wherever a glyph meets the box's top edge, and it read as a white bar
+       across the digits. A box rim is meaningless on a letter — what gives
+       these their edge is the glow behind them — so both poles go to
+       transparent, which is the kit's own way of standing the layer down
+       (the side stop is a color-mix over --slg-rim-hi and follows it). */
+    --slg-rim-hi: transparent;
+    --slg-rim-lo: transparent;
   }
 
   .mpoint__verb {
