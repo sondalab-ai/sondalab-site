@@ -229,6 +229,21 @@ a { color: inherit; }
   --slg-lens-reach: 36px;
 }
 
+/* Read but not seen. Used where a figure carries its meaning visually and the
+ * element that draws it is a picture as far as a screen reader is concerned —
+ * the method's numerals are glass cut to a letterform, with transparent text. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
  * here from their scoped block so the transmissions can share it. Everything

@@ -34,15 +34,19 @@ const points = [
     </div>
 
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
+      <svg id="glass-numeral-masks" class="mnum-masks" aria-hidden="true" focusable="false"><defs></defs></svg>
       {points.map((p, i) => (
         <li class="mslot sl-fx-goo__member">
-          <span class="mpoint__no glass-thick sl-fx-glass sl-fx-glass--pane">{String(i + 1).padStart(2, '0')}</span>
+          <span class="sr-only">Step {i + 1}</span>
           <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
             <div class="mpoint__body">
               <h3 class="mpoint__verb">{p.verb}</h3>
               <p set:html={p.body}></p>
             </div>
           </article>
+          <span class="mpoint__no glass-thick sl-fx-glass sl-fx-glass--pane"
+
+                aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         </li>
       ))}
     </ol>
@@ -152,40 +156,44 @@ const points = [
     --slg-radius: var(--sl-radius-lg);
   }
 
-  /* THE NUMERAL IS ITS OWN PANE, which is why it had to leave the card.
-     glass-lens.js refuses a lens to any element whose parent is inside another
-     glass host — `el.parentElement?.closest(".sl-glass, .sl-fx-glass")` — and
-     the comment there records the investigation: the inner pane rendered
-     correctly only if the ancestor gave up its lens AND its isolation
-     together, and the isolation is what keeps the material under the label.
-     Under that sits a browser rule the kit cannot argue with either: an
-     element carrying backdrop-filter is a BACKDROP ROOT for its descendants,
-     so a nested pane would refract the card's own composite and never the bed.
+  /* THE GLYPHS ARE THE GLASS. Not a pane with a number on it — the number
+     itself, cut out of the material.
 
-     So the slot is the goo member and holds two siblings. The numeral is
-     absolutely positioned and out of flow, so the slot's box stays the card's
-     box and the substance still welds on the card's silhouette. The slot is
-     also what carries the kit's drift, which is what keeps the two registered
-     while they wander — a numeral that drifted on its own clock would come
-     off its card within one cycle.
+     A mask clips a backdrop-filter's output, so masking the pane to the
+     letterforms leaves glass in the shape of `01`. The mask is an SVG <text>
+     living in the document, not a data URI: a data URI has no access to the
+     page's webfonts and would fall back to a system mono, which is a different
+     shape from the one measured here.
 
-     It hangs off the top-left corner on purpose: half of it is over the bed
-     and half over the card, so the same figure refracts two different things
-     at once. That is the one thing a pane inside the card could never do. */
+     The element still carries its digits, so the box measures itself from the
+     same string the mask draws; `color: transparent` because the glass is what
+     should be seen, not ink over it. The reading order keeps a real number in
+     a visually hidden sibling — a masked pane with transparent text is a
+     picture as far as a screen reader is concerned.
+
+     The numeral still had to LEAVE the card: glass-lens.js refuses a lens to
+     anything whose parent sits inside another glass host, and a backdrop-filter
+     element is a backdrop root for its descendants, so a nested pane would
+     refract the card's composite and never the bed. The slot holds the two as
+     siblings and carries the drift, which is what keeps them registered. */
   .mslot { position: relative; }
+  .mnum-masks { position: absolute; width: 0; height: 0; }
   .mpoint__no {
     position: absolute;
-    left: -0.34em;
-    top: -0.3em;
+    left: -0.2em;
+    top: -0.22em;
     z-index: 2;
-    padding: 0.06em 0.1em 0.02em;
+    display: block;
+    width: max-content;
     font-family: var(--sl-font-mono);
     font-weight: 100;
     font-size: var(--step-numeral);
     line-height: 0.8;
     letter-spacing: -0.02em;
-    color: color-mix(in srgb, var(--sl-text-primary) 72%, transparent);
-    --slg-radius: var(--sl-radius-lg);
+    color: transparent;
+    /* No radius: the mask is the shape now, and a rounded rect under a
+       letterform mask only rounds corners nobody can see. */
+    --slg-radius: 0;
   }
 
   .mpoint__verb {

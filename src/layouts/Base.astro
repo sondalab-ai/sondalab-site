@@ -97,6 +97,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // theirs; see scripts/make-backdrops.mjs for why the bed exists twice.
       mountGpu();
 
+      // The method's numerals are glass cut to their own letterforms. The mask
+      // is measured from the rendered type; see glass-numerals.ts for why the
+      // declarative route does not survive a non-square box.
+      import { glassNumerals } from '../lib/glass-numerals';
+      glassNumerals('.mpoint__no');
+
 
     </script>
 
