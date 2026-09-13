@@ -15,7 +15,8 @@ const points = [
 ];
 ---
 
-<section id="method" class="section method">
+<section id="method" class="section method" data-sl-fx-backdrop>
+  <div class="method__bed" aria-hidden="true"></div>
   <div class="wrap method__grid">
     <div class="method__head">
       <div class="section-index">
@@ -34,8 +35,11 @@ const points = [
 
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       {points.map((p, i) => (
-        <li class="mpoint sl-fx-goo__member">
-          <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
+        <li class="mpoint sl-fx-goo__member sl-fx-glass sl-fx-glass--pane">
+          <span class="mpoint__no">
+            <span class="mpoint__blob sl-fx-goo__member" aria-hidden="true"></span>
+            <span class="mpoint__digits">{String(i + 1).padStart(2, '0')}</span>
+          </span>
           <div class="mpoint__body">
             <h3 class="mpoint__verb">{p.verb}</h3>
             <p set:html={p.body}></p>
@@ -47,6 +51,27 @@ const points = [
 </section>
 
 <style>
+  /* The bed, and the same plate-not-gradients rule as the stance and the tools:
+     effects-gpu.js samples --slfx-backdrop as a url() and nothing else, so a
+     bed painted in CSS alone is invisible to the shader. Here it matters twice
+     over, because the substance above it is translucent and this is what shows
+     through. scripts/make-backdrops.mjs generates it from the kit's tokens. */
+  .method {
+    position: relative;
+    --slfx-backdrop: url('/backdrops/method-dark.svg');
+  }
+  :root[data-sl-theme='light'] .method {
+    --slfx-backdrop: url('/backdrops/method-light.svg');
+  }
+  .method__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--slfx-backdrop) center / cover no-repeat;
+  }
+  .method .wrap { position: relative; z-index: 1; }
+
   .method__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -95,6 +120,22 @@ const points = [
     display: grid;
     gap: 1.6rem;
   }
+
+  /* The substance lets the bed through. `opacity` on the FIELD, not a
+     translucent fill: goo-field.js forces --slfx-goo-fill opaque on purpose,
+     because the goo chain's alpha slope erases everything below 0.5 and a
+     translucent silhouette would simply not survive the filter. Opacity is
+     applied to the filter's RESULT, so the weld is already computed when it
+     lands and every neck stays exactly where it was.
+
+     Safe here because no member of this field carries a fill of its own — the
+     cards are glass and paint on pseudo-elements, and the numerals' blobs are
+     the one exception, which is drawn as a tint on purpose. On a field of
+     `sl-tag`s this would shift every colour the component chose, and I would
+     not do it there. :global() because the field is the kit's element, not
+     this component's. */
+  .method__points :global(.sl-fx-goo__field) { opacity: 0.72; }
+
   /* No rule between them. A border draws a line straight across a merged mass,
      which is the defect the substance exists to replace. */
   .mpoint {
@@ -102,14 +143,65 @@ const points = [
     grid-template-columns: auto 1fr;
     gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    /* The card is a pane as well as a member: the pane is what puts light
+       inside it — a spot that follows the pointer and an edge that turns to
+       face it — where the goo only ever says these belong together. The two
+       do not fight: the kit stands the pane's hairline down on a welded
+       member, because where a silhouette holds the edge a rigid ring around
+       it reads as broken. */
+    --slg-radius: var(--sl-radius-lg);
   }
 
   .mpoint__no {
+    position: relative;
+    display: block;
+    /* Hug the numeral. A grid item stretches to its row by default, so this
+       box was the full height of the card and the blob behind it came out a
+       242px column rather than a lozenge around two digits. */
+    align-self: start;
     font-family: var(--sl-font-mono);
     font-weight: 100;
     font-size: var(--step-numeral);
     line-height: 0.8;
     color: var(--sl-text-muted);
+  }
+  .mpoint__digits { position: relative; z-index: 1; }
+
+  /* The numeral's own weather. A second member of the SAME field, not a nested
+     one: goo-field.js collects members across the whole subtree, so a field
+     inside a member would have both fields drawing this blob. Sharing the
+     field is also what makes it weld to the card it sits in — and a weld puts
+     the colour boundary INSIDE the filter, where the goo's identity-on-RGB
+     matrix turns it into a gradient the width of sigma instead of an edge.
+
+     It leans toward the pointer. --slfx-ptr is the bearing the pane driver
+     already writes on the host as an inline style, so it inherits down here
+     and this needs no JavaScript of its own; +20deg undoes PANE_HOT_DEG, the
+     rotation the kit bakes in for its conic gradient's hot stop. --slfx-lit is
+     the same driver's eased 0..1, so the lean arrives and leaves with the
+     light rather than snapping. Both are absent until Tier 1 arms, and the
+     fallbacks are a blob that sits still — which is the whole of the
+     degradation. */
+  .method__points .mpoint__blob {
+    /* The drift is the kit's, and it applies to every member of a --drift
+       field — including this one, where it would slide the blob around inside
+       its own card and, worse, silently win: an animation beats a plain
+       `translate` declaration, so the lean below would never have rendered.
+       The blob needs none of it. It is a DESCENDANT of the card, so the card's
+       own drift already carries it, and turning the animation off here is what
+       frees `translate` for the pointer. */
+    animation: none;
+  }
+  .mpoint__blob {
+    position: absolute;
+    inset: -0.16em -0.08em;
+    z-index: 0;
+    border-radius: var(--sl-radius-pill);
+    background: color-mix(in srgb, var(--sl-accent-default) 34%, transparent);
+    --blob-reach: 0.09em;
+    translate:
+      calc(sin(var(--slfx-ptr, 0deg) + 20deg) * var(--blob-reach) * var(--slfx-lit, 0))
+      calc(cos(var(--slfx-ptr, 0deg) + 20deg) * var(--blob-reach) * var(--slfx-lit, 0) * -1);
   }
   .mpoint__verb {
     font-family: var(--sl-font-display);
