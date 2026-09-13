@@ -97,13 +97,10 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // theirs; see scripts/make-backdrops.mjs for why the bed exists twice.
       mountGpu();
 
-      // The method's numerals are glass cut to their own letterforms. The mask
-      // is measured from the rendered type; see glass-numerals.ts for why the
-      // declarative route does not survive a non-square box.
-      import { glassNumerals } from '../lib/glass-numerals';
-      glassNumerals('.gnum');
-
-
+      // The numerals are glass cut to their own letterforms, and that is the
+      // kit's now: mount() above arms `sl-fx-glass--text`, measures the mask
+      // off the rendered type and seats the light copy before each host. The
+      // local module this replaced is gone.
     </script>
 
     <script is:inline>

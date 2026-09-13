@@ -37,14 +37,13 @@ const pillars = [
       {pillars.map((p, i) => (
         <li class="gnum-slot">
           <span class="sr-only">Point {i + 1}</span>
-          <span class="gnum-glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <article class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
             <div class="pillar__body">
               <h3 class="pillar__verb">{p.verb}</h3>
               <p set:html={p.body}></p>
             </div>
           </article>
-          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane"
+          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
                 aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         </li>
       ))}

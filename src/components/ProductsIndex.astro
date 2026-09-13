@@ -47,7 +47,6 @@ const usedStatuses = [
         const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
           <li class="gnum-slot" style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <span class="gnum-glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on" href={`/products/${p.id}/`}>
               <span class="sr-only">{i + 1}.</span>
               <span class="prow__rule" aria-hidden="true"></span>
@@ -73,7 +72,7 @@ const usedStatuses = [
               <span class="prow__form">{p.data.form}</span>
               <span class="prow__go" aria-hidden="true">→</span>
             </a>
-            <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane"
+            <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
                   data-num={String(i + 1).padStart(2, '0')}
                   aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           </li>
@@ -190,7 +189,9 @@ const usedStatuses = [
 
   /* The row's accent reaches the figure through its glow — the glass itself is
      colourless by construction, being a lens. */
-  .gnum-slot:has(.prow:hover) .gnum-glow {
+  /* :global because the kit creates this element at runtime, so it never
+     carries the scope attribute Astro stamps on this component's own markup. */
+  .gnum-slot:has(.prow:hover) :global(.sl-fx-glass__glow) {
     text-shadow:
       0 0 6px color-mix(in srgb, var(--row-accent) 62%, transparent),
       0 0 34px color-mix(in srgb, var(--row-accent) 34%, transparent);
@@ -294,7 +295,7 @@ const usedStatuses = [
     .prow__go { display: none; }
     /* No room for a 152px figure beside the text on a phone: the numeral is
        decorative and the screen reader already has the number. */
-    .gnum, .gnum-glow { display: none; }
+    .gnum, :global(.sl-fx-glass__glow) { display: none; }
   }
 </style>
 
