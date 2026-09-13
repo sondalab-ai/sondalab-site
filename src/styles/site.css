@@ -332,8 +332,11 @@ a { color: inherit; }
    card. Scaling the slot scales both about the same point, since the slot's
    box IS the card's, and the card's own transform stands down to keep the two
    from compounding. The seated aurora glow is inside the slot too and comes
-   along; the kit's mirror on it is then redundant and harmless, being a
-   transform on an element whose ancestor already carries the same one. */
+   along — and so its OWN mirror has to stand down as well. The kit scales a
+   seated glow with the pane it hangs in, which is right when the pane is the
+   thing scaling; here the slot already carries it, and the two compose rather
+   than agree: measured, 1.03 x 1.03 put the curtains 34.1px wider than the
+   card they are clipped to, spilling past its edge. */
 .gnum-slot {
   position: relative;
   transition: transform 420ms cubic-bezier(0.22, 0.61, 0.28, 1);
@@ -358,7 +361,8 @@ a { color: inherit; }
   transition-timing-function: cubic-bezier(0.22, 0.61, 0.28, 1);
 }
 /* …and the card gives its own up, or the two compound to 6%. */
-.gnum-slot > .sl-fx-glass--pane { transform: none !important; }
+.gnum-slot > .sl-fx-glass--pane,
+.gnum-slot > .sl-fx-aurora__glow { transform: none !important; }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
