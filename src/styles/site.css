@@ -215,6 +215,13 @@ a { color: inherit; }
   /* The edge carries the thickness: a wider frost with the same hairline reads
      as a smudge rather than as a pane with a rim. */
   --slg-rim-hi: color-mix(in srgb, var(--slg-pole) 78%, transparent);
+  /* A wider prism. The kit fits this at 18 — a 4.3px fringe — and its own note
+     says why it stops there: measured, 13px of channel separation across a
+     line of TEXT behind a pane reads as a broken render rather than as glass.
+     The same argument that let the frost open up here lets this open up too,
+     because what is behind these panes is a bed and nobody is reading it. 34
+     is an 8.2px fringe. */
+  --slg-lens-disperse: 34;
 }
 
 /* --- rendered markdown ------------------------------------------------ *
