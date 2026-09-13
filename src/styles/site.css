@@ -160,6 +160,19 @@ a { color: inherit; }
   --slc-border: color-mix(in srgb, currentColor 22%, transparent);
   --slc-border-subtle: color-mix(in srgb, currentColor 12%, transparent);
   --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
+  /* And the aurora's curtains, which is the same pitfall a fourth time. They
+     are WHITE by ruling — "the only colour left in the pane is the colour the
+     GLASS makes of it" — and they were fitted over a near-black ground, where
+     the kit's own note says the light pole "carries far less" than the accent
+     it replaced. On a band whose ground IS that pole they carry nothing at
+     all: measured here, the ribs paint #DAE3E4 at 32% over #DAE3E4.
+     effects.css names the escape in the same comment — "a product that wants
+     coloured curtains rebinds one of them" — so the band takes the brand pair.
+     The white rib layer reads --slfx-glint directly and is left alone; it is
+     invisible here either way, and glint is also the hairline's bright stop
+     and the chrome's poles, which are not this band's to re-decide. */
+  --slfx-pillar-a: var(--sl-accent-default);
+  --slfx-pillar-b: var(--sl-accent-depth);
 }
 
 /* --- the house glass ---------------------------------------------------- *
@@ -173,32 +186,6 @@ a { color: inherit; }
  * ----------------------------------------------------------------------- */
 .sl-fx-glass--pane::before { background: none; }
 
-/* And the glass itself is a GHOST pane. The owner, having seen the material at
- * its shipped weight: he expects the aesthetic of the transparent buttons.
- * That is a recipe the kit already has — what it gives a component with no
- * fill of its own — so this binds the same properties rather than inventing a
- * fifth look: a transparent fill, the page's own ground as the veil instead of
- * the raised surface, and the blur doing the work.
- *
- * --slg-tint-lens as well as --slg-tint-a, because a LENSED pane floors the
- * ground veil at 34% and that floor is what would otherwise put the weight
- * straight back. The kit calls that floor a legibility figure, so every label
- * that now sits on a thinner veil is measured, not assumed.
- * ----------------------------------------------------------------------- */
-.glass-ghost {
-  --slfx-fill: transparent;
-  --slg-tint-color: var(--sl-bg-canvas);
-  --slg-tint-a: 25%;
-  --slg-tint-deep-a: 22%;
-  --slg-tint-lens: 25%;
-}
-/* The inversion-band pitfall again, arriving through a third property. The
-   recipe veils with THE PAGE's own ground, and inside a band that is the
-   opposite of the local one — a 25% near-black film over a light band, which
-   is how three quiet panes came out as grey slabs. The band knows what it is
-   made of, so the band rebinds it, as it already does for --slc-surface and
-   --slfx-goo-fill above. */
-.invert .glass-ghost { --slg-tint-color: var(--sl-text-primary); }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved
