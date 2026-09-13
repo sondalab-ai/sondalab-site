@@ -187,24 +187,24 @@ a { color: inherit; }
 .sl-fx-glass--pane::before { background: none; }
 
 
-/* --- the curtains, lit on every card ------------------------------------ *
- * The kit lights an aurora's glow only while its host is :focus-within or
- * carries data-sl-fx-live="on", and grantLive() is a coordinator that allows
- * exactly one such host per document. The owner wants them all.
- *
- * So the site lifts the gate in CSS rather than writing data-sl-fx-live on a
- * dozen elements: that attribute is a STATE ("this element holds the ambient
- * light", "this element is working"), and stamping it on every card to get a
- * look would make the state mean nothing. Opacity is presentation, which is
- * what this actually is. The selector is the kit's own shape — a seated glow
- * is the host's PREVIOUS sibling, so the state is read forwards with :has().
- *
- * The cost is the honest part: twelve animated, blurred layers instead of one,
- * which is the discipline the cap exists to keep. Scoped to [data-curtains] so
- * it reaches the cards and nothing else — an aurora that lights on focus alone
- * is still free to.
+/* --- the curtains' phase ------------------------------------------------ *
+ * curtain-phase.ts writes --slfx-seed on each seated glow; these two rules are
+ * where it becomes a delay. The kit sets `animation` as a SHORTHAND, which
+ * resets delay to 0, so these have to come after it and match at least as
+ * tightly. Measured: the kit's selector is 0-6-0 and a shorter one here lost
+ * silently — every delay computed to 0s and the twelve glows went on marching.
+ * So this carries the kit's own qualifiers and adds [data-curtains] on top,
+ * which puts it at 0-7-0; site.css is loaded after effects.css for the rest.
+ * Two different multipliers, because the glow's breathe and its
+ * ::before's drift are the pair that beats: scattering them together would
+ * only move the formation, not break it.
  * ----------------------------------------------------------------------- */
-.sl-fx-aurora__glow[data-sl-fx-seated]:has(+ [data-curtains]) { opacity: 1; }
+[data-sl-fx="on"] .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:has(+ .sl-fx-aurora[data-sl-fx-live="on"][data-curtains]) {
+  animation-delay: calc(var(--slfx-seed, 0) * -8.7s);
+}
+[data-sl-fx="on"] .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:has(+ .sl-fx-aurora[data-sl-fx-live="on"][data-curtains])::before {
+  animation-delay: calc(var(--slfx-seed, 0) * -23s);
+}
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved

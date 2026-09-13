@@ -97,6 +97,11 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // theirs; see scripts/make-backdrops.mjs for why the bed exists twice.
       mountGpu();
 
+      // Every card here lights its curtains at once, so they all start their
+      // drift on the same instant and move in formation. See curtain-phase.ts.
+      import { scatterCurtains } from '../lib/curtain-phase';
+      scatterCurtains('[data-curtains]');
+
     </script>
 
     <script is:inline>
