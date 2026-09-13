@@ -36,7 +36,7 @@ const points = [
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
       <svg id="glass-numeral-masks" class="mnum-masks" aria-hidden="true" focusable="false"><defs></defs></svg>
       {points.map((p, i) => (
-        <li class="mslot sl-fx-goo__member">
+        <li class="gnum-slot sl-fx-goo__member">
           <span class="sr-only">Step {i + 1}</span>
           <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
             <div class="mpoint__body">
@@ -44,8 +44,8 @@ const points = [
               <p set:html={p.body}></p>
             </div>
           </article>
-          <span class="mpoint__glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          <span class="mpoint__no glass-thick sl-fx-glass sl-fx-glass--pane"
+          <span class="gnum-glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane"
 
                 aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         </li>
@@ -157,7 +157,7 @@ const points = [
     padding: clamp(1.5rem, 3.5vw, 2.25rem);
     /* The numeral's gutter. Wide enough that a two-digit figure at
        --step-numeral clears the body text: about 152px at the 7rem cap. */
-    padding-left: clamp(6rem, 16vw, 12rem);
+    padding-left: var(--gnum-gutter);
     /* The card is a pane as well as a member: the pane is what puts light
        inside it — a spot that follows the pointer and an edge that turns to
        face it — where the goo only ever says these belong together. The two
@@ -167,92 +167,7 @@ const points = [
     --slg-radius: var(--sl-radius-lg);
   }
 
-  /* THE GLYPHS ARE THE GLASS. Not a pane with a number on it — the number
-     itself, cut out of the material.
-
-     A mask clips a backdrop-filter's output, so masking the pane to the
-     letterforms leaves glass in the shape of `01`. The mask is an SVG <text>
-     living in the document, not a data URI: a data URI has no access to the
-     page's webfonts and would fall back to a system mono, which is a different
-     shape from the one measured here.
-
-     The element still carries its digits, so the box measures itself from the
-     same string the mask draws; `color: transparent` because the glass is what
-     should be seen, not ink over it. The reading order keeps a real number in
-     a visually hidden sibling — a masked pane with transparent text is a
-     picture as far as a screen reader is concerned.
-
-     The numeral still had to LEAVE the card: glass-lens.js refuses a lens to
-     anything whose parent sits inside another glass host, and a backdrop-filter
-     element is a backdrop root for its descendants, so a nested pane would
-     refract the card's composite and never the bed. The slot holds the two as
-     siblings and carries the drift, which is what keeps them registered. */
-  .mslot { position: relative; }
   .mnum-masks { position: absolute; width: 0; height: 0; }
-  /* OVER THE CARD, not across its corner. Straddling the edge put three
-     quarters of the figure on the bed, which on this section is near-black: a
-     glass glyph there has nothing behind it to bend and reads as absent. Its
-     own gutter inside the card puts it over the curtains instead, which are
-     the strongest light on the surface — and the card's rounded corner stops
-     cutting it. */
-  /* THE LIGHT BEHIND THE FIGURE. A lens adds no light of its own — it shows
-     what is behind it — so a glass glyph over a quiet backdrop stays quiet
-     however thick the glass is. This is a second copy of the same digits,
-     unmasked and unfilled, carrying nothing but a text-shadow: the glow has to
-     live OUTSIDE the mask, because the mask is the letterform and anything
-     beyond it is cut.
-
-     Two shadows, not one: a tight bright core that gives the strokes an edge
-     to read against, and a wide soft halo that lifts the figure off the card.
-     Both from the light pole the rest of the material is made of, so the
-     numeral is lit by the same light as the pane it sits in. */
-  .mpoint__glow,
-  .mpoint__no {
-    position: absolute;
-    left: clamp(0.9rem, 2.4vw, 1.7rem);
-    top: 50%;
-    translate: 0 -50%;
-    font-family: var(--sl-font-mono);
-    font-weight: 200;
-    font-size: var(--step-numeral);
-    line-height: 0.8;
-    letter-spacing: -0.02em;
-    color: transparent;
-    /* ROOM FOR THE INK. A mask clips to its own rect and a backdrop-filter to
-       the border box, so anything a glyph draws outside the element is cut —
-       and line-height 0.8 makes the box SHORTER than the letter: measured,
-       92.6px of ink in an 89.6px box, and the advance over the max-content
-       width by another 4.5px. The result was a numeral trimmed top and right
-       while the glow, which carries neither a mask nor a filter, spilled
-       freely past it.
-
-       On both copies, so the two boxes grow together and the figures stay
-       registered. */
-    padding: 0.09em 0.07em;
-  }
-  .mpoint__glow {
-    z-index: 1;
-    text-shadow:
-      0 0 6px color-mix(in srgb, var(--sl-text-primary) 46%, transparent),
-      0 0 30px color-mix(in srgb, var(--sl-text-primary) 26%, transparent);
-  }
-  .mpoint__no {
-    z-index: 2;
-    display: block;
-    width: max-content;
-    /* No radius: the mask is the shape now, and a rounded rect under a
-       letterform mask only rounds corners nobody can see. */
-    --slg-radius: 0;
-    /* AND NO RIM. glass.css gives a pane its thickness with an inset shadow
-       along the top of its BOX; masked to a letterform that line survives
-       wherever a glyph meets the box's top edge, and it read as a white bar
-       across the digits. A box rim is meaningless on a letter — what gives
-       these their edge is the glow behind them — so both poles go to
-       transparent, which is the kit's own way of standing the layer down
-       (the side stop is a color-mix over --slg-rim-hi and follows it). */
-    --slg-rim-hi: transparent;
-    --slg-rim-lo: transparent;
-  }
 
   .mpoint__verb {
     font-family: var(--sl-font-display);

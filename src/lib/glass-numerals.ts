@@ -77,4 +77,13 @@ export function glassNumerals(selector: string) {
     const ro = new ResizeObserver(apply);
     for (const el of document.querySelectorAll(selector)) ro.observe(el);
   }
+  // And so does the TEXT. A product row decode-scrambles its numeral on hover,
+  // which swaps the digits a dozen times a second; a mask cut from the old
+  // string would leave the glass in the shape of a figure no longer there.
+  if (typeof MutationObserver === 'function') {
+    const mo = new MutationObserver(apply);
+    for (const el of document.querySelectorAll(selector)) {
+      mo.observe(el, { characterData: true, childList: true, subtree: true });
+    }
+  }
 }

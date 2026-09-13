@@ -35,12 +35,17 @@ const pillars = [
 
     <ol class="thesis__pillars">
       {pillars.map((p, i) => (
-        <li class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
-          <span class="pillar__no">{String(i + 1).padStart(2, '0')}</span>
-          <div class="pillar__body">
-            <h3 class="pillar__verb">{p.verb}</h3>
-            <p set:html={p.body}></p>
-          </div>
+        <li class="gnum-slot">
+          <span class="sr-only">Point {i + 1}</span>
+          <span class="gnum-glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <article class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
+            <div class="pillar__body">
+              <h3 class="pillar__verb">{p.verb}</h3>
+              <p set:html={p.body}></p>
+            </div>
+          </article>
+          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane"
+                aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         </li>
       ))}
     </ol>
@@ -102,11 +107,12 @@ const pillars = [
     display: grid;
     gap: clamp(0.85rem, 2vw, 1.4rem);
   }
+  /* One column: the numeral is a sibling now, not a cell. The left padding is
+     its gutter — about 152px is what two digits take at the 7rem cap. */
   .pillar {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    padding-left: var(--gnum-gutter);
     --slg-radius: var(--sl-radius-lg);
     /* The hairline the transparent buttons have. The glass ring on ::after
        lights on hover and is quiet at rest by the owner's own earlier ruling,
@@ -115,13 +121,6 @@ const pillars = [
     border-radius: var(--sl-radius-lg);
   }
 
-  .pillar__no {
-    font-family: var(--sl-font-mono);
-    font-weight: 100;
-    font-size: var(--step-numeral);
-    line-height: 0.8;
-    color: color-mix(in srgb, var(--sl-bg-canvas) 30%, transparent);
-  }
   .pillar__verb {
     font-family: var(--sl-font-display);
     font-weight: 440;
