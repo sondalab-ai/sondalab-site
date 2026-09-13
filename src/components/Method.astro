@@ -218,6 +218,17 @@ const points = [
     line-height: 0.8;
     letter-spacing: -0.02em;
     color: transparent;
+    /* ROOM FOR THE INK. A mask clips to its own rect and a backdrop-filter to
+       the border box, so anything a glyph draws outside the element is cut —
+       and line-height 0.8 makes the box SHORTER than the letter: measured,
+       92.6px of ink in an 89.6px box, and the advance over the max-content
+       width by another 4.5px. The result was a numeral trimmed top and right
+       while the glow, which carries neither a mask nor a filter, spilled
+       freely past it.
+
+       On both copies, so the two boxes grow together and the figures stay
+       registered. */
+    padding: 0.09em 0.07em;
   }
   .mpoint__glow {
     z-index: 1;
