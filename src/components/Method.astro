@@ -44,6 +44,7 @@ const points = [
               <p set:html={p.body}></p>
             </div>
           </article>
+          <span class="mpoint__glow" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <span class="mpoint__no glass-thick sl-fx-glass sl-fx-glass--pane"
 
                 aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
@@ -118,6 +119,14 @@ const points = [
        — and it is still inside the kit's own bound of half the weld. */
     --slfx-goo-fill: color-mix(in srgb, var(--sl-text-primary) 15%, var(--sl-bg-surface-raised));
     --slfx-goo-drift: 12px;
+    /* SPEND THE WELD ON BLUR, NOT ON DILATION. weldPlan() splits the 28px
+       between a rim and a sigma, capped by this: at the kit's 5px cap it puts
+       10.63px into the rim, and a 10px rim around a card that now has a strong
+       glass edge of its own reads as a stray second outline — which is what
+       the owner saw as an artefact. At 15 the same 28px becomes 3.88px of rim
+       and 15px of sigma: the necks get softer, the halo stops being a line.
+       Measured with geom.js, not guessed. */
+    --slfx-goo-soft: 15px;
     padding: clamp(1.25rem, 3vw, 2rem);
     margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem));
     display: grid;
@@ -186,20 +195,40 @@ const points = [
      own gutter inside the card puts it over the curtains instead, which are
      the strongest light on the surface — and the card's rounded corner stops
      cutting it. */
+  /* THE LIGHT BEHIND THE FIGURE. A lens adds no light of its own — it shows
+     what is behind it — so a glass glyph over a quiet backdrop stays quiet
+     however thick the glass is. This is a second copy of the same digits,
+     unmasked and unfilled, carrying nothing but a text-shadow: the glow has to
+     live OUTSIDE the mask, because the mask is the letterform and anything
+     beyond it is cut.
+
+     Two shadows, not one: a tight bright core that gives the strokes an edge
+     to read against, and a wide soft halo that lifts the figure off the card.
+     Both from the light pole the rest of the material is made of, so the
+     numeral is lit by the same light as the pane it sits in. */
+  .mpoint__glow,
   .mpoint__no {
     position: absolute;
     left: clamp(0.9rem, 2.4vw, 1.7rem);
     top: 50%;
     translate: 0 -50%;
-    z-index: 2;
-    display: block;
-    width: max-content;
     font-family: var(--sl-font-mono);
     font-weight: 200;
     font-size: var(--step-numeral);
     line-height: 0.8;
     letter-spacing: -0.02em;
     color: transparent;
+  }
+  .mpoint__glow {
+    z-index: 1;
+    text-shadow:
+      0 0 6px color-mix(in srgb, var(--sl-text-primary) 46%, transparent),
+      0 0 30px color-mix(in srgb, var(--sl-text-primary) 26%, transparent);
+  }
+  .mpoint__no {
+    z-index: 2;
+    display: block;
+    width: max-content;
     /* No radius: the mask is the shape now, and a rounded rect under a
        letterform mask only rounds corners nobody can see. */
     --slg-radius: 0;
