@@ -17,7 +17,8 @@ const usedStatuses = [
 ] as string[];
 ---
 
-<section id="products" class="section products">
+<section id="products" class="section products" data-sl-fx-backdrop>
+  <div class="products__bed" aria-hidden="true"></div>
   <div class="wrap">
     <div class="section-index">
       <span class="section-index__no">02</span>
@@ -45,9 +46,9 @@ const usedStatuses = [
         const acc = accentVars(p.data.accent as AccentKey);
         const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
-          <li style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow sl-fx-glass sl-fx-glass--pane sl-fx-aurora" href={`/products/${p.id}/`}>
-              <span class="prow__no" data-num={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</span>
+          <li class="gnum-slot" style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
+            <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on" href={`/products/${p.id}/`}>
+              <span class="sr-only">{i + 1}.</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
                 <div class="prow__headline">
@@ -71,6 +72,9 @@ const usedStatuses = [
               <span class="prow__form">{p.data.form}</span>
               <span class="prow__go" aria-hidden="true">→</span>
             </a>
+            <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
+                  data-num={String(i + 1).padStart(2, '0')}
+                  aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           </li>
         );
       })}
@@ -88,6 +92,31 @@ const usedStatuses = [
 </section>
 
 <style>
+  /* The rows sat on the page's flat ground, which is the whole reason they did
+     not read as glass: a backdrop filter with nothing behind it blurs nothing,
+     and the GPU tier has nothing to bend. So the section declares a bed of its
+     own — the same plate the stance uses, at 45% of its strength, because a
+     list of tools is something to read and not a statement.
+
+     The plate is a file rather than CSS gradients for the reason written out
+     in Thesis.astro and in scripts/make-backdrops.mjs: effects-gpu.js samples
+     a url() and nothing else. */
+  .products {
+    position: relative;
+    --slfx-backdrop: url('/backdrops/products-dark.svg');
+  }
+  :root[data-sl-theme='light'] .products {
+    --slfx-backdrop: url('/backdrops/products-light.svg');
+  }
+  .products__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--slfx-backdrop) center / cover no-repeat;
+  }
+  .products .wrap { position: relative; z-index: 1; }
+
   .products__intro {
     max-width: 40rem;
     margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
@@ -109,17 +138,35 @@ const usedStatuses = [
   .products__list li { --row-accent: var(--row-accent-dark); }
   :root[data-sl-theme='light'] .products__list li { --row-accent: var(--row-accent-light); }
 
+  /* The numeral is a sibling now, not a cell, and the left padding is its
+     gutter. See site.css: a pane inside a pane gets no lens. */
   .prow {
     display: grid;
-    grid-template-columns: auto 3px 1fr auto auto;
+    grid-template-columns: 3px 1fr auto auto;
     align-items: center;
     gap: clamp(1rem, 3vw, 2.5rem);
     padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
     padding-inline: clamp(0.5rem, 2vw, 1.25rem);
     margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
+    /* The numeral's gutter, and it has to come AFTER padding-inline — a
+       shorthand written later resets the longhand, which is how this row kept
+       its original 20px and let its text run under the figure. Plus what the
+       bleed takes back: the row starts left of its slot, so the slot's gutter
+       is short by exactly that margin. */
+    padding-left: calc(var(--gnum-gutter) - clamp(-0.5rem, -2vw, -1.25rem));
     text-decoration: none;
     color: inherit;
-    transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+    /* NO `transition` shorthand here. The kit puts one on .sl-fx-glass--pane —
+       `transform 420ms`, which is what animates the swell under the pointer —
+       and a shorthand on the same element replaces it wholesale: measured, this
+       row computed `transition-property: background` and its scale jumped,
+       while the pillars and the method's cards, which declare none, eased.
+       Restating the kit's curve here would only copy a value it is free to
+       retune. The hover tint is a 6% mix, and losing its fade costs less than
+       losing the swell. */
+    /* See Thesis.astro: at rest a ghost pane carries no edge of its own. */
+    border: 1px solid var(--slc-border);
+    border-radius: var(--sl-radius-md);
   }
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
@@ -140,15 +187,15 @@ const usedStatuses = [
   }
   .prow:hover .prow__go { opacity: 1; transform: translateX(0); }
 
-  .prow__no {
-    font-family: var(--sl-font-mono);
-    font-weight: 100;
-    font-size: var(--step-numeral);
-    line-height: 0.8;
-    color: var(--sl-text-muted);
-    transition: color var(--sl-motion-mid) var(--sl-motion-ease);
+  /* The row's accent reaches the figure through its glow — the glass itself is
+     colourless by construction, being a lens. */
+  /* :global because the kit creates this element at runtime, so it never
+     carries the scope attribute Astro stamps on this component's own markup. */
+  .gnum-slot:has(.prow:hover) :global(.sl-fx-glass__glow) {
+    text-shadow:
+      0 0 6px color-mix(in srgb, var(--row-accent) 62%, transparent),
+      0 0 34px color-mix(in srgb, var(--row-accent) 34%, transparent);
   }
-  .prow:hover .prow__no { color: var(--row-accent); }
 
   .prow__rule {
     align-self: stretch;
@@ -239,26 +286,33 @@ const usedStatuses = [
 
   @media (max-width: 40rem) {
     .prow {
-      grid-template-columns: auto 1fr;
-      grid-template-areas: 'no main' 'rule main';
+      grid-template-columns: 1fr;
       gap: 0.75rem 1.25rem;
+      padding-left: clamp(1.25rem, 5vw, 2rem);
     }
     .prow__rule { display: none; }
     .prow__form { display: none; }
     .prow__go { display: none; }
-    .prow__no { grid-area: no; }
-    .prow__main { grid-area: main; }
+    /* No room for a 152px figure beside the text on a phone: the numeral is
+       decorative and the screen reader already has the number. */
+    .gnum, :global(.sl-fx-glass__glow) { display: none; }
   }
 </style>
 
 <script>
   import { hoverBurst, scramble } from '@sondalab/ui-kit/effects.js';
   // Hovering a product row glitches its name (bursts) and decode-scrambles its
-  // index numeral once; two distinct effects on the same trigger.
+  // numeral once; two distinct effects on the same trigger.
+  //
+  // The numeral is the row's SIBLING now — it cannot be a child, because a pane
+  // inside a pane gets no lens — so it is reached through the slot.
+  // glass-numerals.ts re-cuts that one mask as the digits change, so the decode
+  // reads THROUGH the glass; it re-cut all twelve once, and that is what stopped
+  // the glitch bursts sharing the same frames.
   for (const row of document.querySelectorAll('.prow')) {
     const name = row.querySelector('.prow__name.sl-fx-glitch');
     if (name) hoverBurst(row, name);
-    const no = row.querySelector('.prow__no');
+    const no = row.parentElement?.querySelector('.gnum');
     if (no) row.addEventListener('mouseenter', () => scramble(no as HTMLElement));
   }
 </script>

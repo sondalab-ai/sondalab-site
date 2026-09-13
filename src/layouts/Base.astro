@@ -78,8 +78,29 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // bursts: the ambient ceiling. The hero claim, both interlude markers
       // and a product name all burst on their own timers, and at the default
       // of 1 most of them would simply be dropped.
-      import { mount } from '@sondalab/ui-kit/effects.js';
+      import { mount, mountGpu } from '@sondalab/ui-kit/effects.js';
       mount(document, { ignoreReducedMotion: true, bursts: 3 });
+
+      // Tier 2, the WebGPU light: the bend, the Fresnel rim, the glare. It is
+      // a SEPARATE call on purpose — the kit will not spin up a device for a
+      // consumer who did not ask — and this site had the `vgpu` peer installed
+      // and never made it, so every glass surface here was Tier 1: a backdrop
+      // blur, a veil and a rim, with light only under the pointer.
+      //
+      // It refuses on its own where it should (high contrast, no device, no
+      // peer) and returns false; there is nothing to branch on here, because
+      // Tier 1 is what a refusal leaves behind and Tier 1 is correct.
+      //
+      // A pane only carries this material AT REST if it sits inside a declared
+      // [data-sl-fx-backdrop] — the shader bends a texture, and with nothing
+      // declared there is nothing to bend. The stance and the tools declare
+      // theirs; see scripts/make-backdrops.mjs for why the bed exists twice.
+      mountGpu();
+
+      // The numerals are glass cut to their own letterforms, and that is the
+      // kit's now: mount() above arms `sl-fx-glass--text`, measures the mask
+      // off the rendered type and seats the light copy before each host. The
+      // local module this replaced is gone.
     </script>
 
     <script is:inline>

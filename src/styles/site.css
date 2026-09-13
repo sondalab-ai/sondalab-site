@@ -160,7 +160,193 @@ a { color: inherit; }
   --slc-border: color-mix(in srgb, currentColor 22%, transparent);
   --slc-border-subtle: color-mix(in srgb, currentColor 12%, transparent);
   --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
+  /* And the aurora's curtains, which is the same pitfall a fourth time. They
+     are WHITE by ruling — "the only colour left in the pane is the colour the
+     GLASS makes of it" — and they were fitted over a near-black ground, where
+     the kit's own note says the light pole "carries far less" than the accent
+     it replaced. On a band whose ground IS that pole they carry nothing at
+     all: measured here, the ribs paint #DAE3E4 at 32% over #DAE3E4.
+     effects.css names the escape in the same comment — "a product that wants
+     coloured curtains rebinds one of them" — so the band takes the brand pair.
+     The white rib layer reads --slfx-glint directly and is left alone; it is
+     invisible here either way, and glint is also the hairline's bright stop
+     and the chrome's poles, which are not this band's to re-decide. */
+  --slfx-pillar-a: var(--sl-accent-default);
+  --slfx-pillar-b: var(--sl-accent-depth);
+  /* …and the glass numerals' glow, same story: the band's ink, not the page's.
+     QUIETER WITH IT. The alphas were fitted for a light figure lifting off a
+     dark card; the same figures on a light band are DARK ones pressing into a
+     pale card, and ink carries much further than light does — at 46/26 they
+     read as heavy blots rather than as glass. Halved. */
+  /* The glass numeral's light. Its COLOUR needs no rebinding here: the kit
+     reads `var(--slfx-text-light, var(--slc-text, …))` and --slc-text is
+     already flipped a few lines up. The two alphas do — a band is the page's
+     own light pole, and a halo at the page's strength on it is a smear. */
+  --slfx-text-core-a: 22%;
+  --slfx-text-halo-a: 12%;
 }
+
+/* --- the house glass ---------------------------------------------------- *
+ * No light follows the pointer. The owner's ruling, and this pseudo-element is
+ * the whole of it: the kit's own comment says what is left on it is "the
+ * pointer's own light and nothing else", the slab and the thickness having
+ * moved to glass.css's __tint and __shine. So the glow goes and no material
+ * goes with it. The --pane variant STAYS — its driver is what writes
+ * --slfx-ptr and --slfx-lit on the host, which the method's numerals read to
+ * lean, and an edge that turns to face the pointer is an edge, not a glow.
+ * ----------------------------------------------------------------------- */
+.sl-fx-glass--pane::before { background: none; }
+
+
+/* --- a thicker glass on the cards ---------------------------------------- *
+ * The kit holds a card's frost UNDER 6px, and its comment says why: "a blur
+ * wide enough to read as a material and narrow enough that the text behind it
+ * stays a shape rather than a smear". These three surfaces sit over a BED — a
+ * generated plate of blooms and rules, with nothing to read through them — so
+ * the constraint that set 5.9px is not in force here, and the figure that
+ * followed from it is not the right one either.
+ *
+ * Saturation goes up with it, for the kit's own reason: "saturate lifts what
+ * the blur washes out". A wider blur washes more, so the two move together.
+ *
+ * The lens's frost goes up a little and no further. That chain is the
+ * REFRACTION — the bend at the faces and the prism that parts it into colours
+ * — and blurring it heavily hides exactly what it is for; it is raised only
+ * enough that a Tier 2 pane does not read flatter than a Tier 1 one beside it.
+ *
+ * Nothing here touches the veil (--slg-tint-a): that one is a legibility
+ * figure the kit measured against WCAG, and a label's contrast is not a taste
+ * knob.
+ * ----------------------------------------------------------------------- */
+.glass-thick {
+  --slg-blur: 14px;
+  --slg-sat: 2.2;
+  --slg-lens-blur: 1.6px;
+  --slg-lens-sat: 1.35;
+  /* The edge carries the thickness: a wider frost with the same hairline reads
+     as a smudge rather than as a pane with a rim. */
+  --slg-rim-hi: color-mix(in srgb, var(--slg-pole) 78%, transparent);
+  /* A wider prism. The kit fits this at 18 — a 4.3px fringe — and its own note
+     says why it stops there: measured, 13px of channel separation across a
+     line of TEXT behind a pane reads as a broken render rather than as glass.
+     The same argument that let the frost open up here lets this open up too,
+     because what is behind these panes is a bed and nobody is reading it. 34
+     is an 8.2px fringe. */
+  --slg-lens-disperse: 90;
+  /* And the bend itself, which is what the prism opens out of: a wider split
+     across a small displacement is a fringe on nothing. The kit caps the reach
+     at a sixth of the shorter side — on a 278px card that is 46px, so 18 was
+     the ask and not the ceiling. */
+  --slg-lens-reach: 36px;
+}
+
+/* Read but not seen. Used where a figure carries its meaning visually and the
+ * element that draws it is a picture as far as a screen reader is concerned —
+ * the method's numerals are glass cut to a letterform, with transparent text. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- the glass numeral -------------------------------------------------- *
+ * A card's figure, cut out of the card's own material. Shared by the stance,
+ * the tools and the method, which are the three surfaces that carry glass and
+ * an aurora — the numeral is the same object on each, so it is declared once.
+ *
+ * Two elements, and each one is a constraint rather than a flourish.
+ *
+ * `.gnum` is the glass, and the kit owns the cut now: `sl-fx-glass--text`
+ * (0.9.6) masks a pane to its own letterforms, so the figure IS the pane
+ * rather than a box holding one. `mount()` arms it, the mask is measured off
+ * this element, and an unmasked `.sl-fx-glass__glow` is seated before it to
+ * carry the light — a lens adds none of its own, it shows what is behind it,
+ * so a glass glyph over a quiet backdrop stays quiet however thick the glass.
+ * Everything the kit ships is gone from here: the ink's padding, the rim, the
+ * radius, `width: max-content`, `color: transparent`, `pointer-events`, and
+ * the glow's own two shadows.
+ *
+ * WHAT IS STILL THIS SURFACE'S: the type, and the place. The kit guarantees
+ * the two boxes are the same size and carry the same string; putting them in
+ * the same place is the rule below.
+ *
+ * The numeral must not be a DESCENDANT of the card: glass-lens.js refuses a
+ * lens to anything whose parent sits inside another glass host, and an element
+ * carrying a backdrop-filter is a backdrop root for its descendants, so a
+ * nested pane would refract the card's composite and never the page. Every
+ * surface therefore wraps card and numeral as SIBLINGS.
+ * ----------------------------------------------------------------------- */
+.gnum,
+.gnum-slot > .sl-fx-glass__glow {
+  position: absolute;
+  left: var(--gnum-inset, 1.7rem);
+  top: 50%;
+  translate: 0 -50%;
+}
+.gnum {
+  z-index: 2;
+  display: block;
+  font-family: var(--sl-font-mono);
+  font-weight: 200;
+  font-size: var(--step-numeral);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+}
+/* The glow borrows its type from the host inline, so nothing about the face is
+   restated here — only the layer it sits on. Its colour and its two alphas are
+   the kit's `--slfx-text-*`, read with a fallback at the point of use, which is
+   what lets the inversion band above rebind them. */
+.gnum-slot > .sl-fx-glass__glow { z-index: 1; }
+/* The slot each surface wraps its pair in. It is the positioning context, and
+   where a surface welds (the method) it is also the goo member — the numeral
+   is out of flow, so the slot's box stays the card's. */
+/* THE SWELL BELONGS TO THE SLOT, not to the card inside it. The kit scales a
+   pane 3% under the pointer, and a numeral scaling about its OWN centre while
+   the card scales about the card's would drift — 3% of the distance between
+   the two centres is about 9px, which is a figure visibly sliding off its
+   card. Scaling the slot scales both about the same point, since the slot's
+   box IS the card's, and the card's own transform stands down to keep the two
+   from compounding. The seated aurora glow is inside the slot too and comes
+   along — and so its OWN mirror has to stand down as well. The kit scales a
+   seated glow with the pane it hangs in, which is right when the pane is the
+   thing scaling; here the slot already carries it, and the two compose rather
+   than agree: measured, 1.03 x 1.03 put the curtains 34.1px wider than the
+   card they are clipped to, spilling past its edge. */
+.gnum-slot {
+  position: relative;
+  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.28, 1);
+  /* THE GUTTER, declared once because getting it wrong is an overlap. The
+     figure is 168px at the 7rem cap and starts --gnum-inset from the slot's
+     left edge, so the card's own content has to begin past the sum of the two
+     — and a card with a negative inline margin (the product rows bleed past
+     their list) has to add that back, or its text starts further left than the
+     slot does and runs under the numeral. */
+  --gnum-inset: clamp(0.9rem, 2.4vw, 1.7rem);
+  --gnum-gutter: clamp(7rem, 18vw, 14.5rem);
+}
+.gnum-slot:has(> .sl-fx-glass--pane:hover:not(:disabled)),
+.gnum-slot:has(> .sl-fx-glass--pane:focus-visible) {
+  transform: scale(1.03);
+  transition-timing-function: cubic-bezier(0.34, 1.12, 0.36, 1);
+  transition-duration: 320ms;
+}
+.gnum-slot:has(> .sl-fx-glass--pane:active:not(:disabled)) {
+  transform: scale(0.99);
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.28, 1);
+}
+/* …and everything inside gives its own up, or the two compound to 6%. One
+   declaration: the kit reads --slfx-pane-swell with a fallback and declares it
+   nowhere, so setting it on the slot reaches the card, the numeral and the
+   seated aurora glow alike. It replaced `transform: none !important` on two kit
+   internals, which is what a consumer writes when the kit is missing a knob. */
+.gnum-slot { --slfx-pane-swell: 1; }
 
 /* --- rendered markdown ------------------------------------------------ *
  * The base `.prose` is exactly what the product pages have always used, moved

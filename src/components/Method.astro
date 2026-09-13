@@ -15,7 +15,8 @@ const points = [
 ];
 ---
 
-<section id="method" class="section method">
+<section id="method" class="section method" data-sl-fx-backdrop>
+  <div class="method__bed" aria-hidden="true"></div>
   <div class="wrap method__grid">
     <div class="method__head">
       <div class="section-index">
@@ -33,13 +34,19 @@ const points = [
     </div>
 
     <ol class="method__points sl-fx-goo sl-fx-goo--drift">
+      <svg id="glass-numeral-masks" class="mnum-masks" aria-hidden="true" focusable="false"><defs></defs></svg>
       {points.map((p, i) => (
-        <li class="mpoint sl-fx-goo__member">
-          <span class="mpoint__no">{String(i + 1).padStart(2, '0')}</span>
-          <div class="mpoint__body">
-            <h3 class="mpoint__verb">{p.verb}</h3>
-            <p set:html={p.body}></p>
-          </div>
+        <li class="gnum-slot sl-fx-goo__member">
+          <span class="sr-only">Step {i + 1}</span>
+          <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
+            <div class="mpoint__body">
+              <h3 class="mpoint__verb">{p.verb}</h3>
+              <p set:html={p.body}></p>
+            </div>
+          </article>
+          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
+
+                aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         </li>
       ))}
     </ol>
@@ -47,6 +54,27 @@ const points = [
 </section>
 
 <style>
+  /* The bed, and the same plate-not-gradients rule as the stance and the tools:
+     effects-gpu.js samples --slfx-backdrop as a url() and nothing else, so a
+     bed painted in CSS alone is invisible to the shader. Here it matters twice
+     over, because the substance above it is translucent and this is what shows
+     through. scripts/make-backdrops.mjs generates it from the kit's tokens. */
+  .method {
+    position: relative;
+    --slfx-backdrop: url('/backdrops/method-dark.svg');
+  }
+  :root[data-sl-theme='light'] .method {
+    --slfx-backdrop: url('/backdrops/method-light.svg');
+  }
+  .method__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--slfx-backdrop) center / cover no-repeat;
+  }
+  .method .wrap { position: relative; z-index: 1; }
+
   .method__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -79,27 +107,67 @@ const points = [
     list-style: none;
     margin: 0;
     --slfx-goo-weld: 28px;
+    /* The kit's defaults were too quiet here, measured rather than guessed.
+       --sl-bg-surface-raised against the canvas is 1.15:1 — the default suits a
+       member that carries a colour of its own, and these carry none, so the
+       whole slab was that grey. Lifting it toward the ink puts it near 1.7:1,
+       which reads as material without becoming a card.
+
+       6px over a 17s period is a peak speed of about 2px a second, which is
+       below what anyone watches. At 12px the necks cross the 28px weld visibly
+       — and it is still inside the kit's own bound of half the weld. */
+    --slfx-goo-fill: color-mix(in srgb, var(--sl-text-primary) 15%, var(--sl-bg-surface-raised));
+    --slfx-goo-drift: 12px;
+    /* SPEND THE WELD ON BLUR, NOT ON DILATION. weldPlan() splits the 28px
+       between a rim and a sigma, capped by this: at the kit's 5px cap it puts
+       10.63px into the rim, and a 10px rim around a card that now has a strong
+       glass edge of its own reads as a stray second outline — which is what
+       the owner saw as an artefact. At 15 the same 28px becomes 3.88px of rim
+       and 15px of sigma: the necks get softer, the halo stops being a line.
+       Measured with geom.js, not guessed. */
+    --slfx-goo-soft: 15px;
     padding: clamp(1.25rem, 3vw, 2rem);
     margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem));
     display: grid;
     gap: 1.6rem;
   }
+
+  /* The substance lets the bed through. `opacity` on the FIELD, not a
+     translucent fill: goo-field.js forces --slfx-goo-fill opaque on purpose,
+     because the goo chain's alpha slope erases everything below 0.5 and a
+     translucent silhouette would simply not survive the filter. Opacity is
+     applied to the filter's RESULT, so the weld is already computed when it
+     lands and every neck stays exactly where it was.
+
+     Safe here because no member of this field carries a fill of its own — the
+     cards are glass and paint on pseudo-elements, and the numerals' blobs are
+     the one exception, which is drawn as a tint on purpose. On a field of
+     `sl-tag`s this would shift every colour the component chose, and I would
+     not do it there. :global() because the field is the kit's element, not
+     this component's. */
+  .method__points :global(.sl-fx-goo__field) { opacity: 0.72; }
+
   /* No rule between them. A border draws a line straight across a merged mass,
      which is the defect the substance exists to replace. */
+  /* One column now: the numeral is no longer a cell of this grid. The left
+     padding opens up to leave it the corner it hangs in. */
   .mpoint {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    /* The numeral's gutter. Wide enough that a two-digit figure at
+       --step-numeral clears the body text: about 152px at the 7rem cap. */
+    padding-left: var(--gnum-gutter);
+    /* The card is a pane as well as a member: the pane is what puts light
+       inside it — a spot that follows the pointer and an edge that turns to
+       face it — where the goo only ever says these belong together. The two
+       do not fight: the kit stands the pane's hairline down on a welded
+       member, because where a silhouette holds the edge a rigid ring around
+       it reads as broken. */
+    --slg-radius: var(--sl-radius-lg);
   }
 
-  .mpoint__no {
-    font-family: var(--sl-font-mono);
-    font-weight: 100;
-    font-size: var(--step-numeral);
-    line-height: 0.8;
-    color: var(--sl-text-muted);
-  }
+  .mnum-masks { position: absolute; width: 0; height: 0; }
+
   .mpoint__verb {
     font-family: var(--sl-font-display);
     font-weight: 440;
