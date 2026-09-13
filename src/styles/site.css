@@ -187,23 +187,34 @@ a { color: inherit; }
 .sl-fx-glass--pane::before { background: none; }
 
 
-/* --- the curtains' phase ------------------------------------------------ *
- * curtain-phase.ts writes --slfx-seed on each seated glow; these two rules are
- * where it becomes a delay. The kit sets `animation` as a SHORTHAND, which
- * resets delay to 0, so these have to come after it and match at least as
- * tightly. Measured: the kit's selector is 0-6-0 and a shorter one here lost
- * silently — every delay computed to 0s and the twelve glows went on marching.
- * So this carries the kit's own qualifiers and adds [data-curtains] on top,
- * which puts it at 0-7-0; site.css is loaded after effects.css for the rest.
- * Two different multipliers, because the glow's breathe and its
- * ::before's drift are the pair that beats: scattering them together would
- * only move the formation, not break it.
+/* --- a thicker glass on the cards ---------------------------------------- *
+ * The kit holds a card's frost UNDER 6px, and its comment says why: "a blur
+ * wide enough to read as a material and narrow enough that the text behind it
+ * stays a shape rather than a smear". These three surfaces sit over a BED — a
+ * generated plate of blooms and rules, with nothing to read through them — so
+ * the constraint that set 5.9px is not in force here, and the figure that
+ * followed from it is not the right one either.
+ *
+ * Saturation goes up with it, for the kit's own reason: "saturate lifts what
+ * the blur washes out". A wider blur washes more, so the two move together.
+ *
+ * The lens's frost goes up a little and no further. That chain is the
+ * REFRACTION — the bend at the faces and the prism that parts it into colours
+ * — and blurring it heavily hides exactly what it is for; it is raised only
+ * enough that a Tier 2 pane does not read flatter than a Tier 1 one beside it.
+ *
+ * Nothing here touches the veil (--slg-tint-a): that one is a legibility
+ * figure the kit measured against WCAG, and a label's contrast is not a taste
+ * knob.
  * ----------------------------------------------------------------------- */
-[data-sl-fx="on"] .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:has(+ .sl-fx-aurora[data-sl-fx-live="on"][data-curtains]) {
-  animation-delay: calc(var(--slfx-seed, 0) * -8.7s);
-}
-[data-sl-fx="on"] .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:has(+ .sl-fx-aurora[data-sl-fx-live="on"][data-curtains])::before {
-  animation-delay: calc(var(--slfx-seed, 0) * -23s);
+.glass-thick {
+  --slg-blur: 14px;
+  --slg-sat: 2.2;
+  --slg-lens-blur: 1.6px;
+  --slg-lens-sat: 1.35;
+  /* The edge carries the thickness: a wider frost with the same hairline reads
+     as a smudge rather than as a pane with a rim. */
+  --slg-rim-hi: color-mix(in srgb, var(--slg-pole) 78%, transparent);
 }
 
 /* --- rendered markdown ------------------------------------------------ *
