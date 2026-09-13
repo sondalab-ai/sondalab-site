@@ -221,7 +221,12 @@ a { color: inherit; }
      The same argument that let the frost open up here lets this open up too,
      because what is behind these panes is a bed and nobody is reading it. 34
      is an 8.2px fringe. */
-  --slg-lens-disperse: 34;
+  --slg-lens-disperse: 90;
+  /* And the bend itself, which is what the prism opens out of: a wider split
+     across a small displacement is a fringe on nothing. The kit caps the reach
+     at a sixth of the shorter side — on a 278px card that is 46px, so 18 was
+     the ask and not the ceiling. */
+  --slg-lens-reach: 36px;
 }
 
 /* --- rendered markdown ------------------------------------------------ *
