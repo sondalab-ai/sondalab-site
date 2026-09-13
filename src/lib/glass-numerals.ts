@@ -88,7 +88,17 @@ export function glassNumerals(selector: string) {
             const num = from?.closest<HTMLElement>(selector);
             if (num) seen.add(num);
           }
-          for (const num of seen) if (num.dataset.maskId) cut(num, num.dataset.maskId);
+          for (const num of seen) {
+            if (num.dataset.maskId) cut(num, num.dataset.maskId);
+            // AND THE GLOW WITH IT. The figure is two elements — glass cut to
+            // the letterform, and an unmasked copy behind it carrying the
+            // light — so a decode that rewrote only the glass left a static
+            // halo under a changing shape, which reads as the scramble
+            // happening behind the number rather than to it. The pairing is
+            // kept here because this is where the rewrite is already seen.
+            const glow = num.parentElement?.querySelector<HTMLElement>('.gnum-glow');
+            if (glow && glow.textContent !== num.textContent) glow.textContent = num.textContent;
+          }
         })
       : null;
 
