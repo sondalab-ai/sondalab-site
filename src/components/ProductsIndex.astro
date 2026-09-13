@@ -145,7 +145,14 @@ const usedStatuses = [
     margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
     text-decoration: none;
     color: inherit;
-    transition: background var(--sl-motion-mid) var(--sl-motion-ease);
+    /* NO `transition` shorthand here. The kit puts one on .sl-fx-glass--pane —
+       `transform 420ms`, which is what animates the swell under the pointer —
+       and a shorthand on the same element replaces it wholesale: measured, this
+       row computed `transition-property: background` and its scale jumped,
+       while the pillars and the method's cards, which declare none, eased.
+       Restating the kit's curve here would only copy a value it is free to
+       retune. The hover tint is a 6% mix, and losing its fade costs less than
+       losing the swell. */
     /* See Thesis.astro: at rest a ghost pane carries no edge of its own. */
     border: 1px solid var(--slc-border);
     border-radius: var(--sl-radius-md);
