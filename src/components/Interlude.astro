@@ -40,7 +40,7 @@ const pool = JSON.stringify(data.lines);
     border-top: 1px solid var(--rule);
     padding-block: clamp(3rem, 7vw, 5.5rem);
   }
-  .interlude.invert {
+  .interlude.sl-invert {
     background: var(--sl-text-primary);
     color: var(--sl-bg-canvas);
   }
@@ -74,14 +74,14 @@ const pool = JSON.stringify(data.lines);
   .interlude__lead {
     color: var(--sl-text-muted);
   }
-  .interlude.invert .interlude__lead {
+  .interlude.sl-invert .interlude__lead {
     color: color-mix(in srgb, var(--sl-bg-canvas) 55%, transparent);
   }
   .interlude__punch {
     margin-top: 0.5em;
     color: var(--sl-text-primary);
   }
-  .interlude.invert .interlude__punch { color: var(--sl-bg-canvas); }
+  .interlude.sl-invert .interlude__punch { color: var(--sl-bg-canvas); }
 
   /* Quiet scroll reveal, progressive enhancement: JS arms the hidden state
      (.reveal-armed) before observing, so no-JS always shows the copy. */
