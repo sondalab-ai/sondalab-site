@@ -53,8 +53,8 @@ const ledger = [
       pointerHost=".ap-open"
     />
 
-    <div class="wrap ap-open__inner">
-      <p class="eyebrow">Apparel</p>
+    <div class="sl-wrap ap-open__inner">
+      <p class="sl-eyebrow">Apparel</p>
       <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
       <p class="lede ap-open__lede">
         Sondalab's tools are open, local, and free to run. None of that pays for
@@ -64,12 +64,12 @@ const ledger = [
     </div>
   </section>
 
-  <section class="section ap-pact">
-    <div class="wrap ap-pact__grid">
+  <section class="sl-section ap-pact">
+    <div class="sl-wrap ap-pact__grid">
       <div>
-        <div class="section-index">
-          <span class="section-index__no">01</span>
-          <span class="eyebrow">The pact</span>
+        <div class="sl-section__head">
+          <span class="sl-section__idx">01</span>
+          <span class="sl-eyebrow">The pact</span>
         </div>
         <h2 class="h2">Independent work needs a source of money.</h2>
         <p class="ap-pact__body">
@@ -92,11 +92,11 @@ const ledger = [
     </div>
   </section>
 
-  <section class="section ap-cats">
-    <div class="wrap">
-      <div class="section-index">
-        <span class="section-index__no">02</span>
-        <span class="eyebrow">The pieces</span>
+  <section class="sl-section ap-cats">
+    <div class="sl-wrap">
+      <div class="sl-section__head">
+        <span class="sl-section__idx">02</span>
+        <span class="sl-eyebrow">The pieces</span>
       </div>
 
       <ol class="ap-cats__list" data-reveal-list>
@@ -151,8 +151,8 @@ const ledger = [
     </div>
   </section>
 
-  <section class="section ap-band">
-    <div class="wrap ap-band__inner">
+  <section class="sl-section ap-band">
+    <div class="sl-wrap ap-band__inner">
       <p class="ap-band__state">{open ? '// open' : '// in preparation'}</p>
       {open ? (
         <a class="ap-band__cta" href={storeUrl!} target="_blank" rel="noopener noreferrer">
