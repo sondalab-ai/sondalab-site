@@ -221,18 +221,18 @@ a { color: inherit; }
 .glass-thick {
   --slg-blur: 14px;
   --slg-sat: 2.2;
-  --slg-lens-blur: 1.6px;
   --slg-lens-sat: 1.35;
   /* The edge carries the thickness: a wider frost with the same hairline reads
      as a smudge rather than as a pane with a rim. */
   --slg-rim-hi: color-mix(in srgb, var(--slg-pole) 78%, transparent);
-  /* A wider prism. The kit fits this at 18 — a 4.3px fringe — and its own note
-     says why it stops there: measured, 13px of channel separation across a
-     line of TEXT behind a pane reads as a broken render rather than as glass.
-     The same argument that let the frost open up here lets this open up too,
-     because what is behind these panes is a bed and nobody is reading it. 34
-     is an 8.2px fringe. */
-  --slg-lens-disperse: 90;
+  /* The prism and the lensed frost are the KIT's now, since 0.10.0. This block
+     used to declare --slg-lens-disperse: 90 and --slg-lens-blur: 1.6px, and
+     both became the kit's own defaults — 90 exactly, and 1.5px against our
+     1.6. The kit took them for the reason this block already gave: a pane over
+     a bed has no reader behind it to fringe, and a frost wider than the bend
+     erases the refraction it was supposed to soften. Measured after removing
+     them: every lensed surface here still reports sep 21.6 and the rendered
+     page is unchanged. What stays below is what the kit does NOT default to. */
   /* And the bend itself, which is what the prism opens out of: a wider split
      across a small displacement is a fringe on nothing. The kit caps the reach
      at a sixth of the shorter side — on a 278px card that is 46px, so 18 was
