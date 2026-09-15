@@ -58,14 +58,14 @@ a { color: inherit; }
 
 /* --- shared primitives ------------------------------------------------ */
 
-.wrap {
+.sl-wrap {
   width: 100%;
   max-width: var(--wrap);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
-.eyebrow {
+.sl-eyebrow {
   font-family: var(--sl-font-mono);
   font-weight: 300;
   font-size: var(--step-eyebrow);
@@ -76,7 +76,7 @@ a { color: inherit; }
   align-items: center;
   gap: 0.6em;
 }
-.eyebrow::before {
+.sl-eyebrow::before {
   content: '';
   width: 1.6em;
   height: 1px;
@@ -110,19 +110,19 @@ a { color: inherit; }
   max-width: 34ch;
 }
 
-.section {
+.sl-section {
   padding-block: clamp(4rem, 8vw, 8rem);
   border-top: 1px solid var(--rule);
 }
 
 /* Section index eyebrow, the numbered ladder down the page. */
-.section-index {
+.sl-section__head {
   display: flex;
   align-items: baseline;
   gap: 1rem;
   margin-bottom: clamp(2rem, 5vw, 4rem);
 }
-.section-index__no {
+.sl-section__idx {
   font-family: var(--sl-font-mono);
   font-weight: 200;
   font-size: var(--sl-text-sm);
@@ -131,13 +131,13 @@ a { color: inherit; }
 }
 
 /* Inversion band, strongest neutral, foreground flips. */
-.invert {
+.sl-invert {
   background: var(--sl-text-primary);
   color: var(--sl-bg-canvas);
 }
-.invert .eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
-.invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
-.invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
+.sl-invert .sl-eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
+.sl-invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
+.sl-invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
 /* An inversion band is its own ground, and the effects layer cannot see that:
    its substance is derived from the THEME, so inside a band that flipped
    locally the goo painted the dark theme's raised surface behind pillars
@@ -153,7 +153,7 @@ a { color: inherit; }
    a glass pane on this band would be lit for the page behind it. components.css
    prescribes fixing --slc-border at the band; this is that fix, widened to
    every role the material reads. */
-.invert {
+.sl-invert {
   --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary));
   --slc-text: var(--sl-bg-canvas);
   --slc-surface: color-mix(in srgb, var(--sl-bg-canvas) 10%, var(--sl-text-primary));
@@ -221,18 +221,18 @@ a { color: inherit; }
 .glass-thick {
   --slg-blur: 14px;
   --slg-sat: 2.2;
-  --slg-lens-blur: 1.6px;
   --slg-lens-sat: 1.35;
   /* The edge carries the thickness: a wider frost with the same hairline reads
      as a smudge rather than as a pane with a rim. */
   --slg-rim-hi: color-mix(in srgb, var(--slg-pole) 78%, transparent);
-  /* A wider prism. The kit fits this at 18 — a 4.3px fringe — and its own note
-     says why it stops there: measured, 13px of channel separation across a
-     line of TEXT behind a pane reads as a broken render rather than as glass.
-     The same argument that let the frost open up here lets this open up too,
-     because what is behind these panes is a bed and nobody is reading it. 34
-     is an 8.2px fringe. */
-  --slg-lens-disperse: 90;
+  /* The prism and the lensed frost are the KIT's now, since 0.10.0. This block
+     used to declare --slg-lens-disperse: 90 and --slg-lens-blur: 1.6px, and
+     both became the kit's own defaults — 90 exactly, and 1.5px against our
+     1.6. The kit took them for the reason this block already gave: a pane over
+     a bed has no reader behind it to fringe, and a frost wider than the bend
+     erases the refraction it was supposed to soften. Measured after removing
+     them: every lensed surface here still reports sep 21.6 and the rendered
+     page is unchanged. What stays below is what the kit does NOT default to. */
   /* And the bend itself, which is what the prism opens out of: a wider split
      across a small displacement is a fringe on nothing. The kit caps the reach
      at a sixth of the shorter side — on a 278px card that is 46px, so 18 was
@@ -349,22 +349,22 @@ a { color: inherit; }
 .gnum-slot { --slfx-pane-swell: 1; }
 
 /* --- rendered markdown ------------------------------------------------ *
- * The base `.prose` is exactly what the product pages have always used, moved
+ * The base `.sl-prose` is exactly what the product pages have always used, moved
  * here from their scoped block so the transmissions can share it. Everything
- * the long-form articles add lives under `.prose--long`, so a product page
+ * the long-form articles add lives under `.sl-prose--long`, so a product page
  * renders byte-identically to before the blog existed.
  * --------------------------------------------------------------------- */
 
-.prose { max-width: 60ch; }
-.prose p {
+.sl-prose { max-width: 60ch; }
+.sl-prose p {
   margin: 0 0 1.35rem;
   font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.45rem);
   line-height: var(--sl-line-relaxed);
   color: var(--sl-text-secondary);
 }
-.prose p:first-child { color: var(--sl-text-primary); }
-.prose a { color: var(--sl-accent-default); }
-.prose code {
+.sl-prose p:first-child { color: var(--sl-text-primary); }
+.sl-prose a { color: var(--sl-accent-default); }
+.sl-prose code {
   font-family: var(--sl-font-mono);
   font-size: 0.9em;
   background: var(--sl-bg-surface);
@@ -377,29 +377,29 @@ a { color: inherit; }
  * markdown vocabulary a post uses and a product page does not.
  * --------------------------------------------------------------------- */
 
-.prose--long { max-width: 68ch; }
-.prose--long p {
+.sl-prose--long { max-width: 68ch; }
+.sl-prose--long p {
   font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
   margin-bottom: 1.5rem;
 }
-.prose--long p:first-child {
+.sl-prose--long p:first-child {
   font-size: clamp(1.2rem, 1.05rem + 0.55vw, 1.42rem);
   line-height: var(--sl-line-normal);
   margin-bottom: 1.9rem;
 }
 
-.prose--long h2,
-.prose--long h3 {
+.sl-prose--long h2,
+.sl-prose--long h3 {
   font-family: var(--sl-font-display);
   font-variation-settings: 'opsz' 48, 'WONK' 1;
   line-height: 1.15;
   letter-spacing: -0.015em;
   color: var(--sl-text-primary);
 }
-.prose--long h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
-.prose--long h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
+.sl-prose--long h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
+.sl-prose--long h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
 /* Section headers read as log markers, matching the transmissions index. */
-.prose--long h2::before {
+.sl-prose--long h2::before {
   content: '// ';
   font-family: var(--sl-font-mono);
   font-weight: 300;
@@ -407,29 +407,29 @@ a { color: inherit; }
   color: var(--sl-accent-default);
 }
 
-.prose--long ul,
-.prose--long ol {
+.sl-prose--long ul,
+.sl-prose--long ol {
   margin: 0 0 1.5rem;
   padding-left: 1.4em;
   color: var(--sl-text-secondary);
 }
-.prose--long li {
+.sl-prose--long li {
   margin-bottom: 0.6rem;
   font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
   line-height: var(--sl-line-relaxed);
 }
-.prose--long li::marker { color: var(--sl-accent-default); }
+.sl-prose--long li::marker { color: var(--sl-accent-default); }
 
-.prose--long strong { color: var(--sl-text-primary); font-weight: 600; }
+.sl-prose--long strong { color: var(--sl-text-primary); font-weight: 600; }
 
-.prose--long blockquote {
+.sl-prose--long blockquote {
   margin: 1.75rem 0;
   padding-left: clamp(1rem, 3vw, 1.75rem);
   border-left: 2px solid color-mix(in srgb, var(--sl-accent-default) 40%, transparent);
   color: var(--sl-text-secondary);
 }
 
-.prose--long pre {
+.sl-prose--long pre {
   margin: 0 0 1.5rem;
   padding: 1rem 1.15rem;
   overflow-x: auto;
@@ -437,9 +437,9 @@ a { color: inherit; }
   border: 1px solid var(--sl-border-subtle);
   border-radius: var(--sl-radius-sm);
 }
-.prose--long pre code { background: none; padding: 0; font-size: var(--sl-text-sm); }
+.sl-prose--long pre code { background: none; padding: 0; font-size: var(--sl-text-sm); }
 
-.prose--long hr {
+.sl-prose--long hr {
   margin: 2.5rem 0;
   border: 0;
   border-top: 1px solid var(--sl-border-subtle);

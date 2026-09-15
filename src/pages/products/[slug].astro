@@ -44,11 +44,11 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     data-product
     style={`--acc-light:${acc.light};--acc-dark:${acc.dark}`}
   >
-    <div class="wrap">
+    <div class="sl-wrap">
       <a class="product__back" href="/#products">← All tools</a>
 
       <header class="product__head">
-        <p class="eyebrow">Tool · {data.form}</p>
+        <p class="sl-eyebrow">Tool · {data.form}</p>
         <h1
           class="product__name sl-fx-glitch sl-fx-glitch--shatter"
           data-text={data.name}
@@ -72,7 +72,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       </header>
 
       <div class="product__body">
-        <div class="prose">
+        <div class="sl-prose">
           <Content />
         </div>
 

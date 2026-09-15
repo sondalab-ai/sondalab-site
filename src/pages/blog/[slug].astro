@@ -40,11 +40,11 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 
 <Base title={post.data.title} description={post.data.summary}>
   <article class="post">
-    <div class="wrap">
+    <div class="sl-wrap">
       <a class="post__back" href="/blog/">← All transmissions</a>
 
       <header class="post__head">
-        <p class="eyebrow">Transmission // {no}</p>
+        <p class="sl-eyebrow">Transmission // {no}</p>
         <h1
           class="post__title sl-fx-glitch sl-fx-glitch--shatter"
           data-text={post.data.title}
@@ -64,7 +64,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
         </p>
       </header>
 
-      <div class="prose prose--long">
+      <div class="sl-prose sl-prose--long">
         <Content />
       </div>
 
