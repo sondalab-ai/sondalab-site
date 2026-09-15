@@ -17,6 +17,8 @@ jobs:
       - run: npm ci
       - name: Type check
         run: npx astro check
+      - name: Retired kit class names
+        run: npm run kit-names
       - name: Design-system audit (0 R-violations)
         run: npm run audit
       - name: Build

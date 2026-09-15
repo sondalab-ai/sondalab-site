@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "audit": "node scripts/audit.mjs",
     "motion-gate": "node scripts/motion-gate.mjs",
+    "kit-names": "node scripts/kit-names-gate.mjs",
     "check": "astro check",
     "scenes:placeholders": "node scripts/make-scene-placeholders.mjs",
     "scenes:plates": "node scripts/make-scene-plates.mjs",
