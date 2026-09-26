@@ -160,19 +160,6 @@ a { color: inherit; }
   --slc-border: color-mix(in srgb, currentColor 22%, transparent);
   --slc-border-subtle: color-mix(in srgb, currentColor 12%, transparent);
   --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
-  /* And the aurora's curtains, which is the same pitfall a fourth time. They
-     are WHITE by ruling — "the only colour left in the pane is the colour the
-     GLASS makes of it" — and they were fitted over a near-black ground, where
-     the kit's own note says the light pole "carries far less" than the accent
-     it replaced. On a band whose ground IS that pole they carry nothing at
-     all: measured here, the ribs paint #DAE3E4 at 32% over #DAE3E4.
-     effects.css names the escape in the same comment — "a product that wants
-     coloured curtains rebinds one of them" — so the band takes the brand pair.
-     The white rib layer reads --slfx-glint directly and is left alone; it is
-     invisible here either way, and glint is also the hairline's bright stop
-     and the chrome's poles, which are not this band's to re-decide. */
-  --slfx-pillar-a: var(--sl-accent-default);
-  --slfx-pillar-b: var(--sl-accent-depth);
   /* …and the glass numerals' glow, same story: the band's ink, not the page's.
      QUIETER WITH IT. The alphas were fitted for a light figure lifting off a
      dark card; the same figures on a light band are DARK ones pressing into a
@@ -184,6 +171,25 @@ a { color: inherit; }
      own light pole, and a halo at the page's strength on it is a smear. */
   --slfx-text-core-a: 22%;
   --slfx-text-halo-a: 12%;
+}
+/* And the aurora's curtains, the same pitfall a fourth time, reached another
+   way: the kit declares their colour ON the glow's pseudo-elements, per PAGE
+   theme, so nothing set on the band is inherited. On a dark page the band is
+   paper and the kit paints white light (#DAE3E4 at 45% over a #DAE3E4 band:
+   nothing). A band on a dark page takes the kit's own paper treatment instead,
+   the band's ink in folds at the strengths it fitted for paper. The busy
+   exemption is the kit's selector, repeated so a busy reading still wins.
+   On a light page the band is ink and the kit's paper rule already paints
+   --slc-text, which the band flipped to its light pole. Checked by hand with
+   scripts/curtain-probe.mjs against a served build; CI does not run it. */
+:root:not([data-sl-theme='light']) .sl-invert .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:not(:has(+ .sl-fx-aurora[data-sl-fx-live='busy']:not([style*='--slfx-progress'])))::before,
+:root:not([data-sl-theme='light']) .sl-invert .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:not(:has(+ .sl-fx-aurora[data-sl-fx-live='busy']:not([style*='--slfx-progress'])))::after {
+  --slfx-pillar-a: var(--slc-text);
+  --slfx-pillar-b: var(--slc-text);
+  --slfx-pillar-a1: 22%;
+  --slfx-pillar-a2: 19%;
+  --slfx-pillar-b1: 18%;
+  --slfx-pillar-b2: 15%;
 }
 
 /* --- a thicker glass on the cards ---------------------------------------- *
