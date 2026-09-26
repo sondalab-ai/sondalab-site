@@ -137,7 +137,9 @@ const points = [
     border: 2px solid var(--sl-accent-default);
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--sl-accent-default) 14%, transparent);
   }
-  @media (min-width: 48rem) {
+  /* Text and vignette side by side only where the rail column can hold both:
+     below 72rem the vignette sits under its promise. */
+  @media (min-width: 72rem) {
     .rail__step {
       grid-template-columns: minmax(0, 1fr) 280px;
       gap: 2rem;
@@ -181,6 +183,9 @@ const points = [
      without JavaScript it is simply empty. */
   .mscene { display: block; width: 180px; height: 180px; }
   @media (min-width: 48rem) {
+    .mscene { width: 240px; height: 240px; }
+  }
+  @media (min-width: 72rem) {
     .mscene { width: 280px; height: 280px; }
   }
   :root[data-sl-theme='high-contrast'] .mscene { display: none; }
