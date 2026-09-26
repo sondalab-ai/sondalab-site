@@ -15,7 +15,7 @@ const pillars = [
 ];
 ---
 
-<section id="approach" class="sl-section sl-invert thesis" data-sl-fx-backdrop>
+<section id="approach" class="sl-section sl-invert thesis">
   <div class="thesis__bed" aria-hidden="true"></div>
   <div class="sl-wrap thesis__grid">
     <div class="thesis__head">
@@ -37,7 +37,7 @@ const pillars = [
       {pillars.map((p, i) => (
         <li class="gnum-slot">
           <span class="sr-only">Point {i + 1}</span>
-          <article class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
+          <article class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on">
             <div class="pillar__body">
               <h3 class="pillar__verb">{p.verb}</h3>
               <p set:html={p.body}></p>
@@ -57,26 +57,21 @@ const pillars = [
      in the brand pair, ruled so the blur has an edge to bend rather than a
      gradient blurring into itself. Painted first and left under the content,
      which is what puts it in each pane's backdrop.
-
-     It is a PLATE, not a stack of CSS gradients, and that is not a style
-     choice: the GPU tier bends what a pane declares through --slfx-backdrop,
-     and effects-gpu.js takes a url() and nothing else, because a gradient
-     cannot be sampled. So the same file paints the bed and feeds the shader,
-     which is what keeps the two from drifting. scripts/make-backdrops.mjs
-     generates it from the kit's own theme tokens. */
+     scripts/make-backdrops.mjs generates the plate from the kit's own theme
+     tokens. */
   .thesis {
     position: relative;
-    --slfx-backdrop: url('/backdrops/thesis-dark.svg');
+    --bed: url('/backdrops/thesis-dark.svg');
   }
   :root[data-sl-theme='light'] .thesis {
-    --slfx-backdrop: url('/backdrops/thesis-light.svg');
+    --bed: url('/backdrops/thesis-light.svg');
   }
   .thesis__bed {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: var(--slfx-backdrop) center / cover no-repeat;
+    background: var(--bed) center / cover no-repeat;
   }
 
   .thesis__grid {

@@ -15,7 +15,7 @@ const points = [
 ];
 ---
 
-<section id="method" class="sl-section method" data-sl-fx-backdrop>
+<section id="method" class="sl-section method">
   <div class="method__bed" aria-hidden="true"></div>
   <div class="sl-wrap method__grid">
     <div class="method__head">
@@ -38,7 +38,7 @@ const points = [
       {points.map((p, i) => (
         <li class="gnum-slot sl-fx-goo__member">
           <span class="sr-only">Step {i + 1}</span>
-          <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on">
+          <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on">
             <div class="mpoint__body">
               <h3 class="mpoint__verb">{p.verb}</h3>
               <p set:html={p.body}></p>
@@ -54,24 +54,22 @@ const points = [
 </section>
 
 <style>
-  /* The bed, and the same plate-not-gradients rule as the stance and the tools:
-     effects-gpu.js samples --slfx-backdrop as a url() and nothing else, so a
-     bed painted in CSS alone is invisible to the shader. Here it matters twice
+  /* The bed, the same plate as the stance and the tools. Here it matters twice
      over, because the substance above it is translucent and this is what shows
      through. scripts/make-backdrops.mjs generates it from the kit's tokens. */
   .method {
     position: relative;
-    --slfx-backdrop: url('/backdrops/method-dark.svg');
+    --bed: url('/backdrops/method-dark.svg');
   }
   :root[data-sl-theme='light'] .method {
-    --slfx-backdrop: url('/backdrops/method-light.svg');
+    --bed: url('/backdrops/method-light.svg');
   }
   .method__bed {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: var(--slfx-backdrop) center / cover no-repeat;
+    background: var(--bed) center / cover no-repeat;
   }
   .method .sl-wrap { position: relative; z-index: 1; }
 

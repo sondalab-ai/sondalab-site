@@ -17,7 +17,7 @@ const usedStatuses = [
 ] as string[];
 ---
 
-<section id="products" class="sl-section products" data-sl-fx-backdrop>
+<section id="products" class="sl-section products">
   <div class="products__bed" aria-hidden="true"></div>
   <div class="sl-wrap">
     <div class="sl-section__head">
@@ -47,7 +47,7 @@ const usedStatuses = [
         const meta = p.data.status ? STATUS_META[p.data.status] : null;
         return (
           <li class="gnum-slot" style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-curtains data-sl-fx-live="on" href={`/products/${p.id}/`}>
+            <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on" href={`/products/${p.id}/`}>
               <span class="sr-only">{i + 1}.</span>
               <span class="prow__rule" aria-hidden="true"></span>
               <div class="prow__main">
@@ -94,26 +94,22 @@ const usedStatuses = [
 <style>
   /* The rows sat on the page's flat ground, which is the whole reason they did
      not read as glass: a backdrop filter with nothing behind it blurs nothing,
-     and the GPU tier has nothing to bend. So the section declares a bed of its
+     and the lens has nothing to bend. So the section declares a bed of its
      own — the same plate the stance uses, at 45% of its strength, because a
-     list of tools is something to read and not a statement.
-
-     The plate is a file rather than CSS gradients for the reason written out
-     in Thesis.astro and in scripts/make-backdrops.mjs: effects-gpu.js samples
-     a url() and nothing else. */
+     list of tools is something to read and not a statement. */
   .products {
     position: relative;
-    --slfx-backdrop: url('/backdrops/products-dark.svg');
+    --bed: url('/backdrops/products-dark.svg');
   }
   :root[data-sl-theme='light'] .products {
-    --slfx-backdrop: url('/backdrops/products-light.svg');
+    --bed: url('/backdrops/products-light.svg');
   }
   .products__bed {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: var(--slfx-backdrop) center / cover no-repeat;
+    background: var(--bed) center / cover no-repeat;
   }
   .products .sl-wrap { position: relative; z-index: 1; }
 
