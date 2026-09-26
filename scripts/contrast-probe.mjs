@@ -65,8 +65,13 @@ for (const theme of ['dark', 'light']) {
       if (!el) return null;
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
+      // Painted rather than parsed: the kit computes some labels to oklch(),
+      // whose first three numbers are not sRGB bytes.
+      const ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
+      ctx.fillStyle = cs.color;
+      ctx.fillRect(0, 0, 1, 1);
       return {
-        color: cs.color,
+        color: `rgb(${[...ctx.getImageData(0, 0, 1, 1).data.slice(0, 3)].join(',')})`,
         fontSize: parseFloat(cs.fontSize),
         weight: cs.fontWeight,
         rect: { x: r.x, y: r.y, width: r.width, height: r.height },
