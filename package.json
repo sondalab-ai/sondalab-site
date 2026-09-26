@@ -10,6 +10,7 @@
     "audit": "node scripts/audit.mjs",
     "motion-gate": "node scripts/motion-gate.mjs",
     "kit-names": "node scripts/kit-names-gate.mjs",
+    "test": "node --test scripts/*.test.mjs",
     "check": "astro check",
     "scenes:placeholders": "node scripts/make-scene-placeholders.mjs",
     "scenes:plates": "node scripts/make-scene-plates.mjs",
@@ -18,7 +19,9 @@
     "curtains": "node scripts/curtain-probe.mjs",
     "shoot:fallback": "node scripts/shoot-fallback.mjs",
     "shoot:live": "node scripts/shoot-live.mjs",
-    "backdrops": "node scripts/make-backdrops.mjs"
+    "backdrops": "node scripts/make-backdrops.mjs",
+    "method:crops": "node scripts/make-method-crops.mjs",
+    "method:probe": "node scripts/method-probe.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
