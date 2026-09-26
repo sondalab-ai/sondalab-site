@@ -85,7 +85,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           {(data.repoPublic || data.links.length > 0) && (
             <div class="product__links">
               {data.repoPublic && data.repo && (
-                <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-aurora sl-fx-aurora--rim" href={data.repo} target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+                <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-glass--pane sl-fx-press sl-fx-aurora sl-fx-aurora--rim" href={data.repo} target="_blank" rel="noopener noreferrer">Source on GitHub</a>
               )}
               {data.links.map((l) => (
                 <a class="sl-link" href={l.href} target="_blank" rel="noopener noreferrer">{l.label} →</a>
