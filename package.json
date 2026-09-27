@@ -21,7 +21,8 @@
     "backdrops": "node scripts/make-backdrops.mjs",
     "scenes:crops": "node scripts/make-scene-crops.mjs",
     "method:probe": "node scripts/method-probe.mjs",
-    "stance:probe": "node scripts/stance-probe.mjs"
+    "stance:probe": "node scripts/stance-probe.mjs",
+    "layout:probe": "node scripts/layout-probe.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
