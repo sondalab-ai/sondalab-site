@@ -14,7 +14,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const KIT = 'node_modules/@sondalab/ui-kit/themes';
-const OUT = 'public/backdrops';
+const OUT = 'src/assets/backdrops';
 
 /** The plate's own pixels. It is stretched over the anchor's box, so this is
  *  resolution rather than aspect: the blooms are soft and the rules are the
