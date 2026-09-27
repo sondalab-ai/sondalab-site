@@ -20,7 +20,7 @@
     "shoot:fallback": "node scripts/shoot-fallback.mjs",
     "shoot:live": "node scripts/shoot-live.mjs",
     "backdrops": "node scripts/make-backdrops.mjs",
-    "method:crops": "node scripts/make-method-crops.mjs",
+    "scenes:crops": "node scripts/make-scene-crops.mjs",
     "method:probe": "node scripts/method-probe.mjs"
   },
   "dependencies": {

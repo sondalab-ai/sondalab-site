@@ -9,6 +9,8 @@ interface Scene {
   dots: Dot[];
   /** When it began to assemble (performance.now()), or null before it was seen. */
   t0: number | null;
+  /** The dot colour as sRGB bytes: the canvas's own inherited text colour. */
+  ink: string;
 }
 
 /** Resolves any CSS colour, oklch or color-mix included, to sRGB bytes. */
@@ -26,15 +28,15 @@ async function load(canvas: HTMLCanvasElement): Promise<Scene> {
   await img.decode();
   const g = Object.assign(document.createElement('canvas'), { width: SAMPLE, height: SAMPLE }).getContext('2d')!;
   g.drawImage(img, 0, 0, SAMPLE, SAMPLE);
-  return { canvas, dots: sampleDots(g.getImageData(0, 0, SAMPLE, SAMPLE).data, SAMPLE, GRID), t0: null };
+  return { canvas, dots: sampleDots(g.getImageData(0, 0, SAMPLE, SAMPLE).data, SAMPLE, GRID), t0: null, ink: paint(getComputedStyle(canvas).color) };
 }
 
 /**
  * Brings every `canvas[data-dot-scene]` under `root` to life: each samples its
  * picture once, assembles the first time it is 40% in view, then floats. One
  * animation loop serves them all and runs only while one of them is within
- * 200px of the viewport and the page is visible. The dot colour is the text
- * token, re-read when the theme changes.
+ * 200px of the viewport and the page is visible. The dot colour is the
+ * canvas's inherited text colour, re-read when the theme changes.
  */
 export async function mountDotScenes(root: ParentNode = document): Promise<void> {
   const canvases = [...root.querySelectorAll<HTMLCanvasElement>('canvas[data-dot-scene]')];
@@ -46,14 +48,15 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
   if (scenes.length === 0) return;
   const near = new Set<Scene>();
   const html = document.documentElement;
-  let ink = paint(getComputedStyle(html).getPropertyValue('--sl-text-primary'));
+  // Each canvas takes the text colour where it sits, so a vignette on an
+  // inversion band prints in the band's ink rather than the page's.
   new MutationObserver(() => {
-    ink = paint(getComputedStyle(html).getPropertyValue('--sl-text-primary'));
+    for (const s of scenes) s.ink = paint(getComputedStyle(s.canvas).color);
   }).observe(html, { attributes: true, attributeFilter: ['data-sl-theme'] });
 
   let raf = 0;
   const frame = (now: number) => {
-    for (const s of near) draw(s, now, ink);
+    for (const s of near) draw(s, now);
     raf = near.size > 0 && document.visibilityState === 'visible' ? requestAnimationFrame(frame) : 0;
   };
   const wake = () => {
@@ -88,7 +91,7 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
   }
 }
 
-function draw(s: Scene, now: number, ink: string): void {
+function draw(s: Scene, now: number): void {
   const { canvas } = s;
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.clientWidth;
@@ -98,7 +101,7 @@ function draw(s: Scene, now: number, ink: string): void {
   g.clearRect(0, 0, w, w);
   const t = s.t0 === null ? 0 : (now - s.t0) / 1000;
   // One colour per canvas; each dot varies only its alpha.
-  g.fillStyle = `rgb(${ink})`;
+  g.fillStyle = `rgb(${s.ink})`;
   for (const d of s.dots) {
     const f = dotFrame(d, t, w, GRID);
     g.globalAlpha = f.a;
