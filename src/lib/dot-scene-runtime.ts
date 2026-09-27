@@ -1,8 +1,8 @@
 import { sampleDots, dotFrame, type Dot } from './dot-scene';
 
 /** Grid cells per side, and the resolution each picture is sampled at. */
-const GRID = 72;
-const SAMPLE = 144;
+const GRID = 96;
+const SAMPLE = 192;
 
 interface Scene {
   canvas: HTMLCanvasElement;
@@ -11,6 +11,17 @@ interface Scene {
   t0: number | null;
   /** The dot colour as sRGB bytes: the canvas's own inherited text colour. */
   ink: string;
+  /** The sampled picture, kept so a theme change can resample it. */
+  px: Uint8ClampedArray;
+}
+
+/** Ink darker than mid-grey prints the picture's dark (a halftone on paper); light ink draws its light. */
+function isDarkInk(ink: string): boolean {
+  const [r, g, b] = ink.split(',').map(Number);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
+}
+function resample(s: Scene): void {
+  s.dots = sampleDots(s.px, SAMPLE, GRID, Math.random, isDarkInk(s.ink));
 }
 
 /** Resolves any CSS colour, oklch or color-mix included, to sRGB bytes. */
@@ -28,7 +39,9 @@ async function load(canvas: HTMLCanvasElement): Promise<Scene> {
   await img.decode();
   const g = Object.assign(document.createElement('canvas'), { width: SAMPLE, height: SAMPLE }).getContext('2d')!;
   g.drawImage(img, 0, 0, SAMPLE, SAMPLE);
-  return { canvas, dots: sampleDots(g.getImageData(0, 0, SAMPLE, SAMPLE).data, SAMPLE, GRID), t0: null, ink: paint(getComputedStyle(canvas).color) };
+  const s: Scene = { canvas, dots: [], t0: null, ink: paint(getComputedStyle(canvas).color), px: g.getImageData(0, 0, SAMPLE, SAMPLE).data };
+  resample(s);
+  return s;
 }
 
 /**
@@ -51,7 +64,10 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
   // Each canvas takes the text colour where it sits, so a vignette on an
   // inversion band prints in the band's ink rather than the page's.
   new MutationObserver(() => {
-    for (const s of scenes) s.ink = paint(getComputedStyle(s.canvas).color);
+    for (const s of scenes) {
+      const ink = paint(getComputedStyle(s.canvas).color);
+      if (isDarkInk(ink) !== isDarkInk(s.ink)) { s.ink = ink; resample(s); } else s.ink = ink;
+    }
   }).observe(html, { attributes: true, attributeFilter: ['data-sl-theme'] });
 
   let raf = 0;

@@ -20,7 +20,7 @@ export interface Dot {
 }
 
 /** Cells below this light draw nothing. */
-const FLOOR = 0.06;
+const FLOOR = 0.03;
 /** How long one dot takes to reach its place, in seconds. */
 const ASSEMBLE = 1.1;
 /** Seconds between two passes of the scanline. */
@@ -30,16 +30,21 @@ const SCAN_PERIOD = 6;
  * Samples an RGBA picture (`size` px square) on an `n`×`n` grid. The picture's
  * own 2nd..99th percentile becomes the full light range, so a dark render still
  * spends every dot size; a smoothstep separates faces and hands from the
- * ground; the outer 30% of the inscribed circle fades to nothing, so the square
- * never shows as a square. `rand` seeds the scatter and the phases.
+ * ground; the outer half of the inscribed circle dissolves (dots shrink and
+ * thin out at random) so the vignette has no hard contour. `invert` prints the
+ * picture's dark instead of its light, for ink on a light ground: a noir
+ * render drawn light-for-ink reads as a negative. `rand` seeds the scatter,
+ * the phases and the edge's dither.
  */
 export function sampleDots(
   px: ArrayLike<number>,
   size: number,
   n: number,
   rand: () => number = Math.random,
+  invert = false,
 ): Dot[] {
-  const lum = (k: number) => (0.2126 * px[k] + 0.7152 * px[k + 1] + 0.0722 * px[k + 2]) / 255;
+  const lum0 = (k: number) => (0.2126 * px[k] + 0.7152 * px[k + 1] + 0.0722 * px[k + 2]) / 255;
+  const lum = invert ? (k: number) => (1 - lum0(k)) ** 1.8 : lum0;
   const all: number[] = [];
   for (let k = 0; k < size * size * 4; k += 4) all.push(lum(k));
   all.sort((a, b) => a - b);
@@ -56,8 +61,10 @@ export function sampleDots(
       if (edge >= 1) continue;
       const k = (Math.floor((j + 0.5) * cell) * size + Math.floor((i + 0.5) * cell)) * 4;
       const lin = Math.min(1, Math.max(0, (lum(k) - lo) / (hi - lo)));
-      const L = lin * lin * (3 - 2 * lin) * Math.min(1, (1 - edge) / 0.3);
-      if (L < FLOOR) continue;
+      const f = Math.min(1, (1 - edge) / 0.5);
+      const fade = f * f * (3 - 2 * f);
+      const L = lin * lin * (3 - 2 * lin) * fade;
+      if (L < FLOOR || rand() > fade ** 0.6) continue;
       dots.push({
         x,
         y,
@@ -87,13 +94,13 @@ export function dotFrame(
   const cell = width / n;
   const k = Math.min(1, Math.max(0, (t - d.delay) / ASSEMBLE));
   const e = 1 - (1 - k) ** 3;
-  const drift = 0.45 * cell * e;
+  const drift = 0.15 * cell * e;
   const x = (d.sx + (d.x - d.sx) * e) * width + drift * Math.sin(t * 0.55 + d.phase);
   const y = (d.sy + (d.y - d.sy) * e) * width + drift * Math.cos(t * 0.43 + d.phase * 1.7);
   const shimmer = 1 + 0.075 * Math.sin(t * 1.6 + d.phase);
   const scan = ((t % SCAN_PERIOD) / SCAN_PERIOD) * 1.4 - 0.2;
   const band = Math.max(0, 1 - Math.abs(d.y - scan) * 14) * 0.5;
   const L = Math.min(1, d.L * shimmer + band * d.L);
-  const r = Math.max(0.35, 0.5 * cell * L ** 0.6) * (0.4 + 0.6 * e);
-  return { x, y, r, a: 0.25 + 0.75 * L };
+  const r = 0.56 * cell * Math.sqrt(L) * (0.4 + 0.6 * e);
+  return { x, y, r, a: 1 };
 }
