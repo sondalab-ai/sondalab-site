@@ -20,7 +20,8 @@
     "shoot:live": "node scripts/shoot-live.mjs",
     "backdrops": "node scripts/make-backdrops.mjs",
     "scenes:crops": "node scripts/make-scene-crops.mjs",
-    "method:probe": "node scripts/method-probe.mjs"
+    "method:probe": "node scripts/method-probe.mjs",
+    "stance:probe": "node scripts/stance-probe.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
