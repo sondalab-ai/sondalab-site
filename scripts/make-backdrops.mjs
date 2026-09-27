@@ -80,6 +80,10 @@ mkdirSync(OUT, { recursive: true });
 for (const theme of ['dark', 'light']) {
   const t = tokens(theme);
   const plates = {
+    // The stance sits in an inversion band, so its ground is the strongest
+    // neutral — the same colour `.invert` paints — and not the canvas. Blooms
+    // only: no rules (owner, 2026-09-27).
+    thesis: bed({ ground: t('text-primary'), accent: t('accent-default'), depth: t('accent-depth'), rule: t('bg-canvas'), ruled: false }),
     // The tools sit on the page's own ground, and quieter: the rows are a
     // list to read, not a statement.
     products: bed({ ground: t('bg-canvas'), accent: t('accent-default'), depth: t('accent-depth'), rule: t('text-primary'), ruled: false, intensity: 0.45 }),
