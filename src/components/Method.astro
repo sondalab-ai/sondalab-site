@@ -44,7 +44,7 @@ const points = [
       {points.map((p, i) => (
         <li class="rail__step">
           <div class="rail__text">
-            <span class="rail__n">{String(i + 1).padStart(2, '0')}<span class="rail__label">{p.step}</span></span>
+            <span class="rail__n"><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span class="rail__label">{p.step}</span></span>
             <h3 class="rail__claim">{p.claim}</h3>
             <p class="rail__proof">{p.proof}</p>
           </div>

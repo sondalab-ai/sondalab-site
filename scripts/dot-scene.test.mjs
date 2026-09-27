@@ -20,7 +20,7 @@ test('a black image draws nothing', () => {
 
 test('a uniform image draws nothing and does not divide by zero', () => {
   const dots = sampleDots(image(64, () => 128), 64, 16, fixed);
-  for (const d of dots) assert.ok(Number.isFinite(d.L));
+  assert.equal(dots.length, 0);
 });
 
 test('dots stay inside the inscribed circle', () => {
@@ -66,4 +66,10 @@ test('the circle dissolves at its edge instead of ending on a line', () => {
   const core = dots.filter((d) => Math.hypot(d.x - 0.5, d.y - 0.5) / 0.5 < 0.4);
   const mean = (a) => a.reduce((s, d) => s + d.L, 0) / Math.max(1, a.length);
   assert.ok(mean(rim) < 0.3 * mean(core), `rim ${mean(rim).toFixed(3)} vs core ${mean(core).toFixed(3)}`);
+});
+
+test('dots scatter inside the circle, so the square never shows while they gather', () => {
+  const dots = sampleDots(image(64, (x) => x * 4), 64, 32, Math.random);
+  assert.ok(dots.length > 50);
+  for (const d of dots) assert.ok(Math.hypot(d.sx - 0.5, d.sy - 0.5) <= 0.5, `scatter at ${d.sx.toFixed(2)},${d.sy.toFixed(2)}`);
 });
