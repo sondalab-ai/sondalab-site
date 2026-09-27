@@ -88,7 +88,7 @@ const points = [
   .method__head .lede { margin-top: 1.5rem; max-width: 42ch; }
   .method__head .lede strong { font-weight: 600; color: var(--sl-text-primary); }
 
-  /* The rail: one line through three nodes, intent → work → check. Both
+  /* The rail: one line through three nodes, intent → work → check. The
      pseudo-elements set their own box-sizing, because the site's `*` rule does
      not match pseudo-elements, and a 16px ring with a 2px border otherwise
      renders 20px wide and sits 2px off the line. */
@@ -100,21 +100,6 @@ const points = [
     --node: 16px;
     --label-lh: 1.5rem;
   }
-  .rail::before {
-    content: '';
-    box-sizing: border-box;
-    position: absolute;
-    left: calc(var(--node) / 2 - 1px);
-    top: 0.5rem;
-    bottom: 0.5rem;
-    width: 2px;
-    border-radius: 2px;
-    background: linear-gradient(
-      to bottom,
-      var(--sl-accent-default),
-      color-mix(in srgb, var(--sl-accent-default) 15%, transparent)
-    );
-  }
   .rail__step {
     position: relative;
     display: grid;
@@ -123,6 +108,31 @@ const points = [
     padding: 0 0 clamp(2rem, 4vw, 3rem) calc(var(--node) + 2rem);
   }
   .rail__step:last-child { padding-bottom: 0; }
+  /* The line, drawn per step from this node's centre to the next one's, so it
+     starts and ends on a node whatever the last promise and its vignette
+     measure. The fade runs across the two segments: accent to half, half to
+     15%. */
+  .rail__step:not(:last-child)::after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    left: calc(var(--node) / 2 - 1px);
+    top: calc(var(--label-lh) / 2);
+    bottom: calc(var(--label-lh) / -2);
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--sl-accent-default),
+      color-mix(in srgb, var(--sl-accent-default) 57%, transparent)
+    );
+  }
+  .rail__step:nth-child(2)::after {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--sl-accent-default) 57%, transparent),
+      color-mix(in srgb, var(--sl-accent-default) 15%, transparent)
+    );
+  }
   .rail__step::before {
     content: '';
     box-sizing: border-box;
@@ -135,6 +145,7 @@ const points = [
     border-radius: 50%;
     background: var(--sl-bg-canvas);
     border: 2px solid var(--sl-accent-default);
+    z-index: 1;
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--sl-accent-default) 14%, transparent);
   }
   /* Text and vignette side by side only where the rail column can hold both:

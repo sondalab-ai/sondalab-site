@@ -45,8 +45,10 @@ The owner found the current section unconvincing for two reasons (2026-09-26):
 
 - Two columns from 48rem up: head (eyebrow, headline, lede) at 4fr, rail at
   8fr. Below 48rem, one column.
-- The rail is an ordered list. A 2px vertical line runs from the first node to
-  the last, fading from `--sl-accent-default` to 15% of it. Each node is a 16px
+- The rail is an ordered list. A 2px vertical line runs from the first node's
+  centre to the last one's, drawn per step so it never runs past the last node
+  whatever the last item measures, fading from `--sl-accent-default` to 15% of
+  it across the two segments. Each node is a 16px
   ring (2px `--sl-accent-default` border, `--sl-bg-canvas` fill, a 6px halo at
   14% accent). Node and line share one centre: both pseudo-elements set
   `box-sizing: border-box`, because the site's `* { box-sizing }` rule does not
@@ -54,8 +56,10 @@ The owner found the current section unconvincing for two reasons (2026-09-26):
   20px wide and sits 2px off the line.
 - Each rail item: step number and label (mono, accent number, secondary
   label), the promise in the display face at `clamp(1.5rem, 1rem + 1.8vw,
-  2.3rem)`, the proof in secondary text, and the vignette to the right: 280px
-  square from 48rem, 180px below, under the text.
+  2.3rem)`, the proof in secondary text, and the vignette. From 72rem it sits
+  to the right of the text at 280px; below 72rem it sits under the text, 240px
+  from 48rem and 180px under that. (Beside the text at 48rem it squeezed the
+  promise to 70px; measured.) Each node is level with its step label.
 - The section keeps its background plate (`--bed`, `public/backdrops/method-*.svg`).
 
 ## Vignettes
@@ -86,7 +90,7 @@ The owner found the current section unconvincing for two reasons (2026-09-26):
 - Motion, in order:
   - **Assemble.** When a vignette is 40% in view for the first time, its dots
     move from random positions to their places over about 1.1s each, eased out,
-    with a delay that grows from the centre outwards (up to ~0.9s).
+    with a delay that grows from the centre outwards (up to ~0.6s).
   - **Float.** Afterwards each dot orbits its place, under half a cell
     (`0.45 × cell`), at its own phase, on periods of roughly 11 and 15 seconds.
   - **Shimmer.** Each dot's light breathes by ±7.5% on its own phase.

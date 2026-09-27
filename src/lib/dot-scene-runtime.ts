@@ -11,9 +11,6 @@ interface Scene {
   t0: number | null;
 }
 
-/** Frames drawn so far; read by scripts/method-probe.mjs to prove the loop rests. */
-export const stats = { frames: 0 };
-
 /** Resolves any CSS colour, oklch or color-mix included, to sRGB bytes. */
 function paint(value: string): string {
   const c = document.createElement('canvas').getContext('2d')!;
@@ -42,7 +39,11 @@ async function load(canvas: HTMLCanvasElement): Promise<Scene> {
 export async function mountDotScenes(root: ParentNode = document): Promise<void> {
   const canvases = [...root.querySelectorAll<HTMLCanvasElement>('canvas[data-dot-scene]')];
   if (canvases.length === 0) return;
-  const scenes = await Promise.all(canvases.map(load));
+  // A picture that fails to load leaves its vignette empty, not the others.
+  const scenes = (await Promise.allSettled(canvases.map(load)))
+    .filter((r): r is PromiseFulfilledResult<Scene> => r.status === 'fulfilled')
+    .map((r) => r.value);
+  if (scenes.length === 0) return;
   const near = new Set<Scene>();
   const html = document.documentElement;
   let ink = paint(getComputedStyle(html).getPropertyValue('--sl-text-primary'));
@@ -52,7 +53,6 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
 
   let raf = 0;
   const frame = (now: number) => {
-    stats.frames++;
     for (const s of near) draw(s, now, ink);
     raf = near.size > 0 && document.visibilityState === 'visible' ? requestAnimationFrame(frame) : 0;
   };
@@ -82,9 +82,9 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
     },
     { threshold: 0.4 },
   );
-  for (const c of canvases) {
-    nearWatch.observe(c);
-    seenWatch.observe(c);
+  for (const s of scenes) {
+    nearWatch.observe(s.canvas);
+    seenWatch.observe(s.canvas);
   }
 }
 
@@ -97,11 +97,14 @@ function draw(s: Scene, now: number, ink: string): void {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, w);
   const t = s.t0 === null ? 0 : (now - s.t0) / 1000;
+  // One colour per canvas; each dot varies only its alpha.
+  g.fillStyle = `rgb(${ink})`;
   for (const d of s.dots) {
     const f = dotFrame(d, t, w, GRID);
-    g.fillStyle = `rgba(${ink},${f.a})`;
+    g.globalAlpha = f.a;
     g.beginPath();
     g.arc(f.x, f.y, f.r, 0, Math.PI * 2);
     g.fill();
   }
+  g.globalAlpha = 1;
 }
