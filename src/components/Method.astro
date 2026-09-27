@@ -1,16 +1,26 @@
 ---
+import intent from '../assets/method/intent.png';
+import work from '../assets/method/work.png';
+import check from '../assets/method/check.png';
+
 const points = [
   {
-    verb: 'The brand',
-    body: 'The name and the visual language were <strong>shaped through an agentic process</strong>: options generated and explored by machine, <strong>the final call made by a person</strong>. A family of related identities, not a logo handed down.',
+    step: 'Intent',
+    claim: 'We write the intent first.',
+    proof: 'Every change starts as a written decision, before an agent touches a file.',
+    scene: intent,
   },
   {
-    verb: 'The build',
-    body: 'The tools, and this very site, are developed the <strong>agent-centric way we advocate</strong>: work driven from <strong>written specs and agent sessions</strong>, each change tracing back to an intent you can read. <strong>Assistance, never autopilot.</strong>',
+    step: 'Work',
+    claim: 'The machines show their work.',
+    proof: 'Each step is visible while it runs and traceable afterwards, so nothing lands unexplained.',
+    scene: work,
   },
   {
-    verb: 'The design system',
-    body: 'One shared, <strong>token-based design system</strong> underpins every surface. Agents maintain and migrate it across products, and an <strong>automated audit fails the build on any drift</strong>. This site\'s content is <strong>schema-validated</strong> too, so a wrong edit does not ship; it stops the build instead.',
+    step: 'Check',
+    claim: "Drift doesn't ship.",
+    proof: 'A design audit and a content schema stop the build on any mismatch. This page passed both.',
+    scene: check,
   },
 ];
 ---
@@ -23,30 +33,22 @@ const points = [
         <span class="sl-section__idx">03</span>
         <span class="sl-eyebrow">The method</span>
       </div>
-      <h2 class="h2">Made the way it's meant to run.</h2>
+      <h2 class="h2">We run on our own tools first.</h2>
       <p class="lede">
-        Sondalab builds tools for directing agents, and it is{' '}
-        <strong>built by directing them</strong>. People set the intent and{' '}
-        <strong>hold the switch</strong>; the machine does the work, in the open,
-        every step <strong>traceable and reversible</strong>. The brand, the
-        design system, and this very site came out of that same loop.
+        Sondalab is built by directing agents with the same tools we ship.{' '}
+        <strong>What reaches you has already carried our own work.</strong>
       </p>
     </div>
 
-    <ol class="method__points sl-fx-goo sl-fx-goo--drift">
-      <svg id="glass-numeral-masks" class="mnum-masks" aria-hidden="true" focusable="false"><defs></defs></svg>
+    <ol class="rail">
       {points.map((p, i) => (
-        <li class="gnum-slot sl-fx-goo__member">
-          <span class="sr-only">Step {i + 1}</span>
-          <article class="mpoint glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on">
-            <div class="mpoint__body">
-              <h3 class="mpoint__verb">{p.verb}</h3>
-              <p set:html={p.body}></p>
-            </div>
-          </article>
-          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
-
-                aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <li class="rail__step">
+          <div class="rail__text">
+            <span class="rail__n">{String(i + 1).padStart(2, '0')}<span class="rail__label">{p.step}</span></span>
+            <h3 class="rail__claim">{p.claim}</h3>
+            <p class="rail__proof">{p.proof}</p>
+          </div>
+          <canvas class="mscene" data-dot-scene data-src={p.scene.src} aria-hidden="true"></canvas>
         </li>
       ))}
     </ol>
@@ -54,9 +56,7 @@ const points = [
 </section>
 
 <style>
-  /* The bed, the same plate as the stance and the tools. Here it matters twice
-     over, because the substance above it is translucent and this is what shows
-     through. scripts/make-backdrops.mjs generates it from the kit's tokens. */
+  /* The bed, the same plate as the stance and the tools. */
   .method {
     position: relative;
     --bed: url('/backdrops/method-dark.svg');
@@ -78,110 +78,131 @@ const points = [
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(2.5rem, 6vw, 5rem);
   }
-  @media (min-width: 52rem) {
+  @media (min-width: 48rem) {
     .method__grid {
-      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
       align-items: start;
-    }
-    .method__head {
-      position: sticky;
-      top: 6rem;
     }
   }
   .method__head .h2 { margin-top: 1.25rem; max-width: 16ch; }
   .method__head .lede { margin-top: 1.5rem; max-width: 42ch; }
+  .method__head .lede strong { font-weight: 600; color: var(--sl-text-primary); }
 
-  /* The three points are one substance that will not hold still. The gap is
-     laid out a hair INSIDE the field's own weld, so the members start joined
-     and the drift is what parts them: at 28px a 1.6rem gap welds, and an
-     amplitude of 6px per member swings the distance between two of them by up
-     to 12px either way — enough to cross the threshold and come back.
-
-     The padding is what the container owes them. The substance reaches
-     --slfx-goo-reach plus three blur sigmas past the outermost member, and the
-     drift adds its amplitude on top; the negative inline margin gives it back,
-     so the type stays aligned with the column beside it. */
-  .method__points {
+  /* The rail: one line through three nodes, intent → work → check. The
+     pseudo-elements set their own box-sizing, because the site's `*` rule does
+     not match pseudo-elements, and a 16px ring with a 2px border otherwise
+     renders 20px wide and sits 2px off the line. */
+  .rail {
     list-style: none;
     margin: 0;
-    --slfx-goo-weld: 28px;
-    /* The kit's defaults were too quiet here, measured rather than guessed.
-       --sl-bg-surface-raised against the canvas is 1.15:1 — the default suits a
-       member that carries a colour of its own, and these carry none, so the
-       whole slab was that grey. Lifting it toward the ink puts it near 1.7:1,
-       which reads as material without becoming a card.
-
-       6px over a 17s period is a peak speed of about 2px a second, which is
-       below what anyone watches. At 12px the necks cross the 28px weld visibly
-       — and it is still inside the kit's own bound of half the weld. */
-    --slfx-goo-fill: color-mix(in srgb, var(--sl-text-primary) 15%, var(--sl-bg-surface-raised));
-    --slfx-goo-drift: 12px;
-    /* SPEND THE WELD ON BLUR, NOT ON DILATION. weldPlan() splits the 28px
-       between a rim and a sigma, capped by this: at the kit's 5px cap it puts
-       10.63px into the rim, and a 10px rim around a card that now has a strong
-       glass edge of its own reads as a stray second outline — which is what
-       the owner saw as an artefact. At 15 the same 28px becomes 3.88px of rim
-       and 15px of sigma: the necks get softer, the halo stops being a line.
-       Measured with geom.js, not guessed. */
-    --slfx-goo-soft: 15px;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem));
+    padding: 0;
+    position: relative;
+    --node: 16px;
+    --label-lh: 1.5rem;
+  }
+  .rail__step {
+    position: relative;
     display: grid;
-    gap: 1.6rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 0 0 clamp(2rem, 4vw, 3rem) calc(var(--node) + 2rem);
+  }
+  .rail__step:last-child { padding-bottom: 0; }
+  /* The line, drawn per step from this node's centre to the next one's, so it
+     starts and ends on a node whatever the last promise and its vignette
+     measure. The fade runs across the two segments: accent to half, half to
+     15%. */
+  .rail__step:not(:last-child)::after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    left: calc(var(--node) / 2 - 1px);
+    top: calc(var(--label-lh) / 2);
+    bottom: calc(var(--label-lh) / -2);
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--sl-accent-default),
+      color-mix(in srgb, var(--sl-accent-default) 57%, transparent)
+    );
+  }
+  .rail__step:nth-child(2)::after {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--sl-accent-default) 57%, transparent),
+      color-mix(in srgb, var(--sl-accent-default) 15%, transparent)
+    );
+  }
+  .rail__step::before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    /* Level with the step label's centre: the label's line is --label-lh tall. */
+    top: calc(var(--label-lh) / 2 - var(--node) / 2);
+    width: var(--node);
+    height: var(--node);
+    border-radius: 50%;
+    background: var(--sl-bg-canvas);
+    border: 2px solid var(--sl-accent-default);
+    z-index: 1;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--sl-accent-default) 14%, transparent);
+  }
+  /* Text and vignette side by side only where the rail column can hold both:
+     below 72rem the vignette sits under its promise. */
+  @media (min-width: 72rem) {
+    .rail__step {
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 2rem;
+      align-items: start;
+    }
   }
 
-  /* The substance lets the bed through. `opacity` on the FIELD, not a
-     translucent fill: goo-field.js forces --slfx-goo-fill opaque on purpose,
-     because the goo chain's alpha slope erases everything below 0.5 and a
-     translucent silhouette would simply not survive the filter. Opacity is
-     applied to the filter's RESULT, so the weld is already computed when it
-     lands and every neck stays exactly where it was.
-
-     Safe here because no member of this field carries a fill of its own — the
-     cards are glass and paint on pseudo-elements, and the numerals' blobs are
-     the one exception, which is drawn as a tint on purpose. On a field of
-     `sl-tag`s this would shift every colour the component chose, and I would
-     not do it there. :global() because the field is the kit's element, not
-     this component's. */
-  .method__points :global(.sl-fx-goo__field) { opacity: 0.72; }
-
-  /* No rule between them. A border draws a line straight across a merged mass,
-     which is the defect the substance exists to replace. */
-  /* One column now: the numeral is no longer a cell of this grid. The left
-     padding opens up to leave it the corner it hangs in. */
-  .mpoint {
-    display: grid;
-    padding: clamp(1.5rem, 3.5vw, 2.25rem);
-    /* The numeral's gutter. Wide enough that a two-digit figure at
-       --step-numeral clears the body text: about 152px at the 7rem cap. */
-    padding-left: var(--gnum-gutter);
-    /* The card is a pane as well as a member: the pane is what puts light
-       inside it — a spot that follows the pointer and an edge that turns to
-       face it — where the goo only ever says these belong together. The two
-       do not fight: the kit stands the pane's hairline down on a welded
-       member, because where a silhouette holds the edge a rigid ring around
-       it reads as broken. */
-    --slg-radius: var(--sl-radius-lg);
+  .rail__n {
+    display: block;
+    line-height: var(--label-lh);
+    margin-bottom: 0.2rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    color: var(--sl-accent-default);
   }
-
-  .mnum-masks { position: absolute; width: 0; height: 0; }
-
-  .mpoint__verb {
-    font-family: var(--sl-font-display);
-    font-weight: 440;
-    font-variation-settings: 'opsz' 72, 'WONK' 1;
-    font-size: var(--step-h3);
-    margin: 0 0 0.5rem;
-    color: var(--sl-text-primary);
-  }
-  .mpoint__body p {
-    margin: 0;
-    max-width: 46ch;
+  .rail__label {
+    margin-left: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--sl-text-secondary);
   }
-  .method__head .lede strong,
-  .mpoint__body :global(strong) {
-    font-weight: 600;
+  .rail__claim {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 72, 'WONK' 1;
+    font-size: clamp(1.5rem, 1rem + 1.8vw, 2.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
     color: var(--sl-text-primary);
   }
+  .rail__proof {
+    margin: 0.7rem 0 0;
+    max-width: 40ch;
+    line-height: var(--sl-line-normal);
+    color: var(--sl-text-secondary);
+  }
+
+  /* The vignette: scene art as dots, drawn by dot-scene-runtime.ts. Decorative;
+     without JavaScript it is simply empty. */
+  .mscene { display: block; width: 180px; height: 180px; }
+  @media (min-width: 48rem) {
+    .mscene { width: 240px; height: 240px; }
+  }
+  @media (min-width: 72rem) {
+    .mscene { width: 280px; height: 280px; }
+  }
+  :root[data-sl-theme='high-contrast'] .mscene { display: none; }
 </style>
+
+<script>
+  import { mountDotScenes } from '../lib/dot-scene-runtime';
+  mountDotScenes(document.getElementById('method') ?? document);
+</script>

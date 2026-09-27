@@ -1,16 +1,23 @@
 ---
+import see from '../assets/stance/see.png';
+import steer from '../assets/stance/steer.png';
+import own from '../assets/stance/own.png';
+
 const pillars = [
   {
     verb: 'See it',
     body: 'Whatever a machine is doing, Sondalab <strong>keeps it legible</strong>: observable, measurable, understandable as it happens. <strong>No black boxes.</strong>',
+    scene: see,
   },
   {
     verb: 'Steer it',
     body: 'You <strong>stay in the loop and in charge</strong>: direct it, correct it, hand off or take the controls back at any moment. <strong>Assistance, never autopilot.</strong>',
+    scene: steer,
   },
   {
     verb: 'Own it',
     body: 'The machine, its data and <strong>its off-switch stay yours</strong>, answering to you, <strong>running where you are</strong>, not to a service out of reach.',
+    scene: own,
   },
 ];
 ---
@@ -33,18 +40,13 @@ const pillars = [
       </p>
     </div>
 
-    <ol class="thesis__pillars">
+    <ol class="triptych">
       {pillars.map((p, i) => (
-        <li class="gnum-slot">
-          <span class="sr-only">Point {i + 1}</span>
-          <article class="pillar glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on">
-            <div class="pillar__body">
-              <h3 class="pillar__verb">{p.verb}</h3>
-              <p set:html={p.body}></p>
-            </div>
-          </article>
-          <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
-                aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <li class="panel">
+          <canvas class="sscene" data-dot-scene data-grid="130" data-src={p.scene.src} aria-hidden="true"></canvas>
+          <span class="panel__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="panel__verb">{p.verb}</h3>
+          <p class="panel__body" set:html={p.body}></p>
         </li>
       ))}
     </ol>
@@ -52,13 +54,8 @@ const pillars = [
 </section>
 
 <style>
-  /* The bed. A pane laid on a flat slab shows nothing — it has no structure
-     to blur and no colour to carry — so the band gets a field of soft blooms
-     in the brand pair, ruled so the blur has an edge to bend rather than a
-     gradient blurring into itself. Painted first and left under the content,
-     which is what puts it in each pane's backdrop.
-     scripts/make-backdrops.mjs generates the plate from the kit's own theme
-     tokens. */
+  /* The bed: the band's soft gradient of blooms, no rules, generated from the
+     kit's theme tokens by scripts/make-backdrops.mjs. */
   .thesis {
     position: relative;
     --bed: url('/backdrops/thesis-dark.svg');
@@ -78,59 +75,91 @@ const pillars = [
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: clamp(2.5rem, 6vw, 5rem);
+    gap: clamp(2.5rem, 6vw, 4.5rem);
   }
+  /* The head reads across: the claim on the left, the lede answering it. */
   @media (min-width: 52rem) {
-    .thesis__grid {
-      grid-template-columns: 0.9fr 1.1fr;
-      align-items: start;
-    }
     .thesis__head {
-      position: sticky;
-      top: 6rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      column-gap: clamp(2rem, 5vw, 5rem);
+      align-items: end;
     }
+    .thesis__head .sl-section__head { grid-column: 1 / -1; }
   }
-  .thesis__head .h2 { margin-top: 1.25rem; max-width: 16ch; }
+  .thesis__head .h2 { margin-top: 1.25rem; max-width: 18ch; }
   .thesis__head .lede { margin-top: 1.5rem; }
+  .thesis__head .lede strong { font-weight: 600; color: var(--sl-bg-canvas); }
 
-  .thesis__pillars {
+  /* Three panels side by side, divided by hairlines in the band's own ink,
+     each led by its scene. Not cards: nothing is boxed. */
+  .triptych {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: clamp(0.85rem, 2vw, 1.4rem);
+    gap: 2.5rem;
   }
-  /* One column: the numeral is a sibling now, not a cell. The left padding is
-     its gutter — about 152px is what two digits take at the 7rem cap. */
-  .pillar {
-    display: grid;
-    padding: clamp(1.5rem, 3.5vw, 2.25rem);
-    padding-left: var(--gnum-gutter);
-    --slg-radius: var(--sl-radius-lg);
-    /* The hairline the transparent buttons have. The glass ring on ::after
-       lights on hover and is quiet at rest by the owner's own earlier ruling,
-       so at rest a ghost pane needs an edge of its own or it has none. */
-    border: 1px solid var(--slc-border);
-    border-radius: var(--sl-radius-lg);
+  @media (min-width: 60rem) {
+    /* Each panel's four parts (vignette, number, verb, body) share the
+       triptych's rows through subgrid, so the text lines up across the three
+       columns even where a column is narrower. */
+    .triptych {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(4, auto);
+      gap: 0;
+    }
+    .panel {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      align-content: start;
+    }
+    .sscene { align-self: end; }
+    .panel { padding-inline: clamp(1.25rem, 2.5vw, 2.25rem); }
+    .panel:first-child { padding-left: 0; }
+    .panel:last-child { padding-right: 0; }
+    .panel + .panel { border-left: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
   }
 
-  .pillar__verb {
+  /* Big enough to read: a photo in dots needs room. It fills its column, up to
+     320px. */
+  .sscene {
+    display: block;
+    width: min(100%, 320px);
+    aspect-ratio: 1;
+    height: auto;
+    margin-bottom: 1.5rem;
+  }
+  :root[data-sl-theme='high-contrast'] .sscene { display: none; }
+
+  .panel__n {
+    display: block;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--sl-bg-canvas) 76%, transparent);
+  }
+  .panel__verb {
+    margin: 0.35rem 0 0.6rem;
     font-family: var(--sl-font-display);
     font-weight: 440;
     font-variation-settings: 'opsz' 72, 'WONK' 1;
     font-size: var(--step-h3);
-    margin: 0 0 0.5rem;
     color: var(--sl-bg-canvas);
   }
-  .pillar__body p {
+  .panel__body {
     margin: 0;
-    max-width: 42ch;
+    max-width: 38ch;
     color: color-mix(in srgb, var(--sl-bg-canvas) 76%, transparent);
   }
-  .thesis__head .lede strong,
-  .pillar__body :global(strong) {
+  .panel__body :global(strong) {
     font-weight: 600;
     color: var(--sl-bg-canvas);
   }
 </style>
+
+<script>
+  import { mountDotScenes } from '../lib/dot-scene-runtime';
+  mountDotScenes(document.getElementById('approach') ?? document);
+</script>
