@@ -11,8 +11,9 @@ metadata:
 On 2026-09-26 the owner approved "typographic specimens" (verbatim code, test
 and terminal excerpts per tool) from a text description, then rejected them on
 seeing the built page: "very hard to grasp its meaning". Only spexr's real
-screenshots were kept (branch feat/spexr-screens); the specimens live unmerged
-on feat/tool-specimens.
+screenshots were kept (shipped in https://github.com/sondalab-ai/sondalab-site/pull/17);
+the specimens branch was discarded unmerged on 2026-09-27 (last commit
+f909071, recoverable from the reflog only).
 
 **Why:** a visitor cannot tell what a tool does from a raw excerpt of its code
 or config. A description of a visual approach did not let the owner judge it;
