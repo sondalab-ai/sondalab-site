@@ -10,7 +10,7 @@ export interface Dot {
   y: number;
   /** Light, 0..1, after the stretch, the S-curve and the edge fade. */
   L: number;
-  /** Where the dot starts before it assembles, in unit coordinates. */
+  /** Where the dot starts before it assembles, in unit coordinates, inside the circle. */
   sx: number;
   sy: number;
   /** Seconds before this dot starts moving to its place. */
@@ -65,12 +65,16 @@ export function sampleDots(
       const fade = f * f * (3 - 2 * f);
       const L = lin * lin * (3 - 2 * lin) * fade;
       if (L < FLOOR || rand() > fade ** 0.6) continue;
+      // Scatter inside the circle (uniform by area), so the square never
+      // shows while the dots gather.
+      const sr = 0.5 * Math.sqrt(rand());
+      const sa = rand() * Math.PI * 2;
       dots.push({
         x,
         y,
         L,
-        sx: rand(),
-        sy: rand(),
+        sx: 0.5 + sr * Math.cos(sa),
+        sy: 0.5 + sr * Math.sin(sa),
         delay: rand() * 0.35 + Math.hypot(x - 0.5, y - 0.5) * 0.5,
         phase: rand() * Math.PI * 2,
       });

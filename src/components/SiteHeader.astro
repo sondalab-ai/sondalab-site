@@ -110,7 +110,10 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
     background: var(--sl-accent-default);
   }
 
-  @media (max-width: 34rem) {
+  /* The full nav needs ~800px beside the brand and the toggle; below 52rem it
+     overflowed the page (765-776px wide at 560-768). Collapse to the kept
+     entries there, not only on phones. scripts/layout-probe.mjs guards it. */
+  @media (max-width: 51.99rem) {
     .site-header__nav a:not([data-keep]) { display: none; }
     /* Two entries survive the collapse, so the gap still has to separate them.
        The row gap gives back exactly what the nav gap takes, so the header is

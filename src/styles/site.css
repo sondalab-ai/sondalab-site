@@ -138,60 +138,6 @@ a { color: inherit; }
 .sl-invert .sl-eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
 .sl-invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 .sl-invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
-/* An inversion band is its own ground, and the effects layer cannot see that:
-   its substance is derived from the THEME, so inside a band that flipped
-   locally the goo painted the dark theme's raised surface behind pillars
-   sitting on a light one — dark slabs with barely legible text. The band knows
-   what it is made of, so the band rebinds it: one step off its own ground, in
-   the direction of the page's. This is the dark-invert regression the DS's own
-   migrate workflow tells you to check for, arriving through a different
-   property.
-
-   The role-vars are the same story reached through the front door. --slc-text
-   is the sheen every glint is mirrored from, --slc-surface is what a pane
-   tints toward, and the border roles default to an alpha over the canvas — so
-   a glass pane on this band would be lit for the page behind it. components.css
-   prescribes fixing --slc-border at the band; this is that fix, widened to
-   every role the material reads. */
-.sl-invert {
-  --slfx-goo-fill: color-mix(in srgb, var(--sl-bg-canvas) 7%, var(--sl-text-primary));
-  --slc-text: var(--sl-bg-canvas);
-  --slc-surface: color-mix(in srgb, var(--sl-bg-canvas) 10%, var(--sl-text-primary));
-  --slc-border: color-mix(in srgb, currentColor 22%, transparent);
-  --slc-border-subtle: color-mix(in srgb, currentColor 12%, transparent);
-  --slc-border-strong: color-mix(in srgb, currentColor 34%, transparent);
-  /* …and the glass numerals' glow, same story: the band's ink, not the page's.
-     QUIETER WITH IT. The alphas were fitted for a light figure lifting off a
-     dark card; the same figures on a light band are DARK ones pressing into a
-     pale card, and ink carries much further than light does — at 46/26 they
-     read as heavy blots rather than as glass. Halved. */
-  /* The glass numeral's light. Its COLOUR needs no rebinding here: the kit
-     reads `var(--slfx-text-light, var(--slc-text, …))` and --slc-text is
-     already flipped a few lines up. The two alphas do — a band is the page's
-     own light pole, and a halo at the page's strength on it is a smear. */
-  --slfx-text-core-a: 22%;
-  --slfx-text-halo-a: 12%;
-}
-/* And the aurora's curtains, the same pitfall a fourth time, reached another
-   way: the kit declares their colour ON the glow's pseudo-elements, per PAGE
-   theme, so nothing set on the band is inherited. On a dark page the band is
-   paper and the kit paints white light (#DAE3E4 at 45% over a #DAE3E4 band:
-   nothing). A band on a dark page takes the kit's own paper treatment instead,
-   the band's ink in folds at the strengths it fitted for paper. The busy
-   exemption is the kit's selector, repeated so a busy reading still wins.
-   On a light page the band is ink and the kit's paper rule already paints
-   --slc-text, which the band flipped to its light pole. Checked by hand with
-   scripts/curtain-probe.mjs against a served build; CI does not run it. */
-:root:not([data-sl-theme='light']) .sl-invert .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:not(:has(+ .sl-fx-aurora[data-sl-fx-live='busy']:not([style*='--slfx-progress'])))::before,
-:root:not([data-sl-theme='light']) .sl-invert .sl-fx-aurora__glow[data-sl-fx-seated][data-sl-fx-pillars]:not(:has(+ .sl-fx-aurora[data-sl-fx-live='busy']:not([style*='--slfx-progress'])))::after {
-  --slfx-pillar-a: var(--slc-text);
-  --slfx-pillar-b: var(--slc-text);
-  --slfx-pillar-a1: 22%;
-  --slfx-pillar-a2: 19%;
-  --slfx-pillar-b1: 18%;
-  --slfx-pillar-b2: 15%;
-}
-
 /* --- a thicker glass on the cards ---------------------------------------- *
  * The kit holds a card's frost UNDER 6px, and its comment says why: "a blur
  * wide enough to read as a material and narrow enough that the text behind it

@@ -14,6 +14,8 @@ interface Scene {
   px: Uint8ClampedArray;
   /** Grid cells per side: a bigger vignette carries a finer grid. */
   grid: number;
+  /** CSS width in px, kept by a ResizeObserver rather than read every frame. */
+  width: number;
 }
 
 /** Ink darker than mid-grey prints the picture's dark (a halftone on paper); light ink draws its light. */
@@ -42,7 +44,7 @@ async function load(canvas: HTMLCanvasElement): Promise<Scene> {
   const size = grid * 2;
   const g = Object.assign(document.createElement('canvas'), { width: size, height: size }).getContext('2d')!;
   g.drawImage(img, 0, 0, size, size);
-  const s: Scene = { canvas, dots: [], t0: null, ink: paint(getComputedStyle(canvas).color), px: g.getImageData(0, 0, size, size).data, grid };
+  const s: Scene = { canvas, dots: [], t0: null, ink: paint(getComputedStyle(canvas).color), px: g.getImageData(0, 0, size, size).data, grid, width: canvas.clientWidth };
   resample(s);
   return s;
 }
@@ -104,21 +106,27 @@ export async function mountDotScenes(root: ParentNode = document): Promise<void>
     },
     { threshold: 0.4 },
   );
+  const sizeWatch = new ResizeObserver((entries) => {
+    for (const e of entries) byCanvas.get(e.target as HTMLCanvasElement)!.width = e.contentRect.width;
+  });
   for (const s of scenes) {
     nearWatch.observe(s.canvas);
     seenWatch.observe(s.canvas);
+    sizeWatch.observe(s.canvas);
   }
 }
 
 function draw(s: Scene, now: number): void {
+  // Nothing to draw until it is first seen: it assembles from its scatter then.
+  if (s.t0 === null) return;
   const { canvas } = s;
   const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth;
+  const w = s.width;
   if (canvas.width !== Math.round(w * dpr)) canvas.width = canvas.height = Math.round(w * dpr);
   const g = canvas.getContext('2d')!;
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, w);
-  const t = s.t0 === null ? 0 : (now - s.t0) / 1000;
+  const t = (now - s.t0) / 1000;
   // One colour per canvas; each dot varies only its alpha.
   g.fillStyle = `rgb(${s.ink})`;
   for (const d of s.dots) {
