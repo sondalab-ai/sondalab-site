@@ -2,16 +2,9 @@
 // Builds the backdrop plates the glass refracts, from the design system's own
 // theme files.
 //
-// WHY A FILE AT ALL. The GPU tier bends what is BEHIND a pane, and it reads
-// that from a texture the surface declares (`data-sl-fx-backdrop` plus
-// `--slfx-backdrop: url(...)` on the same element). effects-gpu.js takes a
-// url() and nothing else — "a gradient cannot be sampled, and guessing at one
-// would put an invented backdrop behind the glass" — so a bed painted only in
-// CSS leaves every pane on it unrefracted, however good it looks.
-//
-// So each bed exists twice: as the CSS that paints it and as the plate the
-// shader samples. They are generated from ONE recipe here, and the CSS points
-// at the same file, so the two cannot drift.
+// WHY A FILE AT ALL. Each section paints its bed as `--bed: url(...)`, one
+// plate per theme, generated from ONE recipe here so the dark and light beds
+// cannot drift apart.
 //
 // The colours are READ from the kit's theme CSS, never copied. sl-audit reads
 // CSS only and would not see a literal in this file; the design language would

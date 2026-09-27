@@ -17,9 +17,11 @@ Two consequences, both of which cost a wrong diagnosis in one session:
   (`integratePane`) is a rAF loop, so `--slfx-lit` stays unset, the tier-2
   `draw()` is never called, and the tier label reads TIER 1 forever. It looks
   exactly like a GPU path that failed to boot.
-- **IntersectionObserver never delivers.** `mountGpu()` tracks backdrop panes
-  lazily as they scroll into view; in this tab nothing is ever "in view", so no
-  pane gets its canvas and the material is simply absent.
+- **IntersectionObserver never delivers.** Since kit 0.16.0 the lens, the live
+  light and the specular loop only run on hosts an IntersectionObserver has
+  marked near (`data-sl-fx-near`); in this tab nothing is ever near, so the
+  material looks absent. (`mountGpu()`, which this note used to cite, was
+  retired in 0.12.0 and resolves false.) Use headless puppeteer instead.
 
 **What to do instead.** Import the module and call the entry point yourself —
 `bootLight({canvas, state, geom, tokens})` then `handle.track(el)` — rather than
