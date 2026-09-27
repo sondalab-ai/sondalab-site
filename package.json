@@ -16,7 +16,6 @@
     "scenes:plates": "node scripts/make-scene-plates.mjs",
     "scenes:flats": "node scripts/make-scene-flats.mjs",
     "contrast": "node scripts/contrast-probe.mjs",
-    "curtains": "node scripts/curtain-probe.mjs",
     "shoot:fallback": "node scripts/shoot-fallback.mjs",
     "shoot:live": "node scripts/shoot-live.mjs",
     "backdrops": "node scripts/make-backdrops.mjs",
