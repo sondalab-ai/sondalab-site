@@ -2,30 +2,39 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
+import { extractSources } from '../../lib/sources';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
   const total = posts.length;
-  return posts.map((post, i) => ({
-    params: { slug: post.id },
-    props: {
-      post,
-      // Newest first, so the neighbour above is the newer transmission.
-      newer: posts[i - 1] ?? null,
-      older: posts[i + 1] ?? null,
-      no: String(total - i).padStart(2, '0'),
-    },
-  }));
+  const noOf = (i: number) => String(total - i).padStart(2, '0');
+  return posts.map((post, i) => {
+    // Newest first, so the neighbour above is the newer transmission. Read next
+    // is the older one, the way a log is read; the oldest points back up.
+    const nextIndex = i + 1 < total ? i + 1 : i - 1;
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        newer: posts[i - 1] ?? null,
+        next: posts[nextIndex] ?? null,
+        nextNo: noOf(nextIndex),
+        no: noOf(i),
+      },
+    };
+  });
 }
 
 interface Props {
   post: Post;
   newer: Post | null;
-  older: Post | null;
+  next: Post | null;
+  nextNo: string;
   no: string;
 }
 
-const { post, newer, older, no } = Astro.props;
+const { post, newer, next, nextNo, no } = Astro.props;
+const sources = extractSources(post.body ?? '');
 const { Content } = await render(post);
 
 const stamp = formatDate(post.data.date);
@@ -34,7 +43,7 @@ const mins = readingTime(post.body);
 
 const TITLE_BANDS = 6;
 const titleShards = Array.from({ length: TITLE_BANDS }, (_, i) => i);
-const NAV_BANDS = 4;
+const NAV_BANDS = 5;
 const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 ---
 
@@ -64,52 +73,58 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
         </p>
       </header>
 
-      <div class="sl-prose sl-prose--long">
-        <Content />
+      <p class="post__standfirst">{post.data.summary}</p>
+
+      <div class="post__read">
+        <div class="post__body sl-prose sl-prose--long">
+          <Content />
+        </div>
+        {sources.length > 0 && (
+          <aside class="post__sources" aria-label="Sources">
+            <p class="post__sources-title">Sources</p>
+            <ol>
+              {sources.map((s) => (
+                <li class="post__source">
+                  <span class="post__source-host"><span class="post__source-n">{s.n}</span>{s.host}</span>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer">{s.text}</a>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )}
       </div>
 
-      <nav class="post__nav" aria-label="Other transmissions">
-        {newer ? (
-          <a class="post__nav-link post__nav-link--prev" href={`/blog/${newer.id}/`}>
-            <span class="post__nav-dir">← Newer</span>
-            <span
-              class="post__nav-title sl-fx-glitch sl-fx-glitch--shatter"
-              data-text={newer.data.title}
-              style={`--slfx-n:${NAV_BANDS}`}
-            >
-              <span class="sl-fx-glitch__text">{newer.data.title}</span>
-              <span class="sl-fx-glitch__shards" aria-hidden="true">
-                {navShards.map((i) => (
-                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{newer.data.title}</span>
-                ))}
-              </span>
+      {next && (
+        <a class="post__next" href={`/blog/${next.id}/`}>
+          <span class="post__next-eyebrow">Read next · Transmission // {nextNo}</span>
+          <span
+            class="post__next-title sl-fx-glitch sl-fx-glitch--shatter"
+            data-text={next.data.title}
+            style={`--slfx-n:${NAV_BANDS}`}
+          >
+            <span class="sl-fx-glitch__text">{next.data.title}</span>
+            <span class="sl-fx-glitch__shards" aria-hidden="true">
+              {navShards.map((i) => (
+                <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{next.data.title}</span>
+              ))}
             </span>
-          </a>
-        ) : <span />}
-        {older ? (
-          <a class="post__nav-link post__nav-link--next" href={`/blog/${older.id}/`}>
-            <span class="post__nav-dir">Older →</span>
-            <span
-              class="post__nav-title sl-fx-glitch sl-fx-glitch--shatter"
-              data-text={older.data.title}
-              style={`--slfx-n:${NAV_BANDS}`}
-            >
-              <span class="sl-fx-glitch__text">{older.data.title}</span>
-              <span class="sl-fx-glitch__shards" aria-hidden="true">
-                {navShards.map((i) => (
-                  <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{older.data.title}</span>
-                ))}
-              </span>
-            </span>
-          </a>
-        ) : <span />}
-      </nav>
+          </span>
+          <span class="post__next-summary">{next.data.summary}</span>
+          <span class="post__next-go" aria-hidden="true">Read →</span>
+        </a>
+      )}
+      {newer && newer !== next && (
+        <a class="post__newer" href={`/blog/${newer.id}/`}>← Newer · {newer.data.title}</a>
+      )}
     </div>
   </article>
 </Base>
 
 <style>
-  .post { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+  /* overflow-x: clip, because the glitch's shard copies of a long title do not
+     wrap with it and pushed the page 100px+ wider on a phone. Clip, not hidden:
+     no scroll container, so nothing sticky inside is affected. */
+  .post { padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); overflow-x: clip; }
 
   .post__back {
     display: inline-block;
@@ -162,43 +177,140 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .post__sep { opacity: 0.5; }
 
-  .prose--long { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  /* The summary, promoted to a standfirst: what the post argues, before it argues it. */
+  .post__standfirst {
+    margin: clamp(2rem, 4vw, 2.75rem) 0 0;
+    max-width: 34ch;
+    font-family: var(--sl-font-display);
+    font-weight: 340;
+    font-variation-settings: 'opsz' 40;
+    font-size: clamp(1.3rem, 1.05rem + 0.8vw, 1.7rem);
+    line-height: 1.3;
+    color: var(--sl-text-secondary);
+  }
 
-  .post__nav {
-    margin-top: clamp(3rem, 7vw, 6rem);
-    padding-top: 2rem;
+  /* The text and its sources: the sources take the margin beside the paragraph
+     that cites them (the page script sets each one's height), and fall below
+     the post where there is no margin. */
+  .post__read {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: clamp(2.25rem, 4.5vw, 3.5rem);
+  }
+  @media (min-width: 64rem) {
+    .post__read {
+      grid-template-columns: minmax(0, 68ch) minmax(12rem, 1fr);
+      column-gap: clamp(2rem, 5vw, 4.5rem);
+    }
+  }
+
+  /* Each external link carries its source number, from a counter over the same
+     links the list is built from (src/lib/sources.ts). The alt text keeps the
+     number out of the link's accessible name. */
+  .post__body { counter-reset: src; }
+  .post__body :global(a[href^='http']:not([href*='sondalab.eu']))::after {
+    counter-increment: src;
+    content: counter(src);
+    content: counter(src) / '';
+    margin-left: 0.12em;
+    font-family: var(--sl-font-mono);
+    font-size: 0.68em;
+    vertical-align: super;
+    line-height: 0;
+    color: var(--sl-accent-default);
+  }
+
+  .post__sources {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
     border-top: 1px solid var(--sl-border-subtle);
-    display: flex;
-    justify-content: space-between;
-    gap: 2rem;
   }
-  .post__nav-link {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    max-width: 20rem;
-    text-decoration: none;
-    color: var(--sl-text-primary);
-  }
-  .post__nav-link--next { text-align: right; margin-left: auto; }
-  .post__nav-dir {
+  .post__sources ol { list-style: none; margin: 0; padding: 0; }
+  .post__sources-title,
+  .post__source-host {
     font-family: var(--sl-font-mono);
     font-weight: 300;
     font-size: var(--sl-text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-text-secondary);
+  }
+  .post__sources-title { margin: 0 0 1rem; }
+  .post__source { margin: 0 0 1rem; padding-left: 0.9rem; border-left: 1px solid var(--sl-border-subtle); }
+  .post__source-host { display: block; margin-bottom: 0.25rem; }
+  .post__source-n { color: var(--sl-accent-default); margin-right: 0.6em; }
+  .post__source a {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    line-height: 1.55;
+    color: var(--sl-text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sl-border-default);
+  }
+  .post__source a:hover { border-bottom-color: var(--sl-accent-default); }
+  @media (min-width: 64rem) {
+    .post__sources { margin-top: 0; padding-top: 0; border-top: 0; position: relative; }
+    .post__sources-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    /* Placed by the page script level with the citing paragraph; without it
+       they simply stack at the top of the margin. */
+    .post__sources.is-placed .post__source { position: absolute; left: 0; right: 0; margin: 0; }
+  }
+
+  /* The ending: the next transmission, large enough to be an invitation. */
+  .post__next {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--sl-border-subtle);
+    text-decoration: none;
+    color: inherit;
+  }
+  .post__next-eyebrow {
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sl-accent-default);
+  }
+  .post__next-title {
+    display: block;
+    max-width: 20ch;
+    font-family: var(--sl-font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 96, 'WONK' 1;
+    font-size: var(--step-h2);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--sl-text-primary);
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+    --gx: 4px;
+  }
+  .post__next:hover .post__next-title { color: var(--sl-accent-default); }
+  .post__next-summary { max-width: 52ch; color: var(--sl-text-secondary); line-height: var(--sl-line-normal); }
+  .post__next-go {
+    justify-self: start;
+    margin-top: 0.5rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--sl-text-muted);
+    color: var(--sl-text-primary);
+    border-bottom: 1px solid var(--sl-accent-default);
+    padding-bottom: 0.2rem;
   }
-  .post__nav-title {
-    font-family: var(--sl-font-display);
-    font-weight: 440;
-    font-variation-settings: 'opsz' 48, 'WONK' 1;
-    font-size: var(--step-h3);
-    line-height: 1.1;
-    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
-    --gx: 3px;
+  .post__newer {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-family: var(--sl-font-mono);
+    font-weight: 300;
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    color: var(--sl-text-secondary);
   }
-  .post__nav-link:hover .post__nav-title { color: var(--sl-accent-default); }
+  .post__newer:hover { color: var(--sl-accent-default); }
 </style>
 
 <script>
@@ -211,8 +323,37 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   const stamp = document.querySelector<HTMLElement>('.post__stamp time');
   if (stamp) window.setTimeout(() => scramble(stamp), 400);
 
-  for (const link of document.querySelectorAll('.post__nav-link')) {
-    const t = link.querySelector('.post__nav-title.sl-fx-glitch');
-    if (t) hoverBurst(link, t);
+  const next = document.querySelector('.post__next');
+  const nextTitle = next?.querySelector('.post__next-title.sl-fx-glitch');
+  if (next && nextTitle) hoverBurst(next, nextTitle);
+
+  // Each source sits level with the link that cites it, pushed down when the
+  // one above it would overlap. Only where the sources have a margin to sit in.
+  const aside = document.querySelector<HTMLElement>('.post__sources');
+  const body = document.querySelector<HTMLElement>('.post__body');
+  const wide = matchMedia('(min-width: 64rem)');
+  function place() {
+    if (!aside || !body) return;
+    const items = [...aside.querySelectorAll<HTMLElement>('.post__source')];
+    if (!wide.matches) {
+      aside.classList.remove('is-placed');
+      aside.style.height = '';
+      for (const li of items) li.style.top = '';
+      return;
+    }
+    const links = [...body.querySelectorAll<HTMLAnchorElement>('a[href^="http"]:not([href*="sondalab.eu"])')];
+    const top0 = aside.getBoundingClientRect().top;
+    let floor = 0;
+    aside.classList.add('is-placed');
+    items.forEach((li, i) => {
+      const y = Math.max((links[i]?.getBoundingClientRect().top ?? top0) - top0, floor);
+      li.style.top = `${y}px`;
+      floor = y + li.offsetHeight + 16;
+    });
+    aside.style.height = `${floor}px`;
   }
+  place();
+  document.fonts?.ready.then(place);
+  wide.addEventListener('change', place);
+  addEventListener('resize', place);
 </script>
