@@ -4,6 +4,8 @@ import Base from '../../layouts/Base.astro';
 import { accentVars, type AccentKey } from '../../lib/accents';
 import { STATUS_META } from '../../lib/site';
 import { NOVELLAS } from '../../lib/novellas';
+import { Image } from 'astro:assets';
+import { SCREENS } from '../../lib/screens';
 
 export async function getStaticPaths() {
   const products = (await getCollection('products')).sort(
@@ -31,6 +33,7 @@ const logMarker = `// operator's log · ${chapter} / ${chapterTotal}`;
 
 const acc = accentVars(data.accent as AccentKey);
 const meta = data.status ? STATUS_META[data.status] : null;
+const screens = SCREENS[product.id] ?? [];
 
 const NAME_BANDS = 6;
 const nameShards = Array.from({ length: NAME_BANDS }, (_, i) => i);
@@ -97,6 +100,22 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           )}
         </aside>
       </div>
+
+      {screens.length > 0 && (
+        <section class="shots" aria-label={`${data.name} in use`}>
+          <p class="sl-eyebrow">In use</p>
+          <ol class="shots__track">
+            {screens.map((s) => (
+              <li class="shots__item">
+                <figure>
+                  <Image src={s.src} alt={s.alt} widths={[640, 1200, 1800]} sizes="(max-width: 52rem) 88vw, 60vw" loading="lazy" />
+                  <figcaption>{s.caption}</figcaption>
+                </figure>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {novella && (
         <aside class="novella" data-novella>
@@ -301,6 +320,30 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     align-items: flex-start;
     gap: 1rem;
   }
+  .shots { margin-top: clamp(3rem, 7vw, 5rem); }
+  .shots__track {
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0 0 1rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(88vw, 60rem);
+    gap: clamp(1rem, 3vw, 2rem);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+  }
+  .shots__item { scroll-snap-align: start; }
+  .shots__item figure { margin: 0; display: grid; gap: 0.75rem; }
+  /* No border: the captures are macOS windows with their own frame and shadow. */
+  .shots__item :global(img) { width: 100%; height: auto; }
+  .shots__item figcaption {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.08em;
+    color: var(--sl-text-secondary);
+  }
+
   .product__private {
     margin-top: 2rem;
     font-family: var(--sl-font-mono);
