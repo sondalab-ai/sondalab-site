@@ -26,7 +26,7 @@ import data from './scenes.json';
 export type Tone = 'structure' | 'depth' | 'accent' | 'occluder';
 
 export interface SceneLayer {
-  /** Path under `public/`, so the file is fetched at runtime rather than inlined. */
+  /** Path under `public/`, fetched at runtime. The build appends `?v=` and a hash of the file (scripts/scene-versions.mjs), so a regenerated plate is never served stale. */
   src: string;
   depth: number;
   tone: Tone;

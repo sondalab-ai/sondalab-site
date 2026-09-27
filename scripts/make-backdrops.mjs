@@ -87,10 +87,9 @@ for (const theme of ['dark', 'light']) {
     // The tools sit on the page's own ground, and quieter: the rows are a
     // list to read, not a statement.
     products: bed({ ground: t('bg-canvas'), accent: t('accent-default'), depth: t('accent-depth'), rule: t('text-primary'), ruled: false, intensity: 0.45 }),
-    // The method's substance is TRANSLUCENT, so this plate is read through it
-    // rather than beside it. Ruled, because a goo mass laid over pure gradients
-    // shows nothing moving through — the rules are what make the drift legible.
-    method: bed({ ground: t('bg-canvas'), accent: t('accent-depth'), depth: t('accent-default'), rule: t('text-primary'), ruled: true, intensity: 0.7 }),
+    // The method's rail and dot scenes sit on its gradient alone: blooms, no
+    // rules (owner, 2026-09-27).
+    method: bed({ ground: t('bg-canvas'), accent: t('accent-depth'), depth: t('accent-default'), rule: t('text-primary'), ruled: false, intensity: 0.7 }),
   };
   for (const [name, svg] of Object.entries(plates)) {
     writeFileSync(`${OUT}/${name}-${theme}.svg`, svg);
