@@ -1,8 +1,7 @@
 import { sampleDots, dotFrame, type Dot } from './dot-scene';
 
-/** Grid cells per side, and the resolution each picture is sampled at. */
+/** Grid cells per side unless the canvas sets `data-grid`; pictures are sampled at twice that. */
 const GRID = 96;
-const SAMPLE = 192;
 
 interface Scene {
   canvas: HTMLCanvasElement;
@@ -13,6 +12,8 @@ interface Scene {
   ink: string;
   /** The sampled picture, kept so a theme change can resample it. */
   px: Uint8ClampedArray;
+  /** Grid cells per side: a bigger vignette carries a finer grid. */
+  grid: number;
 }
 
 /** Ink darker than mid-grey prints the picture's dark (a halftone on paper); light ink draws its light. */
@@ -21,7 +22,7 @@ function isDarkInk(ink: string): boolean {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
 }
 function resample(s: Scene): void {
-  s.dots = sampleDots(s.px, SAMPLE, GRID, Math.random, isDarkInk(s.ink));
+  s.dots = sampleDots(s.px, s.grid * 2, s.grid, Math.random, isDarkInk(s.ink));
 }
 
 /** Resolves any CSS colour, oklch or color-mix included, to sRGB bytes. */
@@ -37,9 +38,11 @@ async function load(canvas: HTMLCanvasElement): Promise<Scene> {
   const img = new Image();
   img.src = canvas.dataset.src!;
   await img.decode();
-  const g = Object.assign(document.createElement('canvas'), { width: SAMPLE, height: SAMPLE }).getContext('2d')!;
-  g.drawImage(img, 0, 0, SAMPLE, SAMPLE);
-  const s: Scene = { canvas, dots: [], t0: null, ink: paint(getComputedStyle(canvas).color), px: g.getImageData(0, 0, SAMPLE, SAMPLE).data };
+  const grid = Number(canvas.dataset.grid) || GRID;
+  const size = grid * 2;
+  const g = Object.assign(document.createElement('canvas'), { width: size, height: size }).getContext('2d')!;
+  g.drawImage(img, 0, 0, size, size);
+  const s: Scene = { canvas, dots: [], t0: null, ink: paint(getComputedStyle(canvas).color), px: g.getImageData(0, 0, size, size).data, grid };
   resample(s);
   return s;
 }
@@ -119,7 +122,7 @@ function draw(s: Scene, now: number): void {
   // One colour per canvas; each dot varies only its alpha.
   g.fillStyle = `rgb(${s.ink})`;
   for (const d of s.dots) {
-    const f = dotFrame(d, t, w, GRID);
+    const f = dotFrame(d, t, w, s.grid);
     g.globalAlpha = f.a;
     g.beginPath();
     g.arc(f.x, f.y, f.r, 0, Math.PI * 2);

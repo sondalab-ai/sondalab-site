@@ -43,7 +43,7 @@ const pillars = [
     <ol class="triptych">
       {pillars.map((p, i) => (
         <li class="panel">
-          <canvas class="sscene" data-dot-scene data-src={p.scene.src} aria-hidden="true"></canvas>
+          <canvas class="sscene" data-dot-scene data-grid="130" data-src={p.scene.src} aria-hidden="true"></canvas>
           <span class="panel__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <h3 class="panel__verb">{p.verb}</h3>
           <p class="panel__body" set:html={p.body}></p>
@@ -101,19 +101,32 @@ const pillars = [
     gap: 2.5rem;
   }
   @media (min-width: 60rem) {
+    /* Each panel's four parts (vignette, number, verb, body) share the
+       triptych's rows through subgrid, so the text lines up across the three
+       columns even where a column is narrower. */
     .triptych {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(4, auto);
       gap: 0;
     }
+    .panel {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      align-content: start;
+    }
+    .sscene { align-self: end; }
     .panel { padding-inline: clamp(1.25rem, 2.5vw, 2.25rem); }
     .panel:first-child { padding-left: 0; }
     .panel:last-child { padding-right: 0; }
     .panel + .panel { border-left: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
   }
 
+  /* Big enough to read: a photo in dots needs room. It fills its column, up to
+     320px. */
   .sscene {
     display: block;
-    width: min(100%, 280px);
+    width: min(100%, 320px);
     aspect-ratio: 1;
     height: auto;
     margin-bottom: 1.5rem;

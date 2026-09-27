@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Cuts the dot-scene vignettes (the stance and the method) out of the dark
-// scene renders.
+// Cuts the dot-scene vignettes: the method's from the dark scene renders, the
+// stance's from committed stock photos (assets-src/stance/).
 //
 // The renders live in .scenes-raw/, which is git-ignored, so the crops are
 // committed and this script only needs re-running when a crop changes. The
@@ -24,23 +24,27 @@ const CROPS = {
   'method/intent': ['kinship/dark/02-mid.png', 450, 50, 330],
   'method/work': ['kinship/dark/02-mid.png', 130, 70, 330],
   'method/check': ['uprising/dark/02-mid.png', 200, 170, 300],
-  'stance/see': ['city/dark/02-mid.png', 514, 0, 386],
-  'stance/steer': ['uprising/dark/01-far.png', 343, 0, 240],
-  'stance/own': ['kinship/dark/01-far.png', 296, 103, 296],
+  // Stock photos, committed under assets-src/ (see assets-src/stance/SOURCES.md).
+  'stance/see': ['assets-src/stance/see.jpg', 0, 0, 755],
+  'stance/steer': ['assets-src/stance/steer.jpg', 150, 0, 598],
+  'stance/own': ['assets-src/stance/own.jpg', 30, 150, 330],
 };
 
-if (!existsSync(RAW)) {
-  console.error(`no ${RAW}/: pass the directory holding the raw scene renders`);
-  process.exit(2);
-}
+// The scene renders are git-ignored and live only where they were made; the
+// stock photos are committed. Without the renders, cut what can be cut.
+const haveRaw = existsSync(RAW);
+if (!haveRaw) console.warn(`no ${RAW}/: skipping the crops cut from scene renders`);
 const tmp = mkdtempSync(join(tmpdir(), 'method-crops-'));
 const sips = (...args) => execFileSync('sips', args, { stdio: 'pipe' });
 
 for (const [name, [render, x, y, s]] of Object.entries(CROPS)) {
+  const committed = render.startsWith('assets-src/');
+  if (!committed && !haveRaw) continue;
+  const source = committed ? render : join(RAW, render);
   const work = join(tmp, `${name.replace('/', '-')}.png`);
   const out = join('src/assets', `${name}.png`);
   mkdirSync(dirname(out), { recursive: true });
-  sips('-Z', '900', join(RAW, render), '--out', work);
+  sips('-Z', '900', source, '--out', work);
   sips('-c', String(s), String(s), '--cropOffset', String(y), String(x), work, '--out', work);
   sips('-Z', String(SIZE), work, '--out', work);
   sips('-m', GRAY, '-s', 'format', 'png', work, '--out', out);
