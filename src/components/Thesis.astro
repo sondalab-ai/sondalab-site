@@ -23,7 +23,6 @@ const pillars = [
 ---
 
 <section id="approach" class="sl-section sl-invert thesis">
-  <div class="thesis__bed" aria-hidden="true"></div>
   <div class="sl-wrap thesis__grid">
     <div class="thesis__head">
       <div class="sl-section__head">
@@ -54,26 +53,7 @@ const pillars = [
 </section>
 
 <style>
-  /* The bed: the band's field of soft blooms, generated from the kit's theme
-     tokens by scripts/make-backdrops.mjs. */
-  .thesis {
-    position: relative;
-    --bed: url('/backdrops/thesis-dark.svg');
-  }
-  :root[data-sl-theme='light'] .thesis {
-    --bed: url('/backdrops/thesis-light.svg');
-  }
-  .thesis__bed {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: var(--bed) center / cover no-repeat;
-  }
-
   .thesis__grid {
-    position: relative;
-    z-index: 1;
     display: grid;
     gap: clamp(2.5rem, 6vw, 4.5rem);
   }
