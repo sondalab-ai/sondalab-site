@@ -100,7 +100,24 @@ const pillars = [
     display: grid;
     gap: 2.5rem;
   }
-  @media (min-width: 60rem) {
+  /* Between phone and wide: each pillar is a row, the scene beside its words,
+     because three columns here would shrink the scenes below the ~280px a
+     photo in dots needs to read (1024px gave 255px). */
+  @media (min-width: 40rem) and (max-width: 71.99rem) {
+    .panel {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      /* The text is one block, centred on the scene: two flexible rows
+         around three that hug their content. */
+      grid-template-rows: 1fr auto auto auto 1fr;
+      column-gap: clamp(1.5rem, 4vw, 3rem);
+    }
+    .panel > .sscene { grid-row: 1 / -1; margin-bottom: 0; }
+    .panel__n { grid-column: 2; grid-row: 2; }
+    .panel__verb { grid-column: 2; grid-row: 3; }
+    .panel__body { grid-column: 2; grid-row: 4; }
+  }
+  @media (min-width: 72rem) {
     /* Each panel's four parts (vignette, number, verb, body) share the
        triptych's rows through subgrid, so the text lines up across the three
        columns even where a column is narrower. */
