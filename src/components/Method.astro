@@ -48,7 +48,7 @@ const points = [
             <h3 class="rail__claim">{p.claim}</h3>
             <p class="rail__proof">{p.proof}</p>
           </div>
-          <canvas class="mscene" data-dot-scene data-src={p.scene.src} aria-hidden="true"></canvas>
+          <canvas class="mscene" data-sl-halftone data-sl-src={p.scene.src} aria-hidden="true"></canvas>
         </li>
       ))}
     </ol>
@@ -190,8 +190,8 @@ const points = [
     color: var(--sl-text-secondary);
   }
 
-  /* The vignette: scene art as dots, drawn by dot-scene-runtime.ts. Decorative;
-     without JavaScript it is simply empty. */
+  /* The vignette: scene art as dots, the kit's halftone (armed by mount() in
+     Base.astro). Decorative; without JavaScript it is simply empty. */
   .mscene { display: block; width: 180px; height: 180px; }
   @media (min-width: 48rem) {
     .mscene { width: 240px; height: 240px; }
@@ -199,10 +199,4 @@ const points = [
   @media (min-width: 72rem) {
     .mscene { width: 280px; height: 280px; }
   }
-  :root[data-sl-theme='high-contrast'] .mscene { display: none; }
 </style>
-
-<script>
-  import { mountDotScenes } from '../lib/dot-scene-runtime';
-  mountDotScenes(document.getElementById('method') ?? document);
-</script>
