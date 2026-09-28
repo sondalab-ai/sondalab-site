@@ -43,7 +43,7 @@ const pillars = [
     <ol class="triptych">
       {pillars.map((p, i) => (
         <li class="panel">
-          <canvas class="sscene" data-dot-scene data-grid="130" data-src={p.scene.src} aria-hidden="true"></canvas>
+          <canvas class="sscene" data-sl-halftone data-sl-grid="130" data-sl-src={p.scene.src} aria-hidden="true"></canvas>
           <span class="panel__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <h3 class="panel__verb">{p.verb}</h3>
           <p class="panel__body" set:html={p.body}></p>
@@ -148,7 +148,6 @@ const pillars = [
     height: auto;
     margin-bottom: 1.5rem;
   }
-  :root[data-sl-theme='high-contrast'] .sscene { display: none; }
 
   .panel__n {
     display: block;
@@ -176,7 +175,3 @@ const pillars = [
   }
 </style>
 
-<script>
-  import { mountDotScenes } from '../lib/dot-scene-runtime';
-  mountDotScenes(document.getElementById('approach') ?? document);
-</script>

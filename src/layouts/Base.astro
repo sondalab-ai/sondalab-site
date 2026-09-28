@@ -72,8 +72,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // through the kit instead of by keeping a driver of its own. Windows
       // reports `reduce` by default under "adjust for best performance", and
       // the glitch here is brand, not decoration. scripts/motion-gate.mjs
-      // still guards it. The derogation reaches the glitch alone; high
-      // contrast refuses regardless.
+      // still guards it. The derogation reaches the glitch and the halftone
+      // vignettes' motion; high contrast refuses regardless.
       //
       // bursts: the ambient ceiling. The hero claim, both interlude markers
       // and a product name all burst on their own timers, and at the default
