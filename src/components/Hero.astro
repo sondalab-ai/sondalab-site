@@ -265,11 +265,12 @@ const cue = [
      because the tube used to stay dark. */
   .hero[data-crt='on'] .hero__ghost { color: var(--sl-text-primary); }
   /* The fallback hero fills this button, so its label sits on amber. Here the
-     label is the amber, on paper — and the accent as-is measures 3.0:1 there.
-     Darkening the same token to 52% clears the 4.5:1 floor while staying the
-     brand hue. */
+     label is the amber, on paper — and the accent as-is measures 4.09:1 there
+     (worst pixel, ui-kit 0.21.1). Darkening the same token to 75% clears the
+     4.5:1 floor (6.11:1) and stays close to the brand amber; 52% cleared it
+     by more (8.76:1) but read as brown. */
   :global(:root[data-sl-theme='light']) .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
-    color: color-mix(in srgb, var(--sl-accent-default) 52%, black);
+    color: color-mix(in srgb, var(--sl-accent-default) 75%, black);
   }
 </style>
 
