@@ -76,7 +76,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <p class="post__standfirst">{post.data.summary}</p>
 
       <div class="post__read">
-        <div class="post__body sl-prose sl-prose--long">
+        <div class="post__body sl-prose article-prose">
           <Content />
         </div>
         {sources.length > 0 && (
@@ -137,7 +137,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-text-muted);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
-  .post__back:hover { color: var(--sl-accent-default); }
+  .post__back:hover { color: var(--slc-accent-text); }
 
   /* The rule runs the full measure; only the type is held to a narrow column. */
   .post__head {
@@ -171,7 +171,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-text-muted);
   }
   .post__stamp time {
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     font-weight: 300;
     font-variant-numeric: tabular-nums;
   }
@@ -217,7 +217,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     font-size: 0.68em;
     vertical-align: super;
     line-height: 0;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
   }
 
   .post__sources {
@@ -238,7 +238,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .post__sources-title { margin: 0 0 1rem; }
   .post__source { margin: 0 0 1rem; padding-left: 0.9rem; border-left: 1px solid var(--sl-border-subtle); }
   .post__source-host { display: block; margin-bottom: 0.25rem; }
-  .post__source-n { color: var(--sl-accent-default); margin-right: 0.6em; }
+  .post__source-n { color: var(--slc-accent-text); margin-right: 0.6em; }
   .post__source a {
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-xs);
@@ -247,7 +247,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     text-decoration: none;
     border-bottom: 1px solid var(--sl-border-default);
   }
-  .post__source a:hover { border-bottom-color: var(--sl-accent-default); }
+  .post__source a:hover { border-bottom-color: var(--slc-accent-text); }
   @media (min-width: 64rem) {
     .post__sources { margin-top: 0; padding-top: 0; border-top: 0; position: relative; }
     .post__sources-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -272,7 +272,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
   }
   .post__next-title {
     display: block;
@@ -287,7 +287,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
     --gx: 4px;
   }
-  .post__next:hover .post__next-title { color: var(--sl-accent-default); }
+  .post__next:hover .post__next-title { color: var(--slc-accent-text); }
   .post__next-summary { max-width: 52ch; color: var(--sl-text-secondary); line-height: var(--sl-line-normal); }
   .post__next-go {
     justify-self: start;
@@ -297,7 +297,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--sl-text-primary);
-    border-bottom: 1px solid var(--sl-accent-default);
+    border-bottom: 1px solid var(--slc-accent-text);
     padding-bottom: 0.2rem;
   }
   .post__newer {
@@ -310,7 +310,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     text-decoration: none;
     color: var(--sl-text-secondary);
   }
-  .post__newer:hover { color: var(--sl-accent-default); }
+  .post__newer:hover { color: var(--slc-accent-text); }
 </style>
 
 <script>

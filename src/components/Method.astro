@@ -122,15 +122,15 @@ const points = [
     width: 2px;
     background: linear-gradient(
       to bottom,
-      var(--sl-accent-default),
-      color-mix(in srgb, var(--sl-accent-default) 57%, transparent)
+      var(--slc-accent-text),
+      color-mix(in srgb, var(--slc-accent-text) 57%, transparent)
     );
   }
   .rail__step:nth-child(2)::after {
     background: linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--sl-accent-default) 57%, transparent),
-      color-mix(in srgb, var(--sl-accent-default) 15%, transparent)
+      color-mix(in srgb, var(--slc-accent-text) 57%, transparent),
+      color-mix(in srgb, var(--slc-accent-text) 15%, transparent)
     );
   }
   .rail__step::before {
@@ -144,7 +144,7 @@ const points = [
     height: var(--node);
     border-radius: 50%;
     background: var(--sl-bg-canvas);
-    border: 2px solid var(--sl-accent-default);
+    border: 2px solid var(--slc-accent-text);
     z-index: 1;
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--sl-accent-default) 14%, transparent);
   }
@@ -165,7 +165,7 @@ const points = [
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.1em;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
   }
   .rail__label {
     margin-left: 0.75rem;

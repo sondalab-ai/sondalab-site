@@ -15,7 +15,7 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
 ];
 ---
 
-<header class="site-header">
+<header class="sl-header site-header">
   <div class="sl-wrap site-header__inner">
     <a class="site-header__brand" href="/" aria-label="Sondalab home">
       <Wordmark size="1.35rem" />
@@ -25,42 +25,36 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
       {nav.map((n) => <a href={n.href} data-keep={n.keep ? '' : undefined}>{n.label}</a>)}
     </nav>
 
-    <button class="theme-toggle" type="button" aria-label="Toggle colour theme" data-theme-toggle>
-      <span class="theme-toggle__dot" aria-hidden="true"></span>
-      <span class="theme-toggle__label" data-theme-label>dark</span>
-    </button>
+    <div class="sl-segmented site-header__theme" role="group" aria-label="Colour theme">
+      <button class="sl-segmented__item" type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+      <button class="sl-segmented__item" type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    </div>
   </div>
 </header>
 
 <script is:inline>
   (function () {
-    var btn = document.querySelector('[data-theme-toggle]');
-    var label = document.querySelector('[data-theme-label]');
     var root = document.documentElement;
+    var items = document.querySelectorAll('[data-theme-choice]');
     function sync() {
-      if (label) label.textContent = root.getAttribute('data-sl-theme') || 'dark';
+      var current = root.getAttribute('data-sl-theme') || 'dark';
+      items.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === current));
+      });
     }
     sync();
-    if (btn) {
-      btn.addEventListener('click', function () {
-        var next = root.getAttribute('data-sl-theme') === 'dark' ? 'light' : 'dark';
+    items.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var next = b.getAttribute('data-theme-choice');
         root.setAttribute('data-sl-theme', next);
         try { localStorage.setItem('sl-theme', next); } catch (e) {}
         sync();
       });
-    }
+    });
   })();
 </script>
 
 <style>
-  .site-header {
-    position: sticky;
-    top: 0;
-    z-index: var(--sl-z-overlay);
-    background: color-mix(in srgb, var(--sl-bg-canvas) 82%, transparent);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--sl-border-subtle);
-  }
   .site-header__inner {
     display: flex;
     align-items: center;
@@ -85,29 +79,9 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
   }
   .site-header__nav a:hover { color: var(--sl-text-primary); }
 
-  .theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    background: transparent;
-    border: 1px solid var(--sl-border-default);
-    border-radius: var(--sl-radius-pill);
-    padding: 0.3rem 0.7rem;
-    color: var(--sl-text-secondary);
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: border-color var(--sl-motion-fast) var(--sl-motion-ease);
-  }
-  .theme-toggle:hover { border-color: var(--sl-border-strong); }
-  .theme-toggle__dot {
-    width: 0.55em;
-    height: 0.55em;
-    border-radius: var(--sl-radius-pill);
-    background: var(--sl-accent-default);
+  /* The kit's segmented control, compacted to sit in a 4rem header row. */
+  .site-header__theme .sl-segmented__item {
+    padding: 0.3rem 0.6rem;
   }
 
   /* The full nav needs ~800px beside the brand and the toggle; below 52rem it
@@ -120,5 +94,12 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
        no wider than it was when the two labels were touching. */
     .site-header__nav { gap: 1rem; }
     .site-header__inner { gap: 1rem; }
+  }
+  /* Two named themes are wider than the one-word pill they replaced; on a
+     phone the row only fits with the items and gaps drawn in. */
+  @media (max-width: 26rem) {
+    .site-header__inner { gap: 0.5rem; }
+    .site-header__nav { gap: 0.6rem; letter-spacing: 0.08em; }
+    .site-header__theme .sl-segmented__item { padding: 0.3rem 0.4rem; letter-spacing: 0.06em; }
   }
 </style>

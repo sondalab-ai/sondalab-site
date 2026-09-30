@@ -130,6 +130,22 @@ export function createTerminal(opts: TerminalOptions = {}) {
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   }
 
+  /**
+   * Resolve a colour expression to the colour the browser computes for it.
+   * Needed for derived roles such as --slc-accent-text, whose custom-property
+   * value is an unresolved oklch(from …) expression rather than a colour the
+   * canvas can take. A display:none probe still gets a computed style.
+   */
+  function resolveColor(expr: string): string {
+    const probe = document.createElement('span');
+    probe.style.display = 'none';
+    probe.style.color = expr;
+    root.appendChild(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }
+
   /** Fade a colour towards the screen's own background, whichever end that is. */
   function fade(hex: string, k: number): string {
     const c = parse(hex);
@@ -144,7 +160,9 @@ export function createTerminal(opts: TerminalOptions = {}) {
   let polarityLight = false;
 
   function readTokens() {
-    const accent = token('--sl-accent-default');
+    // Glyphs in the accent are text: on the paper tube the raw light accent is a
+    // fill (about 1.9:1), so they take the kit's accent-as-text role.
+    const accent = resolveColor('var(--slc-accent-text)');
     const depth = token('--sl-accent-depth');
     // On dark the ink is the theme's light text; on light it is the theme's
     // dark text, because the screen itself has flipped.
