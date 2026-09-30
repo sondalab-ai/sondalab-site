@@ -253,7 +253,7 @@ const ledger = [
     font-size: var(--sl-text-xs);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
   }
   .ap-ledger__note {
     font-size: var(--sl-text-sm);
@@ -318,7 +318,7 @@ const ledger = [
     background: color-mix(in srgb, var(--sl-accent-default) 6%, transparent);
   }
   .crow:focus-visible {
-    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: 2px;
   }
 
@@ -331,7 +331,7 @@ const ledger = [
     color: var(--sl-text-muted);
     transition: color var(--sl-motion-mid) var(--sl-motion-ease);
   }
-  .crow:not(.crow--inert):hover .crow__no { color: var(--sl-accent-default); }
+  .crow:not(.crow--inert):hover .crow__no { color: var(--slc-accent-text); }
 
   /* Horizontal now that the numeral sits above the label: a rule that draws
      itself out under the number when the row is live. */
@@ -339,7 +339,7 @@ const ledger = [
     grid-area: rule;
     width: clamp(3rem, 8vw, 6rem);
     height: 3px;
-    background: var(--sl-accent-default);
+    background: var(--slc-accent-text);
     border-radius: var(--sl-radius-pill);
     transform: scaleX(0.3);
     transform-origin: left center;
@@ -451,7 +451,7 @@ const ledger = [
      lone marker floating under the note reads as a stray glyph. */
   .crow--inert .crow__go { display: none; }
   .crow:not(.crow--inert) .crow__go {
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     opacity: 0;
     transform: translateX(-0.5rem);
     transition: opacity var(--sl-motion-mid) var(--sl-motion-ease),
@@ -518,13 +518,13 @@ const ledger = [
     letter-spacing: -0.01em;
     text-decoration: none;
     color: var(--sl-text-primary);
-    border-bottom: 2px solid var(--sl-accent-default);
+    border-bottom: 2px solid var(--slc-accent-text);
     padding-bottom: 0.15em;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
-  .ap-band__cta:hover { color: var(--sl-accent-default); }
+  .ap-band__cta:hover { color: var(--slc-accent-text); }
   .ap-band__cta:focus-visible {
-    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: 3px;
   }
 </style>

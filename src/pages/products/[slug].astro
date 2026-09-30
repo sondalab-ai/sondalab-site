@@ -68,7 +68,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 
         {meta && (
           <div class="product__meta">
-            <span class="product__status">{meta.label}</span>
+            <span class="sl-tag">{meta.label}</span>
             <span class="product__meta-note">{meta.note}</span>
           </div>
         )}
@@ -181,11 +181,23 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 89%, black);
     --slc-accent-active: color-mix(in srgb, var(--slc-accent) 76%, black);
     --slc-accent-subtle: color-mix(in srgb, var(--slc-accent) 12%, transparent);
-    --slc-focus: var(--slc-accent);
+    /* The accent as text / thin line, and the edges cut from it, re-derived
+       with the kit's own formulas (components.css) for the same reason: on
+       light the text caps the hue's lightness at --sl-accent-text-lmax (the
+       raw light accent is a fill), elsewhere the cap is 1 and it is the hue. */
+    --slc-accent-text: oklch(from var(--slc-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
+    --slc-edge-accent: oklch(from var(--slc-accent) calc(l - var(--slc-shade-step)) c h);
+    --slc-edge-pressed: oklch(from color-mix(in srgb, var(--slc-accent) 12%, var(--slc-canvas)) calc(l - var(--slc-shade-step)) c h);
+    --slc-focus: var(--slc-accent-text);
   }
   :root[data-sl-theme='light'] [data-product] {
     --sl-accent-default: var(--acc-light);
     --slc-accent: var(--acc-light);
+    /* Light derives the label on a filled accent from the accent itself
+       (themes/light.css: dark on a light fill, white on a dark one), on :root,
+       from the default orange. Re-derived here with the theme's formula, so a
+       blue or indigo product's opaque primary (effects off) gets a white label. */
+    --slc-on-accent: oklch(from var(--slc-accent) clamp(0.22, (0.61 - l) * 1000, 1) 0 h);
   }
 
   .product {
@@ -223,7 +235,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-text-muted);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
-  .product__back:hover { color: var(--sl-accent-default); }
+  .product__back:hover { color: var(--slc-accent-text); }
 
   .product__head {
     padding-block: clamp(2rem, 5vw, 3.5rem);
@@ -258,17 +270,6 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     align-items: baseline;
     gap: 1rem;
     flex-wrap: wrap;
-  }
-  .product__status {
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sl-accent-default);
-    padding: 0.2em 0.7em;
-    border: 1px solid color-mix(in srgb, var(--sl-accent-default) 45%, transparent);
-    border-radius: var(--sl-radius-pill);
   }
   .product__meta-note {
     font-family: var(--sl-font-mono);
@@ -385,7 +386,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
     --gx: 3px;
   }
-  .product__nav-link:hover .product__nav-name { color: var(--sl-accent-default); }
+  .product__nav-link:hover .product__nav-name { color: var(--slc-accent-text); }
 
   /* --- operator's log (serial novella) --- */
   .novella {
@@ -401,13 +402,13 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     --gx: 2px;
   }
   .novella__body {
     margin-top: 1.6rem;
     padding-left: clamp(1rem, 3vw, 2rem);
-    border-left: 2px solid color-mix(in srgb, var(--sl-accent-default) 40%, transparent);
+    border-left: 2px solid color-mix(in srgb, var(--slc-accent-text) 40%, transparent);
   }
   .novella__p {
     margin: 0 0 1.15rem;
@@ -422,7 +423,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   /* The recurring refrain lands in the product's hue. */
   .novella__p:last-child {
     margin-bottom: 0;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
   }
   /* Staggered reveal, progressive enhancement: JS arms the hidden state. */
   .novella[data-armed] .novella__marker,

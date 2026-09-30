@@ -15,7 +15,6 @@
   --rule: var(--sl-border-subtle);
 
   /* Fluid display scale, oversized type as structure. */
-  --step-eyebrow: 0.75rem;
   --step-h3: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
   --step-h2: clamp(1.9rem, 1.2rem + 3vw, 3.25rem);
   --step-display: clamp(2.6rem, 1rem + 8vw, 6.5rem);
@@ -56,22 +55,29 @@ body {
 
 a { color: inherit; }
 
-/* --- shared primitives ------------------------------------------------ */
+/* --- shared primitives ------------------------------------------------ *
+ * .sl-wrap, .sl-eyebrow, .sl-section and .sl-invert are the kit's classes
+ * (components.css). This file used to redefine each of them in full; what is
+ * left below is only where the site deliberately differs from the kit, and
+ * each rule says why. site.css loads after components.css (Base.astro), so a
+ * rule here wins over the kit's on the same selector.
+ * --------------------------------------------------------------------- */
 
+/* The site's measure is 76rem with a 4rem gutter cap, not the kit's 78/6rem:
+   the header's nav collapse (52rem) and the product rows' numeral gutter were
+   measured against it (scripts/layout-probe.mjs). The kit declares the gutter
+   in-class, so it is re-pointed here rather than on :root. */
 .sl-wrap {
-  width: 100%;
+  --sl-gutter: var(--gutter);
   max-width: var(--wrap);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
 }
 
+/* The site's eyebrow is lighter (300, not the kit's 500) and carries a leading
+   accent dash; inline-flex is what seats the dash, and three page heads
+   (blog, post, product) rely on it being inline-flex. The dash is a 1px line,
+   so it takes the accent-as-text role: the raw light-theme accent is a fill. */
 .sl-eyebrow {
-  font-family: var(--sl-font-mono);
   font-weight: 300;
-  font-size: var(--step-eyebrow);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--sl-text-muted);
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
@@ -80,7 +86,7 @@ a { color: inherit; }
   content: '';
   width: 1.6em;
   height: 1px;
-  background: var(--sl-accent-default);
+  background: var(--slc-accent-text);
 }
 
 .display {
@@ -110,34 +116,25 @@ a { color: inherit; }
   max-width: 34ch;
 }
 
+/* A marketing page breathes more than the kit's 3rem app rhythm. */
 .sl-section {
   padding-block: clamp(4rem, 8vw, 8rem);
-  border-top: 1px solid var(--rule);
 }
-
-/* Section index eyebrow, the numbered ladder down the page. */
 .sl-section__head {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
   margin-bottom: clamp(2rem, 5vw, 4rem);
 }
+/* The numbered ladder down the page is the site's one accent-coloured label
+   (the kit's index is muted): a lighter, larger figure in the accent-as-text
+   role, which the inversion band (Thesis) re-points to the uncapped accent. */
 .sl-section__idx {
-  font-family: var(--sl-font-mono);
   font-weight: 200;
   font-size: var(--sl-text-sm);
-  color: var(--sl-accent-default);
   letter-spacing: 0.1em;
+  color: var(--slc-accent-text);
 }
 
-/* Inversion band, strongest neutral, foreground flips. */
-.sl-invert {
-  background: var(--sl-text-primary);
-  color: var(--sl-bg-canvas);
-}
-.sl-invert .sl-eyebrow { color: color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent); }
+/* .lede is a site class, so the kit's band cannot re-derive it. */
 .sl-invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
-.sl-invert .rule { background: color-mix(in srgb, var(--sl-bg-canvas) 20%, transparent); }
 /* --- a thicker glass on the cards ---------------------------------------- *
  * The kit holds a card's frost UNDER 6px, and its comment says why: "a blur
  * wide enough to read as a material and narrow enough that the text behind it
@@ -279,13 +276,13 @@ a { color: inherit; }
 .gnum-slot { --slfx-pane-swell: 1; }
 
 /* --- rendered markdown ------------------------------------------------ *
- * The base `.sl-prose` is exactly what the product pages have always used, moved
- * here from their scoped block so the transmissions can share it. Everything
- * the long-form articles add lives under `.sl-prose--long`, so a product page
- * renders byte-identically to before the blog existed.
+ * The measure is the kit's: .sl-prose caps it at --sl-measure (63ch). What
+ * follows is the site's typography for the markdown INSIDE it, which the kit
+ * does not style (its prose class is layout only). The long-form articles add
+ * their vocabulary under .article-prose, a site class, so a product page
+ * renders the same with or without it.
  * --------------------------------------------------------------------- */
 
-.sl-prose { max-width: 60ch; }
 .sl-prose p {
   margin: 0 0 1.35rem;
   font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.45rem);
@@ -293,7 +290,7 @@ a { color: inherit; }
   color: var(--sl-text-secondary);
 }
 .sl-prose p:first-child { color: var(--sl-text-primary); }
-.sl-prose a { color: var(--sl-accent-default); }
+.sl-prose a { color: var(--slc-accent-text); }
 .sl-prose code {
   font-family: var(--sl-font-mono);
   font-size: 0.9em;
@@ -307,59 +304,59 @@ a { color: inherit; }
  * markdown vocabulary a post uses and a product page does not.
  * --------------------------------------------------------------------- */
 
-.sl-prose--long { max-width: 68ch; }
-.sl-prose--long p {
+.article-prose { --sl-measure: 68ch; }
+.article-prose p {
   font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
   margin-bottom: 1.5rem;
 }
-.sl-prose--long p:first-child {
+.article-prose p:first-child {
   font-size: clamp(1.2rem, 1.05rem + 0.55vw, 1.42rem);
   line-height: var(--sl-line-normal);
   margin-bottom: 1.9rem;
 }
 
-.sl-prose--long h2,
-.sl-prose--long h3 {
+.article-prose h2,
+.article-prose h3 {
   font-family: var(--sl-font-display);
   font-variation-settings: 'opsz' 48, 'WONK' 1;
   line-height: 1.15;
   letter-spacing: -0.015em;
   color: var(--sl-text-primary);
 }
-.sl-prose--long h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
-.sl-prose--long h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
+.article-prose h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
+.article-prose h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
 /* Section headers read as log markers, matching the transmissions index. */
-.sl-prose--long h2::before {
+.article-prose h2::before {
   content: '// ';
   font-family: var(--sl-font-mono);
   font-weight: 300;
   font-size: 0.7em;
-  color: var(--sl-accent-default);
+  color: var(--slc-accent-text);
 }
 
-.sl-prose--long ul,
-.sl-prose--long ol {
+.article-prose ul,
+.article-prose ol {
   margin: 0 0 1.5rem;
   padding-left: 1.4em;
   color: var(--sl-text-secondary);
 }
-.sl-prose--long li {
+.article-prose li {
   margin-bottom: 0.6rem;
   font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.18rem);
   line-height: var(--sl-line-relaxed);
 }
-.sl-prose--long li::marker { color: var(--sl-accent-default); }
+.article-prose li::marker { color: var(--slc-accent-text); }
 
-.sl-prose--long strong { color: var(--sl-text-primary); font-weight: 600; }
+.article-prose strong { color: var(--sl-text-primary); font-weight: 600; }
 
-.sl-prose--long blockquote {
+.article-prose blockquote {
   margin: 1.75rem 0;
   padding-left: clamp(1rem, 3vw, 1.75rem);
-  border-left: 2px solid color-mix(in srgb, var(--sl-accent-default) 40%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--slc-accent-text) 40%, transparent);
   color: var(--sl-text-secondary);
 }
 
-.sl-prose--long pre {
+.article-prose pre {
   margin: 0 0 1.5rem;
   padding: 1rem 1.15rem;
   overflow-x: auto;
@@ -367,9 +364,9 @@ a { color: inherit; }
   border: 1px solid var(--sl-border-subtle);
   border-radius: var(--sl-radius-sm);
 }
-.sl-prose--long pre code { background: none; padding: 0; font-size: var(--sl-text-sm); }
+.article-prose pre code { background: none; padding: 0; font-size: var(--sl-text-sm); }
 
-.sl-prose--long hr {
+.article-prose hr {
   margin: 2.5rem 0;
   border: 0;
   border-top: 1px solid var(--sl-border-subtle);

@@ -30,7 +30,10 @@ const rows = page.data.map((post, i) => ({
   mins: readingTime(post.body),
 }));
 
-const pageLabel = `${String(page.currentPage).padStart(2, '0')} / ${String(page.lastPage).padStart(2, '0')}`;
+// Every archive page, numbered: the count is measured, not estimated. Page 1
+// lives at the archive root; the rest follow Astro's /blog/<n>/ shape.
+const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+const pageHref = (n: number) => (n === 1 ? '/blog/' : `/blog/${n}/`);
 
 // Both readings of the same brief — machines against us, machines alongside us.
 // The tube changes channel between them on a timer rather than one per archive
@@ -67,17 +70,17 @@ const BAND_SCENES = ['uprising', 'kinship'];
           </div>
 
           <div class="tlog-head__side">
-            <div class="tsearch" data-tsearch-box hidden>
-              <label class="tsearch__label" for="tsearch">Filter</label>
+            <label class="sl-field tsearch" data-tsearch-box hidden>
+              <span class="sl-field__label">Filter</span>
               <input
-                class="tsearch__input"
+                class="sl-field__input"
                 id="tsearch"
                 type="search"
                 autocomplete="off"
                 placeholder="// filter transmissions"
                 data-tsearch
               />
-            </div>
+            </label>
             <p class="tlog-count" data-tcount aria-live="polite">
               // {page.total} {page.total === 1 ? 'transmission' : 'transmissions'}
             </p>
@@ -145,17 +148,23 @@ const BAND_SCENES = ['uprising', 'kinship'];
       </p>
 
       {page.lastPage > 1 && (
-        <nav class="tpager" aria-label="Archive pages" data-tpager>
+        <nav class="sl-pagination tpager" aria-label="Archive pages" data-tpager>
           {page.url.prev ? (
-            <a class="tpager__link" href={page.url.prev}>← Newer</a>
+            <a class="sl-pagination__item" href={page.url.prev} rel="prev">← Newer</a>
           ) : (
-            <span class="tpager__link tpager__link--off">← Newer</span>
+            <span class="sl-pagination__item tpager__off" aria-disabled="true">← Newer</span>
           )}
-          <span class="tpager__pos">{pageLabel}</span>
+          {pageNumbers.map((n) => (
+            <a
+              class="sl-pagination__item"
+              href={pageHref(n)}
+              aria-current={n === page.currentPage ? 'page' : undefined}
+            >{String(n).padStart(2, '0')}</a>
+          ))}
           {page.url.next ? (
-            <a class="tpager__link" href={page.url.next}>Older →</a>
+            <a class="sl-pagination__item" href={page.url.next} rel="next">Older →</a>
           ) : (
-            <span class="tpager__link tpager__link--off">Older →</span>
+            <span class="sl-pagination__item tpager__off" aria-disabled="true">Older →</span>
           )}
         </nav>
       )}
@@ -253,41 +262,9 @@ const BAND_SCENES = ['uprising', 'kinship'];
     --gx: 6px;
   }
 
-  /* Search: a readout line, not a form control. Rule underneath only. */
-  .tsearch { display: block; }
+  /* Search: the kit's field. The kit makes .sl-field a flex column, which
+     outranks the UA's [hidden] rule, so the JS-only reveal needs this back. */
   .tsearch[hidden] { display: none; }
-  .tsearch__label {
-    display: block;
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--sl-text-secondary);
-    margin-bottom: 0.6rem;
-  }
-  .tsearch__input {
-    width: 100%;
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--sl-border-default);
-    border-radius: 0;
-    padding: 0.4rem 0 0.55rem;
-    color: var(--sl-text-primary);
-    caret-color: var(--sl-accent-default);
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-sm);
-    letter-spacing: 0.04em;
-    transition: border-color var(--sl-motion-fast) var(--sl-motion-ease);
-  }
-  .tsearch__input::placeholder { color: var(--sl-text-muted); }
-  .tsearch__input:focus {
-    outline: none;
-    border-bottom-color: var(--sl-accent-default);
-  }
-  /* Strip the UA clear button; the readout keeps its own type. */
-  .tsearch__input::-webkit-search-cancel-button { appearance: none; }
 
   .tlog-head .sl-eyebrow { color: var(--sl-text-secondary); }
   .tlog-count {
@@ -333,13 +310,13 @@ const BAND_SCENES = ['uprising', 'kinship'];
     font-variant-numeric: tabular-nums;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
-  .trow:hover .trow__date { color: var(--sl-accent-default); }
+  .trow:hover .trow__date { color: var(--slc-accent-text); }
   .trow__no { font-weight: 200; color: var(--sl-text-muted); }
 
   /* Vertical rule fills from the top on hover: the signal locking on. */
   .trow__rule {
     align-self: stretch;
-    background: var(--sl-accent-default);
+    background: var(--slc-accent-text);
     opacity: 0;
     transform: scaleY(0);
     transform-origin: top;
@@ -360,7 +337,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
     letter-spacing: -0.015em;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
-  .trow:hover .trow__title { color: var(--sl-accent-default); }
+  .trow:hover .trow__title { color: var(--slc-accent-text); }
   .trow__summary {
     display: block;
     margin-top: 0.6rem;
@@ -380,7 +357,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
   }
   .trow__go {
     font-size: var(--sl-text-lg);
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     opacity: 0;
     transform: translateX(-0.4rem);
     transition:
@@ -420,31 +397,14 @@ const BAND_SCENES = ['uprising', 'kinship'];
   }
   .tlog-empty[hidden] { display: none; }
 
+  /* The pager is the kit's pagination; the site keeps its spacing, and the
+     same [hidden] guard as the search (the filter hides the pager). */
   .tpager {
     margin-top: clamp(2.5rem, 6vw, 4rem);
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1.5rem;
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    flex-wrap: wrap;
   }
   .tpager[hidden] { display: none; }
-  .tpager__link {
-    text-decoration: none;
-    color: var(--sl-text-secondary);
-    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
-  }
-  .tpager__link:hover { color: var(--sl-accent-default); }
-  .tpager__link--off { color: var(--sl-text-muted); opacity: 0.5; }
-  .tpager__pos {
-    color: var(--sl-text-muted);
-    font-weight: 200;
-    font-variant-numeric: tabular-nums;
-  }
+  .tpager__off { opacity: 0.5; }
 </style>
 
 <script>

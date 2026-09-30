@@ -104,7 +104,7 @@ const cue = [
   }
   .hero__claim span { display: block; }
   .hero__claim-accent {
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
     font-style: italic;
     --gx: 6px; /* bigger split; the display word is large */
@@ -152,7 +152,7 @@ const cue = [
   .hero__cue {
     --px: 5px;
     --gap: 8px; /* dot pitch, a touch airier than the dot size */
-    --c: var(--sl-accent-default);
+    --c: var(--slc-accent-text);
     position: relative;
     display: block;
     width: calc(6 * var(--gap) + var(--px));
@@ -248,7 +248,7 @@ const cue = [
     border: 0;
     padding: 0;
     border-radius: 0;
-    color: var(--sl-accent-default);
+    color: var(--slc-accent-text);
     font-family: var(--sl-font-mono);
     font-weight: 400;
     font-size: var(--sl-text-sm);
@@ -264,13 +264,15 @@ const cue = [
      tokens are the right ones. The earlier light-theme override existed only
      because the tube used to stay dark. */
   .hero[data-crt='on'] .hero__ghost { color: var(--sl-text-primary); }
-  /* The fallback hero fills this button, so its label sits on amber. Here the
-     label is the amber, on paper — and the accent as-is measures 4.09:1 there
-     (worst pixel, ui-kit 0.21.1). Darkening the same token to 75% clears the
-     4.5:1 floor (6.11:1) and stays close to the brand amber; 52% cleared it
-     by more (8.76:1) but read as brown. */
+  /* The fallback hero fills this button, so its label sits on the accent.
+     Here the label is the accent, on paper. Until ui-kit 0.24 that meant
+     darkening the token by hand (75% toward black, 6.11:1 on the 0.21 amber);
+     since 0.24 the light accent is the bright fill and the kit derives its
+     text-safe reading, --slc-accent-text. That reads 4.35:1 worst pixel over
+     the tube's vignette (contrast-probe, 0.24), so the label sits one oklch
+     step (0.05) below it. */
   :global(:root[data-sl-theme='light']) .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
-    color: color-mix(in srgb, var(--sl-accent-default) 75%, black);
+    color: oklch(from var(--slc-accent-text) calc(l - 0.05) c h);
   }
 </style>
 

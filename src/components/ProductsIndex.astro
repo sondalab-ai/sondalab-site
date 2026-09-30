@@ -64,7 +64,7 @@ const usedStatuses = [
                       ))}
                     </span>
                   </h3>
-                  {meta && <span class="prow__status">{meta.label}</span>}
+                  {meta && <span class="sl-tag">{meta.label}</span>}
                 </div>
                 <p class="prow__tagline">{p.data.tagline}</p>
                 <p class="prow__summary" set:html={p.data.summary}></p>
@@ -133,6 +133,16 @@ const usedStatuses = [
 
   .products__list li { --row-accent: var(--row-accent-dark); }
   :root[data-sl-theme='light'] .products__list li { --row-accent: var(--row-accent-light); }
+  /* The row's hue as text and thin lines, and the tag's wash in it. The kit
+     derives both on :root from the default accent, so a row re-derives them
+     from its own hue with the kit's formulas (components.css): on light the
+     text caps the lightness at --sl-accent-text-lmax, elsewhere it is the hue.
+     --slc-accent itself is left alone, so the glass and aurora keep theirs. */
+  .products__list li {
+    --row-accent-text: oklch(from var(--row-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
+    --slc-accent-text: var(--row-accent-text);
+    --slc-accent-subtle: color-mix(in srgb, var(--row-accent) 12%, transparent);
+  }
 
   /* The numeral is a sibling now, not a cell, and the left padding is its
      gutter. See site.css: a pane inside a pane gets no lens. */
@@ -168,14 +178,14 @@ const usedStatuses = [
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
   }
   .prow:focus-visible {
-    outline: var(--sl-focus-ring-width) solid var(--sl-accent-default);
+    outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: 2px;
   }
 
   .prow__go {
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-lg);
-    color: var(--row-accent);
+    color: var(--row-accent-text);
     opacity: 0;
     transform: translateX(-0.4rem);
     transition: opacity var(--sl-motion-mid) var(--sl-motion-ease),
@@ -196,7 +206,7 @@ const usedStatuses = [
   .prow__rule {
     align-self: stretch;
     width: 3px;
-    background: var(--row-accent);
+    background: var(--row-accent-text);
     border-radius: var(--sl-radius-pill);
     transform: scaleY(0.35);
     transform-origin: center;
@@ -220,17 +230,6 @@ const usedStatuses = [
     margin: 0;
     letter-spacing: -0.01em;
     --gx: 3px;
-  }
-  .prow__status {
-    font-family: var(--sl-font-mono);
-    font-weight: 300;
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--row-accent);
-    padding: 0.15em 0.6em;
-    border: 1px solid color-mix(in srgb, var(--row-accent) 45%, transparent);
-    border-radius: var(--sl-radius-pill);
   }
   .prow__tagline {
     margin: 0.5rem 0 0;
