@@ -82,6 +82,9 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
   /* The kit's segmented control, compacted to sit in a 4rem header row. */
   .site-header__theme .sl-segmented__item {
     padding: 0.3rem 0.6rem;
+    /* Keeps the pre-0.27 height: the kit moved segmented items to
+       line-height 1 for its 32px control height. */
+    line-height: normal;
   }
 
   /* The full nav needs ~800px beside the brand and the toggle; below 52rem it
