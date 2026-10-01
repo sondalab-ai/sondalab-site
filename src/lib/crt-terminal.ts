@@ -15,7 +15,7 @@ import { SITE } from './site';
 import { NOVELLAS } from './novellas';
 
 /** Chapter order matches the products' order: one long night, 2am to dawn. */
-const ORDER = ['spexr', 'introspect', 'claude-loadout', 'daos', 'local-agents', 'skillkit'] as const;
+const ORDER = ['spexr', 'introspect', 'claude-loadout', 'daos', 'local-agents', 'skillkit', 'mxm'] as const;
 const HOURS: Record<string, string> = {
   spexr: '02:00',
   introspect: '03:00',
@@ -23,6 +23,7 @@ const HOURS: Record<string, string> = {
   daos: '05:00',
   'local-agents': '06:00',
   skillkit: '07:00',
+  mxm: '08:00',
 };
 
 type Kind =
