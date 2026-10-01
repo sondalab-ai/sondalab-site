@@ -36,6 +36,11 @@ export const NOVELLAS: Record<string, string[]> = {
   skillkit: [
     "7 a.m., and it's the small things that carry a shift: the skills you keep on the shelf, each a plain capability the agent can run on command. You pick the ones tonight needs, install them clean, and when they've served their turn they come off just as cleanly, your recorded work untouched.",
     "The service would rather sell you a suite you can't take apart. You'd rather own a toolbox: add, remove, know exactly what's in your hand.",
-    "The sun's up. The machines worked all night, and every log is still yours to read. The switch is still where you left it. End of shift.",
+    "The sun's up. The machines worked all night, and every log is still yours to read. One thing left before you go.",
+  ],
+  mxm: [
+    "8 a.m. The shift is over, and the worst thing the night could do now is vanish. Tomorrow's session would wake up blank, walk into tonight's dead ends, ask tonight's questions. So before you log off, the night gets written down: every exchange kept in one file on your own disk, distilled into a handful of facts, each checked against what was actually said.",
+    "The service would gladly remember for you, in a vault you'll never open, and decide what you're allowed to recall. Here the memory speaks only when it has something that stands out, and you can open it, read it, move it, delete it. Nothing it knows is out of your sight.",
+    "Tomorrow night starts where this one ended. The switch is yours. End of shift.",
   ],
 };
