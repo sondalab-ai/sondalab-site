@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "@sondalab/ui-kit": "^0.27.1",
+    "@sondalab/ui-kit": "^0.28.0",
     "astro": "^7.2.5",
     "vgpu": "0.3.1"
   },
