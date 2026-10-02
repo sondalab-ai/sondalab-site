@@ -296,7 +296,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
       row += line.h;
       if (line.kind === 'blank') return;
 
-      ctx.font = `${Math.round(cellH * st.size)}px "Martian Mono Variable", ui-monospace, Menlo, monospace`;
+      ctx.font = `${Math.round(cellH * st.size)}px "Geist Mono", ui-monospace, Menlo, monospace`;
       let x = cellW * 3;
 
       if (line.kind === 'prompt') {
@@ -345,7 +345,7 @@ export function createTerminal(opts: TerminalOptions = {}) {
     const midRow = Math.floor(ROWS / 2);
     const x = cellW * 3;
     const mono = (k: number) =>
-      `${Math.round(cellH * k)}px "Martian Mono Variable", ui-monospace, Menlo, monospace`;
+      `${Math.round(cellH * k)}px "Geist Mono", ui-monospace, Menlo, monospace`;
 
     ctx.font = mono(0.62);
     ctx.fillStyle = style.meta.color;

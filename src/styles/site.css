@@ -4,10 +4,18 @@
  * ------------------------------------------------------------------ */
 
 :root {
-  /* Prefer the self-hosted variable faces; DS names stay as fallback. */
-  --sl-font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
-  --sl-font-sans: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
-  --sl-font-mono: 'Martian Mono Variable', 'Martian Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* The faces are the kit's tokens (Geist, Geist Mono, and Fraunces as
+     --sl-font-brand for the wordmark only), loaded by fonts.css in Base.astro.
+
+     The light mono is this site's signature, cut in Martian Mono at 100, 200
+     and 300 until ui-kit 0.30. Geist Mono draws a thinner stem at the same
+     weight number, so each step is re-matched by measured stem width at equal
+     font-size (Martian 100/200/300 = 9.2/15.3/20.8px at 200px; Geist Mono
+     150/300/400 = 9.2/14.2/17.9px, the 400 matching on stem-to-cap ratio).
+     One place to tune all three. */
+  --mono-thin: 150;
+  --mono-hair: 300;
+  --mono-light: 400;
 
   /* Layout */
   --wrap: 76rem;
@@ -64,7 +72,7 @@ a { color: inherit; }
  * --------------------------------------------------------------------- */
 
 /* The site's measure is 76rem with a 4rem gutter cap, not the kit's 78/6rem:
-   the header's nav collapse (52rem) and the product rows' numeral gutter were
+   the header's nav collapse (48rem) and the product rows' numeral gutter were
    measured against it (scripts/layout-probe.mjs). The kit declares the gutter
    in-class, so it is re-pointed here rather than on :root. */
 .sl-wrap {
@@ -72,12 +80,13 @@ a { color: inherit; }
   max-width: var(--wrap);
 }
 
-/* The site's eyebrow is lighter (300, not the kit's 500) and carries a leading
-   accent dash; inline-flex is what seats the dash, and three page heads
-   (blog, post, product) rely on it being inline-flex. The dash is a 1px line,
-   so it takes the accent-as-text role: the raw light-theme accent is a fill. */
+/* The site's eyebrow is lighter (the light mono, not the kit's 500) and
+   carries a leading accent dash; inline-flex is what seats the dash, and three
+   page heads (blog, post, product) rely on it being inline-flex. The dash is a
+   1px line, so it takes the accent-as-text role: the raw light-theme accent is
+   a fill. Size and tracking are the kit's micro register (0.30). */
 .sl-eyebrow {
-  font-weight: 300;
+  font-weight: var(--mono-light);
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
@@ -89,23 +98,25 @@ a { color: inherit; }
   background: var(--slc-accent-text);
 }
 
+/* Display and section heads are Geist 600 since ui-kit 0.30 (Fraunces is the
+   wordmark's alone). Geist closes up as it grows, so the tracking follows the
+   size: the kit's -0.05em on display type, set solid, and Lumen's -0.045em at
+   the h2 scale (Lumen: 34px -0.045em, 44px -0.05em, 84px -0.06em). */
 .display {
   font-family: var(--sl-font-display);
-  font-weight: 380;
-  font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
+  font-weight: 600;
   font-size: var(--step-display);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.05em;
   margin: 0;
 }
 
 .h2 {
   font-family: var(--sl-font-display);
-  font-weight: 420;
-  font-variation-settings: 'opsz' 72, 'WONK' 1;
+  font-weight: 600;
   font-size: var(--step-h2);
   line-height: 1.04;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.045em;
   margin: 0;
 }
 
@@ -127,7 +138,7 @@ a { color: inherit; }
    (the kit's index is muted): a lighter, larger figure in the accent-as-text
    role, which the inversion band (Thesis) re-points to the uncapped accent. */
 .sl-section__idx {
-  font-weight: 200;
+  font-weight: var(--mono-hair);
   font-size: var(--sl-text-sm);
   letter-spacing: 0.1em;
   color: var(--slc-accent-text);
@@ -226,7 +237,7 @@ a { color: inherit; }
   z-index: 2;
   display: block;
   font-family: var(--sl-font-mono);
-  font-weight: 200;
+  font-weight: var(--mono-hair);
   font-size: var(--step-numeral);
   line-height: 0.8;
   letter-spacing: -0.02em;
@@ -250,13 +261,16 @@ a { color: inherit; }
   position: relative;
   transition: transform 420ms cubic-bezier(0.22, 0.61, 0.28, 1);
   /* THE GUTTER, declared once because getting it wrong is an overlap. The
-     figure is 168px at the 7rem cap and starts --gnum-inset from the slot's
-     left edge, so the card's own content has to begin past the sum of the two
-     — and a card with a negative inline margin (the product rows bleed past
-     their list) has to add that back, or its text starts further left than the
-     slot does and runs under the numeral. */
+     figure is 146px at the 7rem cap (two Geist Mono digits, 1.3em) and starts
+     --gnum-inset from the slot's left edge, so the card's own content has to
+     begin past the sum of the two — and a card with a negative inline margin
+     (the product rows bleed past their list) has to add that back, or its
+     text starts further left than the slot does and runs under the numeral.
+     Re-cut for Geist Mono (ui-kit 0.30): the Martian Mono figure was 1.5em, so
+     the gutter gives back the 0.2em, which holds the measured clearance from
+     the figure to the row's rule where it was (1px at 660px, 38px at 1440). */
   --gnum-inset: clamp(0.9rem, 2.4vw, 1.7rem);
-  --gnum-gutter: clamp(7rem, 18vw, 14.5rem);
+  --gnum-gutter: clamp(6.45rem, 16.4vw - 0.2rem, 13.1rem);
 }
 .gnum-slot:has(> .sl-fx-glass--pane:hover:not(:disabled)),
 .gnum-slot:has(> .sl-fx-glass--pane:focus-visible) {
@@ -318,18 +332,18 @@ a { color: inherit; }
 .article-prose h2,
 .article-prose h3 {
   font-family: var(--sl-font-display);
-  font-variation-settings: 'opsz' 48, 'WONK' 1;
+  font-weight: 600;
   line-height: 1.15;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.03em;
   color: var(--sl-text-primary);
 }
-.article-prose h2 { font-weight: 440; font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
-.article-prose h3 { font-weight: 480; font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
+.article-prose h2 { font-size: var(--step-h3); margin: 2.75rem 0 1rem; }
+.article-prose h3 { font-size: var(--sl-text-xl); margin: 2.25rem 0 0.85rem; }
 /* Section headers read as log markers, matching the transmissions index. */
 .article-prose h2::before {
   content: '// ';
   font-family: var(--sl-font-mono);
-  font-weight: 300;
+  font-weight: var(--mono-light);
   font-size: 0.7em;
   color: var(--slc-accent-text);
 }

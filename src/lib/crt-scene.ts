@@ -448,7 +448,7 @@ export async function createScene(id: string | string[], opts: SceneOptions = {}
 
     ctx.globalCompositeOperation = 'source-over';
     ctx.textBaseline = 'middle';
-    ctx.font = '20px "Martian Mono Variable", ui-monospace, Menlo, monospace';
+    ctx.font = '20px "Geist Mono", ui-monospace, Menlo, monospace';
     ctx.fillStyle = fade(token('--sl-text-primary'), 0.55);
     ctx.fillText('-- carrier lost --', 40, canvas.height - 46);
     dirty = false;

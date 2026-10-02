@@ -103,17 +103,17 @@ const cue = [
     max-width: 18ch;
   }
   .hero__claim span { display: block; }
+  /* Upright since ui-kit 0.30: Geist has no italic and the kit serves none, so
+     `italic` would only be a synthesised slant. The accent colour carries it. */
   .hero__claim-accent {
     color: var(--slc-accent-text);
-    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
-    font-style: italic;
     --gx: 6px; /* bigger split; the display word is large */
   }
 
   .hero__tagline {
     margin-top: 2rem;
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-md);
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -129,7 +129,7 @@ const cue = [
   }
   .hero__ghost {
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-sm);
     letter-spacing: 0.08em;
     text-decoration: none;
