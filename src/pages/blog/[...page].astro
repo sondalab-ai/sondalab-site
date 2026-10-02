@@ -253,11 +253,10 @@ const BAND_SCENES = ['uprising', 'kinship'];
        as an inline box this heading shares a line with the eyebrow. */
     display: block;
     font-family: var(--sl-font-display);
-    font-weight: 400;
-    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-weight: 600;
     font-size: var(--step-display);
     line-height: 1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.05em;
     margin: 1.75rem 0 0;
     --gx: 6px;
   }
@@ -270,7 +269,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
   .tlog-count {
     margin: 1.25rem 0 0;
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -305,13 +304,13 @@ const BAND_SCENES = ['uprising', 'kinship'];
     letter-spacing: 0.1em;
   }
   .trow__date {
-    font-weight: 300;
+    font-weight: var(--mono-light);
     color: var(--sl-text-secondary);
     font-variant-numeric: tabular-nums;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
   .trow:hover .trow__date { color: var(--slc-accent-text); }
-  .trow__no { font-weight: 200; color: var(--sl-text-muted); }
+  .trow__no { font-weight: var(--mono-hair); color: var(--sl-text-muted); }
 
   /* Vertical rule fills from the top on hover: the signal locking on. */
   .trow__rule {
@@ -330,11 +329,10 @@ const BAND_SCENES = ['uprising', 'kinship'];
   .trow__title {
     display: block;
     font-family: var(--sl-font-display);
-    font-weight: 440;
-    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-weight: 600;
     font-size: var(--step-h3);
     line-height: 1.1;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.03em;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
   .trow:hover .trow__title { color: var(--slc-accent-text); }
@@ -349,7 +347,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
 
   .trow__mins {
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.1em;
     color: var(--sl-text-muted);
@@ -390,7 +388,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
   .tlog-empty {
     margin: 2.5rem 0 0;
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-sm);
     letter-spacing: 0.08em;
     color: var(--sl-text-muted);

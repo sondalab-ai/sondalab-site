@@ -37,9 +37,11 @@ const wmShards = Array.from({ length: WM_BANDS }, (_, i) => i);
   .wordmark {
     display: inline-flex;
     align-items: baseline;
-    font-family: var(--sl-font-display);
+    /* The brand face: since ui-kit 0.30 Fraunces is the wordmark's alone, and
+       the kit's file carries the optical-size axis this cut is pinned to. */
+    font-family: var(--sl-font-brand);
     font-weight: 500;
-    font-variation-settings: 'opsz' 40, 'WONK' 0;
+    font-variation-settings: 'opsz' 40;
     font-size: var(--wm-size);
     letter-spacing: -0.05em;
     line-height: 1;

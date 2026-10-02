@@ -249,7 +249,7 @@ const ledger = [
   .ap-ledger__row:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
   .ap-ledger__key {
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -325,7 +325,7 @@ const ledger = [
   .crow__no {
     grid-area: no;
     font-family: var(--sl-font-mono);
-    font-weight: 100;
+    font-weight: var(--mono-thin);
     font-size: clamp(3.5rem, 1.5rem + 9vw, 9.5rem);
     line-height: 0.78;
     color: var(--sl-text-muted);
@@ -428,11 +428,10 @@ const ledger = [
   .crow__label {
     display: block;
     font-family: var(--sl-font-display);
-    font-weight: 440;
-    font-variation-settings: 'opsz' 60, 'WONK' 1;
+    font-weight: 600;
     font-size: var(--step-h2);
     line-height: 1.02;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.045em;
   }
   .crow__note {
     display: block;
@@ -504,7 +503,7 @@ const ledger = [
   .ap-band__state {
     margin: 0;
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -512,10 +511,9 @@ const ledger = [
   }
   .ap-band__cta {
     font-family: var(--sl-font-display);
-    font-weight: 400;
-    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-weight: 500;
     font-size: var(--step-h3);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
     text-decoration: none;
     color: var(--sl-text-primary);
     border-bottom: 2px solid var(--slc-accent-text);

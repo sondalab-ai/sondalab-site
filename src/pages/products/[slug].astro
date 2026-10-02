@@ -227,7 +227,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .product__back {
     display: inline-block;
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -246,11 +246,10 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
        as an inline box this heading shares a line with the eyebrow. */
     display: block;
     font-family: var(--sl-font-display);
-    font-weight: 400;
-    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-weight: 600;
     font-size: var(--step-display);
     line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.05em;
     margin: 1.75rem 0 0;
     --gx: 6px;
   }
@@ -261,8 +260,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-text-secondary);
     max-width: 24ch;
     font-family: var(--sl-font-display);
-    font-weight: 340;
-    font-variation-settings: 'opsz' 40;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
   .product__meta {
     margin-top: 2rem;
@@ -273,7 +272,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .product__meta-note {
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.04em;
     color: var(--sl-text-muted);
@@ -300,7 +299,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .factsheet dt {
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -309,7 +308,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .factsheet dd {
     margin: 0;
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-sm);
     color: var(--sl-text-primary);
   }
@@ -348,7 +347,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .product__private {
     margin-top: 2rem;
     font-family: var(--sl-font-mono);
-    font-weight: 200;
+    font-weight: var(--mono-hair);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.04em;
     color: var(--sl-text-muted);
@@ -372,7 +371,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .product__nav-link--next { text-align: right; }
   .product__nav-dir {
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -380,9 +379,9 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .product__nav-name {
     font-family: var(--sl-font-display);
-    font-weight: 440;
-    font-variation-settings: 'opsz' 48, 'WONK' 1;
+    font-weight: 600;
     font-size: var(--step-h3);
+    letter-spacing: -0.03em;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
     --gx: 3px;
   }
@@ -398,7 +397,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .novella__marker {
     display: inline-block;
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -410,12 +409,12 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     padding-left: clamp(1rem, 3vw, 2rem);
     border-left: 2px solid color-mix(in srgb, var(--slc-accent-text) 40%, transparent);
   }
+  /* Upright since ui-kit 0.30 (was Fraunces italic): Geist has no italic and
+     the kit serves none. The accent rule and the secondary ink set it apart. */
   .novella__p {
     margin: 0 0 1.15rem;
     font-family: var(--sl-font-display);
-    font-weight: 360;
-    font-style: italic;
-    font-variation-settings: 'opsz' 40, 'WONK' 0;
+    font-weight: 400;
     font-size: clamp(1.2rem, 1.05rem + 0.45vw, 1.35rem);
     line-height: 1.65;
     color: var(--sl-text-secondary);

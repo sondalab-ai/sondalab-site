@@ -67,7 +67,7 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
     display: flex;
     gap: 1.75rem;
     font-family: var(--sl-font-mono);
-    font-weight: 300;
+    font-weight: var(--mono-light);
     font-size: var(--sl-text-xs);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -87,10 +87,11 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
     line-height: normal;
   }
 
-  /* The full nav needs ~800px beside the brand and the toggle; below 52rem it
-     overflowed the page (765-776px wide at 560-768). Collapse to the kept
-     entries there, not only on phones. scripts/layout-probe.mjs guards it. */
-  @media (max-width: 51.99rem) {
+  /* The full nav needs ~754px beside the brand and the toggle in Geist Mono
+     (ui-kit 0.30; it was ~824px in Martian Mono, collapsed below 52rem); below
+     that it overflows the page. Collapse to the kept entries under 48rem, not
+     only on phones. scripts/layout-probe.mjs guards it. */
+  @media (max-width: 47.99rem) {
     .site-header__nav a:not([data-keep]) { display: none; }
     /* Two entries survive the collapse, so the gap still has to separate them.
        The row gap gives back exactly what the nav gap takes, so the header is
@@ -103,6 +104,6 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
   @media (max-width: 26rem) {
     .site-header__inner { gap: 0.5rem; }
     .site-header__nav { gap: 0.6rem; letter-spacing: 0.08em; }
-    .site-header__theme .sl-segmented__item { padding: 0.3rem 0.4rem; letter-spacing: 0.06em; }
+    .site-header__theme .sl-segmented__item { padding: 0.3rem 0.4rem; }
   }
 </style>
