@@ -72,6 +72,12 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
             <span class="product__meta-note">{meta.note}</span>
           </div>
         )}
+
+        {data.fullPage && (
+          <p class="product__full">
+            <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-glass--pane sl-fx-press sl-fx-aurora sl-fx-aurora--rim" href={data.fullPage.href}>{data.fullPage.label} →</a>
+          </p>
+        )}
       </header>
 
       <div class="product__body">
@@ -274,6 +280,9 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     gap: 1rem;
     flex-wrap: wrap;
   }
+  /* The long-form page, when a product has one: the head's one action, above
+     the fold on every width (the aside falls below the prose on a phone). */
+  .product__full { margin: 2rem 0 0; }
   .product__meta-note {
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-hair);

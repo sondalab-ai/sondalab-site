@@ -40,6 +40,17 @@ const products = defineCollection({
     links: z
       .array(z.object({ label: z.string(), href: z.string().url() }))
       .default([]),
+    /**
+     * The product's long-form page on this site (e.g. /daos/), linked from its
+     * product page. An internal path with the trailing slash every site URL
+     * carries (astro.config.mjs); `links` is for absolute external URLs only.
+     */
+    fullPage: z
+      .object({
+        href: z.string().regex(/^\/[a-z0-9-]+(\/[a-z0-9-]+)*\/$/),
+        label: z.string(),
+      })
+      .optional(),
     /** One-sentence "does X to solve Y" for the index row. */
     summary: z.string(),
   }),
