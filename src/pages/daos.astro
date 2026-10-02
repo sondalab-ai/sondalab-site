@@ -441,15 +441,6 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
      spacing/type tokens. Where the site's own globals (site.css) would leak
      in, the page's class names differ (.hero-lede, not .lede). */
 
-  /* The faint third text tier, below --slc-text-muted, for glyphs that carry
-     no words (×, →, ordinals, §). Declared again on the inversion band's
-     children so it is re-derived from the band's own text. Word-bearing labels
-     that sat on it in the landing measured 1.4–2.8:1 and use muted here. */
-  .daos,
-  .daos .sl-invert > * {
-    --soft: color-mix(in srgb, var(--slc-text) 34%, transparent);
-  }
-
   .daos {
     position: relative;
     font-size: clamp(1rem, 0.96rem + 0.2vw, 1.075rem);
@@ -723,7 +714,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   }
   .daos .proof-foot .pf-k { color: var(--slc-text); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
   .daos .proof-foot .pf-v { color: var(--slc-text-muted); flex: 1; min-width: 14ch; letter-spacing: 0.02em; }
-  .daos .proof-foot .pf-ref { color: var(--soft); letter-spacing: 0.14em; }
+  .daos .proof-foot .pf-ref { color: var(--slc-text-muted); letter-spacing: 0.14em; }
 
   /* ---- sections --------------------------------------------------------- */
   /* A denser rhythm than the site's 8rem: this is one long argument, not a
@@ -781,7 +772,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     color: var(--slc-text-secondary);
     padding-block: var(--sl-space-1);
   }
-  .daos .layers li .g { font-family: var(--sl-font-mono); color: var(--soft); font-size: 0.78rem; }
+  .daos .layers li .g { font-family: var(--sl-font-mono); color: var(--slc-text-muted); font-size: 0.78rem; }
   .daos .layers li.gone { color: var(--slc-text-muted); }
   .daos .layers li.gone .g { color: var(--slc-text); }
   .daos .layers li.stays .g { color: var(--slc-accent-text); }
@@ -813,7 +804,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     flex-wrap: wrap;
   }
   .daos .bcard .from b { color: var(--slc-text); font-weight: 600; }
-  .daos .bcard .arrow { color: var(--soft); }
+  .daos .bcard .arrow { color: var(--slc-text-muted); }
   .daos .bcard h3 { font-size: 1.1rem; margin: 0 0 var(--sl-space-2); }
   .daos .bcard p { margin: 0; color: var(--slc-text-secondary); font-size: 0.95rem; }
   .daos .bcard .constraint {
@@ -900,7 +891,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     font-family: var(--sl-font-mono);
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--soft);
+    color: var(--slc-text-muted);
     font-variant-numeric: tabular-nums;
     padding-top: 0.15rem;
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
@@ -918,7 +909,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   /* ---- 06 · limits ------------------------------------------------------- */
   .daos .limits-intro { margin: 0 0 2rem; max-width: 58ch; }
   .daos .limit h3 { font-size: 1.02rem; margin: 0 0 var(--sl-space-2); display: flex; gap: var(--sl-space-3); }
-  .daos .limit h3 .x { font-family: var(--sl-font-mono); color: var(--soft); }
+  .daos .limit h3 .x { font-family: var(--sl-font-mono); color: var(--slc-text-muted); }
   .daos .limit p { margin: 0; color: var(--slc-text-muted); font-size: 0.95rem; }
   .daos .limit p .mono { color: var(--slc-text-secondary); }
 
