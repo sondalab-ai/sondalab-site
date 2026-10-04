@@ -14,71 +14,89 @@
 // Two modes:
 //
 //   node scripts/contrast-probe.mjs <url> <selector> [<selector> ...]
-//     Named targets on one page. Gates on the WORST pixel, the one a reader
-//     actually struggles with.
+//     Named targets on one page, 1440px. Measures a Range over the element's
+//     contents (a `::before` dash beside the words is not their ground) and
+//     gates on the WORST pixel, the one a reader actually struggles with.
 //
 //   node scripts/contrast-probe.mjs <baseUrl> --all [<path> ...]
+//       [--widths 1440,390] [--gpu on,off]
 //     Every text element on every page reachable from `/` (or on the paths
-//     given), at 1440px, both themes. Gates on the 5th percentile of each
-//     element's pixels and prints the worst beside it: across hundreds of
-//     line boxes the worst pixel is a stray hairline or a photo's edge as
-//     often as it is the ground. A failure is measured a second time after a
-//     pause, since an ambient glitch burst can land on a sample, and only one
-//     that fails twice is reported. Each line also prints what the old,
-//     opaque reading gave; failures it would have passed are marked NEW.
-//     Glass text (the numerals cut out of their pane, and the light copy
-//     seated behind them) is a picture with a screen-reader copy and is not
-//     measured; nor are glitch shards or visually hidden boxes. A disabled
-//     control (`:disabled`, `aria-disabled="true"`) is skipped as WCAG 1.4.3
-//     exempts it: an inactive control is meant to read as one.
+//     given), both themes, at each width, with WebGPU on (the CRT surfaces)
+//     and off (the fallback most visitors get). Gates on the 5th percentile of
+//     each element's pixels and prints the worst beside it: across hundreds
+//     of line boxes the worst pixel is a stray hairline or a photo's edge as
+//     often as it is the ground. An element that cannot be measured fails.
+//     A failure is measured a second time after a pause, since an ambient
+//     glitch burst can land on a sample; one that passes the second time is
+//     printed as a warning, one that fails twice as a failure. Failures the
+//     old, opaque reading would have passed are marked NEW.
+//     Not measured, and counted per reason: glass text (numerals cut out of
+//     their pane, with a screen-reader copy), glitch shards, visually hidden
+//     boxes, disabled controls (WCAG 1.4.3 exempts them), form controls, and
+//     text never wholly in view and uncovered (a carousel's off-screen items).
+//     A sticky element is measured where it first comes into view.
+//     `npm run contrast:all -- <baseUrl>` runs the full matrix.
 import puppeteer from 'puppeteer-core';
-import { contrastStats, floorFor, inkFromPaints, readTextInk } from './contrast-math.mjs';
+import { belowFloor, contrastStats, floorFor, inkFromPaints, readTextInk } from './contrast-math.mjs';
 import { decodePng, sleep } from './probe-kit.mjs';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const THEMES = ['dark', 'light'];
-const W = 1440;
-const H = 900;
-const [url, ...rest] = process.argv.slice(2);
+const GPU_FLAGS = ['--enable-unsafe-webgpu', '--use-angle=metal', '--enable-features=Vulkan,WebGPU'];
 // The sweep hides every glyph at once with this sheet, for one photograph per view.
 const HIDE_ID = 'contrast-probe-hide';
 const HIDE_CSS = '*, *::before, *::after { -webkit-text-fill-color: transparent !important; text-decoration-color: transparent !important; caret-color: transparent !important; }';
 
-if (!url || rest.length === 0) {
-  console.error('usage: contrast-probe.mjs <url> <selector> [...]\n       contrast-probe.mjs <baseUrl> --all [<path> ...]');
+const argv = process.argv.slice(2);
+const url = argv.find((a) => /^https?:/.test(a));
+const flag = (name, fallback) => {
+  const i = argv.indexOf(name);
+  return i >= 0 ? argv[i + 1] : fallback;
+};
+const flagValues = new Set(['--widths', '--gpu'].flatMap((f) => (argv.includes(f) ? [flag(f)] : [])));
+const positional = argv.filter((a) => a !== url && !a.startsWith('--') && !flagValues.has(a));
+const sweepMode = argv.includes('--all');
+
+if (!url || (!sweepMode && positional.length === 0)) {
+  console.error('usage: contrast-probe.mjs <url> <selector> [...]\n       contrast-probe.mjs <baseUrl> --all [<path> ...] [--widths 1440,390] [--gpu on,off]');
   process.exit(2);
 }
 
-const launch = () => puppeteer.launch({
+const launch = (gpu = true) => puppeteer.launch({
   executablePath: CHROME,
   headless: 'new',
-  args: ['--no-sandbox', '--hide-scrollbars'],
+  args: ['--no-sandbox', '--hide-scrollbars', ...(gpu ? GPU_FLAGS : [])],
 });
 const browser = await launch();
 
-async function openPage(target, theme, on = browser) {
+const heightFor = (width) => (width > 500 ? 900 : 844);
+
+async function openPage(target, { theme, width = 1440, gpu = true }, on = browser) {
   const page = await on.newPage();
-  await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
-  await page.evaluateOnNewDocument((t) => {
+  await page.setViewport({ width, height: heightFor(width), deviceScaleFactor: 1 });
+  await page.evaluateOnNewDocument((t, withGpu) => {
     try {
       localStorage.setItem('sl-theme', t);
     } catch {
       /* private mode; the default theme is fine for the measurement */
     }
-  }, theme);
+    // Without WebGPU the site renders its fallback surfaces (the flat hero,
+    // the static scenes), which is what most visitors see.
+    if (!withGpu) Object.defineProperty(navigator, 'gpu', { get: () => undefined, configurable: true });
+  }, theme, gpu);
   await page.goto(target, { waitUntil: 'networkidle0', timeout: 60000 });
   return page;
 }
 
-const ok = rest[0] === '--all' ? await sweep(url.replace(/\/$/, ''), rest.slice(1)) : await targets(url, rest);
+const ok = sweepMode ? await sweep(url.replace(/\/$/, ''), positional) : await targets(url, positional);
 await browser.close();
 process.exit(ok ? 0 : 1);
 
-/** Named selectors on one page, worst pixel. */
+/** Named selectors on one page, worst pixel of a Range over each one's contents. */
 async function targets(target, selectors) {
-  let worstOverall = Infinity;
+  let pass = true;
   for (const theme of THEMES) {
-    const page = await openPage(target, theme);
+    const page = await openPage(target, { theme });
     // Let the surface come up and settle: a tube still fading in measures
     // better than the one the visitor ends up looking at.
     await sleep(6000);
@@ -86,15 +104,20 @@ async function targets(target, selectors) {
 
     for (const selector of selectors) {
       const el = await page.$(selector);
-      const info = el && (await el.evaluate((e) => {
-        const r = e.getBoundingClientRect();
-        const cs = getComputedStyle(e);
-        return { fontSize: parseFloat(cs.fontSize), weight: cs.fontWeight, rect: { x: r.x, y: r.y, width: r.width, height: r.height } };
-      }));
-      if (!info || info.rect.width < 1 || info.rect.height < 1) {
-        console.log(`  ${selector}: not found`);
+      if (!el) {
+        console.log(`  FAIL  ${selector}: not found`);
+        pass = false;
         continue;
       }
+      await el.evaluate((e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await sleep(600);
+      const info = await el.evaluate((e) => {
+        const cs = getComputedStyle(e);
+        const r = document.createRange();
+        r.selectNodeContents(e);
+        const b = r.getBoundingClientRect();
+        return { fontSize: parseFloat(cs.fontSize), weight: cs.fontWeight, clip: { x: b.x + scrollX, y: b.y + scrollY, width: b.width, height: b.height } };
+      });
       const paints = await el.evaluate(readTextInk);
       const ink = inkFromPaints(paints.overBlack, paints.overWhite, paints.opacity);
 
@@ -105,26 +128,19 @@ async function targets(target, selectors) {
         e.style.textDecorationColor = 'transparent';
       });
       await sleep(350);
-      const shot = await page.screenshot({
-        clip: {
-          x: Math.max(0, info.rect.x),
-          y: Math.max(0, info.rect.y),
-          width: Math.min(W, info.rect.width),
-          height: Math.min(H, info.rect.height),
-        },
-        encoding: 'base64',
-      });
+      const usable = info.clip.width >= 1 && info.clip.height >= 1;
+      const shot = usable && (await page.screenshot({ clip: info.clip, encoding: 'base64', captureBeyondViewport: false }));
       await el.evaluate((e) => {
         e.style.webkitTextFillColor = '';
         e.style.textDecorationColor = '';
       });
 
-      const s = contrastStats(ink, await decodePng(page, shot));
+      const s = contrastStats(ink, shot ? await decodePng(page, shot) : []);
       const floor = floorFor(info.fontSize, info.weight);
-      const pass = s.worst >= floor;
-      worstOverall = Math.min(worstOverall, s.worst / floor);
+      const fails = !(s.worst >= floor);
+      pass &&= !fails;
       console.log(
-        `  ${pass ? 'PASS' : 'FAIL'}  ${selector}\n` +
+        `  ${fails ? 'FAIL' : 'PASS'}  ${selector}\n` +
           `        worst ${s.worst.toFixed(2)}:1   mean ${s.mean.toFixed(2)}:1   ` +
           `floor ${floor}:1 (${Math.round(info.fontSize)}px${floor === 3 ? ', large' : ''})` +
           (ink[3] < 0.999 ? `   ink alpha ${ink[3].toFixed(2)}, read opaque ${s.opaque.worst.toFixed(2)}:1` : ''),
@@ -132,8 +148,8 @@ async function targets(target, selectors) {
     }
     await page.close();
   }
-  console.log(worstOverall >= 1 ? '\nall targets clear their floor' : '\nat least one target is below its floor');
-  return worstOverall >= 1;
+  console.log(pass ? '\nall targets clear their floor' : '\nat least one target is below its floor');
+  return pass;
 }
 
 /** Every same-origin page reachable from `/` by its links. */
@@ -158,21 +174,34 @@ async function crawl(base) {
 
 /**
  * Runs IN THE PAGE: the text elements wholly in view and uncovered, with their
- * line boxes in viewport pixels. A candidate is an element with a text node of
- * its own, keyed by its index in document order; `done` lists keys already
- * measured.
+ * line boxes in viewport pixels, and the ones that are never measured, keyed
+ * by reason. A candidate is an element with a text node of its own, keyed by
+ * its index in document order; `done` lists keys already measured.
  */
 function candidatesInView(done) {
-  const SKIP = '.sl-fx-glitch__shards, .sl-fx-glass--text, .sl-fx-glass__glow, .sr-only, [aria-disabled="true"], :disabled, script, style, noscript, template, svg, select, option, textarea';
+  const REASONS = [
+    ['glitch shard', '.sl-fx-glitch__shards'],
+    ['glass text', '.sl-fx-glass--text, .sl-fx-glass__glow'],
+    ['visually hidden', '.sr-only'],
+    ['disabled control', '[aria-disabled="true"], :disabled'],
+    ['form control', 'select, option, textarea'],
+  ];
+  const NOT_RENDERED = 'script, style, noscript, template, svg';
   const skipDone = new Set(done);
-  const out = [];
+  const items = [];
+  const skipped = {};
   const all = document.body.querySelectorAll('*');
   for (let i = 0; i < all.length; i++) {
     const e = all[i];
     const key = String(i);
-    if (skipDone.has(key) || e.closest(SKIP)) continue;
+    if (skipDone.has(key) || e.closest(NOT_RENDERED)) continue;
     const texts = [...e.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim());
     if (!texts.length) continue;
+    const reason = REASONS.find(([, sel]) => e.closest(sel));
+    if (reason) {
+      (skipped[reason[0]] ||= []).push(key);
+      continue;
+    }
     const cs = getComputedStyle(e);
     if (cs.visibility !== 'visible') continue;
     const rects = [];
@@ -191,7 +220,7 @@ function candidatesInView(done) {
       });
     });
     if (!uncovered) continue;
-    out.push({
+    items.push({
       key,
       label: `${e.tagName.toLowerCase()}${[...e.classList].map((c) => `.${c}`).join('')}`,
       text: texts.map((t) => t.textContent.trim()).join(' ').replace(/\s+/g, ' ').slice(0, 48),
@@ -200,6 +229,18 @@ function candidatesInView(done) {
       scrollY,
       rects: rects.map((b) => ({ x: Math.floor(b.left), y: Math.floor(b.top), w: Math.ceil(b.width), h: Math.ceil(b.height) })),
     });
+  }
+  return { items, skipped };
+}
+
+/** Runs IN THE PAGE: the keys of every rendered element with a text node of its own. */
+function textKeys() {
+  const out = [];
+  const all = document.body.querySelectorAll('*');
+  for (let i = 0; i < all.length; i++) {
+    const e = all[i];
+    if (e.closest('script, style, noscript, template, svg')) continue;
+    if ([...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && e.getClientRects().length) out.push(String(i));
   }
   return out;
 }
@@ -239,48 +280,79 @@ async function measureView(page, items) {
 }
 
 /** Scrolls one page top to bottom, measuring each text element once. */
-async function sweepPage(page) {
+async function sweepPage(page, height) {
   const done = [];
   const results = [];
-  const height = await page.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; ; y += 640) {
+  const skipped = {};
+  const invisible = new Set();
+  const total = await page.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; ; y += Math.round(height * 0.7)) {
     await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), y);
     // Reveals arm on scroll and stagger in over about a second.
     await sleep(1400);
-    const items = await page.evaluate(candidatesInView, done);
-    // Invisible ink is not text a reader sees (a reveal not yet run, a glass
-    // letterform); it is skipped rather than reported at 1:1.
-    for (const m of (await measureView(page, items)).filter((x) => x.ink[3] >= 0.02)) {
+    const view = await page.evaluate(candidatesInView, done);
+    for (const [reason, keys] of Object.entries(view.skipped)) for (const k of keys) (skipped[reason] ||= new Set()).add(k);
+    // Invisible ink is not text a reader sees (a reveal not yet run); it is
+    // left for a later view, and counted if no view ever shows it.
+    for (const m of await measureView(page, view.items)) {
+      if (m.ink[3] < 0.02) {
+        invisible.add(m.key);
+        continue;
+      }
+      invisible.delete(m.key);
       done.push(m.key);
       results.push(m);
     }
-    if (y + H >= height) break;
+    if (y + height >= total) break;
   }
-  return results;
+  const accounted = new Set([...done, ...Object.values(skipped).flatMap((s) => [...s]), ...invisible]);
+  const never = (await page.evaluate(textKeys)).filter((k) => !accounted.has(k));
+  const counts = Object.fromEntries(Object.entries(skipped).map(([r, s]) => [r, s.size]));
+  if (invisible.size) counts['invisible ink'] = invisible.size;
+  if (never.length) counts['never wholly in view'] = never.length;
+  return { results, counts };
 }
 
-/** Measures `r` again with it scrolled to the same place in a fresh frame. */
+/**
+ * Measures `r` again with it scrolled to the same place in a fresh frame. A
+ * frame where its ink is invisible (a glitch burst hides the intact text while
+ * its shards show) is no measurement: up to three tries, then the first stands.
+ */
 async function remeasure(page, r, others) {
   await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), r.scrollY);
-  await sleep(2200);
-  const view = (await page.evaluate(candidatesInView, others)).filter((v) => v.key === r.key);
-  return view.length ? (await measureView(page, view))[0] : r;
+  for (let tries = 0; tries < 3; tries++) {
+    await sleep(2200);
+    const view = (await page.evaluate(candidatesInView, others)).items.filter((v) => v.key === r.key);
+    if (!view.length) return r;
+    const [m] = await measureView(page, view);
+    if (m.ink[3] >= 0.02) return m;
+  }
+  return r;
 }
 
-async function sweep(base, paths) {
-  const pages = paths.length ? paths : await crawl(base);
-  console.log(`contrast sweep: ${pages.length} page(s) × ${THEMES.length} themes at ${W}px; gate = p5 of each element's pixels`);
+/** A ratio for printing; an unmeasurable one has none. */
+function fmt(n) {
+  return Number.isFinite(n) ? n.toFixed(2) : 'n/a';
+}
+
+/** One configuration (width × WebGPU) over every page, both themes. */
+async function sweepConfig(base, pages, { width, gpu }) {
+  const height = heightFor(width);
+  console.log(`\n══ ${width}px, WebGPU ${gpu ? 'on' : 'off'}: ${pages.length} page(s) × ${THEMES.length} themes; gate = p5 of each element's pixels ══`);
   let measured = 0;
   const failures = [];
+  const warnings = [];
+  const skips = {};
   const run = async (own, { theme, path }) => {
-    const page = await openPage(`${base}${path}`, theme, own);
+    const page = await openPage(`${base}${path}`, { theme, width, gpu }, own);
     await sleep(2500);
-    const results = await sweepPage(page);
+    const { results, counts } = await sweepPage(page, height);
     measured += results.length;
+    for (const [r, n] of Object.entries(counts)) skips[r] = (skips[r] || 0) + n;
     const keys = results.map((x) => x.key);
-    for (const r of results.filter((x) => x.stats.p5 < x.floor)) {
+    for (const r of results.filter((x) => belowFloor(x.stats, x.floor))) {
       const again = await remeasure(page, r, keys.filter((k) => k !== r.key));
-      if (again.stats.p5 < again.floor) failures.push({ theme, path, ...again });
+      (belowFloor(again.stats, again.floor) ? failures : warnings).push({ theme, path, first: r, ...again });
     }
     await page.close();
   };
@@ -288,21 +360,36 @@ async function sweep(base, paths) {
   // One browser per worker: tabs sharing a headless browser stall each
   // other's screenshots, since only the front one is given frames.
   await Promise.all(Array.from({ length: 4 }, async () => {
-    const own = await launch();
+    const own = await launch(gpu);
     while (queue.length) await run(own, queue.shift());
     await own.close();
   }));
 
-  failures.sort((a, b) => a.path.localeCompare(b.path) || a.theme.localeCompare(b.theme) || a.label.localeCompare(b.label));
-  for (const f of failures) {
-    const fresh = f.stats.opaque.p5 >= f.floor;
+  const order = (a, b) => a.path.localeCompare(b.path) || a.theme.localeCompare(b.theme) || a.label.localeCompare(b.label);
+  for (const f of failures.sort(order)) {
+    const fresh = !belowFloor(f.stats.opaque, f.floor);
     console.log(
       `FAIL${fresh ? ' NEW' : '    '} ${f.path} [${f.theme}] ${f.label} "${f.text}"\n` +
-        `         p5 ${f.stats.p5.toFixed(2)}:1  worst ${f.stats.worst.toFixed(2)}:1  floor ${f.floor}:1 (${Math.round(f.fontSize)}px)` +
-        `  ink alpha ${f.ink[3].toFixed(2)}  read opaque p5 ${f.stats.opaque.p5.toFixed(2)}:1`,
+        `         p5 ${fmt(f.stats.p5)}:1  worst ${fmt(f.stats.worst)}:1  floor ${f.floor}:1 (${Math.round(f.fontSize)}px)` +
+        (Number.isFinite(f.stats.p5) ? `  ink alpha ${f.ink[3].toFixed(2)}  read opaque p5 ${fmt(f.stats.opaque.p5)}:1` : '  unmeasurable: no pixels sampled'),
     );
   }
-  const fresh = failures.filter((f) => f.stats.opaque.p5 >= f.floor).length;
-  console.log(`\n${measured} text elements measured; ${failures.length} below their floor (${fresh} of them pass when read as opaque)`);
-  return failures.length === 0;
+  for (const w of warnings.sort(order)) {
+    console.log(`WARN     ${w.path} [${w.theme}] ${w.label} "${w.text}": p5 ${fmt(w.first.stats.p5)}:1 first, ${fmt(w.stats.p5)}:1 on the second measure (floor ${w.floor}:1)`);
+  }
+  const fresh = failures.filter((f) => !belowFloor(f.stats.opaque, f.floor)).length;
+  const skipLine = Object.entries(skips).map(([r, n]) => `${r} ${n}`).join(', ') || 'none';
+  console.log(`${measured} text elements measured; ${failures.length} below their floor (${fresh} of them pass when read as opaque); ${warnings.length} passed on a second measure`);
+  console.log(`not measured: ${skipLine}`);
+  return failures.length;
+}
+
+async function sweep(base, paths) {
+  const pages = paths.length ? paths : await crawl(base);
+  const widths = flag('--widths', '1440').split(',').map(Number);
+  const gpus = flag('--gpu', 'on').split(',').map((g) => g === 'on');
+  let failed = 0;
+  for (const width of widths) for (const gpu of gpus) failed += await sweepConfig(base, pages, { width, gpu });
+  console.log(`\n${failed ? `${failed} failure(s)` : 'every measured element clears its floor'} across ${widths.length * gpus.length} configuration(s)`);
+  return failed === 0;
 }

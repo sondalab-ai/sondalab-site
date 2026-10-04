@@ -221,6 +221,25 @@ const ledger = [
     margin-top: clamp(1.75rem, 4vw, 2.75rem);
     max-width: 46ch;
   }
+  /* Below 64rem the lede runs across the tube, past the lit left of the
+     frame: it read 2.63:1 over the live scene and 1.27:1 over its flat image
+     at 390px, and 2.48:1 over the image at 768px (light). The heading is large
+     and clears its 3:1 there. So the lede alone gets the canvas behind it, edge
+     to edge and feathered top and bottom; the picture keeps the heading and
+     the margins. From 64rem the lede sits in the lit left (1024px: passes). */
+  @media (max-width: 63.99rem) {
+    .ap-open__lede { position: relative; }
+    .ap-open__lede::before {
+      content: '';
+      position: absolute;
+      inset: -1.25rem calc(-1 * var(--gutter));
+      z-index: -1;
+      pointer-events: none;
+      background: var(--sl-bg-canvas);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+    }
+  }
 
   /* --- the pact ------------------------------------------------------ */
   .ap-pact__grid {
@@ -249,7 +268,7 @@ const ledger = [
   .ap-ledger__row:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
   .ap-ledger__key {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -317,12 +336,15 @@ const ledger = [
   .crow:not(.crow--inert):hover {
     background: color-mix(in srgb, var(--sl-accent-default) 6%, transparent);
   }
-  /* The kit's flush ring, by hand, and the row's hairlines join it: a rule of
-     another colour inside the ring is a band. */
+  /* A row with a link (none until the shop opens) has rules top and bottom
+     only. The ring sits over them, 1px in, so it is 2px and flush on every
+     side: offset 0 with the rules joining it would read 3px at the top and
+     bottom and 2px at the sides, and a rule left in its own colour is a band.
+     Square, as the rules are. */
   .crow:focus-visible {
     outline: var(--sl-focus-ring-width) solid var(--slc-focus);
-    outline-offset: var(--sl-focus-ring-offset);
-    border-color: var(--slc-focus);
+    outline-offset: -1px;
+    border-radius: 0;
   }
 
   .crow__no {
@@ -506,7 +528,7 @@ const ledger = [
   .ap-band__state {
     margin: 0;
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;

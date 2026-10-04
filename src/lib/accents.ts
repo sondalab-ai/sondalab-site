@@ -1,4 +1,4 @@
-import registry from '@sondalab/ui-kit/agent/accent-registry.json';
+import registry from '@sondalab/ui-kit/agent/accent-registry.json' with { type: 'json' };
 
 export type AccentKey = 'default' | 'spexr' | 'introspect' | 'local-agents';
 

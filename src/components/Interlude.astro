@@ -50,7 +50,7 @@ const pool = JSON.stringify(data.lines);
 
   .interlude__marker {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -70,8 +70,10 @@ const pool = JSON.stringify(data.lines);
   .interlude__lead {
     color: var(--sl-text-muted);
   }
+  /* The band's secondary ink (the kit re-derives it inside .sl-invert): the
+     canvas at 55% read 4.27:1 over the scene (dark, 390px). */
   .interlude.sl-invert .interlude__lead {
-    color: color-mix(in srgb, var(--sl-bg-canvas) 55%, transparent);
+    color: var(--slc-text-secondary);
   }
   .interlude__punch {
     margin-top: 0.5em;

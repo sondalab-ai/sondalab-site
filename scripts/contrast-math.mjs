@@ -69,6 +69,15 @@ export function contrastStats(ink, pixels) {
   return { ...summarise(real), opaque: summarise(naive) };
 }
 
+/**
+ * Whether `stats` (from contrastStats) fails `floor` at the 5th percentile. It
+ * fails closed: an element with no pixels sampled has a NaN ratio, and NaN
+ * compares false both ways, so `p5 < floor` would have passed it silently.
+ */
+export function belowFloor(stats, floor) {
+  return !(stats.p5 >= floor);
+}
+
 /** WCAG 1.4.3 floor: 3:1 for large text (>= 24px, or >= 18.66px at 700+), else 4.5:1. */
 export function floorFor(fontSize, weight) {
   const large = fontSize >= 24 || (fontSize >= 18.66 && Number(weight) >= 700);

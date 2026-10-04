@@ -171,32 +171,35 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 <style>
   /* Repaint the accent from the product's registered hue. The kit's accent
      roles compute on :root from the default accent, so the ones this page's
-     content reads are re-derived here with the kit's own formulas
-     (components.css): the accent, its 12% wash, the accent as text (capped on
-     light at --sl-accent-text-lmax, where the raw accent is a fill), the
-     pressed edge and the ring. --sl-accent-default is for this page's own CSS.
-     Only var()/color-mix here; the hex lives in the inline style attribute.
+     content reads are re-derived here with the kit's own formulas: the accent,
+     its 12% wash, the accent as text (capped on light at
+     --sl-accent-text-lmax, where the raw accent is a fill), the ring, and the
+     hover step, which the glitch's jitter mixes into a product name, a pager
+     name and the log marker (effects.css); the step is the theme's own,
+     lighter on ink and darker on paper (themes/dark.css, light.css).
+     --sl-accent-default is for this page's own CSS. Only var()/color-mix
+     here; the hex lives in the inline style attribute.
 
      The primary is the kit's contract since ui-kit 0.32: one role,
      --slc-accent-fill, set to the product's registered fill (the accent itself
      unless the registry names a deeper one, as it does for spexr). The kit's
      filled controls derive their fill set from it on themselves, so set on this
      subtree it reaches the primary's label, hover, press, edge and foot, opaque
-     or glass; high contrast resets it on the control. The hand-derived hover,
-     active, edge and light-theme label this block carried until 0.32 are gone. */
+     or glass; high contrast resets it on the control. */
   [data-product] {
     --sl-accent-default: var(--acc-dark);
     --slc-accent: var(--acc-dark);
     --slc-accent-fill: var(--acc-fill-dark);
+    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 80%, white);
     --slc-accent-subtle: color-mix(in srgb, var(--slc-accent) 12%, transparent);
     --slc-accent-text: oklch(from var(--slc-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
-    --slc-edge-pressed: oklch(from color-mix(in srgb, var(--slc-accent) 12%, var(--slc-canvas)) calc(l - var(--slc-shade-step)) c h);
     --slc-focus: var(--slc-accent-text);
   }
   :root[data-sl-theme='light'] [data-product] {
     --sl-accent-default: var(--acc-light);
     --slc-accent: var(--acc-light);
     --slc-accent-fill: var(--acc-fill-light);
+    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 89%, black);
   }
 
   .product {
@@ -298,7 +301,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .factsheet dt {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -396,7 +399,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .novella__marker {
     display: inline-block;
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;

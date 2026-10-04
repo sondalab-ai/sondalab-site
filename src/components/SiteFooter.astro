@@ -37,10 +37,12 @@ const year = new Date().getFullYear();
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
   .site-footer__feed:hover { color: var(--slc-accent-text); }
+  /* Its underline joins the focus ring (site.css): left neutral it is a band. */
+  .site-footer__feed:focus-visible { border-bottom-color: var(--slc-focus); }
   .site-footer__claim {
     margin: 0;
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;

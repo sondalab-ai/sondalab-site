@@ -79,19 +79,32 @@ const cue = [
     align-items: center;
     overflow: hidden;
   }
-  /* Full-bleed readability scrim over the glow, biased to the text side, fades
-     fully to transparent so it never reads as a rectangle. */
+  /* The scrim: the canvas behind the copy, so the glow frames the words
+     instead of sitting under them. The glow's blobs drift and follow the
+     pointer, and its radial scrim (75% x 115% at 26% 52%) left the copy's
+     right half on full-strength blooms: without WebGPU, the eyebrow read
+     1.07:1 and the second link 1.11:1 at 390px (dark), and "not passengers."
+     1.12:1 at 1024. So it is the copy's own box, feathered: solid from 25% to
+     77% of the hero's height (the copy spans 26-75% at every width measured,
+     390-1920px) and, across, 56rem from the wrap's edge (the copy is ~886px
+     wide at the display size), past which the glow shows on a wide screen.
+     On a phone that edge is off the screen and the band runs full width; the
+     glow shows above and below it. */
   .hero__scrim {
+    --copy-end: calc(max(var(--gutter), (100% - var(--wrap)) / 2 + var(--gutter)) + 56rem);
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: radial-gradient(
-      75% 115% at 26% 52%,
-      var(--sl-bg-canvas) 0%,
-      color-mix(in srgb, var(--sl-bg-canvas) 45%, transparent) 34%,
-      transparent 66%
-    );
+    background: var(--sl-bg-canvas);
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 2%, #000 25%, #000 77%, transparent 100%),
+      linear-gradient(to right, #000 var(--copy-end), transparent calc(var(--copy-end) + 30rem));
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, transparent 2%, #000 25%, #000 77%, transparent 100%),
+      linear-gradient(to right, #000 var(--copy-end), transparent calc(var(--copy-end) + 30rem));
+    mask-composite: intersect;
   }
   .hero__inner {
     position: relative;
@@ -111,15 +124,17 @@ const cue = [
     --gx: 6px; /* bigger split; the display word is large */
   }
 
+  /* Copy, not a label that names a region, so body type in sentence case
+     (ui-kit 0.30, L1). The source is lower case ("see it · steer it · own
+     it"), as the tube and the footer use it, so the capital is the first
+     letter's alone. */
   .hero__tagline {
     margin-top: 2rem;
-    font-family: var(--sl-font-mono);
-    font-weight: var(--mono-hair);
-    font-size: var(--sl-text-md);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-family: var(--sl-font-sans);
+    font-size: var(--sl-text-lg);
     color: var(--sl-text-primary);
   }
+  .hero__tagline::first-letter { text-transform: uppercase; }
 
   .hero__actions {
     margin-top: 2.75rem;

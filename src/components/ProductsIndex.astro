@@ -181,12 +181,16 @@ const usedStatuses = [
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
   }
-  /* The kit's flush ring, by hand (a row is not a kit control), and the
-     border joins it: a hairline of another colour inside the ring is a band. */
+  /* The kit's flush ring, by hand (a row is not a kit control). The border
+     joins it, and the pane's pale rim inside the border (glass.css __shine)
+     stands down, as the kit's own glass controls do under focus: either one
+     left inside the ring is a band of another colour. */
   .prow:focus-visible {
     outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: var(--sl-focus-ring-offset);
     border-color: var(--slc-focus);
+    --slg-rim-hi: transparent;
+    --slg-rim-lo: transparent;
   }
 
   .prow__go {
@@ -255,12 +259,12 @@ const usedStatuses = [
     max-width: 62ch;
   }
   .prow__summary :global(strong) { font-weight: 600; }
-  /* A micro label (ui-kit 0.30), in the site's light mono as the eyebrow is.
-     The primary ink for the same reason as the summary: the label sits on the
-     lens too, and the secondary read 3.76:1 there (light). */
+  /* A micro label (ui-kit 0.30, L1). The primary ink for the same reason as
+     the summary: the label sits on the lens too, and the secondary read
+     3.76:1 there (light). */
   .prow__form {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -278,7 +282,7 @@ const usedStatuses = [
   .legend__item { display: flex; align-items: baseline; gap: 0.6rem; }
   .legend__term {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;

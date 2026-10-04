@@ -163,7 +163,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     align-items: baseline;
     gap: 0.75rem;
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -171,7 +171,6 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .post__stamp time {
     color: var(--slc-accent-text);
-    font-weight: var(--mono-light);
     font-variant-numeric: tabular-nums;
   }
 
@@ -227,7 +226,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .post__sources-title,
   .post__source-host {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -246,6 +245,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     border-bottom: 1px solid var(--sl-border-default);
   }
   .post__source a:hover { border-bottom-color: var(--slc-accent-text); }
+  /* Its underline joins the focus ring (site.css): left neutral it is a band. */
+  .post__source a:focus-visible { border-bottom-color: var(--slc-focus); }
   @media (min-width: 64rem) {
     .post__sources { margin-top: 0; padding-top: 0; border-top: 0; position: relative; }
     .post__sources-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -266,7 +267,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .post__next-eyebrow {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-weight: 500;
     font-size: var(--sl-text-micro);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -285,6 +286,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     --gx: 4px;
   }
   .post__next:hover .post__next-title { color: var(--slc-accent-text); }
+  /* The ending's rule joins the focus ring (site.css): left neutral it is a band. */
+  .post__next:focus-visible { border-top-color: var(--slc-focus); }
   .post__next-summary { max-width: 52ch; color: var(--sl-text-secondary); line-height: var(--sl-line-normal); }
   .post__next-go {
     justify-self: start;
@@ -297,13 +300,13 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     border-bottom: 1px solid var(--slc-accent-text);
     padding-bottom: 0.2rem;
   }
+  /* Control text, as the back link and "Read" are (L1). */
   .post__newer {
     display: inline-block;
     margin-top: 2.5rem;
-    font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.1em;
+    font-family: var(--sl-font-sans);
+    font-weight: 500;
+    font-size: var(--sl-text-sm);
     text-decoration: none;
     color: var(--sl-text-secondary);
   }
