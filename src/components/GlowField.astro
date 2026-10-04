@@ -2,6 +2,15 @@
 // Hand-written Canvas2D glow-blob field, the "sonda" motif: soft signal
 // fields that respond to the operator's cursor. Additive on dark, multiply on
 // light; reads live DS tokens so it follows the theme toggle. No libraries.
+//
+// The field is composed around the words. Elements in the host marked
+// `data-glow-avoid` are the copy column: the blooms live right of it and
+// along the hero's top and bottom edges (above and below it where it spans
+// the width), and every frame the field falls away over it, so a bloom that
+// drifts or follows the pointer there thins out instead of lighting the text
+// from behind. What stays behind the copy is a trace of colour (10% on ink,
+// 8% on paper), which the muted ink still reads 4.5:1 against with the
+// pointer's own bloom resting on it (at 18% on ink it read 3.86:1).
 ---
 
 <canvas class="glow-field" data-glow-field aria-hidden="true"></canvas>
@@ -24,16 +33,50 @@
     }
 
     var DPR = Math.min(window.devicePixelRatio || 1, 1.25), W = 0, H = 0;
-    var blobs = [], mouse = null;
+    var blobs = [], mouse = null, copy = null;
 
+    // The copy column, in the canvas's own pixels: the union of the marked
+    // elements' text (a Range, so a block's empty width does not count).
+    function measureCopy() {
+      var box = cv.getBoundingClientRect();
+      var els = host ? host.querySelectorAll('[data-glow-avoid]') : [];
+      var l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+      for (var i = 0; i < els.length; i++) {
+        var range = document.createRange();
+        range.selectNodeContents(els[i]);
+        var e = range.getBoundingClientRect();
+        if (!e.width || !e.height) continue;
+        l = Math.min(l, e.left - box.left); t = Math.min(t, e.top - box.top);
+        r = Math.max(r, e.right - box.left); b = Math.max(b, e.bottom - box.top);
+      }
+      copy = isFinite(l) ? { l: l, t: t, r: r, b: b } : null;
+    }
+
+    // Where the blooms live: right of the copy where there is room, else above
+    // and below it; homes in pixels, radius as a share of the shorter side.
     function seed() {
       var m = Math.min(W, H);
-      var defs = [
-        ['t',0.30,0.38,0.54],['a',0.58,0.28,0.46],['t',0.82,0.56,0.60],
-        ['a',0.70,0.72,0.42],['t',0.42,0.68,0.50],['a',0.90,0.32,0.40],['t',0.16,0.66,0.46]
+      var c = copy || { l: 0, t: H * 0.3, r: W * 0.6, b: H * 0.7 };
+      var right = W - c.r, span = c.r - c.l, below = H - c.b;
+      var defs = right > W * 0.2 ? [
+        ['a', c.r + right * 0.72, H * 0.30, 0.56],
+        ['t', W - right * 0.06, H * 0.66, 0.58],
+        ['a', c.r + right * 0.55, H * 0.96, 0.44],
+        ['a', W, 0, 0.36],
+        ['t', c.l + span * 0.30, 0, 0.44],
+        ['t', c.l + span * 0.10, H, 0.48],
+        ['a', c.l + span * 0.62, H, 0.42]
+      ] : [
+        ['a', W * 0.68, c.t * 0.45, 0.56],
+        ['t', W * 0.14, c.t * 0.55, 0.48],
+        ['t', W, c.t * 0.85, 0.40],
+        ['t', W * 0.20, H - below * 0.38, 0.52],
+        ['a', W * 0.66, H - below * 0.32, 0.54],
+        ['a', W, H, 0.42],
+        ['t', W * 0.44, H, 0.42]
       ];
       blobs = defs.map(function (d) {
-        return { type:d[0], hx:d[1], hy:d[2], x:d[1]*W, y:d[2]*H,
+        return { type:d[0], hx:d[1], hy:d[2], x:d[1], y:d[2],
                  vx:0, vy:0, r:d[3]*m, ph:Math.random()*6.283, sp:0.18+Math.random()*0.28 };
       });
     }
@@ -42,6 +85,7 @@
       W = Math.max(320, r.width); H = Math.max(320, r.height);
       cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      measureCopy();
       seed();
     }
     function paintBlob(x, y, r, rgb, a0) {
@@ -67,8 +111,8 @@
 
       blobs.forEach(function (b) {
         if (animate) {
-          var hx = b.hx*W + Math.cos(b.ph + t*b.sp)*W*0.05;
-          var hy = b.hy*H + Math.sin(b.ph*1.3 + t*b.sp*0.9)*H*0.06;
+          var hx = b.hx + Math.cos(b.ph + t*b.sp)*W*0.05;
+          var hy = b.hy + Math.sin(b.ph*1.3 + t*b.sp*0.9)*H*0.06;
           b.vx += (hx - b.x)*0.006; b.vy += (hy - b.y)*0.006;
           if (mouse) {
             var dx = mouse.x - b.x, dy = mouse.y - b.y, d = Math.hypot(dx, dy);
@@ -78,7 +122,31 @@
         }
         paintBlob(b.x, b.y, b.r, b.type === 'a' ? amber : teal, a0);
       });
-      if (animate && mouse) paintBlob(mouse.x, mouse.y, Math.min(W,H)*0.34, amber, a0);
+      if (animate && mouse) {
+        // The pointer's bloom dims as it crosses the copy: 30% over the words,
+        // full a radius away from them.
+        var mr = Math.min(W, H) * 0.34, k = 1;
+        if (copy) {
+          var dx = Math.max(copy.l - mouse.x, 0, mouse.x - copy.r);
+          var dy = Math.max(copy.t - mouse.y, 0, mouse.y - copy.b);
+          k = 0.3 + 0.7 * Math.min(1, Math.hypot(dx, dy) / mr);
+        }
+        paintBlob(mouse.x, mouse.y, mr, amber, a0 * k);
+      }
+
+      // The copy's ground: the field falls away over the column, through a
+      // shape blurred wide enough that no edge of it can be found, and keeps
+      // a trace of its colour there. Erasing shows the page's own canvas,
+      // the colour this field is painted on.
+      if (copy) {
+        var F = Math.max(28, Math.min(W, H) * 0.08), p = F * 1.3;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.globalAlpha = dark ? 0.9 : 0.92;
+        ctx.filter = 'blur(' + F + 'px)';
+        ctx.fillStyle = '#000';
+        ctx.fillRect(copy.l - p, copy.t - p, copy.r - copy.l + 2 * p, copy.b - copy.t + 2 * p);
+        ctx.globalAlpha = 1;
+      }
 
       ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
     }
@@ -95,6 +163,8 @@
 
     resize();
     window.addEventListener('resize', resize);
+    // The copy reflows when the faces arrive: measure the column again.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
 
     // Painting costs a full-canvas blur every frame, so skip it whenever the
     // field is not actually on screen: hidden behind the CRT hero

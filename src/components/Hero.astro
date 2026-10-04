@@ -26,11 +26,10 @@ const cue = [
 <section class="hero">
   <GlowField />
   <TerminalField />
-  <div class="hero__scrim" aria-hidden="true"></div>
   <div class="sl-wrap hero__inner">
-    <p class="sl-eyebrow hero__eyebrow">Sondalab · a lab for operators</p>
+    <p class="sl-eyebrow hero__eyebrow" data-glow-avoid>Sondalab · a lab for operators</p>
 
-    <h1 class="display hero__claim">
+    <h1 class="display hero__claim" data-glow-avoid>
       <span>{claimParts[0]},</span>
       <span
         class="hero__claim-accent sl-fx-glitch sl-fx-glitch--shatter"
@@ -46,7 +45,7 @@ const cue = [
       </span>
     </h1>
 
-    <p class="hero__tagline">{SITE.tagline}</p>
+    <p class="hero__tagline" data-glow-avoid>{SITE.tagline}</p>
 
     <div class="hero__actions">
       <!-- No glass pane here, deliberately. With the tube on, this is a terminal
@@ -56,8 +55,8 @@ const cue = [
            would put that pill back. The DS rule "every text button is a glass
            pane" is the showcase's; this is a documented exception of this
            site's. -->
-      <a class="sl-btn sl-btn--primary sl-fx-aurora sl-fx-aurora--linear" href="/#products">See what we wire</a>
-      <a class="hero__ghost" href="/#approach">What we believe →</a>
+      <a class="sl-btn sl-btn--primary sl-fx-aurora sl-fx-aurora--linear" href="/#products" data-glow-avoid>See what we wire</a>
+      <a class="hero__ghost" href="/#approach" data-glow-avoid>What we believe →</a>
     </div>
   </div>
 
@@ -78,33 +77,6 @@ const cue = [
     display: flex;
     align-items: center;
     overflow: hidden;
-  }
-  /* The scrim: the canvas behind the copy, so the glow frames the words
-     instead of sitting under them. The glow's blobs drift and follow the
-     pointer, and its radial scrim (75% x 115% at 26% 52%) left the copy's
-     right half on full-strength blooms: without WebGPU, the eyebrow read
-     1.07:1 and the second link 1.11:1 at 390px (dark), and "not passengers."
-     1.12:1 at 1024. So it is the copy's own box, feathered: solid from 25% to
-     77% of the hero's height (the copy spans 26-75% at every width measured,
-     390-1920px) and, across, 56rem from the wrap's edge (the copy is ~886px
-     wide at the display size), past which the glow shows on a wide screen.
-     On a phone that edge is off the screen and the band runs full width; the
-     glow shows above and below it. */
-  .hero__scrim {
-    --copy-end: calc(max(var(--gutter), (100% - var(--wrap)) / 2 + var(--gutter)) + 56rem);
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: var(--sl-bg-canvas);
-    -webkit-mask-image:
-      linear-gradient(to bottom, transparent 2%, #000 25%, #000 77%, transparent 100%),
-      linear-gradient(to right, #000 var(--copy-end), transparent calc(var(--copy-end) + 30rem));
-    -webkit-mask-composite: source-in;
-    mask-image:
-      linear-gradient(to bottom, transparent 2%, #000 25%, #000 77%, transparent 100%),
-      linear-gradient(to right, #000 var(--copy-end), transparent calc(var(--copy-end) + 30rem));
-    mask-composite: intersect;
   }
   .hero__inner {
     position: relative;
@@ -223,7 +195,6 @@ const cue = [
   /* .glow-field is rendered by GlowField.astro, so it needs :global() to be
      reachable from this component's scoped styles. */
   .hero[data-crt='on'] :global(.glow-field) { display: none; }
-  .hero[data-crt='on'] .hero__scrim { display: none; }
 
   /* The tube draws the eyebrow, claim and tagline itself. The HTML copies are
      clipped rather than removed: display:none and visibility:hidden drop them
