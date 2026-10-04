@@ -250,8 +250,8 @@ const ledger = [
   .ap-ledger__key {
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.16em;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-accent-text);
   }
@@ -317,9 +317,12 @@ const ledger = [
   .crow:not(.crow--inert):hover {
     background: color-mix(in srgb, var(--sl-accent-default) 6%, transparent);
   }
+  /* The kit's flush ring, by hand, and the row's hairlines join it: a rule of
+     another colour inside the ring is a band. */
   .crow:focus-visible {
     outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: var(--sl-focus-ring-offset);
+    border-color: var(--slc-focus);
   }
 
   .crow__no {
@@ -504,8 +507,8 @@ const ledger = [
     margin: 0;
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.16em;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--sl-text-muted);
   }

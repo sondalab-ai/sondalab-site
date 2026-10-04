@@ -137,11 +137,15 @@ const usedStatuses = [
      derives both on :root from the default accent, so a row re-derives them
      from its own hue with the kit's formulas (components.css): on light the
      text caps the lightness at --sl-accent-text-lmax, elsewhere it is the hue.
-     --slc-accent itself is left alone, so the glass and aurora keep theirs. */
+     --slc-accent itself is left alone, so the glass and aurora keep theirs.
+     The wash is 12% over the surface, as the kit's contract describes it, and
+     not over nothing: the tag sits on the row's lens, which refracts bright
+     streaks of the bed under it, and on a see-through wash spexr's tag read
+     3.72:1 (dark) and introspect's 4.18:1 (light). */
   .products__list li {
     --row-accent-text: oklch(from var(--row-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
     --slc-accent-text: var(--row-accent-text);
-    --slc-accent-subtle: color-mix(in srgb, var(--row-accent) 12%, transparent);
+    --slc-accent-subtle: color-mix(in srgb, var(--row-accent) 12%, var(--slc-surface));
   }
 
   /* The numeral is a sibling now, not a cell, and the left padding is its
@@ -177,9 +181,12 @@ const usedStatuses = [
   .prow:hover {
     background: color-mix(in srgb, var(--row-accent) 6%, transparent);
   }
+  /* The kit's flush ring, by hand (a row is not a kit control), and the
+     border joins it: a hairline of another colour inside the ring is a band. */
   .prow:focus-visible {
     outline: var(--sl-focus-ring-width) solid var(--slc-focus);
     outline-offset: var(--sl-focus-ring-offset);
+    border-color: var(--slc-focus);
   }
 
   .prow__go {
@@ -230,29 +237,34 @@ const usedStatuses = [
     letter-spacing: -0.03em;
     --gx: 3px;
   }
+  /* The tagline and the summary take the primary ink, not the secondary and
+     the muted: the row's lens refracts bright streaks of the bed behind them,
+     and over the brightest the secondary read 3.73-4.44:1 and the muted 2.58:1
+     (dark, contrast-probe). The primary reads >= 6.02:1 there. The row keeps
+     its order by size and weight; in the summary, emphasis is the weight. */
   .prow__tagline {
     margin: 0.5rem 0 0;
-    color: var(--sl-text-secondary);
+    color: var(--slc-text);
     max-width: 48ch;
   }
   .prow__summary {
     margin: 0.6rem 0 0;
     font-size: var(--sl-text-sm);
     line-height: var(--sl-line-normal);
-    color: var(--sl-text-muted);
+    color: var(--slc-text);
     max-width: 62ch;
   }
-  .prow__summary :global(strong) {
-    font-weight: 600;
-    color: var(--sl-text-secondary);
-  }
+  .prow__summary :global(strong) { font-weight: 600; }
+  /* A micro label (ui-kit 0.30), in the site's light mono as the eyebrow is.
+     The primary ink for the same reason as the summary: the label sits on the
+     lens too, and the secondary read 3.76:1 there (light). */
   .prow__form {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-hair);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.14em;
+    font-weight: var(--mono-light);
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--sl-text-muted);
+    color: var(--slc-text);
   }
 
   .legend {
@@ -267,8 +279,8 @@ const usedStatuses = [
   .legend__term {
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.1em;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--sl-text-primary);
   }

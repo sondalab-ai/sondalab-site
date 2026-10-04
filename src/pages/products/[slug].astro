@@ -45,7 +45,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   <article
     class="product"
     data-product
-    style={`--acc-light:${acc.light};--acc-dark:${acc.dark}`}
+    style={`--acc-light:${acc.light};--acc-dark:${acc.dark};--acc-fill-light:${acc.fill.light};--acc-fill-dark:${acc.fill.dark}`}
   >
     <div class="sl-wrap">
       <a class="product__back" href="/#products">← All tools</a>
@@ -169,35 +169,34 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 </Base>
 
 <style>
-  /* Repaint the accent from the product's registered hue. DS components read the
-     --slc-* role vars (resolved at :root, so a --sl-accent-default override on a
-     descendant would NOT re-derive them, hence we map --slc-* here directly).
-     --sl-accent-default is also set for this page's own authored CSS. Steps use
-     the DS ratios (89/76/12) off --slc-accent, so only the base hue flips per
-     theme. Only var()/color-mix here; the hex lives in the inline style attr. */
+  /* Repaint the accent from the product's registered hue. The kit's accent
+     roles compute on :root from the default accent, so the ones this page's
+     content reads are re-derived here with the kit's own formulas
+     (components.css): the accent, its 12% wash, the accent as text (capped on
+     light at --sl-accent-text-lmax, where the raw accent is a fill), the
+     pressed edge and the ring. --sl-accent-default is for this page's own CSS.
+     Only var()/color-mix here; the hex lives in the inline style attribute.
+
+     The primary is the kit's contract since ui-kit 0.32: one role,
+     --slc-accent-fill, set to the product's registered fill (the accent itself
+     unless the registry names a deeper one, as it does for spexr). The kit's
+     filled controls derive their fill set from it on themselves, so set on this
+     subtree it reaches the primary's label, hover, press, edge and foot, opaque
+     or glass; high contrast resets it on the control. The hand-derived hover,
+     active, edge and light-theme label this block carried until 0.32 are gone. */
   [data-product] {
     --sl-accent-default: var(--acc-dark);
     --slc-accent: var(--acc-dark);
-    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 89%, black);
-    --slc-accent-active: color-mix(in srgb, var(--slc-accent) 76%, black);
+    --slc-accent-fill: var(--acc-fill-dark);
     --slc-accent-subtle: color-mix(in srgb, var(--slc-accent) 12%, transparent);
-    /* The accent as text / thin line, and the edges cut from it, re-derived
-       with the kit's own formulas (components.css) for the same reason: on
-       light the text caps the hue's lightness at --sl-accent-text-lmax (the
-       raw light accent is a fill), elsewhere the cap is 1 and it is the hue. */
     --slc-accent-text: oklch(from var(--slc-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
-    --slc-edge-accent: oklch(from var(--slc-accent) calc(l - var(--slc-shade-step)) c h);
     --slc-edge-pressed: oklch(from color-mix(in srgb, var(--slc-accent) 12%, var(--slc-canvas)) calc(l - var(--slc-shade-step)) c h);
     --slc-focus: var(--slc-accent-text);
   }
   :root[data-sl-theme='light'] [data-product] {
     --sl-accent-default: var(--acc-light);
     --slc-accent: var(--acc-light);
-    /* Light derives the label on a filled accent from the accent itself
-       (themes/light.css: dark on a light fill, white on a dark one), on :root,
-       from the default orange. Re-derived here with the theme's formula, so a
-       blue or indigo product's opaque primary (effects off) gets a white label. */
-    --slc-on-accent: oklch(from var(--slc-accent) clamp(0.22, (0.61 - l) * 1000, 1) 0 h);
+    --slc-accent-fill: var(--acc-fill-light);
   }
 
   .product {
@@ -226,11 +225,11 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
 
   .product__back {
     display: inline-block;
-    font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    /* A link you operate: sentence-case Geist at the control step (ui-kit
+       0.30, L1), not a mono micro label. */
+    font-family: var(--sl-font-sans);
+    font-weight: 500;
+    font-size: var(--sl-text-sm);
     text-decoration: none;
     color: var(--sl-text-muted);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
@@ -300,8 +299,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .factsheet dt {
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.12em;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--sl-text-muted);
   }
@@ -369,12 +368,12 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     color: var(--sl-text-primary);
   }
   .product__nav-link--next { text-align: right; }
+  /* Read with the link it sits in, so control text (L1): sentence-case
+     Geist, the small control step. */
   .product__nav-dir {
-    font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
+    font-family: var(--sl-font-sans);
+    font-weight: 500;
     font-size: var(--sl-text-xs);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
     color: var(--sl-text-muted);
   }
   .product__nav-name {
@@ -398,8 +397,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     display: inline-block;
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.22em;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-accent-text);
     --gx: 2px;

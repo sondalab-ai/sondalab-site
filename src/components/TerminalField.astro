@@ -94,6 +94,11 @@
         const label = `[ ${primary.textContent?.trim()} ]`;
         primary.textContent = label;
         primary.dataset.text = label;
+        // The glitch takes ::before and ::after, and the linear aurora drew its
+        // line on the same ::after: the glitch's `inset: 0` dragged it to the
+        // top edge, a second line inside the focus ring. One family per
+        // element here; the ring and its halo carry focus.
+        primary.classList.remove('sl-fx-aurora', 'sl-fx-aurora--linear');
         primary.classList.add('sl-fx-glitch');
         const { hoverBurst } = await import('@sondalab/ui-kit/effects.js');
         hoverBurst(primary, primary, { burstMin: 120, burstMax: 260 });

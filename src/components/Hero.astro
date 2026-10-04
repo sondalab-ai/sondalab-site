@@ -50,11 +50,12 @@ const cue = [
 
     <div class="hero__actions">
       <!-- No glass pane here, deliberately. With the tube on, this is a terminal
-           affordance and not a button: the rule below strips its fill, border,
-           padding and radius, because "a filled pill floating over CRT output is
-           what read as pasted on". A --pane would put that pill back. The DS
-           rule "every text button is a glass pane" is the showcase's; this is a
-           documented exception of this site's. -->
+           affordance and not a button: the rule below strips its fill and
+           border, because "a filled pill floating over CRT output is what read
+           as pasted on", and keeps only a box for the focus ring. A --pane
+           would put that pill back. The DS rule "every text button is a glass
+           pane" is the showcase's; this is a documented exception of this
+           site's. -->
       <a class="sl-btn sl-btn--primary sl-fx-aurora sl-fx-aurora--linear" href="/#products">See what we wire</a>
       <a class="hero__ghost" href="/#approach">What we believe →</a>
     </div>
@@ -246,14 +247,29 @@ const cue = [
   .hero[data-crt='on'] .hero__actions :global(.sl-btn) {
     background: transparent;
     border: 0;
-    padding: 0;
-    border-radius: 0;
+    /* A box for the kit's focus ring to sit on, and the negative margin that
+       gives it back to the row, so the label stays where it was. Stripped to
+       0 padding and 0 radius, the flush ring and its halo (ui-kit 0.32) drew a
+       square tight around the glyphs; on this box they are the kit's own
+       rounded ring, flush, with the halo outside it. */
+    padding: 0.375rem 0.625rem;
+    margin: -0.375rem -0.625rem;
+    border-radius: var(--sl-radius-sm);
     color: var(--slc-accent-text);
     font-family: var(--sl-font-mono);
     font-weight: 400;
     font-size: var(--sl-text-sm);
     letter-spacing: 0.08em;
     text-decoration: none;
+    /* Pressed, the kit's primary sinks by its foot (0.32); with the fill and
+       the foot stripped there is nothing to sink, only the label dipping. */
+    translate: none;
+  }
+  /* The glitch's copies fill the padding box (inset: 0); with the padding
+     they would start at its corner, off the label. */
+  .hero[data-crt='on'] .hero__actions :global(.sl-btn::before),
+  .hero[data-crt='on'] .hero__actions :global(.sl-btn::after) {
+    padding: inherit;
   }
   /* No underline on hover: the sl-fx-glitch is the hover state, wired in
      TerminalField. The brackets live in the text because .sl-fx-glitch owns
