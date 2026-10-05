@@ -18,7 +18,7 @@ export type DaosLang = (typeof DAOS_LANGS)[number];
 /** localStorage key for an explicit pick; absent means the browser decides. */
 export const DAOS_LANG_KEY = 'daos-lang';
 
-/** Native names for the switch's accessible labels. */
+/** The switch's labels: each language named in itself, in sentence case. */
 export const DAOS_LANG_NAMES: Record<DaosLang, string> = {
   en: 'English',
   it: 'Italiano',

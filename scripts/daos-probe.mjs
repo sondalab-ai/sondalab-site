@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Rendered-page checks for the DAOS page (/daos/), against a served build: it
 // reads without JavaScript, picks the browser's language, remembers a pick,
-// swaps every run, keeps the switch still, and the hero underline clears the
-// next line in every language.
+// swaps every run, keeps the switch still, the hero underline clears the next
+// line in every language, nothing spills at any width, and every keyboard stop
+// wears a flush ring clear of the sticky header.
 // Usage: node scripts/daos-probe.mjs http://localhost:4321
 import { createProbe, sleep } from './probe-kit.mjs';
 import { DAOS_I18N, DAOS_LANGS, DAOS_LANG_KEY } from '../src/lib/daos-i18n.ts';
@@ -142,6 +143,41 @@ for (const lang of DAOS_LANGS) {
     if (r.sw > r.iw || r.spill.length) bad.push(`${width}px→${r.sw > r.iw ? `scroll ${r.sw}` : ''}${r.spill.length ? ` spill ${r.spill.slice(0, 2).join(', ')}` : ''}`);
   }
   report(bad.length === 0, `${lang}: no horizontal scroll and no spilling box at ${WIDTHS.length} widths${bad.length ? ` (${bad.join('; ')})` : ''}`);
+  await page.close();
+}
+
+// Keyboard: every stop in the page wears a flush ring (the site's
+// :where(:focus-visible), or the kit's on its controls), any border of its own
+// is the ring's colour rather than a band inside it, and the stop lands clear
+// of the sticky header (scroll-padding-top, WCAG 2.4.11). At 390 the code
+// blocks scroll, so Chrome makes them stops of their own.
+for (const width of [1440, 390]) {
+  const page = await open({ width });
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
+  const stops = [];
+  for (let i = 0; i < 80; i++) {
+    await page.keyboard.press('Tab');
+    await sleep(40);
+    const s = await page.evaluate(() => {
+      const e = document.activeElement;
+      if (!e || e === document.body) return null;
+      const cs = getComputedStyle(e);
+      const borders = ['Top', 'Right', 'Bottom', 'Left'].filter((side) => parseFloat(cs[`border${side}Width`]) > 0);
+      return {
+        where: e.closest('.daos') ? 'daos' : e.closest('.site-footer') ? 'footer' : 'other',
+        name: `${e.tagName.toLowerCase()}${e.dataset.daosLang ? `[${e.dataset.daosLang}]` : ''}`,
+        ring: cs.outlineStyle === 'solid' && parseFloat(cs.outlineWidth) >= 2,
+        band: borders.some((side) => cs[`border${side}Color`] !== cs.outlineColor),
+        top: e.getBoundingClientRect().top,
+        header: document.querySelector('.site-header').getBoundingClientRect().bottom,
+      };
+    });
+    if (!s) continue;
+    if (s.where === 'footer') break;
+    if (s.where === 'daos') stops.push(s);
+  }
+  const bad = stops.filter((s) => !s.ring || s.band || s.top < s.header);
+  report(stops.length >= 4 && bad.length === 0, `${width}px: ${stops.length} keyboard stops (${[...new Set(stops.map((s) => s.name))].join(', ')}), each with a flush ring and clear of the header${bad.length ? ` — off: ${bad.map((s) => `${s.name}${s.ring ? '' : ' no ring'}${s.band ? ' band' : ''}${s.top < s.header ? ' under header' : ''}`).join('; ')}` : ''}`);
   await page.close();
 }
 

@@ -134,9 +134,8 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
               type="button"
               data-daos-lang={l}
               lang={l}
-              aria-label={DAOS_LANG_NAMES[l]}
               aria-pressed={l === 'en' ? 'true' : 'false'}
-            >{l.toUpperCase()}</button>
+            >{DAOS_LANG_NAMES[l]}</button>
           ))}
         </div>
       </div>
@@ -320,7 +319,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
                   {c.tag === 'track' && <span class="sl-tag">Track&nbsp;B &middot; research</span>}
                 </div>
                 <DaosText as="p" k={c.p} />
-                {c.art && <pre class="artifact" set:html={ARTIFACTS[c.art]} />}
+                {c.art && <pre class="artifact sl-invert" set:html={ARTIFACTS[c.art]} />}
                 <span class:list={['sl-tag', 'mech', { 'sl-tag--plain': !c.accent }]} set:html={c.mech} />
               </div>
             </article>
@@ -478,11 +477,14 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
 
   /* ---- the DAOS bar: the landing's own header, under the site's --------- */
   .daos-bar { border-bottom: 1px solid var(--slc-border-subtle); }
+  /* Wraps rather than squeezes: the switch names each language in itself, and
+     where the row is too narrow for that it drops under the mark. */
   .daos-bar__in {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sl-space-4);
+    gap: var(--sl-space-2) var(--sl-space-4);
     padding-block: var(--sl-space-3);
   }
   .daos-brand {
@@ -501,7 +503,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   }
   @media (max-width: 620px) {
     .daos-bar__meta { display: none; }
-    .daos-bar__in { gap: var(--sl-space-2); }
+    .daos-bar__in { column-gap: var(--sl-space-2); }
     .daos-lang .sl-segmented__item { padding-inline: var(--sl-space-2); }
   }
 
@@ -558,7 +560,10 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .not-cache .sl-callout__title { display: block; margin-bottom: var(--sl-space-2); }
   .daos .not-cache b { color: var(--slc-text); font-weight: 600; }
 
-  /* executed artifacts: real output pasted from `uv run python`, on the ink */
+  /* executed artifacts: real output pasted from `uv run python`, on the ink.
+     The block is an inversion (sl-invert), so its spans get the band's roles:
+     a comment is the band's muted text, the kit's 60% mix that holds 4.5:1 on
+     the ink (the landing's 48% measured 3.4:1 composited). */
   .daos .artifact {
     margin: var(--sl-space-4) 0 0;
     padding: var(--sl-space-4) 1.15rem;
@@ -570,7 +575,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     font-size: clamp(0.78rem, 0.74rem + 0.25vw, 0.88rem);
     line-height: var(--sl-line-loose);
   }
-  .daos .artifact .c { color: color-mix(in srgb, var(--slc-canvas) 48%, transparent); }
+  .daos .artifact .c { color: var(--slc-text-muted); }
   .daos .artifact .k { font-weight: 600; }
   /* on-ink status pair, derived per theme: the status hue lifted toward the
      band's text so it reads on the ink (design-language.md §Decision 2) */
@@ -584,6 +589,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .proof .cap {
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-text-muted);
@@ -625,6 +631,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     color: var(--slc-text-muted);
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -645,6 +652,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .proof .leaf {
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-text-muted);
@@ -689,12 +697,15 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     gap: var(--sl-space-4);
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .daos .call-h .n { color: var(--slc-text); font-weight: 700; }
+  /* The label and the zero carry their weight in ink, not in a bolder cut:
+     the micro register is one weight. */
+  .daos .call-h .n { color: var(--slc-text); }
   .daos .call-h .cost { color: var(--slc-text-muted); }
-  .daos .call-h .cost.zero { color: var(--slc-text); font-weight: 700; }
+  .daos .call-h .cost.zero { color: var(--slc-text); }
   .daos .step {
     font-family: var(--sl-font-mono);
     font-size: 0.64rem;
@@ -712,9 +723,9 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
   }
-  .daos .proof-foot .pf-k { color: var(--slc-text); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .daos .proof-foot .pf-k { color: var(--slc-text); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
   .daos .proof-foot .pf-v { color: var(--slc-text-muted); flex: 1; min-width: 14ch; letter-spacing: 0.02em; }
-  .daos .proof-foot .pf-ref { color: var(--slc-text-muted); letter-spacing: 0.14em; }
+  .daos .proof-foot .pf-ref { color: var(--slc-text-muted); letter-spacing: 0.06em; }
 
   /* ---- sections --------------------------------------------------------- */
   /* A denser rhythm than the site's 8rem: this is one long argument, not a
@@ -839,6 +850,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     flex-wrap: wrap;
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-micro);
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-text-secondary);
@@ -852,10 +864,12 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
     line-height: 1;
     letter-spacing: -0.03em;
   }
+  /* The unit beside the figure: secondary, not muted. At 21px it is body-size
+     text on a cell's 7% wash inside the band, where muted measured 4.1-4.3:1. */
   .daos .metric .sl-stat__value small {
     font-size: 0.42em;
     font-weight: 600;
-    color: var(--slc-text-muted);
+    color: var(--slc-text-secondary);
     letter-spacing: 0;
   }
   .daos .metric-note {

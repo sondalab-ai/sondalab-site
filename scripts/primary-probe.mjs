@@ -10,13 +10,17 @@
 // before the effects layer mounts, so every product's fill is measured, and
 // its rows are marked "injected".
 //
+// A product with a long-form page of its own (`fullPage` in its frontmatter,
+// e.g. daos → /daos/) has a second primary in its head, the link to that page,
+// measured the same way.
+//
 // The label's own text node is measured: the button's range also spans the
 // glass layers mount() puts inside it. Captures stay inside the viewport,
 // because the aside is sticky and a beyond-viewport capture re-lays it out.
 // Gates on the 5th percentile, failing closed (contrast-math.mjs).
 //
 // Usage: node scripts/primary-probe.mjs http://localhost:4321
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { belowFloor, contrastStats, inkFromPaints, readTextInk } from './contrast-math.mjs';
 import { createProbe, decodePng, sleep } from './probe-kit.mjs';
 
@@ -25,6 +29,12 @@ const probe = await createProbe(BASE, 'primary-probe.mjs');
 const { browser, report } = probe;
 const PRODUCTS = readdirSync('src/content/products').filter((f) => f.endsWith('.md')).map((f) => f.replace(/\.md$/, '')).sort();
 const SEL = '.product__aside .sl-btn--primary';
+const FULL = '.product__full .sl-btn--primary';
+const hasFullPage = (product) => /^fullPage:/m.test(readFileSync(`src/content/products/${product}.md`, 'utf8'));
+const TARGETS = PRODUCTS.flatMap((product) => [
+  { product, sel: SEL, tag: '' },
+  ...(hasFullPage(product) ? [{ product, sel: FULL, tag: ' full-page link' }] : []),
+]);
 const FLOOR = 4.5;
 
 const hex = (c) => `#${c.slice(0, 3).map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
@@ -73,11 +83,11 @@ async function measure(page, el) {
 }
 
 const rows = [];
-for (const product of PRODUCTS) {
+for (const { product, sel, tag } of TARGETS) {
   for (const theme of ['dark', 'light']) {
     for (const opaque of [false, true]) {
       const page = await open(product, theme, opaque);
-      const el = await page.$(SEL);
+      const el = await page.$(sel);
       await el.evaluate((e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
       await sleep(1200);
       const injected = await el.evaluate((e) => 'injected' in e.dataset);
@@ -95,7 +105,7 @@ for (const product of PRODUCTS) {
       await page.mouse.up();
       await page.close();
       const mode = opaque ? 'opaque' : 'glass';
-      const name = `${product}${injected ? ' (injected)' : ''}`;
+      const name = `${product}${tag}${injected ? ' (injected)' : ''}`;
       rows.push({ name, theme, mode, rest, hover, press });
       for (const [state, m] of Object.entries({ rest, hover, press })) {
         report(!belowFloor(m.stats, FLOOR), `${name} ${theme} ${mode} ${state}: label ${m.ink} p5 ${m.stats.p5.toFixed(2)}:1`);
