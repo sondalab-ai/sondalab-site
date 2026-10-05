@@ -293,8 +293,16 @@ const BAND_SCENES = ['uprising', 'kinship'];
     transition: background var(--sl-motion-mid) var(--sl-motion-ease);
   }
   .trow:hover { background: var(--sl-bg-surface); }
-  /* The row's rule joins the focus ring (site.css): left neutral it is a band. */
-  .trow:focus-visible { border-bottom-color: var(--slc-focus); }
+  /* The focused row stands above its neighbours, which otherwise paint over
+     the ring's outer edge (the first row's top). The ring sits 1px in, over
+     the row's own rule, so it is 2px on every side; at offset 0 the rule
+     joined it and the bottom read 3px. */
+  .trow:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline-offset: -1px;
+    border-bottom-color: var(--slc-focus);
+  }
 
   /* Stamp column: the log's spine. Date over serial, both mono. */
   .trow__stamp {

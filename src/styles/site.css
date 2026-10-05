@@ -43,7 +43,13 @@
   --sl-motion-slow: 360ms;
 }
 
-html { scroll-behavior: smooth; }
+/* The sticky header is 4rem and a 1px rule: anything scrolled into view, by
+   an anchor or by Shift+Tab, lands clear of it instead of under it
+   (WCAG 2.4.11). */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(4rem + 1px + 1rem);
+}
 
 body {
   margin: 0;

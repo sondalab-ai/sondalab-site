@@ -175,8 +175,10 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
      its 12% wash, the accent as text (capped on light at
      --sl-accent-text-lmax, where the raw accent is a fill), the ring, and the
      hover step, which the glitch's jitter mixes into a product name, a pager
-     name and the log marker (effects.css); the step is the theme's own,
-     lighter on ink and darker on paper (themes/dark.css, light.css).
+     name and the log marker (effects.css). The glitch needs the product's hue,
+     a step off: a fixed mix, lighter on ink and darker on paper, since the
+     kit's own step rule (0.32.1) is a private macro and no primary reads this
+     one (a set --slc-accent-fill derives its steps on the control).
      --sl-accent-default is for this page's own CSS. Only var()/color-mix
      here; the hex lives in the inline style attribute.
 
