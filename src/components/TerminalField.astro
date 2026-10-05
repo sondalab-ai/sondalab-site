@@ -94,6 +94,16 @@
         const label = `[ ${primary.textContent?.trim()} ]`;
         primary.textContent = label;
         primary.dataset.text = label;
+        // The glitch takes ::before and ::after, and the linear aurora drew its
+        // line on the same ::after: the glitch's `inset: 0` dragged it to the
+        // top edge, a second line inside the focus ring. One family per
+        // element here; the ring and its halo carry focus. mount() marked the
+        // aurora near the viewport; the mark goes with it. Its observer may set
+        // it again on a scroll, and nothing reads it without the aurora class.
+        // (Replacing the button with a clone would unhook that observer, but
+        // mount() then gives the new button the ink sweep this one never had.)
+        primary.classList.remove('sl-fx-aurora', 'sl-fx-aurora--linear');
+        primary.removeAttribute('data-sl-fx-near');
         primary.classList.add('sl-fx-glitch');
         const { hoverBurst } = await import('@sondalab/ui-kit/effects.js');
         hoverBurst(primary, primary, { burstMin: 120, burstMax: 260 });

@@ -43,7 +43,13 @@
   --sl-motion-slow: 360ms;
 }
 
-html { scroll-behavior: smooth; }
+/* The sticky header is 4rem and a 1px rule: anything scrolled into view, by
+   an anchor or by Shift+Tab, lands clear of it instead of under it
+   (WCAG 2.4.11). */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(4rem + 1px + 1rem);
+}
 
 body {
   margin: 0;
@@ -63,6 +69,20 @@ body {
 
 a { color: inherit; }
 
+/* The kit's flush focus ring on everything focusable that is not a kit
+   control: links, rows, the scroll cue, a scrolling track. Without it they get
+   the browser's ring, 1px at a 1px offset in its own blue: a gap, and another
+   colour. :where() keeps this at zero weight, so a kit control's ring and any
+   rule of this site's own still win. The ring only: the kit's halo is private
+   to its controls (--_sl-halo), and copying its 22% here would fork it. The
+   soft corner is the kit's for a host with square corners (.sl-link). A host
+   with a border of its own hands it to the ring in its component. */
+:where(:focus-visible) {
+  outline: var(--sl-focus-ring-width, 2px) solid var(--slc-focus);
+  outline-offset: var(--sl-focus-ring-offset, 0px);
+  border-radius: var(--sl-radius-sm);
+}
+
 /* --- shared primitives ------------------------------------------------ *
  * .sl-wrap, .sl-eyebrow, .sl-section and .sl-invert are the kit's classes
  * (components.css). This file used to redefine each of them in full; what is
@@ -80,13 +100,12 @@ a { color: inherit; }
   max-width: var(--wrap);
 }
 
-/* The site's eyebrow is lighter (the light mono, not the kit's 500) and
-   carries a leading accent dash; inline-flex is what seats the dash, and three
-   page heads (blog, post, product) rely on it being inline-flex. The dash is a
-   1px line, so it takes the accent-as-text role: the raw light-theme accent is
-   a fill. Size and tracking are the kit's micro register (0.30). */
+/* The site's eyebrow carries a leading accent dash; inline-flex is what seats
+   the dash, and three page heads (blog, post, product) rely on it being
+   inline-flex. The dash is a 1px line, so it takes the accent-as-text role:
+   the raw light-theme accent is a fill. Face, size, weight and tracking are
+   the kit's micro register (0.30, L1). */
 .sl-eyebrow {
-  font-weight: var(--mono-light);
   display: inline-flex;
   align-items: center;
   gap: 0.6em;

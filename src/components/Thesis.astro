@@ -70,6 +70,9 @@ const pillars = [
     pointer-events: none;
     background: var(--bed) center / cover no-repeat;
   }
+  /* A bloom of the bed sits under the eyebrow, so it takes the secondary ink,
+     not L1's muted: the owner's 4.5:1 rule wins (muted read 3.98:1, light). */
+  .thesis .sl-eyebrow { color: var(--slc-text-secondary); }
 
   .thesis__grid {
     position: relative;

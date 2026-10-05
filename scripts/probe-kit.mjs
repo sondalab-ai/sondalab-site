@@ -2,6 +2,7 @@
 // one headless Chrome, pass/fail reporting, and the measurements the probes
 // share. Not a test framework; each probe stays a plain script.
 import puppeteer from 'puppeteer-core';
+import { contrastStats, inkFromPaints, readTextInk } from './contrast-math.mjs';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
@@ -55,20 +56,22 @@ export const snapshot = (page, selector) => page.$$eval(selector, (cs) => cs.map
 
 /**
  * 5th-percentile contrast of `selector`'s own text against what is behind it:
- * hides only the text, samples the text's own box, and adds the scroll offset
- * because puppeteer clips in document coordinates.
+ * hides only the glyphs, samples the text's own box, and adds the scroll offset
+ * because puppeteer clips in document coordinates. The ink is composited over
+ * each sampled pixel with its own alpha and the element's effective opacity
+ * (contrast-math.mjs): read as opaque, the band's 60% muted ink measured as the
+ * full foreground. The glyphs are hidden through -webkit-text-fill-color, not
+ * `color`, so a ground the band derives from currentColor stays as painted.
  */
 export async function textContrast(page, selector) {
   const el = await page.$(selector);
   await el.scrollIntoView();
   await sleep(200);
-  const ink = await el.evaluate((e) => {
-    const c = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
-    c.fillStyle = getComputedStyle(e).color;
-    c.fillRect(0, 0, 1, 1);
-    const rgb = [...c.getImageData(0, 0, 1, 1).data.slice(0, 3)];
-    e.style.color = 'transparent';
-    return rgb;
+  const paints = await el.evaluate(readTextInk);
+  const ink = inkFromPaints(paints.overBlack, paints.overWhite, paints.opacity);
+  await el.evaluate((e) => {
+    e.style.webkitTextFillColor = 'transparent';
+    e.style.textDecorationColor = 'transparent';
   });
   const clip = await el.evaluate((e) => {
     const r = document.createRange();
@@ -77,25 +80,19 @@ export async function textContrast(page, selector) {
     return { x: b.x + scrollX, y: b.y + scrollY, width: b.width, height: b.height };
   });
   const shot = await page.screenshot({ clip, encoding: 'base64' });
-  await el.evaluate((e) => { e.style.color = ''; });
-  const px = await page.evaluate(async (s) => {
-    const i = new Image();
-    i.src = `data:image/png;base64,${s}`;
-    await i.decode();
-    const c = Object.assign(document.createElement('canvas'), { width: i.width, height: i.height }).getContext('2d');
-    c.drawImage(i, 0, 0);
-    return Array.from(c.getImageData(0, 0, i.width, i.height).data);
-  }, shot);
-  const lum = ([r, g, b]) => {
-    const f = (v) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
-  };
-  const li = lum(ink);
-  const ratios = [];
-  for (let k = 0; k < px.length; k += 4) {
-    const l = lum([px[k], px[k + 1], px[k + 2]]);
-    ratios.push((Math.max(l, li) + 0.05) / (Math.min(l, li) + 0.05));
-  }
-  ratios.sort((a, b) => a - b);
-  return ratios[Math.floor(0.05 * (ratios.length - 1))];
+  await el.evaluate((e) => {
+    e.style.webkitTextFillColor = '';
+    e.style.textDecorationColor = '';
+  });
+  return contrastStats(ink, await decodePng(page, shot)).p5;
 }
+
+/** RGBA bytes of a base64 PNG, decoded by the page's own image decoder. */
+export const decodePng = (page, b64) => page.evaluate(async (s) => {
+  const i = new Image();
+  i.src = `data:image/png;base64,${s}`;
+  await i.decode();
+  const c = Object.assign(document.createElement('canvas'), { width: i.width, height: i.height }).getContext('2d');
+  c.drawImage(i, 0, 0);
+  return Array.from(c.getImageData(0, 0, i.width, i.height).data);
+}, b64);

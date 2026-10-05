@@ -221,6 +221,20 @@ const ledger = [
     margin-top: clamp(1.75rem, 4vw, 2.75rem);
     max-width: 46ch;
   }
+  /* Below 64rem the lede runs across the tube, past the lit left of the
+     frame: it read 2.63:1 over the live scene and 1.27:1 over its flat image
+     at 390px, and 2.48:1 over the image at 768px (light). So the scene is
+     composed above it: it holds the top and the right, behind the heading
+     (large, it clears its 3:1 there), and dissolves toward the bottom of the
+     section over 7rem, gone 15rem up from it, the height of the lede and the
+     padding under it at these widths. Nothing of it comes back below the
+     words. From 64rem the lede sits in the lit left (1024px: passes). */
+  @media (max-width: 63.99rem) {
+    :global(.crt-scene.ap-open__field) {
+      -webkit-mask-image: linear-gradient(to top, transparent 15rem, #000 22rem);
+      mask-image: linear-gradient(to top, transparent 15rem, #000 22rem);
+    }
+  }
 
   /* --- the pact ------------------------------------------------------ */
   .ap-pact__grid {
@@ -249,9 +263,9 @@ const ledger = [
   .ap-ledger__row:last-child { border-bottom: 1px solid var(--sl-border-subtle); }
   .ap-ledger__key {
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.16em;
+    font-weight: 500;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--slc-accent-text);
   }
@@ -317,9 +331,15 @@ const ledger = [
   .crow:not(.crow--inert):hover {
     background: color-mix(in srgb, var(--sl-accent-default) 6%, transparent);
   }
+  /* A row with a link (none until the shop opens) has rules top and bottom
+     only. The ring sits over them, 1px in, so it is 2px and flush on every
+     side: offset 0 with the rules joining it would read 3px at the top and
+     bottom and 2px at the sides, and a rule left in its own colour is a band.
+     Square, as the rules are. */
   .crow:focus-visible {
     outline: var(--sl-focus-ring-width) solid var(--slc-focus);
-    outline-offset: var(--sl-focus-ring-offset);
+    outline-offset: -1px;
+    border-radius: 0;
   }
 
   .crow__no {
@@ -503,9 +523,9 @@ const ledger = [
   .ap-band__state {
     margin: 0;
     font-family: var(--sl-font-mono);
-    font-weight: var(--mono-light);
-    font-size: var(--sl-text-xs);
-    letter-spacing: 0.16em;
+    font-weight: 500;
+    font-size: var(--sl-text-micro);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--sl-text-muted);
   }

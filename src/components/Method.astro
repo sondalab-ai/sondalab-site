@@ -71,6 +71,9 @@ const points = [
     pointer-events: none;
     background: var(--bed) center / cover no-repeat;
   }
+  /* A bloom of the bed sits under the eyebrow, so it takes the secondary ink,
+     not L1's muted: the owner's 4.5:1 rule wins (muted read 4.28:1, light). */
+  .method .sl-eyebrow { color: var(--slc-text-secondary); }
   .method .sl-wrap { position: relative; z-index: 1; }
 
   .method__grid {
@@ -169,7 +172,9 @@ const points = [
   }
   .rail__label {
     margin-left: 0.75rem;
-    letter-spacing: 0.16em;
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--sl-text-secondary);
   }
