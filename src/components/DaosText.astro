@@ -1,0 +1,20 @@
+---
+import type { HTMLTag } from 'astro/types';
+import { DAOS_I18N, type DaosKey } from '../lib/daos-i18n';
+
+// One translatable run of the DAOS page. Renders the English markup for `k`
+// and stamps the same key as `data-i18n`, so the server text and the client
+// swap can never point at different keys. An unknown key fails the build:
+// `astro check` does not type a component's props here (Props reads as unused
+// on every component), so the guard is at render time.
+interface Props {
+  k: DaosKey;
+  as?: HTMLTag;
+  class?: string;
+}
+
+const { k, as: Tag = 'span', class: className } = Astro.props as Props;
+if (!Object.hasOwn(DAOS_I18N.en, k)) throw new Error(`DaosText: unknown key "${k}"`);
+---
+
+<Tag class={className} data-i18n={k} set:html={DAOS_I18N.en[k]} />

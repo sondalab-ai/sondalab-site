@@ -1,0 +1,970 @@
+---
+// The DAOS minisite: the long-form page for one tool, ported from the
+// standalone landing (daos repo, docs/daos-landing.html). It lives beside the
+// short product page (/products/daos/), which links here.
+//
+// The one page on the site in four languages. English is rendered on the
+// server; the script below swaps every data-i18n run (DaosText) for the
+// visitor's language. The dictionary and the language rule are
+// src/lib/daos-i18n.ts.
+//
+// DAOS has no accent of its own: the kit's registry has `daos: { inherits:
+// "default" }`, so the page paints in the site's default accent and needs no
+// per-product repaint (compare products/[slug].astro).
+import Base from '../layouts/Base.astro';
+import DaosText from '../components/DaosText.astro';
+import { DAOS_LANGS, DAOS_LANG_NAMES, type DaosKey } from '../lib/daos-i18n';
+
+// Real output pasted from `uv run python` in the daos repo. Not translated:
+// code reads the same in every language. Strings, because Astro would read
+// the braces in the JSON as template expressions.
+const PINNED = '{"category":"billing",<wbr>"confidence":0.85,<wbr>"escalate":true,<wbr>"priority":"high"}';
+
+const ARTIFACTS = {
+  test: `<span class="c"># raw generation: float noise + arbitrary key order</span>
+canonicalize_output({<span class="k">"priority":"high","confidence":0.8500000119,...</span>})
+  <span class="c">→</span> <span class="k">{"category":"billing","confidence":0.85,"escalate":true,"priority":"high"}</span>
+<span class="c"># same bytes on re-run, any process → the golden assert holds</span>`,
+  audit: `<span class="c"># every resolution appended to the signed, append-only event log</span>
+append(LogEvent(kind=<span class="k">"resolved"</span>, output=<span class="k">{"category":"billing","confidence":0.85,...}</span>))  <span class="c">→</span> seq 1
+read_run("ticket-01...")  <span class="c">→</span> <span class="ok">MAC-verified ✓</span>
+<span class="c"># flip one byte of a stored answer (billing → refund), re-read:</span>
+  <span class="c">→</span> <span class="no">IntegrityError: event 'ticket-01...'/1 failed HMAC verification</span>`,
+  cache: `<span class="c"># two inputs, semantically equal, keys reordered</span>
+canon({"threshold":<span class="k">0.9</span>,...}) == canon({...,"threshold":<span class="k">0.90</span>})  <span class="c">→</span>  <span class="ok">True</span>
+<span class="c"># both → {"threshold":0.9,...} → one cache entry, one inference paid</span>`,
+  extract: `<span class="c"># an invalid extraction is caught, not passed on</span>
+validate({"category":<span class="no">"banana"</span>, "confidence":<span class="no">1.3</span>, ...})
+  <span class="c">→</span> <span class="no">$.category: 'banana' is not one of ['billing','outage',...]</span>
+  <span class="c">→</span> <span class="no">$.confidence: 1.3 is greater than the maximum of 1</span>
+<span class="c"># a signed, cacheable DAOSFailure — never plausible garbage</span>`,
+} as const;
+
+/** `how`: the plain "How it works" tag; `track`: the accent Track B tag. */
+type CaseTag = 'how' | 'track' | null;
+
+/** Section 05's ledger. `mech` is the mechanism tag, kept English like the code. */
+const CASES: { h: DaosKey; p: DaosKey; tag: CaseTag; art?: keyof typeof ARTIFACTS; mech: string; accent?: boolean }[] = [
+  { h: 's05.h1', p: 's05.p1', tag: 'how', art: 'test', mech: 'Canonical object &middot; <b>byte-identity</b>' },
+  { h: 's05.h2c', p: 's05.p2', tag: 'how', art: 'audit', mech: 'L6 event log &middot; <b>signed trust root</b>' },
+  { h: 's05.h3', p: 's05.p3', tag: 'track', mech: 'Cross-quant quorum &middot; <b>Track B</b>', accent: true },
+  { h: 's05.h4', p: 's05.p4', tag: 'how', art: 'cache', mech: 'L4 content-addressable cache' },
+  { h: 's05.h5', p: 's05.p5', tag: null, mech: 'Schema-constrained boundary' },
+  { h: 's05.h6', p: 's05.p6', tag: 'track', mech: 'Quorum record &middot; <b>dissent attribution</b>', accent: true },
+  { h: 's05.h7', p: 's05.p7', tag: 'how', art: 'extract', mech: 'L2 CFG decoder &middot; L9 verify/repair &middot; <b>G4</b>' },
+  { h: 's05.h8', p: 's05.p8', tag: null, mech: 'Pure function &middot; <b>G1</b>' },
+  { h: 's05.h9', p: 's05.p9', tag: null, mech: 'Pure function &middot; replay <b>(fresh process, measured)</b>' },
+  { h: 's05.h10', p: 's05.p10', tag: null, mech: 'L6 replay &middot; <b>divergence detection (R6.2)</b>' },
+];
+
+const LAYERS: { k: DaosKey; g: string; gone?: boolean }[] = [
+  { k: 's01.li1', g: '1&times;', gone: true },
+  { k: 's01.li2', g: '2' },
+  { k: 's01.li3', g: '3' },
+  { k: 's01.li4', g: '4' },
+  { k: 's01.li5', g: '5' },
+  { k: 's01.li6', g: '6' },
+];
+
+const BRAIN: { from: DaosKey; h: DaosKey; p: DaosKey; c: DaosKey }[] = [
+  { from: 's03.from1', h: 's03.h3a', p: 's03.p1', c: 's03.c1' },
+  { from: 's03.from2', h: 's03.h3b', p: 's03.p2', c: 's03.c2' },
+  { from: 's03.from3', h: 's03.h3c', p: 's03.p3', c: 's03.c3' },
+];
+
+const METRICS: { label: DaosKey; items: { value: string; unit: string; note: DaosKey }[] }[] = [
+  {
+    label: 's04.mlabel1',
+    items: [
+      { value: '20', unit: '&rarr;1', note: 's04.lab1' },
+      { value: '0', unit: '&nbsp;inf.', note: 's04.lab2' },
+    ],
+  },
+  {
+    label: 's04.mlabel2',
+    items: [
+      { value: '1', unit: '&nbsp;/ 3', note: 's04.lab3' },
+      { value: '17.5', unit: '%', note: 's04.lab4' },
+    ],
+  },
+];
+
+const LIMITS: { h: DaosKey; p: DaosKey }[] = [
+  { h: 's06.h3a', p: 's06.pa' },
+  { h: 's06.h3b', p: 's06.pb' },
+  { h: 's06.h3c', p: 's06.pc' },
+  { h: 's06.h3d', p: 's06.pd' },
+  { h: 's06.h3e', p: 's06.pe' },
+  { h: 's06.h3f', p: 's06.pf' },
+];
+---
+
+<Base
+  title="DAOS — Deterministic Agent Output System"
+  description="DAOS turns an LLM call into a pure function: input, context and schema resolve once to a canonical output that is pinned, signed and replayed byte-for-byte."
+>
+  <div class="daos" data-daos>
+    {/* Arms the scroll reveal before the first paint, so the hero card never
+        shows, hides, then rises. Without JavaScript nothing is armed and
+        everything is simply visible. If the page script never runs, the timer
+        disarms it; the script marks itself live to keep the arm. */}
+    <script is:inline>
+      (function (root) {
+        if (!('IntersectionObserver' in window)) return;
+        root.setAttribute('data-armed', '');
+        setTimeout(function () {
+          if (!root.hasAttribute('data-live')) root.removeAttribute('data-armed');
+        }, 3000);
+      })(document.currentScript.parentElement);
+    </script>
+
+    <div class="daos-bar">
+      <div class="sl-wrap daos-bar__in">
+        <p class="daos-brand">
+          <svg class="daos-brand__mark" viewBox="0 0 40 40" aria-hidden="true">
+            <path fill="currentColor" fill-rule="evenodd" d="M0 0h40v40H0z M9 11h22v4.2H9z M9 17.9h22v4.2H9z M9 24.8h22v4.2H9z" />
+          </svg>
+          <span class="daos-brand__name">DAOS</span>
+        </p>
+        <span class="sl-eyebrow daos-bar__meta">Deterministic Agent Output System</span>
+        <div class="sl-segmented daos-lang" role="group" aria-label="Language">
+          {DAOS_LANGS.map((l) => (
+            <button
+              class="sl-segmented__item"
+              type="button"
+              data-daos-lang={l}
+              lang={l}
+              aria-pressed={l === 'en' ? 'true' : 'false'}
+            >{DAOS_LANG_NAMES[l]}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="sl-wrap">
+      <div class="hero">
+        <div class="hero-grid">
+          <div>
+            <DaosText as="p" class="sl-eyebrow" k="hero.kicker" />
+            <DaosText as="h1" class="sl-anchor" k="hero.h1" />
+            <DaosText as="p" class="hero-lede sl-prose" k="hero.lede" />
+          </div>
+
+          <figure
+            class="sl-card proof proof--hero"
+            aria-label="One ticket resolved and pinned once, then reproduced byte-for-byte with zero inference whenever that exact run is replayed — in a test, an audit, or on another machine"
+          >
+            <div class="cap"><DaosText k="proof.cap1" /><DaosText k="proof.cap2" /></div>
+            <div class="calls">
+              <div class="call">
+                <div class="call-h"><DaosText class="n" k="proof.resolve" /><DaosText class="cost" k="proof.cost1" /></div>
+                <div class="vrow"><span class="q">TICKET</span><DaosText class="raw" k="proof.ticket" /></div>
+                <DaosText as="div" class="step" k="proof.step" />
+                <div class="canon canon--wrap"><span class="q">PINNED</span><span class="out" set:html={PINNED} /></div>
+              </div>
+              <div class="call repeat">
+                <div class="call-h"><DaosText class="n" k="proof.reproduce" /><DaosText class="cost zero" k="proof.cost0" /></div>
+                <div class="vrow"><span class="q">WHEN</span><DaosText class="raw" k="proof.when" /></div>
+                <div class="canon"><span class="q">REPLAY</span><DaosText class="out" k="proof.replay" /></div>
+                <DaosText as="p" class="subnote" k="proof.subnote" />
+              </div>
+            </div>
+            <div class="proof-foot">
+              <DaosText class="pf-k" k="proof.footK" />
+              <DaosText class="pf-v" k="proof.footV" />
+              <span class="pf-ref">&sect;&thinsp;04</span>
+            </div>
+          </figure>
+        </div>
+        <p class="fn sl-invert"><span class="sig"><b>f</b>(input, context, schema) <b>&rarr;</b> output</span><DaosText class="cmt" k="hero.fnComment" /></p>
+      </div>
+    </div>
+
+    <!-- NOT A CACHE: names the inversion so the hero card doesn't read as memoization -->
+    <div class="sl-wrap">
+      <div class="sl-callout not-cache"><DaosText as="p" class="sl-callout__body" k="nc.p" /></div>
+    </div>
+
+    <!-- 01 · THE temperature=0 TRAP -->
+    <section class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">01</span><DaosText as="p" class="sl-eyebrow" k="s01.kicker" /></div>
+        <DaosText as="h2" class="knob-h2" k="s01.h2" />
+
+        <div class="sl-hgrid compare">
+          <div class="col">
+            <DaosText class="sl-eyebrow" k="s01.tag1" />
+            <DaosText as="h3" k="s01.h3a" />
+            <DaosText as="p" class="sl-prose" k="s01.p1" />
+            <DaosText as="p" class="note sl-prose" k="s01.note1" />
+          </div>
+          <div class="col runtime">
+            <DaosText class="sl-eyebrow" k="s01.tag2" />
+            <DaosText as="h3" k="s01.h3b" />
+            <DaosText as="p" class="sl-prose" k="s01.p2" />
+            <ul class="layers">
+              {LAYERS.map((l) => (
+                <li class={l.gone ? 'gone' : 'stays'}><span class="g" set:html={l.g} /><DaosText k={l.k} /></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div class="punch sl-invert">
+          <DaosText as="p" k="s01.punch" />
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · WHAT IT DOES -->
+    <section class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">02</span><DaosText as="h2" k="s02.h2" /></div>
+        <div class="two-col">
+          <DaosText as="p" class="lead-para sl-prose" k="s02.lead" />
+          <div>
+            <DaosText as="p" class="note sl-prose" k="s02.note1" />
+            <DaosText as="p" class="note sl-prose" k="s02.note2" />
+            <DaosText as="p" class="note sl-prose" k="s02.note3" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 · BRAIN BIOLOGY -->
+    <section class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head">
+          <span class="sl-section__idx">03</span>
+          <DaosText as="p" class="sl-eyebrow" k="s03.kicker" />
+          <DaosText class="sl-tag" k="ui.designChoice" />
+        </div>
+        <DaosText as="h2" class="brain-h2" k="s03.h2" />
+        <DaosText as="p" class="lead-para brain-lead sl-prose" k="s03.lead" />
+
+        <div class="sl-hgrid brain-grid">
+          {BRAIN.map((b) => (
+            <div class="bcard">
+              <DaosText as="p" class="from" k={b.from} />
+              <DaosText as="h3" k={b.h} />
+              <DaosText as="p" k={b.p} />
+              <DaosText as="p" class="constraint" k={b.c} />
+            </div>
+          ))}
+          <div class="bcard rejected sl-invert">
+            <DaosText as="p" class="from" k="s03.from4" />
+            <DaosText as="h3" k="s03.h3d" />
+            <DaosText as="p" k="s03.p4" />
+            <DaosText as="p" class="tagline" k="s03.tagline" />
+          </div>
+        </div>
+        <DaosText as="p" class="note brain-foot sl-prose" k="s03.foot" />
+      </div>
+    </section>
+
+    <!-- 04 · EVIDENCE (the inversion band) -->
+    <section class="sl-section sl-invert">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">04</span><DaosText as="p" class="sl-eyebrow" k="s04.kicker" /></div>
+        <DaosText as="h2" class="evidence-h2" k="s04.h2" />
+
+        {METRICS.map((g, gi) => (
+          <div class="mgroup">
+            <DaosText as="div" class="mgroup-label" k={g.label} />
+            <div class="sl-hgrid metrics">
+              {g.items.map((m) => (
+                <div class="sl-stat metric">
+                  <span class="sl-stat__value">{m.value}<small set:html={m.unit} /></span>
+                  <DaosText as="p" class="metric-note" k={m.note} />
+                </div>
+              ))}
+            </div>
+            {gi === 1 && (
+              <Fragment>
+                <div class="research-card-wrap">
+                  <figure class="sl-card proof research" aria-label="Three quantization variants voting a leaf; a genuine value split resolved by majority">
+                    <div class="cap"><DaosText k="s04.capA" /><DaosText k="s04.capB" /></div>
+                    <DaosText as="p" class="leaf" k="s04.leaf" />
+                    <div class="variants">
+                      <div class="vrow"><span class="q">F16</span><span class="raw">"high"</span></div>
+                      <div class="vrow"><span class="q">Q8_0</span><span class="raw">"high"</span></div>
+                      <div class="vrow"><span class="q">Q4_K_M</span><span class="raw">"medium" &nbsp;<DaosText class="lone" k="s04.lone" /></span></div>
+                    </div>
+                    <DaosText as="div" class="collapse" k="s04.collapse" />
+                    <div class="canon"><span class="q">OUTPUT</span><span class="out">"priority": "high"</span></div>
+                    <DaosText as="p" class="subnote" k="s04.subnote" />
+                  </figure>
+                </div>
+                <DaosText as="p" class="foot-note" k="s04.foot" />
+              </Fragment>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 05 · USE CASES -->
+    <section class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">05</span><DaosText as="h2" k="s05.h2" /></div>
+        <div class="ledger">
+          {CASES.map((c, i) => (
+            <article class="case">
+              <span class="num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <div class="htop">
+                  <DaosText as="h3" k={c.h} />
+                  {c.tag === 'how' && <DaosText class="sl-tag sl-tag--plain" k="ui.howItWorks" />}
+                  {c.tag === 'track' && <span class="sl-tag">Track&nbsp;B &middot; research</span>}
+                </div>
+                <DaosText as="p" k={c.p} />
+                {c.art && <pre class="artifact sl-invert" set:html={ARTIFACTS[c.art]} />}
+                <span class:list={['sl-tag', 'mech', { 'sl-tag--plain': !c.accent }]} set:html={c.mech} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 · LIMITS -->
+    <section class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">06</span><DaosText as="h2" k="s06.h2" /></div>
+        <DaosText as="p" class="note limits-intro sl-prose" k="s06.intro" />
+        <div class="sl-hgrid limits">
+          {LIMITS.map((l) => (
+            <div class="limit"><DaosText as="h3" k={l.h} /><DaosText as="p" class="sl-prose" k={l.p} /></div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSE -->
+    <section class="sl-section close">
+      <div class="sl-wrap">
+        <DaosText as="p" class="sl-eyebrow" k="close.kicker" />
+        <DaosText as="h2" k="close.h2" />
+        <DaosText as="p" class="lead-para sl-prose" k="close.lead" />
+      </div>
+    </section>
+
+    <div class="daos-colophon">
+      <div class="sl-wrap daos-colophon__in">
+        <p class="sl-eyebrow">DAOS · Deterministic Agent Output System</p>
+        <DaosText as="p" class="sl-eyebrow" k="footer.guarantee" />
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import {
+    DAOS_I18N,
+    DAOS_LANG_KEY,
+    asDaosLang,
+    resolveDaosLang,
+    type DaosKey,
+    type DaosLang,
+  } from '../lib/daos-i18n';
+
+  const page = document.querySelector<HTMLElement>('[data-daos]');
+  const runs = document.querySelectorAll<HTMLElement>('[data-i18n]');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-daos-lang]');
+
+  /** Swaps every translatable run to `lang` and marks the switch; text only, no layout of its own. */
+  function apply(lang: DaosLang) {
+    const dict = DAOS_I18N[lang];
+    for (const run of runs) {
+      const html = dict[run.dataset.i18n as DaosKey];
+      if (html !== undefined && run.innerHTML !== html) run.innerHTML = html;
+    }
+    document.documentElement.lang = lang;
+    for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.daosLang === lang));
+  }
+
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem(DAOS_LANG_KEY);
+  } catch {
+    // Storage blocked: the browser's language decides on every visit.
+  }
+  const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
+  const initial = resolveDaosLang(stored, preferred);
+  // The server already rendered English; only another language needs a pass.
+  if (initial !== 'en') apply(initial);
+
+  // Only an explicit pick is remembered, so a visitor who never chooses keeps
+  // following the browser.
+  for (const b of buttons) {
+    b.addEventListener('click', () => {
+      const lang = asDaosLang(b.dataset.daosLang);
+      if (!lang) return;
+      apply(lang);
+      try {
+        localStorage.setItem(DAOS_LANG_KEY, lang);
+      } catch {
+        // Not remembered; the choice still holds for this page view.
+      }
+    });
+  }
+
+  // Scroll reveal: the hero and research cards' rows rise in, the use cases
+  // slide up. The inline script in the page armed the hidden state before the
+  // first paint; claiming it here (data-live) keeps its fail-safe from undoing it.
+  if (page?.hasAttribute('data-armed')) {
+    page.setAttribute('data-live', '');
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
+    );
+    for (const n of page.querySelectorAll('.case, .proof')) io.observe(n);
+  }
+</script>
+
+<style is:global>
+  /* Global, under one .daos root: the translated runs arrive as markup
+     (set:html on the server, innerHTML on a switch), and Astro's scoping
+     attribute never reaches elements inside such markup, so scoped rules
+     would silently miss the hero underline, the mono runs and the rest.
+
+     Ported from the landing, which was already Tier A on ui-kit 0.30 with no
+     colour literal: what is here is layout glue on --slc-* roles and --sl-*
+     spacing/type tokens. Where the site's own globals (site.css) would leak
+     in, the page's class names differ (.hero-lede, not .lede). */
+
+  .daos {
+    position: relative;
+    font-size: clamp(1rem, 0.96rem + 0.2vw, 1.075rem);
+    line-height: var(--sl-line-relaxed);
+    letter-spacing: -0.006em;
+  }
+  .daos p.sl-eyebrow { margin: 0; }
+  .daos .mono { font-family: var(--sl-font-mono); }
+  /* Element weight only, as in the landing (a bare h1 there): `.daos h1`
+     would outrank .sl-anchor and undo the display type's solid leading and
+     tighter tracking, which the hero underline is measured against. */
+  :where(.daos) :is(h1, h2, h3) {
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+    line-height: var(--sl-line-tight);
+  }
+  /* Emphasis in full ink, where the landing wrote it as an inline style. */
+  .daos b.ink { color: var(--slc-text); font-weight: 600; }
+  .daos .mono.ink-2 { color: var(--slc-text-secondary); }
+
+  /* ---- ruler gutter (L2, wide viewports only) -------------------------- */
+  @media (min-width: 1080px) {
+    .daos::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      left: calc(var(--gutter) - 1px);
+      background: var(--slc-border-subtle);
+    }
+  }
+
+  /* ---- the DAOS bar: the landing's own header, under the site's --------- */
+  .daos-bar { border-bottom: 1px solid var(--slc-border-subtle); }
+  /* Wraps rather than squeezes: the switch names each language in itself, and
+     where the row is too narrow for that it drops under the mark. */
+  .daos-bar__in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sl-space-2) var(--sl-space-4);
+    padding-block: var(--sl-space-3);
+  }
+  .daos-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-space-2);
+    margin: 0;
+    color: var(--slc-text);
+  }
+  .daos-brand__mark { width: 26px; height: 26px; display: block; flex: none; }
+  .daos-brand__name {
+    font-family: var(--sl-font-mono);
+    font-weight: 700;
+    font-size: 1.06rem;
+    letter-spacing: 0.14em;
+  }
+  @media (max-width: 620px) {
+    .daos-bar__meta { display: none; }
+    .daos-bar__in { column-gap: var(--sl-space-2); }
+    .daos-lang .sl-segmented__item { padding-inline: var(--sl-space-2); }
+  }
+
+  /* ---- hero ------------------------------------------------------------- */
+  .daos .hero {
+    padding-top: clamp(var(--sl-space-8), 9vw, 7rem);
+    padding-bottom: clamp(var(--sl-space-8), 7vw, 5.5rem);
+  }
+  .daos .hero-grid { display: grid; grid-template-columns: 1fr; gap: clamp(2.5rem, 5vw, 4rem); }
+  .daos .hero-grid > * { min-width: 0; }
+  @media (min-width: 1000px) {
+    .daos .hero-grid { grid-template-columns: 1.3fr 0.7fr; align-items: center; }
+  }
+  .daos .hero h1 { margin-top: var(--sl-space-5); }
+  /* An underline that hugs the baseline: at the kit's solid display leading
+     (line-height 1) a border below the box ran into the next line's capitals. */
+  .daos .hero h1 .id {
+    font-family: var(--sl-font-mono);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-decoration: underline 0.12em;
+    text-underline-offset: 0.08em;
+    text-decoration-skip-ink: none;
+  }
+  .daos .hero-lede {
+    margin-top: var(--sl-space-5);
+    font-size: clamp(1.1rem, 1.02rem + 0.4vw, 1.32rem);
+    line-height: var(--sl-line-normal);
+    color: var(--slc-text-secondary);
+    letter-spacing: -0.011em;
+  }
+  /* signature band: a small inversion under both hero columns */
+  .daos .fn {
+    margin: clamp(var(--sl-space-6), 3.5vw, var(--sl-space-8)) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sl-space-1) var(--sl-space-5);
+    padding: var(--sl-space-4) 1.3rem;
+    font-family: var(--sl-font-mono);
+    font-size: clamp(0.82rem, 0.76rem + 0.3vw, 0.98rem);
+    letter-spacing: 0;
+  }
+  .daos .fn .sig b { font-weight: 700; }
+  .daos .fn .cmt { color: var(--slc-text-muted); }
+
+  /* the inversion: keeps the hero card from reading as plain memoization */
+  .daos .not-cache { margin: clamp(var(--sl-space-8), 6vw, 4.4rem) 0; max-width: 78ch; }
+  .daos .not-cache .sl-callout__body {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.16rem);
+    line-height: var(--sl-line-normal);
+  }
+  .daos .not-cache .sl-callout__title { display: block; margin-bottom: var(--sl-space-2); }
+  .daos .not-cache b { color: var(--slc-text); font-weight: 600; }
+
+  /* executed artifacts: real output pasted from `uv run python`, on the ink.
+     The block is an inversion (sl-invert), so its spans get the band's roles:
+     a comment is the band's muted text, the kit's 60% mix that holds 4.5:1 on
+     the ink (the landing's 48% measured 3.4:1 composited). */
+  .daos .artifact {
+    margin: var(--sl-space-4) 0 0;
+    padding: var(--sl-space-4) 1.15rem;
+    background: var(--slc-text);
+    color: var(--slc-canvas);
+    overflow-x: auto;
+    white-space: pre;
+    font-family: var(--sl-font-mono);
+    font-size: clamp(0.78rem, 0.74rem + 0.25vw, 0.88rem);
+    line-height: var(--sl-line-loose);
+  }
+  .daos .artifact .c { color: var(--slc-text-muted); }
+  .daos .artifact .k { font-weight: 600; }
+  /* on-ink status pair, derived per theme: the status hue lifted toward the
+     band's text so it reads on the ink (design-language.md §Decision 2) */
+  .daos .artifact .ok { color: color-mix(in srgb, var(--slc-success) 45%, var(--slc-canvas)); font-weight: 600; }
+  .daos .artifact .no { color: color-mix(in srgb, var(--slc-danger) 45%, var(--slc-canvas)); }
+
+  /* ---- the proof cards -------------------------------------------------- */
+  .daos .proof { margin: 0; padding: clamp(1.4rem, 3vw, 2.2rem); }
+  .daos .proof.proof--hero { padding: clamp(1.15rem, 2.2vw, 1.6rem); }
+  .daos .proof.research { border-color: color-mix(in srgb, var(--slc-accent-text) 55%, transparent); }
+  .daos .proof .cap {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slc-text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sl-space-1) var(--sl-space-4);
+    padding-bottom: var(--sl-space-4);
+    margin-bottom: var(--sl-space-4);
+    border-bottom: 1px solid var(--slc-border-subtle);
+  }
+  .daos .proof.research .cap {
+    color: var(--slc-accent-text);
+    border-bottom-color: color-mix(in srgb, var(--slc-accent-text) 40%, transparent);
+  }
+  .daos .variants { display: flex; flex-direction: column; gap: var(--sl-space-2); }
+  .daos .vrow,
+  .daos .canon {
+    display: grid;
+    grid-template-columns: 4.6rem 1fr;
+    align-items: center;
+    gap: var(--sl-space-3);
+    font-family: var(--sl-font-mono);
+    font-size: clamp(0.7rem, 0.66rem + 0.2vw, 0.82rem);
+  }
+  .daos .vrow .q { color: var(--slc-text-muted); letter-spacing: 0.06em; }
+  .daos .vrow .raw {
+    color: var(--slc-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .daos .vrow .lone { color: var(--slc-accent-text); }
+  .daos .collapse {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-space-3);
+    margin: var(--sl-space-4) 0;
+    color: var(--slc-text-muted);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .daos .collapse::before,
+  .daos .collapse::after { content: ''; height: 1px; background: var(--slc-border-subtle); flex: 1; }
+  .daos .canon .q { color: var(--slc-text); font-weight: 700; letter-spacing: 0.04em; }
+  .daos .canon .out {
+    color: var(--slc-canvas);
+    background: var(--slc-text);
+    padding: var(--sl-space-2) 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+  }
+  .daos .canon--wrap .out { white-space: normal; overflow: visible; text-overflow: clip; line-height: var(--sl-line-normal); }
+  .daos .proof.research .canon .out { background: var(--slc-accent); color: var(--slc-on-accent); }
+  .daos .proof .leaf {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slc-text-muted);
+    margin: 0 0 var(--sl-space-3);
+  }
+  .daos .proof .leaf b { color: var(--slc-accent-text); font-weight: 700; }
+  .daos .proof .subnote {
+    margin: var(--sl-space-4) 0 0;
+    font-family: var(--sl-font-mono);
+    font-size: 0.66rem;
+    line-height: var(--sl-line-normal);
+    color: var(--slc-text-muted);
+  }
+  .daos .proof .subnote b { color: var(--slc-text); font-weight: 600; }
+  /* hero pinned card: shrink to the grid cell; the pinned JSON stacks under its
+     label and wraps at its <wbr> field boundaries */
+  .daos .proof--hero .calls,
+  .daos .proof--hero .call,
+  .daos .proof--hero .canon,
+  .daos .proof--hero .vrow,
+  .daos .proof--hero .vrow .raw { min-width: 0; }
+  .daos .proof--hero .calls { gap: var(--sl-space-3); }
+  .daos .proof--hero .call { gap: var(--sl-space-2); }
+  .daos .proof--hero .canon--wrap { grid-template-columns: 1fr; gap: var(--sl-space-2); }
+  .daos .proof--hero .vrow .raw {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    color: var(--slc-text-muted);
+    line-height: var(--sl-line-normal);
+  }
+  .daos .proof--hero .call:not(.repeat) .vrow .raw { color: var(--slc-text-secondary); font-weight: 600; }
+
+  /* two-call ledger (hero card): the guarantee is about time */
+  .daos .calls { display: flex; flex-direction: column; }
+  .daos .call { display: flex; flex-direction: column; }
+  .daos .call.repeat { padding-top: var(--sl-space-4); border-top: 1px solid var(--slc-border-subtle); }
+  .daos .call-h {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sl-space-4);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  /* The label and the zero carry their weight in ink, not in a bolder cut:
+     the micro register is one weight. */
+  .daos .call-h .n { color: var(--slc-text); }
+  .daos .call-h .cost { color: var(--slc-text-muted); }
+  .daos .call-h .cost.zero { color: var(--slc-text); }
+  .daos .step {
+    font-family: var(--sl-font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    color: var(--slc-text-muted);
+  }
+  .daos .proof-foot {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sl-space-3);
+    flex-wrap: wrap;
+    margin-top: var(--sl-space-5);
+    padding-top: var(--sl-space-4);
+    border-top: 1px solid var(--slc-border-subtle);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+  }
+  .daos .proof-foot .pf-k { color: var(--slc-text); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  .daos .proof-foot .pf-v { color: var(--slc-text-muted); flex: 1; min-width: 14ch; letter-spacing: 0.02em; }
+  .daos .proof-foot .pf-ref { color: var(--slc-text-muted); letter-spacing: 0.06em; }
+
+  /* ---- sections --------------------------------------------------------- */
+  /* A denser rhythm than the site's 8rem: this is one long argument, not a
+     run of statements. */
+  .daos > .sl-section { padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
+  .daos .sec-head { flex-wrap: wrap; margin-bottom: var(--sl-space-6); }
+  .daos .sec-head h2 { font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.3rem); }
+  .daos .two-col { display: grid; grid-template-columns: 1fr; gap: clamp(1.4rem, 3vw, 2.6rem); }
+  @media (min-width: 860px) {
+    .daos .two-col { grid-template-columns: 1fr 1fr; }
+  }
+  .daos .lead-para {
+    font-size: clamp(1.05rem, 1rem + 0.4vw, 1.24rem);
+    color: var(--slc-text-secondary);
+    line-height: var(--sl-line-normal);
+    letter-spacing: -0.01em;
+  }
+  .daos .note { color: var(--slc-text-muted); }
+
+  /* hairline grids: two columns where the landing had two, cells padded like
+     the rest of the page, an outer hairline to close the grid */
+  .daos .compare,
+  .daos .brain-grid,
+  .daos .limits { grid-template-columns: 1fr; border: 1px solid var(--slc-border-subtle); }
+  .daos .compare > *,
+  .daos .brain-grid > *,
+  .daos .limits > * { padding: clamp(var(--sl-space-5), 3vw, 2.2rem); }
+  @media (min-width: 820px) {
+    .daos .compare,
+    .daos .limits { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 860px) {
+    .daos .brain-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .daos .sl-hgrid > .sl-invert { background: var(--slc-text); }
+
+  /* ---- 01 · temperature=0 ------------------------------------------------ */
+  .daos .knob-h2 { max-width: 22ch; font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.6rem); }
+  .daos .knob-h2 .k { font-family: var(--sl-font-mono); font-weight: 700; letter-spacing: -0.02em; }
+  .daos .compare { margin-top: 2.6rem; }
+  /* flex, not the landing's block: the site's eyebrow seats its dash inline */
+  .daos .col .sl-eyebrow { display: flex; margin-bottom: var(--sl-space-4); }
+  .daos .col.runtime .sl-eyebrow { color: var(--slc-text); }
+  .daos .col h3 { font-size: 1.12rem; margin: 0 0 var(--sl-space-3); }
+  .daos .col p { margin: 0; color: var(--slc-text-secondary); font-size: 0.98rem; }
+  .daos .col p.note { color: var(--slc-text-muted); }
+  .daos .col p + p { margin-top: var(--sl-space-3); }
+  .daos .layers { list-style: none; margin: var(--sl-space-4) 0 0; padding: 0; }
+  .daos .layers li {
+    display: grid;
+    grid-template-columns: 1.4rem 1fr;
+    gap: var(--sl-space-2);
+    align-items: baseline;
+    font-size: 0.92rem;
+    color: var(--slc-text-secondary);
+    padding-block: var(--sl-space-1);
+  }
+  .daos .layers li .g { font-family: var(--sl-font-mono); color: var(--slc-text-muted); font-size: 0.78rem; }
+  .daos .layers li.gone { color: var(--slc-text-muted); }
+  .daos .layers li.gone .g { color: var(--slc-text); }
+  .daos .layers li.stays .g { color: var(--slc-accent-text); }
+  .daos .layers .tie { color: var(--slc-text-muted); }
+  .daos .punch { margin-top: var(--sl-space-6); padding: clamp(1.2rem, 3vw, 1.7rem) clamp(1.3rem, 3vw, 1.9rem); }
+  .daos .punch p {
+    margin: 0;
+    max-width: 68ch;
+    font-size: clamp(1rem, 0.96rem + 0.3vw, 1.14rem);
+    line-height: var(--sl-line-normal);
+  }
+  .daos .punch .mono { color: var(--slc-text-muted); }
+  .daos .punch b { font-weight: 600; }
+
+  /* ---- 03 · brain-biology cards ------------------------------------------ */
+  .daos .brain-h2 { max-width: 20ch; }
+  .daos .brain-lead { margin-top: 1.6rem; max-width: 60ch; }
+  .daos .brain-grid { margin-top: 2.4rem; }
+  .daos .bcard { display: flex; flex-direction: column; }
+  .daos .bcard .from {
+    font-family: var(--sl-font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--slc-text-muted);
+    margin: 0 0 var(--sl-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--sl-space-2);
+    flex-wrap: wrap;
+  }
+  .daos .bcard .from b { color: var(--slc-text); font-weight: 600; }
+  .daos .bcard .arrow { color: var(--slc-text-muted); }
+  .daos .bcard h3 { font-size: 1.1rem; margin: 0 0 var(--sl-space-2); }
+  .daos .bcard p { margin: 0; color: var(--slc-text-secondary); font-size: 0.95rem; }
+  .daos .bcard .constraint {
+    margin-top: var(--sl-space-4);
+    font-family: var(--sl-font-mono);
+    font-size: 0.72rem;
+    line-height: var(--sl-line-normal);
+    color: var(--slc-text-muted);
+    border-top: 1px solid var(--slc-border-subtle);
+    padding-top: var(--sl-space-4);
+  }
+  .daos .bcard.rejected .from b { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .daos .bcard.rejected h3 { color: var(--slc-text); }
+  .daos .bcard.rejected .tagline {
+    margin-top: auto;
+    padding-top: var(--sl-space-4);
+    font-family: var(--sl-font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--slc-text-secondary);
+  }
+  .daos .brain-foot { margin-top: var(--sl-space-5); }
+
+  /* ---- 04 · evidence band (the inversion) -------------------------------- */
+  .daos .evidence-h2 { max-width: 24ch; }
+  .daos .mgroup { margin-top: 2.6rem; }
+  .daos .mgroup + .mgroup { margin-top: var(--sl-space-8); }
+  .daos .mgroup-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-space-3);
+    flex-wrap: wrap;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slc-text-secondary);
+    margin-bottom: var(--sl-space-4);
+  }
+  .daos .metrics { grid-template-columns: repeat(2, 1fr); border: 1px solid var(--slc-border-subtle); }
+  .daos .metrics > * { padding: clamp(1.4rem, 3vw, 2rem) clamp(1.2rem, 2.5vw, 1.6rem); min-width: 0; }
+  .daos .metric .sl-stat__value {
+    font-weight: 700;
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  /* The unit beside the figure: secondary, not muted. At 21px it is body-size
+     text on a cell's 7% wash inside the band, where muted measured 4.1-4.3:1. */
+  .daos .metric .sl-stat__value small {
+    font-size: 0.42em;
+    font-weight: 600;
+    color: var(--slc-text-secondary);
+    letter-spacing: 0;
+  }
+  .daos .metric-note {
+    margin: var(--sl-space-3) 0 0;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--slc-text-secondary);
+    max-width: 26ch;
+    /* Two cells to a row at every width: on a phone a German compound
+       ("Quantisierungsvarianten") is wider than the cell and spilled past it
+       in the landing. German hyphenates; anything still too long breaks. */
+    overflow-wrap: anywhere;
+  }
+  .daos .metric-note:lang(de) { hyphens: auto; }
+  .daos .foot-note { margin-top: var(--sl-space-5); color: var(--slc-text-muted); font-size: 0.86rem; max-width: 74ch; }
+  .daos .research-card-wrap { margin-top: var(--sl-space-5); }
+
+  /* ---- 05 · use-case ledger ---------------------------------------------- */
+  .daos .ledger { display: flex; flex-direction: column; border-top: 1px solid var(--slc-border); }
+  .daos .case {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    gap: clamp(1rem, 3vw, 2.4rem);
+    padding-block: clamp(1.6rem, 3vw, 2.1rem);
+    border-bottom: 1px solid var(--slc-border-subtle);
+  }
+  /* the content cell may shrink below its <pre>, which then scrolls itself */
+  .daos .case > div { min-width: 0; }
+  @media (min-width: 780px) {
+    .daos .case { grid-template-columns: 4rem 1fr; }
+  }
+  .daos .case .num {
+    font-family: var(--sl-font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--slc-text-muted);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.15rem;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+  .daos .case:hover .num { color: var(--slc-text); }
+  .daos .case .htop { display: flex; align-items: center; gap: var(--sl-space-3); flex-wrap: wrap; margin: 0 0 var(--sl-space-2); }
+  .daos .case h3 { font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.42rem); margin: 0; }
+  .daos .case p { margin: 0; color: var(--slc-text-secondary); max-width: 66ch; }
+  /* a mechanism tag is one run of text with a <b> inside: flow it inline so a
+     narrow column wraps the words, not the flex items */
+  .daos .case .mech { display: inline-block; margin-top: var(--sl-space-4); max-width: 100%; line-height: 1.4; }
+  .daos .case .mech::before { display: inline-block; vertical-align: middle; margin: -0.15em var(--sl-space-2) 0 0; }
+  .daos .case .mech b { font-weight: 700; }
+
+  /* ---- 06 · limits ------------------------------------------------------- */
+  .daos .limits-intro { margin: 0 0 2rem; max-width: 58ch; }
+  .daos .limit h3 { font-size: 1.02rem; margin: 0 0 var(--sl-space-2); display: flex; gap: var(--sl-space-3); }
+  .daos .limit h3 .x { font-family: var(--sl-font-mono); color: var(--slc-text-muted); }
+  .daos .limit p { margin: 0; color: var(--slc-text-muted); font-size: 0.95rem; }
+  .daos .limit p .mono { color: var(--slc-text-secondary); }
+
+  /* ---- close and colophon ------------------------------------------------ */
+  .daos .close h2 { font-size: clamp(1.7rem, 1.2rem + 2.4vw, 3rem); max-width: 20ch; }
+  .daos .close .lead-para { margin-top: var(--sl-space-5); }
+  .daos-colophon { border-top: 1px solid var(--slc-border-subtle); padding-block: 2.6rem; }
+  .daos-colophon__in {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sl-space-4) var(--sl-space-6);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ---- scroll reveal ------------------------------------------------------
+     Hidden only once armed (the inline script at the top of the page), so the
+     page reads in full without JavaScript. Not gated on reduced motion: this
+     site animates for everyone (scripts/motion-gate.mjs). */
+  .daos[data-armed] .vrow,
+  .daos[data-armed] .canon {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .daos[data-armed] .is-in .vrow,
+  .daos[data-armed] .is-in .canon {
+    animation: daos-rise var(--sl-motion-slow) var(--sl-motion-ease) forwards;
+  }
+  .daos[data-armed] .is-in .vrow:nth-child(1) { animation-delay: 0.05s; }
+  .daos[data-armed] .is-in .vrow:nth-child(2) { animation-delay: 0.13s; }
+  .daos[data-armed] .is-in .vrow:nth-child(3) { animation-delay: 0.21s; }
+  .daos[data-armed] .is-in .canon { animation-delay: 0.5s; }
+  @keyframes daos-rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .daos[data-armed] .case {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity var(--sl-motion-slow) var(--sl-motion-ease),
+      transform var(--sl-motion-slow) var(--sl-motion-ease);
+  }
+  .daos[data-armed] .case.is-in { opacity: 1; transform: none; }
+</style>
