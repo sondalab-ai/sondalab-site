@@ -111,6 +111,17 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
     const glitch = target.closest('.ds-spec .sl-fx-glitch');
     if (glitch) burst(glitch);
   });
+
+  // The kit's slider fills from --sl-slider-value, which its catalog markup
+  // writes from an inline oninput. Specimens run no inline handlers, so the
+  // page does the same write: once on load, then on every input.
+  const fill = (el: HTMLInputElement) =>
+    el.style.setProperty('--sl-slider-value', `${((+el.value - +el.min) / (+el.max - +el.min)) * 100}%`);
+  document.querySelectorAll<HTMLInputElement>('.ds-spec .sl-slider').forEach(fill);
+  document.addEventListener('input', (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.matches?.('.ds-spec .sl-slider')) fill(el);
+  });
 </script>
 
 <style>
@@ -132,7 +143,13 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
   .ds-entry { margin-bottom: var(--sl-space-6); }
   .ds-entry h3 { font-size: var(--sl-text-md); margin-bottom: var(--sl-space-2); }
   .ds-entry h3 code { font: var(--sl-text-xs) var(--sl-font-mono); color: var(--sl-text-secondary); margin-left: var(--sl-space-2); }
-  .ds-spec { isolation: isolate; contain: layout; padding: var(--sl-space-5); background: var(--sl-bg-surface); border: 1px solid var(--sl-border-subtle); border-radius: var(--sl-radius-md); }
+  /* A catalog snippet may have several roots (a button, a field, a card).
+     Left as flow they touch; as a wrapping flex row they get one gap, while
+     block-level roots still take a full line, as they did in flow. A zero-
+     specificity width lets a snippet's own inline width win. */
+  .ds-spec { isolation: isolate; contain: layout; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sl-space-3); padding: var(--sl-space-5); background: var(--sl-bg-surface); border: 1px solid var(--sl-border-subtle); border-radius: var(--sl-radius-md); }
+  .ds-spec > :global(:where(div, p, label, section, header, footer, nav, article, ul, ol, dl, table, form, fieldset, details, pre, blockquote, figure, dialog, hr, input, textarea, select, h1, h2, h3, h4, h5, h6)) { width: 100%; }
+  .ds-spec :global(.ds-wrapbox) { margin: 0; padding: var(--sl-space-3); border: 1px dashed var(--sl-border-default); border-radius: var(--sl-radius-sm); font: var(--sl-text-xs) var(--sl-font-mono); color: var(--sl-text-secondary); }
   /* Out-of-flow specimens (an open dialog, the toast stack) give their box no
      height and would draw over the next entry: seat them in the flow. */
   .ds-spec :global(dialog[open]),

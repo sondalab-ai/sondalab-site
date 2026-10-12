@@ -75,6 +75,23 @@ export type SpecimenAssets = { image: string; halftone: string };
 const ICON =
   '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg>';
 
+// The catalog writes "…" for a component's content. A bare ellipsis shows
+// nothing of what the component does, so each placeholder host gets sample
+// content of its own kind. The "Markup" code keeps the catalog's shorthand.
+const LINE = 'Sample copy sets in the kit\'s type and spacing, so the box reads as a surface and not as an empty frame.';
+const PROSE =
+  '<h2>A heading sets the measure</h2><p>Running text caps at about 63 characters, with <a href="#">a link</a>, <strong>strong text</strong> and <code>inline code</code> that keep their own rhythm.</p>' +
+  '<h3>Lists and quotes</h3><ul><li>An unordered item</li><li>Another item</li></ul><ol><li>A first step</li><li>A second step</li></ol>' +
+  '<blockquote>A quotation indents and takes the secondary ink.</blockquote><pre><code>const measure = "63ch";</code></pre>';
+const FILL: [RegExp, string][] = [
+  [/<div class="sl-prose">\s*<p>…<\/p>\s*<\/div>/g, `<div class="sl-prose">${PROSE}</div>`],
+  [/(<(?:aside|main|div) class="sl-pane"[^>]*aria-label="([^"]+)"[^>]*>)…(<\/(?:aside|main|div)>)/g, '$1<p class="sl-eyebrow">$2</p><p>' + LINE + '</p>$3'],
+  [/(<article class="sl-card[^"]*"[^>]*>)…(<\/article>)/g, '$1<strong>Card title</strong><p>' + LINE + '</p>$2'],
+  [/(<div class="sl-wrap">) … (<\/div>)/g, '$1<p class="ds-wrapbox">sl-wrap: the content measure</p>$2'],
+  [/(<section class="sl-haze">) … (<\/section>)/g, '$1<div class="sl-wrap"><h2>Light as atmosphere</h2><p>' + LINE + '</p></div>$2'],
+];
+const HGRID_CELL = '<p class="sl-eyebrow">Metric</p><p><strong>42</strong></p><p>One line of copy.</p>';
+
 /**
  * A catalog snippet made safe to draw inside the page. Snippets are copy-paste
  * markup: placeholder URLs must not 404 or navigate, inline handlers must not
@@ -84,7 +101,7 @@ const ICON =
  * handle fails the build.
  */
 export function specimen(html: string, assets: SpecimenAssets): string {
-  const out = html
+  const base = html
     .replace(/<(\/?)(?:main|aside|h[1-6])\b/g, '<$1div')
     .replace(/(\shref=)(["'])(?!#)[^"']*\2/g, '$1"#"')
     .replace(/(<img\b[^>]*?\ssrc=)(["'])(?!data:)[^"']*\2/g, `$1"${assets.image}"`)
@@ -92,6 +109,10 @@ export function specimen(html: string, assets: SpecimenAssets): string {
     .replace(/\son[a-z]+=(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/(<button\b[^>]*>)…(<\/button>)/g, `$1${ICON}$2`)
     .replace(/<dialog\b(?![^>]*\bopen\b)/g, '<dialog open');
+  // After the heading rewrite above, so the sample headings keep their level.
+  let out = base;
+  for (const [re, to] of FILL) out = out.replace(re, to);
+  if (out.includes('class="sl-hgrid"')) out = out.replace(/<div>…<\/div>/g, `<div>${HGRID_CELL}</div>`);
   const left = /\son[a-z]+\s*=|<script\b|\shref=(["'])(?!#)|\ssrc=(["'])(?!data:)/i.exec(out);
   if (left) throw new Error(`catalog snippet still has "${left[0].trim()}" after sanitising: ${out.slice(0, 80)}…`);
   return out;
