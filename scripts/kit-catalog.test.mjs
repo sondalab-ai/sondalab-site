@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { assertUniqueIds, parseCatalog, loadKitCatalog, parseTokens, loadKitTokens, specimen } from '../src/lib/kit-catalog.ts';
+import { assertUniqueIds, parseCatalog, loadKitCatalog, parseTokens, loadKitTokens, proseParts, kindOf, specimen } from '../src/lib/kit-catalog.ts';
 
 // The design-system page is generated from the installed kit, so these tests
 // pin the parser's contract on a fixture and then run it against the real
@@ -177,4 +177,59 @@ test('no live specimen is left with a bare ellipsis as its content', () => {
         const m = />\s*(…|\.\.\.)\s*</.exec(live);
         assert.ok(!m, `${e.title}: a placeholder ellipsis is still rendered: ${live.slice(Math.max(0, m?.index - 40), (m?.index ?? 0) + 40)}`);
       }
+});
+
+test('a token a theme leaves initial is still a colour where another theme sets it (spectrum)', () => {
+  const { groups } = loadKitTokens();
+  const spectrum = groups.find((g) => g.family === 'spectrum');
+  assert.ok(spectrum.tokens.length > 0);
+  for (const t of spectrum.tokens) assert.equal(t.kind, 'colour', `${t.name} is drawn as a swatch`);
+});
+
+test('every token gets a preview kind, and only unknown families fall back to a bare value', () => {
+  const { groups } = loadKitTokens();
+  for (const t of groups.flatMap((g) => g.tokens)) assert.ok(t.kind, `${t.name} has a kind`);
+  const byName = Object.fromEntries(groups.flatMap((g) => g.tokens).map((t) => [t.name, t.kind]));
+  assert.equal(byName['--sl-space-2'], 'space');
+  assert.equal(byName['--sl-shadow-sm'], 'shadow');
+  assert.equal(byName['--sl-motion-fast'], 'motion');
+});
+
+test('proseParts keeps the first paragraph as the lead, escapes markup, and renders code and bold', () => {
+  const { lead, rest } = proseParts('A **bold** `code` <b>x</b>.\n\nSecond paragraph.');
+  assert.equal(lead, '<p>A <strong>bold</strong> <code>code</code> &lt;b&gt;x&lt;/b&gt;.</p>');
+  assert.equal(rest, '<p>Second paragraph.</p>');
+});
+
+test('specimen refuses anything that loads or navigates, in any spelling', () => {
+  for (const bad of ['<img src=x>', '<a href = "http://x">a</a>', '<img srcset="a.png 1x">', '<form action="/x"></form>', '<iframe></iframe>', '<div style="background:url(a.png)"></div>', '<link rel="stylesheet">'])
+    assert.throws(() => run(bad), /still has/, bad);
+});
+
+test('the page image, rewritten to a non-data URL, is allowed', () => {
+  assert.doesNotThrow(() => run('<img src="https://elsewhere/a.png" alt="">'));
+});
+
+test('kindOf puts the family before the value shape, so an alias is not a swatch', () => {
+  assert.equal(kindOf('space', { name: '--sl-space-gutter', value: 'var(--sl-space-4)', colour: true }), 'space');
+  assert.equal(kindOf('focus', { name: '--sl-focus-ring', colour: true }), 'colour');
+  assert.equal(kindOf('text', { name: '--sl-text-sm', value: '0.875rem', colour: false }), 'size');
+});
+
+test('parseTokens keeps colour when any file sets a colour and another leaves it initial', () => {
+  const g = new Map();
+  parseTokens('[a]{\n --sl-spectrum-0: initial;\n}', g);
+  parseTokens('[b]{\n --sl-spectrum-0: #ff4d6d;\n}', g);
+  assert.equal(g.get('spectrum').tokens[0].colour, true);
+});
+
+test('proseParts renders lists and emphasis, and no literal markdown survives in the real catalog', () => {
+  assert.equal(proseParts('Intro.\n\n- **A** one\n- B two').rest, '<ul><li><strong>A</strong> one</li><li>B two</li></ul>');
+  assert.equal(proseParts('A *set* here.').lead, '<p>A <em>set</em> here.</p>');
+  for (const s of loadKitCatalog().sections)
+    for (const e of s.entries) {
+      const { lead, rest } = proseParts(e.prose);
+      const text = (lead + rest).replace(/<code>.*?<\/code>/g, '');
+      assert.doesNotMatch(text, /\*\*|(^|\s)\*\S|<p>- /, `${e.title}: literal markdown left in the prose`);
+    }
 });
