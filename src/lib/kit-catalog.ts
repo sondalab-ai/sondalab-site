@@ -102,6 +102,19 @@ const HGRID_CELL = '<p class="sl-eyebrow">Metric</p><p><strong>42</strong></p><p
  * still navigates, loads or runs throws, so a snippet shape this cannot
  * handle fails the build.
  */
+// What may not survive sanitising: handlers, scripts, embeds, and any attribute that
+// loads or navigates unless it is "#" or a data: URI (the page's own image is
+// swapped for a data: URI before this runs).
+const UNSAFE = new RegExp(
+  [
+    '\\son[a-z]+\\s*=',
+    '<(?:script|iframe|object|embed|link|style|meta|base)\\b',
+    '\\s(?:href|src|srcset|action|formaction|poster|srcdoc|xlink:href)\\s*=\\s*(?!["\']?(?:#|data:))',
+    'url\\(',
+  ].join('|'),
+  'i',
+);
+
 export function specimen(html: string, assets: SpecimenAssets): string {
   const base = html
     .replace(/<(\/?)(?:main|aside|h[1-6])\b/g, '<$1div')
@@ -115,16 +128,15 @@ export function specimen(html: string, assets: SpecimenAssets): string {
   let out = base;
   for (const [re, to] of FILL) out = out.replace(re, to);
   if (out.includes('class="sl-hgrid"')) out = out.replace(/<div>…<\/div>/g, `<div>${HGRID_CELL}</div>`);
-  const left = /\son[a-z]+\s*=|<script\b|\shref=(["'])(?!#)|\ssrc=(["'])(?!data:)/i.exec(out.split(assets.image).join('data:'));
+  const left = UNSAFE.exec(out.split(assets.image).join('data:'));
   if (left) throw new Error(`catalog snippet still has "${left[0].trim()}" after sanitising: ${out.slice(0, 80)}…`);
   return out;
 }
 
 /** What a token is a token OF, so the page can draw the right preview: a colour is a swatch, a space a bar, a shadow a tile. */
 export function kindOf(family: string, t: Token): TokenKind {
+  if (['space', 'radius', 'font', 'line', 'z', 'motion', 'shadow'].includes(family)) return family as TokenKind;
   if (t.colour) return 'colour';
-  if (family === 'space' || family === 'radius' || family === 'font' || family === 'line' || family === 'z' || family === 'motion' || family === 'shadow')
-    return family;
   if (family === 'text') return 'size';
   if (family === 'focus') return 'focus';
   return 'value';
@@ -204,7 +216,15 @@ export function loadKitTokens() {
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const inline = (t: string) =>
-  esc(t).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  esc(t)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:]|$)/g, '$1<em>$2</em>');
+const block = (p: string) => {
+  const lines = p.split('\n').map((l) => l.trim());
+  if (lines.every((l) => /^- /.test(l))) return `<ul>${lines.map((l) => `<li>${inline(l.slice(2))}</li>`).join('')}</ul>`;
+  return `<p>${inline(lines.join(' '))}</p>`;
+};
 
 /**
  * The catalog's entry prose as safe HTML: paragraphs, `code` and **bold**, and
@@ -213,6 +233,6 @@ const inline = (t: string) =>
  */
 export function proseParts(prose: string): { lead: string; rest: string } {
   const paras = prose.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  const html = (ps: string[]) => ps.map((p) => `<p>${inline(p.replace(/\s*\n\s*/g, ' '))}</p>`).join('');
+  const html = (ps: string[]) => ps.map(block).join('');
   return { lead: html(paras.slice(0, 1)), rest: html(paras.slice(1)) };
 }

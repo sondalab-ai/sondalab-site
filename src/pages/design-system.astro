@@ -6,13 +6,11 @@
 // repo does.
 //
 // Opt-in stylesheets the rest of the site does not load are imported here,
-// one line each: the workbench chrome (palette, tree, status bar) and the
-// high-contrast theme the per-demo switch offers. The effects layer
+// one line each: the workbench chrome (palette, tree, status bar). The effects layer
 // (effects.css, glass.css) and its mount() come from Base.
 // scripts/kit-catalog.test.mjs fails if the catalog names a stylesheet that
 // neither this page nor Base imports.
 import '@sondalab/ui-kit/workbench.css';
-import '@sondalab/ui-kit/themes/high-contrast.css';
 import halftoneSrc from '@sondalab/ui-kit/assets/avatar-ink.png?url';
 import Base from '../layouts/Base.astro';
 import { assertUniqueIds, loadKitCatalog, loadKitTokens, proseParts, specimen } from '../lib/kit-catalog';
@@ -27,7 +25,7 @@ if (new Set(anchors).size !== anchors.length || anchors.includes(''))
   throw new Error(`catalog section anchors are not unique: ${anchors.join(', ')}`);
 
 // Entry ids: stable, unique, and clear of the page's own anchors.
-const used = new Set<string>(['tokens', 'contrast', ...anchors]);
+const used = new Set<string>(['tokens', 'contrast', 'site-nav-panel', ...anchors]);
 const entryId = (title: string) => {
   const base = `c-${slug(title)}`;
   let id = base;
@@ -50,11 +48,11 @@ const names = (classes: string[]) => classes.filter((c) => !c.startsWith('--') &
 
 // What a specimen cannot show on its own, said once beside it.
 const NOTES: [RegExp, string][] = [
-  [/\bsl-spectral\b/, 'The spectral ink is painted in the light theme only: the spectrum tokens are undefined in dark by design, so there the text keeps its plain ink. Use the Light switch above to see it.'],
+  [/\bsl-spectral\b/, 'The spectral ink is painted in the light theme only: the spectrum tokens are undefined in dark by design, so there the text keeps its plain ink. Switch the site theme to Light in the header to see it.'],
 ];
 const SECTION_NOTES: Record<string, string> = {
   workbench: 'Workbench components are desktop chrome: they keep their width and scroll sideways on a narrow screen instead of collapsing.',
-  effects: 'Every effect stills under prefers-reduced-motion (the goo drift is refused outright and the field stays welded), and [data-sl-fx="off"] or the high-contrast theme switches the layer off for a subtree.',
+  effects: 'Every effect stills under prefers-reduced-motion (the goo drift is refused outright and the field stays welded). [data-sl-fx="off"] switches the layer off for a subtree, and the high-contrast theme turns it off site-wide.',
 };
 const workbenchAt = sections.findIndex((x) => /^Workbench/.test(x.title));
 
@@ -81,17 +79,17 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
     </header>
 
     <div class="ds-layout">
-      <aside class="ds-nav" aria-label="On this page">
+      <nav class="ds-nav" aria-label="On this page">
         <label class="ds-filter">
-          <span class="ds-vh">Filter components</span>
+          <span class="sr-only">Filter components</span>
           <input class="sl-field__input" type="search" placeholder="Filter components…" data-ds-filter autocomplete="off" />
         </label>
         <p class="ds-count" data-ds-count aria-live="polite"></p>
         <ul class="ds-toc">
-          <li><a href="#tokens" data-ds-spy>Tokens</a></li>
-          <li><a href="#contrast" data-ds-spy>Contrast</a></li>
+          <li data-ds-static><a href="#tokens" data-ds-spy>Tokens</a></li>
+          <li data-ds-static><a href="#contrast" data-ds-spy>Contrast</a></li>
           {sections.map((s, i) => (
-            <li>
+            <li data-ds-toc-section={anchors[i]}>
               <a href={`#${anchors[i]}`} data-ds-spy>{short(s.title)}</a>
               <ul>
                 {s.entries.map((e) => (
@@ -101,7 +99,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
             </li>
           ))}
         </ul>
-      </aside>
+      </nav>
 
       <div class="ds-main">
         <section id="tokens" class="ds-sec">
@@ -135,8 +133,9 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
                             <span class="ds-ground" data-sl-theme="dark"><span class="ds-shadow" style={`box-shadow:var(${t.name})`} /></span>
                           </>
                         )}
-                        {t.kind === 'motion' && <span class="ds-motion" style={`--ds-dur:var(${t.name})`} data-motion={t.value} />}
-                        {t.kind === 'focus' && <span class="ds-focus" style={`outline-width:var(${t.name})`} />}
+                        {t.kind === 'motion' && /^(cubic-bezier|linear)\(/.test(t.value ?? '') && <span class="ds-motion" style={`--ds-ease:var(${t.name});--ds-dur:${t.value?.startsWith('linear') ? '600ms' : '500ms'}`} />}
+                        {t.kind === 'motion' && !/^(cubic-bezier|linear)\(/.test(t.value ?? '') && <span class="ds-motion" style={`--ds-dur:var(${t.name})`} />}
+                        {t.kind === 'focus' && t.name.endsWith('-ring-width') && <span class="ds-focus" style={`outline-width:var(${t.name})`} />}
                       </span>
                       <code class="ds-name">{t.name}</code>
                       {t.themed && t.kind === 'colour' ? (
@@ -176,7 +175,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
         {sections.map((s, i) => (
           <section id={anchors[i]} class="ds-sec" data-ds-section>
             <h2>{short(s.title)}</h2>
-            {SECTION_NOTES[anchors[i].split('-')[0]] && <p class="ds-note">{SECTION_NOTES[anchors[i].split('-')[0]]}</p>}
+            {SECTION_NOTES[anchors[i]] && <p class="ds-note">{SECTION_NOTES[anchors[i]]}</p>}
             {s.entries.map((e) => {
               const { lead, rest } = proseParts(e.prose);
               const note = NOTES.find(([re]) => re.test(e.classes.join(' ')))?.[1];
@@ -185,13 +184,6 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
                   <h3>
                     {e.title} <code>{names(e.classes)}</code>
                     <a class="ds-perma" href={`#${ids.get(e)}`} aria-label={`Link to ${e.title}`}>#</a>
-                    <span class="ds-themes" role="group" aria-label={`Theme for the ${e.title} demo`}>
-                      {['auto', 'light', 'dark', 'high-contrast'].map((t) => (
-                        <button type="button" data-ds-theme={t} aria-pressed={t === 'auto' ? 'true' : 'false'}>
-                          {t === 'high-contrast' ? 'Contrast' : t[0].toUpperCase() + t.slice(1)}
-                        </button>
-                      ))}
-                    </span>
                   </h3>
                   {lead && <div class="ds-lead" set:html={lead} />}
                   {note && <p class="ds-note">{note}</p>}
@@ -220,7 +212,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
     </div>
 
     <button class="sl-btn sl-btn--ghost ds-top" type="button" data-ds-top hidden>Back to top</button>
-    <div class="ds-toast sl-toast" role="status" aria-live="polite" data-ds-toast hidden></div>
+    <div class="ds-toast sl-toast" role="status" data-ds-toast></div>
   </div>
 </Base>
 
@@ -233,10 +225,17 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   const toast = document.querySelector<HTMLElement>('[data-ds-toast]')!;
   let toastTimer = 0;
   const say = (msg: string) => {
-    toast.textContent = msg;
-    toast.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(() => (toast.hidden = true), 1600);
+    toast.textContent = '';
+    toast.classList.remove('is-on');
+    window.setTimeout(() => {
+      toast.textContent = msg;
+      toast.classList.add('is-on');
+    }, 30);
+    toastTimer = window.setTimeout(() => {
+      toast.classList.remove('is-on');
+      toast.textContent = '';
+    }, 2200);
   };
   const copy = async (text: string, what: string) => {
     try {
@@ -257,22 +256,13 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
     if (row) copy(row.dataset.dsCopy!, row.dataset.dsCopy!);
     const code = target.closest<HTMLElement>('[data-ds-copy-code]');
     if (code) copy(code.closest('.ds-code')!.querySelector('code')!.textContent ?? '', 'markup');
-
-    // Per-demo theme: set on the specimen, so one demo can be read in another theme.
-    const themeBtn = target.closest<HTMLElement>('[data-ds-theme]');
-    if (themeBtn) {
-      const art = themeBtn.closest('article')!;
-      const theme = themeBtn.dataset.dsTheme!;
-      $$('.ds-spec', art).forEach((spec) => (theme === 'auto' ? spec.removeAttribute('data-sl-theme') : spec.setAttribute('data-sl-theme', theme)));
-      $$<HTMLElement>('[data-ds-theme]', art).forEach((b) => b.setAttribute('aria-pressed', String(b === themeBtn)));
-    }
   });
 
   // The kit's slider fills from --sl-slider-value, which its catalog markup
   // writes from an inline oninput. Specimens run no inline handlers, so the
   // page does the same write: once on load, then on every input.
   const fill = (el: HTMLInputElement) =>
-    el.style.setProperty('--sl-slider-value', `${((+el.value - +el.min) / (+el.max - +el.min)) * 100}%`);
+    el.style.setProperty('--sl-slider-value', `${((+el.value - +(el.min || 0)) / (+(el.max || 100) - +(el.min || 0))) * 100}%`);
   $$<HTMLInputElement>('.ds-spec .sl-slider').forEach(fill);
   document.addEventListener('input', (e) => {
     const el = e.target as HTMLInputElement;
@@ -335,7 +325,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
     ['--sl-text-muted', '--sl-bg-surface', 'Muted text on surface'],
     ['--sl-text-on-accent', '--sl-accent-default', 'Text on accent'],
   ];
-  const badge = (r: number) => (r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'non-text only' : 'fails');
+  const badge = (r: number) => (r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'large text / non-text' : 'fails');
   const tbody = document.querySelector('[data-ds-contrast] tbody')!;
   for (const [fg, bg, label] of PAIRS) {
     const tr = document.createElement('tr');
@@ -374,7 +364,14 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
       document.querySelector<HTMLElement>(`[data-ds-toc-entry="${a.id}"]`)!.hidden = !hit;
       if (hit) shown++;
     }
-    $$<HTMLElement>('[data-ds-section]').forEach((s) => (s.hidden = !!q && !$$('[data-ds-entry]:not([hidden])', s).length));
+    $$<HTMLElement>('[data-ds-section]').forEach((s) => {
+      const empty = !!q && !$$('[data-ds-entry]:not([hidden])', s).length;
+      s.hidden = empty;
+      document.querySelector<HTMLElement>(`[data-ds-toc-section="${s.id}"]`)!.hidden = empty;
+    });
+    // Tokens and Contrast are not filterable: step them aside while a query is active.
+    $$<HTMLElement>('#tokens, #contrast').forEach((s) => (s.hidden = !!q));
+    $$<HTMLElement>('[data-ds-static]').forEach((li) => (li.hidden = !!q));
     count.textContent = q ? `${shown} of ${entries.length} entries` : '';
   });
 
@@ -385,7 +382,9 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
       for (const o of obs) {
         if (!o.isIntersecting) continue;
         links.forEach((a) => a.removeAttribute('aria-current'));
-        links.get((o.target as HTMLElement).id)?.setAttribute('aria-current', 'true');
+        const cur = links.get((o.target as HTMLElement).id);
+        cur?.setAttribute('aria-current', 'true');
+        cur?.scrollIntoView({ block: 'nearest' });
       }
     },
     { rootMargin: '-80px 0px -70% 0px' },
@@ -406,7 +405,6 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   .ds h1 { font-size: var(--sl-text-3xl); line-height: var(--sl-line-tight); margin: var(--sl-space-2) 0; }
   .ds-ver { font: var(--sl-text-md) var(--sl-font-mono); color: var(--sl-text-secondary); }
   .ds-lede { max-width: 60ch; color: var(--sl-text-secondary); }
-  .ds-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
   /* Contents rail from 64rem; a flow list above the page below it. */
   .ds-layout { display: grid; gap: var(--sl-space-6); }
@@ -460,9 +458,8 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   .ds-lines { font-size: var(--sl-text-xs); color: var(--sl-text-primary); }
   .ds-ground { display: inline-grid; place-items: center; padding: 0.5rem; background: var(--sl-bg-canvas); border-radius: var(--sl-radius-sm); }
   .ds-shadow { width: 2rem; height: 1.8rem; border-radius: var(--sl-radius-sm); background: var(--sl-bg-surface-raised, var(--sl-bg-surface)); }
-  .ds-motion { width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--sl-accent-default); transition: transform var(--ds-dur, 200ms) var(--sl-motion-ease); }
+  .ds-motion { width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--sl-accent-default); transition: transform var(--ds-dur, 200ms) var(--ds-ease, var(--sl-motion-ease)); }
   .ds-row:hover .ds-motion, .ds-row:focus-visible .ds-motion { transform: translateX(4rem); }
-  .ds-motion[data-motion*="linear"] { transition-timing-function: var(--sl-motion-spring); transition-duration: 600ms; }
   .ds-focus { width: 2rem; height: 1.2rem; border-radius: var(--sl-radius-sm); outline: 2px solid var(--sl-focus-ring); outline-offset: 2px; }
 
   .ds-tablewrap { overflow-x: auto; }
@@ -478,11 +475,6 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   .ds-entry h3 code { font: var(--sl-text-xs) var(--sl-font-mono); color: var(--sl-text-secondary); }
   .ds-perma { opacity: 0; text-decoration: none; color: var(--sl-text-secondary); }
   .ds-entry h3:hover .ds-perma, .ds-perma:focus-visible { opacity: 1; }
-  .ds-themes { margin-left: auto; display: inline-flex; gap: 2px; font: var(--sl-text-xs) var(--sl-font-sans); }
-  .ds-themes button { all: unset; cursor: pointer; padding: 0.15rem 0.5rem; border-radius: var(--sl-radius-sm); color: var(--sl-text-secondary); }
-  .ds-themes button:hover { color: var(--sl-text-primary); }
-  .ds-themes button[aria-pressed="true"] { background: var(--sl-bg-surface-raised, var(--sl-bg-surface)); color: var(--sl-text-primary); }
-  .ds-themes button:focus-visible { outline: 2px solid var(--sl-focus-ring); }
   .ds-lead { max-width: 70ch; margin-bottom: var(--sl-space-3); }
   .ds-lead p, .ds-usage p { margin: 0 0 var(--sl-space-2); color: var(--sl-text-secondary); font-size: var(--sl-text-sm); line-height: var(--sl-line-normal); }
   .ds-lead code, .ds-usage code { font: var(--sl-text-xs) var(--sl-font-mono); color: var(--sl-text-primary); }
@@ -494,7 +486,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
      block-level roots still take a full line, as they did in flow. A zero-
      specificity width lets a snippet's own inline width win. */
   .ds-spec { isolation: isolate; contain: layout; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sl-space-3); padding: var(--sl-space-5); color: var(--sl-text-primary); background: var(--sl-bg-surface); border: 1px solid var(--sl-border-subtle); border-radius: var(--sl-radius-md); }
-  .ds-spec > :where(div, p, label, section, header, footer, nav, article, ul, ol, dl, table, form, fieldset, details, pre, blockquote, figure, dialog, hr, input, textarea, select, h1, h2, h3, h4, h5, h6) { width: 100%; }
+  :where(.ds-spec) > :where(div, p, label, section, header, footer, nav, article, ul, ol, dl, table, form, fieldset, details, pre, blockquote, figure, dialog, hr, input, textarea, select, h1, h2, h3, h4, h5, h6) { width: 100%; }
   .ds-spec .ds-wrapbox { margin: 0; padding: var(--sl-space-3); border: 1px dashed var(--sl-border-default); border-radius: var(--sl-radius-sm); font: var(--sl-text-xs) var(--sl-font-mono); color: inherit; }
   .ds-spec img { max-height: 18rem; object-fit: contain; }
   .ds-spec--wide { overflow-x: auto; }
@@ -520,6 +512,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   .ds-code:not([open]) .ds-copycode { display: none; }
 
   .ds-top { position: fixed; right: var(--sl-space-5); bottom: var(--sl-space-5); z-index: var(--sl-z-overlay); }
-  .ds-top[hidden], .ds-toast[hidden] { display: none; }
-  .ds-toast { position: fixed; left: 50%; bottom: var(--sl-space-5); transform: translateX(-50%); z-index: var(--sl-z-toast); max-width: 90vw; overflow-wrap: anywhere; }
+  .ds-top[hidden] { display: none; }
+  .ds-toast.sl-toast { position: fixed; visibility: hidden; left: 50%; bottom: var(--sl-space-5); transform: translateX(-50%); z-index: var(--sl-z-toast); max-width: 90vw; overflow-wrap: anywhere; }
+  .ds-toast.sl-toast.is-on { visibility: visible; }
 </style>
