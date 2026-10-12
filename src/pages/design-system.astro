@@ -12,12 +12,14 @@ const { version, groups } = loadKitTokens();
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const short = (title: string) => title.replace(/\s*\(.*$/, '');
 // Snippets are copy-paste markup with placeholder URLs. Here they must not
-// 404 or navigate away, and a closed dialog is transparent by design.
+// 404, navigate away or run inline handlers, and a closed dialog is
+// transparent by design.
 const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 3%22%3E%3Crect width=%224%22 height=%223%22 fill=%22%23888%22 fill-opacity=%22.25%22/%3E%3C/svg%3E';
 const specimen = (html: string) =>
   html
     .replace(/(<a\b[^>]*?\shref=)"\/[^"]*"/g, '$1"#"')
     .replace(/(<img\b[^>]*?\ssrc=)"\/[^"]*"/g, `$1"${PLACEHOLDER}"`)
+    .replace(/\s(on[a-z]+)="[^"]*"/gi, '')
     .replace(/<dialog\b(?![^>]*\bopen\b)/g, '<dialog open');
 const count = sections.reduce((n, s) => n + s.entries.length, 0);
 ---
@@ -36,7 +38,7 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
       </p>
       <nav class="ds-toc" aria-label="Sections">
         <a href="#tokens">Tokens</a>
-        {sections.map((s) => <a href={`#${slug(s.title)}`}>{short(s.title)}</a>)}
+        {sections.map((s) => <a href={`#${slug(short(s.title))}`}>{short(s.title)}</a>)}
       </nav>
     </header>
 
@@ -63,10 +65,10 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
     </section>
 
     {sections.map((s) => (
-      <section id={slug(s.title)} class="ds-sec">
+      <section id={slug(short(s.title))} class="ds-sec">
         <h2>{short(s.title)}</h2>
         {s.entries.map((e) => (
-          <article class="ds-entry" id={slug(`${s.title}-${e.title}`)}>
+          <article class="ds-entry">
             <h3>{e.title} <code>{e.classes[0]}</code></h3>
             {e.snippets.map((html) => (
               <>

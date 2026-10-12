@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCatalog, loadKitCatalog, parseTokens, loadKitTokens } from '../src/lib/kit-catalog.ts';
+import { assertUniqueIds, parseCatalog, loadKitCatalog, parseTokens, loadKitTokens } from '../src/lib/kit-catalog.ts';
 
 // The design-system page is generated from the installed kit, so these tests
 // pin the parser's contract on a fixture and then run it against the real
@@ -99,4 +99,15 @@ test('a token any theme declares is theme-only: listed without a value', () => {
   const space = groups.find((g) => g.family === 'space').tokens[0];
   assert.match(space.value, /rem|^0$/);
   assert.equal(space.colour, false);
+});
+
+test('a repeated snippet id, or one that shadows the page, throws', () => {
+  const sec = (...ids) => [{ title: 'S', entries: ids.map((id) => ({ title: id, classes: [], prose: '', snippets: [`<i id="${id}"></i>`] })) }];
+  assert.throws(() => assertUniqueIds(sec('a', 'a')), /used twice/);
+  assert.throws(() => assertUniqueIds(sec('tokens')), /used twice/);
+  assert.doesNotThrow(() => assertUniqueIds(sec('a', 'b')));
+});
+
+test('the installed catalog has unique snippet ids', () => {
+  assert.doesNotThrow(() => loadKitCatalog());
 });

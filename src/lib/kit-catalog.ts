@@ -82,13 +82,30 @@ export function parseTokens(css: string, groups = new Map<string, TokenGroup>())
   return [...groups.values()];
 }
 
+// Ids the page itself uses; a snippet declaring one would shadow an anchor.
+const RESERVED_IDS = ['main', 'tokens'];
+
+/** Snippet ids share one document, so a repeat (or a clash with the page's own) would break labels and anchors. */
+export function assertUniqueIds(sections: CatalogSection[]) {
+  const seen = new Set(RESERVED_IDS);
+  for (const s of sections)
+    for (const e of s.entries)
+      for (const html of e.snippets)
+        for (const [, id] of html.matchAll(/\sid="([^"]+)"/g)) {
+          if (seen.has(id)) throw new Error(`catalog snippet id "${id}" (${e.title}) is used twice on the page`);
+          seen.add(id);
+        }
+}
+
 const kitRoot = () => dirname(createRequire(import.meta.url).resolve('@sondalab/ui-kit/agent/catalog.json'));
 
 /** The installed kit's catalog: parsed markdown plus the machine index. */
 export function loadKitCatalog() {
   const dir = kitRoot();
   const json: CatalogJson = JSON.parse(readFileSync(join(dir, 'catalog.json'), 'utf8'));
-  return { ...parseCatalog(readFileSync(join(dir, 'catalog.md'), 'utf8')), json };
+  const parsed = parseCatalog(readFileSync(join(dir, 'catalog.md'), 'utf8'));
+  assertUniqueIds(parsed.sections);
+  return { ...parsed, json };
 }
 
 /**
