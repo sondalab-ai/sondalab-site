@@ -3,6 +3,10 @@
 // from the kit's agent/catalog.md (rendered live with the real kit CSS, code
 // beside each), tokens from tokens.css and the light theme, the version from
 // the package. A kit bump changes the page; no file in this repo does.
+// The catalog also documents the kit's opt-in workbench chrome (palette, tree,
+// status bar), which the rest of the site does not load. This page does, so
+// those specimens are drawn by their own CSS.
+import '@sondalab/ui-kit/workbench.css';
 import Base from '../layouts/Base.astro';
 import { loadKitCatalog, loadKitTokens } from '../lib/kit-catalog';
 
@@ -15,8 +19,11 @@ const short = (title: string) => title.replace(/\s*\(.*$/, '');
 // 404, navigate away or run inline handlers, and a closed dialog is
 // transparent by design.
 const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 3%22%3E%3Crect width=%224%22 height=%223%22 fill=%22%23888%22 fill-opacity=%22.25%22/%3E%3C/svg%3E';
+// The catalog writes "…" where a button's icon goes; draw an icon there.
+const ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg>';
 const specimen = (html: string) =>
   html
+    .replace(/(<button\b[^>]*>)…(<\/button>)/g, `$1${ICON}$2`)
     .replace(/(<a\b[^>]*?\shref=)"\/[^"]*"/g, '$1"#"')
     .replace(/(<img\b[^>]*?\ssrc=)"\/[^"]*"/g, `$1"${PLACEHOLDER}"`)
     .replace(/\s(on[a-z]+)="[^"]*"/gi, '')
