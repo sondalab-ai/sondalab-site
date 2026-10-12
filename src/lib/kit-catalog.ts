@@ -5,7 +5,9 @@ import { dirname, join } from 'node:path';
 export type CatalogEntry = { title: string; classes: string[]; prose: string; snippets: string[] };
 export type CatalogSection = { title: string; stylesheet?: string; entries: CatalogEntry[] };
 export type CatalogJson = { components: { id: string; kind: string; classes: string[] }[] };
-export type Token = { name: string; value?: string; colour: boolean };
+export type TokenKind = 'colour' | 'space' | 'radius' | 'size' | 'font' | 'line' | 'z' | 'motion' | 'shadow' | 'focus' | 'value';
+/** `themed` tokens differ per theme and carry no value here; `kind` picks the page's preview. */
+export type Token = { name: string; value?: string; colour: boolean; themed?: boolean; kind?: TokenKind };
 export type TokenGroup = { family: string; tokens: Token[] };
 
 // The one section that is prose for authors, with nothing to draw.
@@ -113,9 +115,19 @@ export function specimen(html: string, assets: SpecimenAssets): string {
   let out = base;
   for (const [re, to] of FILL) out = out.replace(re, to);
   if (out.includes('class="sl-hgrid"')) out = out.replace(/<div>…<\/div>/g, `<div>${HGRID_CELL}</div>`);
-  const left = /\son[a-z]+\s*=|<script\b|\shref=(["'])(?!#)|\ssrc=(["'])(?!data:)/i.exec(out);
+  const left = /\son[a-z]+\s*=|<script\b|\shref=(["'])(?!#)|\ssrc=(["'])(?!data:)/i.exec(out.split(assets.image).join('data:'));
   if (left) throw new Error(`catalog snippet still has "${left[0].trim()}" after sanitising: ${out.slice(0, 80)}…`);
   return out;
+}
+
+/** What a token is a token OF, so the page can draw the right preview: a colour is a swatch, a space a bar, a shadow a tile. */
+export function kindOf(family: string, t: Token): TokenKind {
+  if (t.colour) return 'colour';
+  if (family === 'space' || family === 'radius' || family === 'font' || family === 'line' || family === 'z' || family === 'motion' || family === 'shadow')
+    return family;
+  if (family === 'text') return 'size';
+  if (family === 'focus') return 'focus';
+  return 'value';
 }
 
 const COLOUR = /^(#|rgb|hsl|oklch|color-mix|var\()/;
@@ -126,7 +138,10 @@ export function parseTokens(css: string, groups = new Map<string, TokenGroup>())
     const [, name, family, raw] = m;
     const value = raw.trim();
     const g = groups.get(family) ?? { family, tokens: [] };
-    if (!g.tokens.some((t) => t.name === name)) g.tokens.push({ name, value, colour: COLOUR.test(value) });
+    const seen = g.tokens.find((t) => t.name === name);
+    // A token a theme leaves `initial` is still a colour in the theme that sets it.
+    if (seen) seen.colour ||= COLOUR.test(value);
+    else g.tokens.push({ name, value, colour: COLOUR.test(value) });
     groups.set(family, g);
   }
   return [...groups.values()];
@@ -178,9 +193,26 @@ export function loadKitTokens() {
     const into = byFamily.get(g.family) ?? { family: g.family, tokens: [] };
     for (const t of g.tokens) {
       if (into.tokens.some((x) => x.name === t.name)) continue;
-      into.tokens.push(themeNames.has(t.name) ? { name: t.name, colour: t.colour } : t);
+      const themedToken = themeNames.has(t.name);
+      const full: Token = themedToken ? { name: t.name, colour: t.colour, themed: true } : t;
+      into.tokens.push({ ...full, kind: kindOf(g.family, full) });
     }
     byFamily.set(g.family, into);
   }
   return { version, groups: [...byFamily.values()] };
+}
+
+const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const inline = (t: string) =>
+  esc(t).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+/**
+ * The catalog's entry prose as safe HTML: paragraphs, `code` and **bold**, and
+ * nothing else. The first paragraph says what the component is; the rest is
+ * usage (Consumes, Do, Don't), returned apart so the page can fold it.
+ */
+export function proseParts(prose: string): { lead: string; rest: string } {
+  const paras = prose.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const html = (ps: string[]) => ps.map((p) => `<p>${inline(p.replace(/\s*\n\s*/g, ' '))}</p>`).join('');
+  return { lead: html(paras.slice(0, 1)), rest: html(paras.slice(1)) };
 }

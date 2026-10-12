@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { assertUniqueIds, parseCatalog, loadKitCatalog, parseTokens, loadKitTokens, specimen } from '../src/lib/kit-catalog.ts';
+import { assertUniqueIds, parseCatalog, loadKitCatalog, parseTokens, loadKitTokens, proseParts, specimen } from '../src/lib/kit-catalog.ts';
 
 // The design-system page is generated from the installed kit, so these tests
 // pin the parser's contract on a fixture and then run it against the real
@@ -177,4 +177,26 @@ test('no live specimen is left with a bare ellipsis as its content', () => {
         const m = />\s*(…|\.\.\.)\s*</.exec(live);
         assert.ok(!m, `${e.title}: a placeholder ellipsis is still rendered: ${live.slice(Math.max(0, m?.index - 40), (m?.index ?? 0) + 40)}`);
       }
+});
+
+test('a token a theme leaves initial is still a colour where another theme sets it (spectrum)', () => {
+  const { groups } = loadKitTokens();
+  const spectrum = groups.find((g) => g.family === 'spectrum');
+  assert.ok(spectrum.tokens.length > 0);
+  for (const t of spectrum.tokens) assert.equal(t.kind, 'colour', `${t.name} is drawn as a swatch`);
+});
+
+test('every token gets a preview kind, and only unknown families fall back to a bare value', () => {
+  const { groups } = loadKitTokens();
+  for (const t of groups.flatMap((g) => g.tokens)) assert.ok(t.kind, `${t.name} has a kind`);
+  const byName = Object.fromEntries(groups.flatMap((g) => g.tokens).map((t) => [t.name, t.kind]));
+  assert.equal(byName['--sl-space-2'], 'space');
+  assert.equal(byName['--sl-shadow-sm'], 'shadow');
+  assert.equal(byName['--sl-motion-fast'], 'motion');
+});
+
+test('proseParts keeps the first paragraph as the lead, escapes markup, and renders code and bold', () => {
+  const { lead, rest } = proseParts('A **bold** `code` <b>x</b>.\n\nSecond paragraph.');
+  assert.equal(lead, '<p>A <strong>bold</strong> <code>code</code> &lt;b&gt;x&lt;/b&gt;.</p>');
+  assert.equal(rest, '<p>Second paragraph.</p>');
 });

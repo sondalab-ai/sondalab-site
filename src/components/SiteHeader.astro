@@ -1,16 +1,14 @@
 ---
 import Wordmark from './Wordmark.astro';
 
-// `keep` survives the narrow-viewport collapse. The home anchors are
-// reachable by scrolling anyway; Apparel and Blog are destinations of their
-// own, so hiding them on a phone would make those sections unreachable from
-// the header.
-const nav: { label: string; href: string; keep?: boolean }[] = [
+// Under 48rem the inline links give way to a Menu button holding all of them,
+// so no destination (Contact included) is unreachable on a phone.
+const nav: { label: string; href: string }[] = [
   { label: 'Products', href: '/#products' },
   { label: 'Stance', href: '/#approach' },
   { label: 'Method', href: '/#method' },
-  { label: 'Apparel', href: '/apparel/', keep: true },
-  { label: 'Blog', href: '/blog/', keep: true },
+  { label: 'Apparel', href: '/apparel/' },
+  { label: 'Blog', href: '/blog/' },
   { label: 'Contact', href: '/#contact' },
 ];
 ---
@@ -22,14 +20,19 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
     </a>
 
     <nav class="site-header__nav" aria-label="Primary">
-      {nav.map((n) => <a href={n.href} data-keep={n.keep ? '' : undefined}>{n.label}</a>)}
+      {nav.map((n) => <a href={n.href}>{n.label}</a>)}
     </nav>
+
+    <button class="sl-btn sl-btn--ghost sl-btn--sm site-header__menu" type="button" aria-expanded="false" aria-controls="site-nav-panel" data-menu-button>Menu</button>
 
     <div class="sl-segmented site-header__theme" role="group" aria-label="Colour theme">
       <button class="sl-segmented__item" type="button" data-theme-choice="light" aria-pressed="false">Light</button>
       <button class="sl-segmented__item" type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
     </div>
   </div>
+  <nav id="site-nav-panel" class="site-header__panel sl-wrap" aria-label="Primary" data-menu-panel hidden>
+    {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+  </nav>
 </header>
 
 <script is:inline>
@@ -43,6 +46,23 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
       });
     }
     sync();
+
+    var button = document.querySelector('[data-menu-button]');
+    var panel = document.querySelector('[data-menu-panel]');
+    function setMenu(open, refocus) {
+      button.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+      if (open) { var first = panel.querySelector('a'); if (first) first.focus(); }
+      else if (refocus) button.focus();
+    }
+    button.addEventListener('click', function () { setMenu(panel.hidden, false); });
+    panel.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false, false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) setMenu(false, true); });
+    document.addEventListener('click', function (e) {
+      if (!panel.hidden && !e.target.closest('.site-header')) setMenu(false, false);
+    });
+    window.matchMedia('(min-width: 48rem)').addEventListener('change', function (m) { if (m.matches) setMenu(false, false); });
+
     items.forEach(function (b) {
       b.addEventListener('click', function () {
         var next = b.getAttribute('data-theme-choice');
@@ -87,21 +107,30 @@ const nav: { label: string; href: string; keep?: boolean }[] = [
   /* The full nav needs ~745px with its gutters at 768px, in sentence-case
      Geist (ui-kit 0.32; ~754px in uppercase Geist Mono, ~824px in Martian
      Mono, collapsed below 52rem); at 46rem it would overflow the page.
-     Collapse to the kept entries under 48rem, not only on phones.
+     Under 48rem the links move into the Menu panel instead of being hidden.
      scripts/layout-probe.mjs guards it. */
-  @media (max-width: 47.99rem) {
-    .site-header__nav a:not([data-keep]) { display: none; }
-    /* Two entries survive the collapse, so the gap still has to separate them.
-       The row gap gives back exactly what the nav gap takes, so the header is
-       no wider than it was when the two labels were touching. */
-    .site-header__nav { gap: 1rem; }
-    .site-header__inner { gap: 1rem; }
+  .site-header__menu { display: none; }
+  .site-header__panel { display: flex; flex-direction: column; padding-block: 0.5rem 1rem; }
+  .site-header__panel[hidden] { display: none; }
+  .site-header__panel a {
+    padding-block: 0.65rem;
+    text-decoration: none;
+    font-family: var(--sl-font-sans);
+    font-weight: 500;
+    color: var(--sl-text-secondary);
+    border-bottom: 1px solid var(--sl-border-subtle);
   }
-  /* Two named themes are wider than the one-word pill they replaced; on a
-     phone the row only fits with the items and gaps drawn in. */
+  .site-header__panel a:hover { color: var(--sl-text-primary); }
+  @media (max-width: 47.99rem) {
+    .site-header__nav { display: none; }
+    .site-header__menu { display: inline-flex; }
+    .site-header__inner { gap: 0.75rem; }
+  }
+  @media (min-width: 48rem) {
+    .site-header__panel { display: none; }
+  }
   @media (max-width: 26rem) {
     .site-header__inner { gap: 0.5rem; }
-    .site-header__nav { gap: 0.6rem; }
     .site-header__theme .sl-segmented__item { padding-inline: 0.4rem; }
   }
 </style>
