@@ -1,51 +1,58 @@
 ---
-// The design-system page. Nothing here is written by hand: components come
-// from the kit's agent/catalog.md (rendered live with the real kit CSS, code
-// beside each), tokens from tokens.css and the light theme, the version from
-// the package. A kit bump changes the page; no file in this repo does.
-// The catalog also documents the kit's opt-in workbench chrome (palette, tree,
-// status bar), which the rest of the site does not load. This page does, so
-// those specimens are drawn by their own CSS.
+// The design-system page. Nothing here is written by hand: components and
+// effects come from the kit's agent/catalog.md (rendered live with the real
+// kit CSS, code beside each), tokens from tokens.css and the themes, the
+// version from the package. A kit bump changes the page; no file in this repo
+// does.
+//
+// Opt-in stylesheets the rest of the site does not load are imported here,
+// one line each: the workbench chrome (palette, tree, status bar). The effects
+// layer (effects.css, glass.css) and its mount() come from Base.
+// scripts/kit-catalog.test.mjs fails if the catalog names a stylesheet that
+// neither this page nor Base imports.
 import '@sondalab/ui-kit/workbench.css';
+import halftoneSrc from '@sondalab/ui-kit/assets/avatar-ink.png?url';
 import Base from '../layouts/Base.astro';
-import { loadKitCatalog, loadKitTokens } from '../lib/kit-catalog';
+import { assertUniqueIds, loadKitCatalog, loadKitTokens, specimen } from '../lib/kit-catalog';
 
-const { sections } = loadKitCatalog();
+const { sections, json } = loadKitCatalog();
 const { version, groups } = loadKitTokens();
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const short = (title: string) => title.replace(/\s*\(.*$/, '');
-// Snippets are copy-paste markup with placeholder URLs. Here they must not
-// 404, navigate away or run inline handlers, and a closed dialog is
-// transparent by design.
+const anchors = sections.map((s) => slug(short(s.title)));
+if (new Set(anchors).size !== anchors.length || anchors.includes(''))
+  throw new Error(`catalog section anchors are not unique: ${anchors.join(', ')}`);
+assertUniqueIds(sections, anchors);
+
 const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 3%22%3E%3Crect width=%224%22 height=%223%22 fill=%22%23888%22 fill-opacity=%22.25%22/%3E%3C/svg%3E';
-// The catalog writes "…" where a button's icon goes; draw an icon there.
-const ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg>';
-const specimen = (html: string) =>
-  html
-    .replace(/(<button\b[^>]*>)…(<\/button>)/g, `$1${ICON}$2`)
-    .replace(/(<a\b[^>]*?\shref=)"\/[^"]*"/g, '$1"#"')
-    .replace(/(<img\b[^>]*?\ssrc=)"\/[^"]*"/g, `$1"${PLACEHOLDER}"`)
-    .replace(/\s(on[a-z]+)="[^"]*"/gi, '')
-    .replace(/<dialog\b(?![^>]*\bopen\b)/g, '<dialog open');
+const assets = { image: PLACEHOLDER, halftone: halftoneSrc };
+
+// An effect needs light and a ground to act on: its specimen gets a backdrop,
+// and nothing clips its bloom. Which entries are effects is the kit's own index.
+const effectClasses = new Set(json.components.filter((c) => c.kind === 'effect').flatMap((c) => c.classes));
+const isEffect = (classes: string[]) => classes.some((c) => effectClasses.has(c));
+// The names to show: the component's classes, not its modifiers or elements.
+const names = (classes: string[]) => classes.filter((c) => !c.startsWith('--') && !c.startsWith('__') && !c.startsWith('+')).join(' ');
+
 const count = sections.reduce((n, s) => n + s.entries.length, 0);
 ---
 
 <Base
   title="Design system"
-  description="The Sondalab UI kit: tokens and components, rendered live from the package this site is built with."
+  description="The Sondalab UI kit: tokens, components and effects, rendered live from the package this site is built with."
 >
   <div class="ds sl-wrap">
     <header class="ds-head">
       <p class="sl-eyebrow">Design system</p>
       <h1>Sondalab UI kit <span class="ds-ver">v{version}</span></h1>
       <p class="ds-lede">
-        {count} components and every token, drawn by the kit's own CSS. This page is generated from the
+        {count} components and effects and every token, drawn by the kit's own CSS. This page is generated from the
         package installed at build time, so it is always the version this site runs.
       </p>
-      <nav class="ds-toc" aria-label="Sections">
+      <nav class="ds-toc" aria-label="On this page">
         <a href="#tokens">Tokens</a>
-        {sections.map((s) => <a href={`#${slug(short(s.title))}`}>{short(s.title)}</a>)}
+        {sections.map((s, i) => <a href={`#${anchors[i]}`}>{short(s.title)}</a>)}
       </nav>
     </header>
 
@@ -71,15 +78,15 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
       ))}
     </section>
 
-    {sections.map((s) => (
-      <section id={slug(short(s.title))} class="ds-sec">
+    {sections.map((s, i) => (
+      <section id={anchors[i]} class="ds-sec">
         <h2>{short(s.title)}</h2>
         {s.entries.map((e) => (
           <article class="ds-entry">
-            <h3>{e.title} <code>{e.classes[0]}</code></h3>
+            <h3>{e.title} <code>{names(e.classes)}</code></h3>
             {e.snippets.map((html) => (
               <>
-                <div class="ds-spec" set:html={specimen(html)} />
+                <div class:list={['ds-spec', { 'ds-spec--fx': isEffect(e.classes) }]} set:html={specimen(html, assets)} />
                 <details class="ds-code">
                   <summary>Markup</summary>
                   <pre><code>{html}</code></pre>
@@ -92,6 +99,19 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
     ))}
   </div>
 </Base>
+
+<script>
+  // Specimens are not a site: placeholder links stay put, and a glitch fires
+  // on a real event, as the kit asks (CSS alone renders nothing).
+  import { burst } from '@sondalab/ui-kit/effects.js';
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as Element;
+    if (target.closest('.ds-spec a[href="#"]')) e.preventDefault();
+    const glitch = target.closest('.ds-spec .sl-fx-glitch');
+    if (glitch) burst(glitch);
+  });
+</script>
 
 <style>
   .ds { padding-block: var(--sl-space-8); }
@@ -113,6 +133,19 @@ const count = sections.reduce((n, s) => n + s.entries.length, 0);
   .ds-entry h3 { font-size: var(--sl-text-md); margin-bottom: var(--sl-space-2); }
   .ds-entry h3 code { font: var(--sl-text-xs) var(--sl-font-mono); color: var(--sl-text-secondary); margin-left: var(--sl-space-2); }
   .ds-spec { isolation: isolate; contain: layout; padding: var(--sl-space-5); background: var(--sl-bg-surface); border: 1px solid var(--sl-border-subtle); border-radius: var(--sl-radius-md); }
+  /* Out-of-flow specimens (an open dialog, the toast stack) give their box no
+     height and would draw over the next entry: seat them in the flow. */
+  .ds-spec :global(dialog[open]),
+  .ds-spec :global(.sl-toast-stack) { position: relative; inset: auto; margin: 0; }
+  /* Light needs a ground with content in it, and a bloom reaches ~22px past
+     its box, so an effect's specimen is padded and does not contain. */
+  .ds-spec--fx {
+    contain: none;
+    padding: var(--sl-space-8) var(--sl-space-6);
+    background-image:
+      radial-gradient(circle at 18% 30%, var(--sl-accent-subtle), transparent 55%),
+      repeating-linear-gradient(135deg, var(--sl-border-default) 0 1px, transparent 1px 14px);
+  }
   .ds-code summary { cursor: pointer; font-size: var(--sl-text-xs); color: var(--sl-text-secondary); padding-block: var(--sl-space-2); }
   .ds-code pre { overflow-x: auto; padding: var(--sl-space-3); background: var(--sl-bg-sunken); border-radius: var(--sl-radius-md); font: var(--sl-text-xs) / var(--sl-line-normal) var(--sl-font-mono); }
 </style>
