@@ -167,3 +167,14 @@ test('a script in a snippet fails the build', () => {
 test('every installed snippet sanitises without throwing', () => {
   for (const s of loadKitCatalog().sections) for (const e of s.entries) for (const html of e.snippets) run(html);
 });
+
+test('no live specimen is left with a bare ellipsis as its content', () => {
+  const { sections } = loadKitCatalog();
+  for (const s of sections)
+    for (const e of s.entries)
+      for (const html of e.snippets) {
+        const live = run(html).replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/g, '');
+        const m = />\s*(…|\.\.\.)\s*</.exec(live);
+        assert.ok(!m, `${e.title}: a placeholder ellipsis is still rendered: ${live.slice(Math.max(0, m?.index - 40), (m?.index ?? 0) + 40)}`);
+      }
+});
