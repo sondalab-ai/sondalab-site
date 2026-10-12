@@ -91,11 +91,14 @@ a { color: inherit; }
  * rule here wins over the kit's on the same selector.
  * --------------------------------------------------------------------- */
 
-/* The site's measure is 76rem with a 4rem gutter cap, not the kit's 78/6rem:
+/* Rules on kit classes are fenced from /design-system/'s specimens
+   (:not(.ds-spec *)), which show the kit as shipped.
+
+   The site's measure is 76rem with a 4rem gutter cap, not the kit's 78/6rem:
    the header's nav collapse (48rem) and the product rows' numeral gutter were
    measured against it (scripts/layout-probe.mjs). The kit declares the gutter
    in-class, so it is re-pointed here rather than on :root. */
-.sl-wrap {
+.sl-wrap:not(.ds-spec *) {
   --sl-gutter: var(--gutter);
   max-width: var(--wrap);
 }
@@ -105,12 +108,12 @@ a { color: inherit; }
    inline-flex. The dash is a 1px line, so it takes the accent-as-text role:
    the raw light-theme accent is a fill. Face, size, weight and tracking are
    the kit's micro register (0.30, L1). */
-.sl-eyebrow {
+.sl-eyebrow:not(.ds-spec *) {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
 }
-.sl-eyebrow::before {
+.sl-eyebrow:not(.ds-spec *)::before {
   content: '';
   width: 1.6em;
   height: 1px;
@@ -147,16 +150,16 @@ a { color: inherit; }
 }
 
 /* A marketing page breathes more than the kit's 3rem app rhythm. */
-.sl-section {
+.sl-section:not(.ds-spec *) {
   padding-block: clamp(4rem, 8vw, 8rem);
 }
-.sl-section__head {
+.sl-section__head:not(.ds-spec *) {
   margin-bottom: clamp(2rem, 5vw, 4rem);
 }
 /* The numbered ladder down the page is the site's one accent-coloured label
    (the kit's index is muted): a lighter, larger figure in the accent-as-text
    role, which the inversion band (Thesis) re-points to the uncapped accent. */
-.sl-section__idx {
+.sl-section__idx:not(.ds-spec *) {
   font-weight: var(--mono-hair);
   font-size: var(--sl-text-sm);
   letter-spacing: 0.1em;
