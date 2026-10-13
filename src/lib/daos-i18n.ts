@@ -143,6 +143,20 @@ const en = {
     'Compare two prompts fairly',
   'uses.p6':
     'To know whether prompt v2 beats v1, you have to remove the random variation, or you cannot tell a real improvement from luck. Run the same test set with each prompt: with the randomness gone, any difference in the output comes from the prompt.',
+  'ui.commands':
+    `The commands`,
+  'uses.h7':
+    `Use it from the tools you already have`,
+  'uses.p7':
+    `DAOS can run as a local server that speaks the OpenAI chat API, so an app that already talks to OpenAI only needs a new address. Two catches: your schema has to set limits on every field (allowed values, a maximum length, a range for numbers), and the server only listens on your own machine.`,
+  'uses.h8':
+    `Find wrong answers before your users do`,
+  'uses.p8':
+    `A stored answer is repeated faithfully even when it is wrong. So a daily check takes the new answers, plus a rotating share of older ones, and asks a stronger model (Claude) and a web search whether they hold up. It withdraws an answer on its own only where your rules say so; everything else goes into a report for you to review.`,
+  'uses.h9':
+    `Correct one stored answer without starting over`,
+  'uses.p9':
+    `When an answer turns out to be wrong, you withdraw that one answer, or replace it with a fixed one, and leave everything else as it is. Until a fix is in place, that request returns a clear error instead of the wrong answer. Who changed it, and why, is recorded with the change.`,
   'limits.h2':
     'What DAOS does not do',
   'limits.intro':
@@ -154,7 +168,7 @@ const en = {
   'limits.h3b':
     '<span class="x">×</span> Making answers correct',
   'limits.pb':
-    'DAOS makes answers <em>stable</em>, not <em>right</em>. A wrong answer is repeated just as faithfully as a right one.',
+    `DAOS makes answers <em>stable</em>, not <em>right</em>. A wrong answer is repeated just as faithfully as a right one. The daily check and the correction command (§04) help you find and fix wrong answers; they do not prevent them.`,
   'limits.h3c':
     '<span class="x">×</span> A free first call',
   'limits.pc':
@@ -379,6 +393,20 @@ const it: DaosDict = {
     'Confronta due prompt in modo onesto',
   'uses.p6':
     `Per sapere se il prompt v2 batte il v1 devi togliere la variazione casuale, altrimenti non distingui un vero miglioramento dalla fortuna. Esegui lo stesso insieme di test con ciascun prompt: senza casualità, ogni differenza nell'output viene dal prompt.`,
+  'ui.commands':
+    `I comandi`,
+  'uses.h7':
+    `Usalo dagli strumenti che hai già`,
+  'uses.p7':
+    `DAOS può girare come server locale che parla l’API chat di OpenAI, quindi a un’app che già usa OpenAI basta cambiare indirizzo. Due avvertenze: lo schema deve porre limiti a ogni campo (valori ammessi, una lunghezza massima, un intervallo per i numeri), e il server risponde solo sulla tua macchina.`,
+  'uses.h8':
+    `Trova le risposte sbagliate prima dei tuoi utenti`,
+  'uses.p8':
+    `Una risposta salvata viene ripetuta fedelmente anche quando è sbagliata. Per questo un controllo quotidiano prende le risposte nuove, più una quota a rotazione di quelle vecchie, e chiede a un modello più forte (Claude) e a una ricerca sul web se reggono. Ritira una risposta da solo solo dove le tue regole lo prevedono; tutto il resto finisce in un rapporto che rivedi tu.`,
+  'uses.h9':
+    `Correggi una risposta salvata senza ricominciare da capo`,
+  'uses.p9':
+    `Quando una risposta si rivela sbagliata, ritiri quella sola risposta, o la sostituisci con una corretta, e lasci tutto il resto com’è. Finché la correzione non c’è, quella richiesta restituisce un errore chiaro invece della risposta sbagliata. Chi l’ha cambiata, e perché, resta registrato insieme alla modifica.`,
   'limits.h2':
     'Cosa DAOS non fa',
   'limits.intro':
@@ -390,7 +418,7 @@ const it: DaosDict = {
   'limits.h3b':
     '<span class="x">×</span> Rendere le risposte corrette',
   'limits.pb':
-    'DAOS rende le risposte <em>stabili</em>, non <em>giuste</em>. Una risposta sbagliata viene ripetuta con la stessa fedeltà di una giusta.',
+    `DAOS rende le risposte <em>stabili</em>, non <em>giuste</em>. Una risposta sbagliata viene ripetuta con la stessa fedeltà di una giusta. Il controllo quotidiano e il comando di correzione (§04) ti aiutano a trovarle e correggerle; non le evitano.`,
   'limits.h3c':
     '<span class="x">×</span> Una prima chiamata gratuita',
   'limits.pc':
@@ -612,6 +640,20 @@ const es: DaosDict = {
     'Compara dos prompts con justicia',
   'uses.p6':
     'Para saber si el prompt v2 supera al v1 hay que quitar la variación aleatoria, o no distinguirás una mejora real de la suerte. Ejecuta el mismo conjunto de pruebas con cada prompt: sin aleatoriedad, cualquier diferencia en la salida viene del prompt.',
+  'ui.commands':
+    `Los comandos`,
+  'uses.h7':
+    `Úsalo desde las herramientas que ya tienes`,
+  'uses.p7':
+    `DAOS puede funcionar como servidor local que habla la API de chat de OpenAI, así que a una app que ya usa OpenAI solo le hace falta una dirección nueva. Dos advertencias: tu esquema tiene que poner límites a cada campo (valores permitidos, una longitud máxima, un rango para los números), y el servidor solo escucha en tu propia máquina.`,
+  'uses.h8':
+    `Encuentra las respuestas erróneas antes que tus usuarios`,
+  'uses.p8':
+    `Una respuesta guardada se repite fielmente aunque sea errónea. Por eso un control diario toma las respuestas nuevas, más una parte rotatoria de las antiguas, y pregunta a un modelo más potente (Claude) y a una búsqueda web si se sostienen. Solo retira una respuesta por su cuenta donde tus reglas lo indican; todo lo demás va a un informe para que lo revises.`,
+  'uses.h9':
+    `Corrige una respuesta guardada sin empezar de cero`,
+  'uses.p9':
+    `Cuando una respuesta resulta errónea, retiras esa sola respuesta, o la sustituyes por una corregida, y dejas todo lo demás como está. Hasta que haya una corrección, esa petición devuelve un error claro en lugar de la respuesta errónea. Quién la cambió, y por qué, queda registrado junto al cambio.`,
   'limits.h2':
     'Lo que DAOS no hace',
   'limits.intro':
@@ -623,7 +665,7 @@ const es: DaosDict = {
   'limits.h3b':
     '<span class="x">×</span> Hacer que las respuestas sean correctas',
   'limits.pb':
-    'DAOS hace las respuestas <em>estables</em>, no <em>acertadas</em>. Una respuesta equivocada se repite con la misma fidelidad que una correcta.',
+    `DAOS hace que las respuestas sean <em>estables</em>, no <em>correctas</em>. Una respuesta errónea se repite con la misma fidelidad que una correcta. El control diario y el comando de corrección (§04) te ayudan a encontrarlas y corregirlas; no las evitan.`,
   'limits.h3c':
     '<span class="x">×</span> Una primera llamada gratis',
   'limits.pc':
@@ -845,6 +887,20 @@ const de: DaosDict = {
     'Zwei Prompts fair vergleichen',
   'uses.p6':
     'Um zu wissen, ob Prompt v2 besser ist als v1, musst du die zufällige Schwankung entfernen, sonst kannst du eine echte Verbesserung nicht von Glück unterscheiden. Lass dieselben Tests mit jedem Prompt laufen: Ohne Zufall kommt jeder Unterschied in der Ausgabe vom Prompt.',
+  'ui.commands':
+    `Die Befehle`,
+  'uses.h7':
+    `Nutze es aus den Tools, die du schon hast`,
+  'uses.p7':
+    `DAOS kann als lokaler Server laufen, der die Chat-API von OpenAI spricht. Eine App, die schon mit OpenAI redet, braucht also nur eine neue Adresse. Zwei Haken: Dein Schema muss jedes Feld begrenzen (erlaubte Werte, eine maximale Länge, einen Bereich für Zahlen), und der Server hört nur auf deinem eigenen Rechner.`,
+  'uses.h8':
+    `Finde falsche Antworten, bevor deine Nutzer es tun`,
+  'uses.p8':
+    `Eine gespeicherte Antwort wird treu wiederholt, auch wenn sie falsch ist. Deshalb nimmt eine tägliche Prüfung die neuen Antworten plus einen wechselnden Teil der älteren und fragt ein stärkeres Modell (Claude) und eine Websuche, ob sie standhalten. Von sich aus zieht sie eine Antwort nur zurück, wo deine Regeln es sagen; alles andere landet in einem Bericht, den du durchsiehst.`,
+  'uses.h9':
+    `Korrigiere eine gespeicherte Antwort, ohne neu anzufangen`,
+  'uses.p9':
+    `Stellt sich eine Antwort als falsch heraus, ziehst du genau diese eine Antwort zurück oder ersetzt sie durch eine korrigierte, und alles andere bleibt, wie es ist. Bis eine Korrektur da ist, liefert diese Anfrage einen klaren Fehler statt der falschen Antwort. Wer sie geändert hat und warum, wird mit der Änderung festgehalten.`,
   'limits.h2':
     'Was DAOS nicht tut',
   'limits.intro':
@@ -856,7 +912,7 @@ const de: DaosDict = {
   'limits.h3b':
     '<span class="x">×</span> Antworten richtig machen',
   'limits.pb':
-    'DAOS macht Antworten <em>stabil</em>, nicht <em>richtig</em>. Eine falsche Antwort wird genauso treu wiederholt wie eine richtige.',
+    `DAOS macht Antworten <em>stabil</em>, nicht <em>richtig</em>. Eine falsche Antwort wird genauso treu wiederholt wie eine richtige. Die tägliche Prüfung und der Korrekturbefehl (§04) helfen dir, falsche Antworten zu finden und zu korrigieren; verhindern können sie sie nicht.`,
   'limits.h3c':
     '<span class="x">×</span> Ein kostenloser erster Aufruf',
   'limits.pc':

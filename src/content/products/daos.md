@@ -24,5 +24,10 @@ signing key, and an answer that was changed after signing is caught. It is a
 local, single-user Python library, built from a written specification and
 tested with unit, property, concurrency and structural suites.
 
+It also runs as a local server that speaks the OpenAI chat API, so existing
+apps only change an address. A daily check asks a stronger model and a web
+search whether stored answers still hold up, and a single wrong answer can be
+withdrawn or replaced without touching the rest.
+
 There is no user interface: it is the quiet tool the rest of the suite relies
 on when a claim needs checking. The source repository is currently private.
