@@ -28,235 +28,235 @@ export const DAOS_LANG_NAMES: Record<DaosLang, string> = {
 
 const en = {
   'hero.kicker':
-    'Determinism as a runtime guarantee',
+    'Same question, same answer',
   'hero.h1':
-    'Same input.<br>The <span class="id">byte-identical</span> output.<br>Every time.',
+    'Ask once.<br>Get the <span class="id">same answer</span><br>every time after.',
   'hero.lede':
-    'An LLM gives you a different answer on every call. DAOS turns that call into a pure function — one input, context, and schema resolve <em>once</em> to a canonical output object, which is then pinned, signed, and replayed byte-for-byte: across time, and across every machine running the same designated variant and backend.',
+    'Ask an AI model the same thing twice and you can get two different answers. That breaks tests, audits and bug reports. DAOS asks the model <em>once</em>, signs the answer so any later edit is caught, and gives back exactly that answer, byte for byte, whenever the same request comes in, without calling the model again.',
   'proof.cap1':
-    'Pinned mode',
+    'One support ticket',
   'proof.cap2':
-    'the shipped product',
+    'what ships today',
   'proof.resolve':
-    'Resolve once',
+    'The first time',
   'proof.cost1':
-    '1 inference',
+    '1 model call',
   'proof.ticket':
     '“…charged $49.99 twice this month…”',
   'proof.step':
-    'resolve · greedy → canonicalize → sign into cache',
+    'the model answers → DAOS tidies the answer → signs it and stores it',
   'proof.reproduce':
-    'Reproduce that run',
+    'Every time after',
   'proof.cost0':
-    '0 inference',
+    '0 model calls',
   'proof.when':
-    'a CI golden test · an auditor · a second machine',
+    'a test run · an auditor · a bug report weeks later',
   'proof.replay':
     '—&nbsp;the same bytes&nbsp;—',
   'proof.subnote':
-    "You don't wait for the same ticket to arrive twice — you <b>reproduce the run you care about</b>, byte-for-byte, from its logged input. Determinism is a property of the <b>function</b>, not a bet on repeat traffic. Reproducing in a fresh process is <b>measured</b> (§&thinsp;04); a second machine holds <b>by design</b>, within one quantization and backend.",
+    "You don't have to wait for the same ticket to come in again: you can <b>replay any logged run</b> and get back exactly what the model said at the time. Replaying in a fresh process is <b>measured</b>. On a second machine it should hold <b>by design</b>, as long as that machine runs the same model file on the same inference software.",
   'proof.footK':
     'Measured',
   'proof.footV':
-    '20 greedy runs → 1 output · replayed in a fresh process, 0 inference',
+    '20 runs → 1 answer · replayed in a fresh process with 0 model calls',
   'hero.fnComment':
-    '// a pure function at the semantic tier — one designated variant, resolved once, replayed byte-for-byte',
+    '// same request in, same answer out: one chosen model, asked once, then replayed',
   'nc.p':
-    `<span class="sl-callout__title">This is not a cache</span>Memoizing a non-deterministic model is a <b>correctness bug</b>: it serves an answer the model would no longer give, and can't tell it's wrong. DAOS earns the right to cache <b>first</b> — the model hash and load config are folded into the key, so a model swap <b>invalidates</b> instead of serving stale, and a replay that doesn't match the signed log is flagged as a <b>detected bug</b>. The store is downstream of the guarantee, not the product.`,
-  's01.kicker':
-    'You already tried this',
-  's01.h2':
-    '<span class="k">temperature=0</span> is not determinism. It is a quieter kind of luck.',
-  's01.tag1':
-    'The config knob',
-  's01.h3a':
-    'Turning the sampler down',
-  's01.p1':
-    'Set <span class="mono">temperature=0</span>, <span class="mono">top_k=1</span>, <span class="mono">top_p</span> low, and the <em>selection rule</em> becomes deterministic: always take the argmax token. In our own runs it even held — 20 sequential greedy generations, four seeds, one under a competing thread on the same box: <b class="ink">one distinct output</b>.',
-  's01.note1':
-    'So on one variant, one backend, one machine, greedy can be byte-stable. That is where most teams stop — and where the guarantee they think they have does not exist.',
-  's01.tag2':
+    `<span class="sl-callout__title">Isn't this just a cache?</span>No, and a plain cache would be risky. If the model changes, a cache keeps serving an answer the model would no longer give, and nothing tells you. DAOS ties every stored answer to the exact model that produced it, so <b>swapping the model means the old answers are not used</b>. Every answer is signed, so <b>an edited answer is caught</b>. And if replaying a run gives something other than what the log says, DAOS <b>reports it as a bug</b>.`,
+  'why.kicker':
+    'You may have tried this',
+  'why.h2':
+    '<span class="k">temperature=0</span> makes a model less random. It does not make it repeatable.',
+  'why.tag1':
+    'What people try',
+  'why.h3a':
+    'Turn the randomness down',
+  'why.p1':
+    `Set <span class="mono">temperature=0</span> and the model always picks its most likely next word. In our own tests that held: 20 runs in a row, across four different seeds and with another job competing for the machine during one of them, gave <b class="ink">one single answer</b>.`,
+  'why.note1':
+    'So with one model on one machine it can work. Most teams stop there, and assume they have a guarantee they do not actually have.',
+  'why.tag2':
     'Why it is not enough',
-  's01.h3b':
-    'Greedy removes one noise layer of six',
-  's01.p2':
-    'The argmax is deterministic, but the <em>scores it chooses over</em> are not stable across the axes that matter. Five layers survive <span class="mono">temperature=0</span> untouched:',
-  's01.li1':
-    'sampling entropy — the only layer a low temperature removes',
-  's01.li2':
-    'floating-point non-associativity in GPU kernel reductions',
-  's01.li3':
-    'continuous batching changing the numerics of your call',
-  's01.li4':
-    'quantization — a different bit-width computes a different function <span class="tie">— measured: Q4 split from FP16 on 9 of 40 fields (§04)</span>',
-  's01.li5':
-    'silent model drift on a hosted endpoint',
-  's01.li6':
-    'agent-level entropy — tool order, timestamps, retrieval',
-  's01.punch':
-    `<span class="mono">temperature=0</span> recomputes the answer and hopes it matches. On a low-margin token the argmax flips — and you get no signal that it did, and no way to prove today's answer equals yesterday's. <b>DAOS resolves once, canonicalizes the object, signs it into a content-addressable cache, and replays it — byte-for-byte, 0 inference.</b> Pinned mode <em>is</em> greedy decoding, plus the three things a knob cannot give you: a canonical form, a pinned entry, and a receipt.`,
-  's02.h2':
-    'Determinism moved off the token stream',
-  's02.lead':
-    'Some non-determinism cannot be removed — two quantizations of one model compute different functions and will never emit the same tokens. So DAOS does not fight for identical tokens. It moves the determinism contract onto a <b class="ink">canonicalized, schema-constrained output object</b>.',
-  's02.note1':
-    `The shipped product is <b class="ink">pinned mode</b>: one designated variant, one generation, canonicalized and validated against a bounded schema, with the variant's model hash and load config folded into the key. The result is frozen in a content-addressable, HMAC-signed cache and recorded in a signed, replayable event log.`,
-  's02.note2':
-    `Canonicalization is what makes the stored bytes well-defined: a raw generation of <span class="mono">confidence: 0.8500000119</span> is rendered <span class="mono ink-2">0.85</span> — number form is <b class="ink">schema-owned</b> (<span class="mono">multipleOf&nbsp;0.05</span>), overriding the serializer's shortest form — then NFC unicode, then JCS-sorted keys.`,
-  's02.note3':
-    'The guarantee is a fixed point you can build on — the same input resolves to the same output object, then every repeat is a signed replay, not a re-roll. Not “usually the same.” The same.',
-  's03.kicker':
-    'Neuroscience-informed design · spec v1.4 revision',
-  'ui.designChoice':
-    'Design choice',
-  's03.h2':
-    'The stochastic-substrate problem is old. Brains solved it first.',
-  's03.lead':
-    "A biological neural system holds one coherent thought on top of noisy, spiking, unreliable hardware. DAOS's resolution layer borrows three mechanisms that make that possible — and deliberately throws out the one that makes brains unreliable witnesses.",
-  's03.from1':
-    '<b>Attractor dynamics</b> <span class="arrow">→</span> pooled decoding',
-  's03.h3a':
-    'Settle the population, then read it',
-  's03.p1':
-    "A cortical population fed noisy input falls toward one of a few stable states, cleaning up the noise on the way down. DAOS's logit-pool strategy does the same: it averages the variants' probability <em>distributions</em> at each step and commits the pooled token to all of them in lockstep — resolving the ensemble into one discrete choice <em>before</em> collapsing to argmax, not after.",
-  's03.c1':
-    'R7.7 · aggregate probabilities, never raw logits · requires a shared tokenizer (cross-quant only) and in-process step-level access — excludes vLLM / LM Studio / TGI.',
-  's03.from2':
-    '<b>Population coding</b> <span class="arrow">→</span> the correlation ceiling',
-  's03.h3b':
-    'Averaging only scales under independent error',
-  's03.p2':
-    'Pooling N neurons suppresses noise as √N — but only when their errors are independent. Correlated noise imposes a hard ceiling. The same theorem bounds a quorum: quantization error is <em>systematic</em>, so stacking more bit-width variants plateaus fast. DAOS states this limit rather than hiding it — decorrelate with different quant <em>methods</em>, do not just add more.',
-  's03.c2':
-    'R7.8 · a limit surfaced, not a feature claimed · the same information-limiting correlation studied in population coding.',
-  's03.from3':
-    '<b>Predictive coding</b> <span class="arrow">→</span> a declared prior',
-  's03.h3c':
-    'Weight ambiguity toward a prior',
-  's03.p3':
-    'The brain stabilizes an ambiguous percept by weighting it toward a prior. DAOS breaks a tied vote the same way, with a schema-declared prior — and pointedly <em>rejected</em> the seductive “prior = most similar past answer,” because a similarity function smuggles non-determinism straight back in.',
-  's03.c3':
-    'R3.3(a) · permitted only as a pure, versioned function of logged state · token-ID backstop retained.',
-  's03.from4':
-    'The one we threw out: <b>confabulation</b>',
-  's03.h3d':
-    'The interpreter that invents coherence',
-  's03.p4':
-    "Split-brain work shows the mind fabricating a coherent story <em>after</em> the fact — and believing it. That post-hoc coherence is precisely DAOS's anti-goal: reproducible is not the same as trustworthy. The very mechanism that makes a brain feel certain is the one a determinism engine has to refuse.",
-  's03.tagline':
-    'Rejected in review · a machine that fabricates its own certainty is the failure mode, not the feature.',
-  's03.foot':
-    'Logit-pool (R7.7) is a spec-level resolution strategy for Track&nbsp;B research, not a switch a consumer flips today — the same honesty that governs the rest of this page.',
-  's04.kicker':
-    'Measured on real models, not just designed',
-  's04.h2':
-    'Llama-3.2 at three bit-widths, on an Apple M3 Pro.',
-  's04.mlabel1':
-    'The product · pinned mode',
-  's04.lab1':
-    'twenty sequential greedy generations of the pinned variant — one distinct output, stable under four seeds and a competing thread',
-  's04.lab2':
-    'inference calls to replay a logged run — reproduced byte-for-byte in a fresh process with a new signing key',
-  's04.mlabel2':
-    'The stress test <span class="sl-tag">Track&nbsp;B · research</span>',
-  's04.lab3':
-    'canonical object reconciled from three quantization variants of one model — a harder bar than single-variant determinism',
-  's04.lab4':
-    'Q4 lone-minority rate; FP16 was never the lone minority — dissent is monotone in precision',
-  's04.capA':
-    'Cross-quant resolution',
-  's04.capB':
-    '1 base model · 3 bit-widths',
-  's04.leaf':
-    'Voting the <b>priority</b> leaf',
-  's04.lone':
-    '← lone minority',
-  's04.collapse':
-    'field-wise majority',
-  's04.subnote':
-    "Q4's dissent is recorded and the field flagged <b>fragile</b>. The referee rule (highest precision wins) breaks only <em>no-majority</em> ties — here the 2–1 majority already decides.",
-  's04.foot':
-    'Of 40 resolved fields, 31 were unanimous and 9 split 2–1 across 6 of 10 tasks — where byte-identity was produced by resolution, not by three variants happening to agree. The quorum bought <em>determinism</em>, not accuracy: cross-quant makes no accuracy claim, and core no longer ships it as a product surface.',
-  's05.h2':
-    'Ten places it pays for itself',
-  's05.h1':
-    'Making LLM features testable at all',
-  'ui.howItWorks':
+  'why.h3b':
+    'Randomness is only one of six things that change the answer',
+  'why.p2':
+    'The model still picks its most likely word, but <em>which</em> word counts as most likely can shift for reasons that have nothing to do with temperature. Five of them are untouched by <span class="mono">temperature=0</span>:',
+  'why.li1':
+    'random sampling: the only one a low temperature removes',
+  'why.li2':
+    'tiny rounding differences in how a GPU adds up numbers',
+  'why.li3':
+    'the server processing your request together with other people’s',
+  'why.li4':
+    `a smaller, compressed copy of the model, which is really a slightly different model <span class="tie">(see §06)</span>`,
+  'why.li5':
+    'a hosted model being updated without notice',
+  'why.li6':
+    'everything else in an agent: the order tools run in, timestamps, search results',
+  'why.punch':
+    `<span class="mono">temperature=0</span> asks the model again and hopes the answer matches. When two words are almost equally likely, it can tip the other way, and nothing tells you it did. <b>DAOS asks once, keeps that answer, and hands it back every time after, byte for byte, with no model call.</b> It uses the same low-randomness setting, and adds what a setting cannot give you: one fixed form for the answer, a stored copy, and a signed record.`,
+  'how.h2':
     'How it works',
-  's05.p1':
-    'You cannot assert against a moving target, so teams stop writing the tests. With a fixed output, a golden test means something again: a prompt or model change becomes a diff you review, not noise you learn to ignore.',
-  's05.h2c':
-    'Audit and compliance in regulated domains',
-  's05.p2':
-    'Finance, insurance, healthcare: “why did it produce this, and can you reproduce it?” — sometimes years later, to a regulator. DAOS logs every resolution to a signed, append-only log and replays the exact run on demand. Tamper-evident by signature; reproducible by construction.',
-  's05.h3':
-    'Migrating quantization or backend',
-  's05.p3':
-    "Move to the cheaper Q4 model or a new inference server without a silent shift in behavior. Track B's cross-quant quorum resolved FP16, Q8 and Q4 to one canonical object — evidence that the semantic tier survives a bit-width change. It tells you a migration is <em>safe to test</em>, provable with a before/after replay; it is a research result, not a product switch. In practice: a platform team pins Q4 for cost, then re-runs last quarter's golden inputs to prove the switch changed nothing before rollout.",
-  's05.h4':
-    'Deterministic caching and k× cost control',
-  's05.p4':
-    'First resolution writes the answer once; every semantically identical request after it is a cache hit that skips inference. The cache key is the canonical form of the input, so <span class="mono">0.9</span> and <span class="mono">0.90</span> or reordered keys collapse to one entry. Determinism is what makes reuse <em>correct</em>.',
-  's05.h5':
-    'Stable contracts between pipeline stages',
-  's05.p5':
-    "In a multi-step agent, each stage consumes the last one's output; upstream noise cascades and failures stop reproducing. A schema-shaped contract at every boundary makes the whole pipeline reproducible and pins a failure to the stage that caused it. In practice: a nightly document pipeline re-runs extract → classify → route on the same inputs, so a regression is a reviewable diff at one stage, not a mystery that surfaced three stages later.",
-  's05.h6':
-    'Disagreement as a confidence signal',
-  's05.p6':
-    'When FP16, Q8 and Q4 split on a field, that field is fragile — low-margin, the kind that flips under batching or a model update. The quorum records the per-field vote and attributes each dissent to its variant, so contested fields route to review and unanimous ones run untouched. A research capability, not part of the pinned product. In practice: a claims extractor sends only the fields the three variants split on to a human, and auto-approves the unanimous ones.',
-  's05.h7':
-    'Structured extraction you can trust to a schema',
-  's05.p7':
-    'Invoices, contracts, document-to-JSON: output that conforms every time, the same document yielding the same row. Generation is grammar-constrained, validated, then repaired or <em>failed loudly</em> — never plausible-looking garbage passed downstream.',
-  's05.h8':
-    'A/B testing with a clean signal',
-  's05.p8':
-    "To know whether prompt v2 beats v1, you must remove output variance or you can't separate a real gain from sampling luck. DAOS strips it, so any change in output is attributable to the change you made — the experiment measures the thing you're testing. In practice: prompt v2 ships behind a flag and you re-run the same eval set — the output delta is the prompt, not the sampler.",
-  's05.h9':
-    'Reproducible research, benchmarks, evals',
-  's05.p9':
-    'Results are only credible when someone else re-runs your published eval on their own box. <b>Measured:</b> re-running the same triple in a fresh process with a new signing key returned the same bytes, 0 inference — the eval measures the model, not the noise floor. Extending that to a second machine is the <b>design scope</b>: byte-identity holds across boxes running one quantization and backend, never across a backend swap.',
-  's05.h10':
-    'Incident forensics on production behavior',
-  's05.p10':
-    "When a bad output ships, step one — reproducing it — is usually the hardest, because the conditions are gone. DAOS replays the exact run from its signed log with zero inference. And if the replay doesn't match, that divergence is itself flagged as a detected bug. In practice: a customer disputes an answer from three weeks ago; you replay the logged run and see the exact bytes they saw, not an approximation.",
-  's06.h2':
-    'Where DAOS is not the answer',
-  's06.intro':
-    'Honesty is part of the pitch — the discipline that produces the guarantee produces a clear boundary around it.',
-  's06.h3a':
-    '<span class="x">×</span> Open-ended or creative generation',
-  's06.pa':
-    'DAOS constrains output to a schema and rewards agreement. If you want variety, it is the wrong layer.',
-  's06.h3b':
-    '<span class="x">×</span> Correctness',
-  's06.pb':
-    'DAOS makes output <em>stable</em>, not <em>true</em>. A wrong answer pins as reliably as a right one — determinism is orthogonal to accuracy, and the product claims only the first.',
-  's06.h3c':
-    '<span class="x">×</span> Bitwise-identical tokens across quantizations',
-  's06.pc':
-    'Mathematically impossible — quantization changes the function computed. DAOS guarantees the semantic tier and says so, rather than claiming the impossible.',
-  's06.h3d':
-    '<span class="x">×</span> Cross-quant quorum in production',
-  's06.pd':
-    'It is Track B research with no accuracy claim; core raises <span class="mono">UnsupportedMode</span>. The shipped product is pinned mode — one designated variant.',
-  's06.h3e':
-    '<span class="x">×</span> Latency parity with a single call',
-  's06.pe':
-    'Resolution costs inference on the first call, then caches. You buy determinism with compute: a real cost cold, a lookup warm.',
-  's06.h3f':
-    '<span class="x">×</span> Detecting that a model drifted',
-  's06.pf':
-    "Replay proves the pipeline, not the model — it consumes yesterday's output, so a model that changed still replays green. That is drift detection: on the roadmap.",
+  'how.lead':
+    'You cannot stop a model from varying, so DAOS does not try. It asks <b class="ink">one chosen model</b> once, and makes that answer the official one.',
+  'how.note1':
+    '<b class="ink">1. Ask once.</b> You send the input along with a <em>schema</em>: the exact shape the answer must have, meaning its fields, allowed values and number precision. DAOS asks the model and checks the answer against the schema. An answer that does not fit is an error, never passed on as if it were fine.',
+  'how.note2':
+    '<b class="ink">2. Tidy it up.</b> Two answers that mean the same thing should be the same bytes. So a raw <span class="mono">0.8500000119</span> becomes <span class="mono ink-2">0.85</span> (the schema sets the precision), text is normalised, and fields are put in a fixed order.',
+  'how.note3':
+    `<b class="ink">3. Sign, store, replay.</b> The tidy answer is signed and stored. From then on the same request gets the stored answer back, without calling the model. Turn on the log and each run is also recorded in a signed log, so you can replay it later.`,
+  'measured.kicker':
+    'Measured, not just promised',
+  'measured.h2':
+    'Tested on a real model: Llama-3.2, on an Apple M3 Pro.',
+  'measured.label':
+    'The product',
+  'measured.n1':
+    `runs in a row of the same request gave one single answer, across four different seeds, one of them with another job competing for the machine`,
+  'measured.n2':
+    'model calls to replay a logged run, byte for byte, in a fresh process with a new signing key',
+  'uses.h2':
+    'What you can do with it',
+  'ui.realOutput':
+    'Real output',
+  'uses.h1':
+    'Write tests for AI features that mean something',
+  'uses.p1':
+    'You cannot test against an answer that keeps changing, so teams stop writing the tests. With DAOS you save the answer for a known input as the expected result, and the test checks it on every build. When someone changes the prompt or the model, the test shows exactly what changed: a difference to review, not noise to ignore.',
+  'uses.h2c':
+    'Show an auditor exactly what the model said',
+  'uses.p2':
+    `Finance, insurance, healthcare: “why did it decide this, and can you show it again?”, sometimes years later. With logging on, every answer goes into a signed log that cannot be edited without it being detected, and DAOS replays that exact run on request.`,
+  'uses.h3':
+    'Reproduce a bad answer from production',
+  'uses.p3':
+    'When a bad answer reaches a customer, the hardest step is reproducing it, because the conditions are gone. A customer disputes an answer from three weeks ago: you replay the logged run and see the exact bytes they saw, not an approximation. If the replay does not match the log, that mismatch is reported as a bug.',
+  'uses.h4':
+    'Pull data out of documents into a fixed shape',
+  'uses.p4':
+    'Invoices, contracts, support tickets into JSON. Every answer is checked against the schema you define, and one that does not fit fails with the exact reason, instead of plausible-looking garbage reaching the next step. The same document always gives the same row.',
+  'uses.h5':
+    'Stop paying twice for the same answer',
+  'uses.p5':
+    'The first request pays for one model call. Every later request that means the same thing is served from storage: <span class="mono">0.9</span> and <span class="mono">0.90</span>, or the same fields in a different order, count as one request. Because the model is part of the key, switching models never serves an old answer.',
+  'uses.h6':
+    'Compare two prompts fairly',
+  'uses.p6':
+    'To know whether prompt v2 beats v1, you have to remove the random variation, or you cannot tell a real improvement from luck. Run the same test set with each prompt: with the randomness gone, any difference in the output comes from the prompt.',
+  'limits.h2':
+    'What DAOS does not do',
+  'limits.intro':
+    'The same discipline that makes the guarantee also draws a clear line around it.',
+  'limits.h3a':
+    '<span class="x">×</span> Creative or open-ended writing',
+  'limits.pa':
+    'DAOS forces answers into a fixed shape and keeps them the same. If you want variety, it is the wrong tool.',
+  'limits.h3b':
+    '<span class="x">×</span> Making answers correct',
+  'limits.pb':
+    'DAOS makes answers <em>stable</em>, not <em>right</em>. A wrong answer is repeated just as faithfully as a right one.',
+  'limits.h3c':
+    '<span class="x">×</span> A free first call',
+  'limits.pc':
+    'The first time, the model still has to answer, at full cost and speed. Only the repeats are instant and free.',
+  'limits.h3d':
+    '<span class="x">×</span> Noticing that a model changed',
+  'limits.pd':
+    'Replaying a run reuses the stored answer, so a model that now answers differently still replays fine. Detecting that is planned, not built.',
+  'limits.h3e':
+    `<span class="x">×</span> The same answer after changing the model or how it runs`,
+  'limits.pe':
+    `The guarantee covers one model file loaded with the same settings. A different file or different load settings count as a new model, so DAOS asks again, and the new answer may differ. Moving the same model to different inference software is not covered at all.`,
+  'limits.h3f':
+    '<span class="x">×</span> Replaying calls that were never logged',
+  'limits.pf':
+    'Only runs written to the signed log can be replayed. A call made without a log gets the stored answer but leaves nothing to replay.',
+  'research.kicker':
+    'Research · not in the product',
+  'research.h2':
+    'What we are still exploring',
+  'research.intro':
+    'Everything above ships today. This section is different: experiments and design ideas from the DAOS spec that are <b>not</b> in the product. They are here because they shaped it, and because some of them did not work out.',
+  'research.qh3':
+    'Can three copies of one model vote on the answer?',
+  'research.qp':
+    'We ran one model in three sizes, at full precision and compressed to 8-bit and 4-bit, and had them vote field by field. Where they disagreed the majority won, so all three always ended up with the same final answer.',
+  'research.n1':
+    'final answer from three differently compressed copies of one model, every time',
+  'research.n2':
+    'of fields where the 4-bit copy was the only one to disagree; the full-precision copy never was',
+  'research.capA':
+    'Three copies vote',
+  'research.capB':
+    '1 model · 3 sizes',
+  'research.leaf':
+    'Voting on the <b>priority</b> field',
+  'research.lone':
+    '← the only one to disagree',
+  'research.collapse':
+    'the majority wins',
+  'research.subnote':
+    `The 4-bit copy's disagreement is recorded and the field is marked <b>fragile</b>. A tie-break rule (the most precise copy wins) exists for when there is no majority; here the two-to-one majority already decides.`,
+  'research.foot':
+    'Of 40 fields, 31 got the same value from all three copies and 9 split two to one, across 6 of the 10 tasks. What the vote did <em>not</em> do is make answers more accurate: on 600 labelled tasks it was no better than the full-precision copy alone. The copies tend to make the same mistakes, so a majority just repeats them. That is why voting is not in the product.',
+  'research.i1h':
+    'Switching to a cheaper copy of the model, safely',
+  'research.i1p':
+    'If a 4-bit copy gives the same final answers as the full model, you could switch to it to save money, and replay last quarter’s inputs to show nothing changed. The experiment suggests this can work. It is not a product feature.',
+  'research.i2h':
+    'Disagreement as a warning light',
+  'research.i2p':
+    'A field where the copies disagree is a field the model is unsure about. Because the vote records who disagreed, those fields could go to a person while the rest run untouched.',
+  'brain.kicker':
+    'Ideas borrowed from neuroscience',
+  'ui.notBuilt':
+    'In the spec',
+  'brain.h2':
+    'Brains also get one clear thought out of noisy parts.',
+  'brain.lead':
+    'Neurons are noisy and unreliable, yet a brain settles on one thought. The DAOS spec borrows three tricks that make that possible, and deliberately rejects a fourth. None of them is in the product. One has been measured.',
+  'brain.from1':
+    '<b>Neurons settling on one state</b> <span class="arrow">→</span> pooled answers',
+  'brain.h3a':
+    'Let the copies agree before picking each word',
+  'brain.p1':
+    'A group of neurons given a noisy signal falls into one stable pattern, and cleans up the noise on the way. The spec applies the same idea to copies of a model: at every word, combine how likely each copy finds each option, pick one word together, and move on in step.',
+  'brain.c1':
+    'Not built. It needs every copy running inside one program, word by word, which common model servers do not allow.',
+  'brain.from2':
+    '<b>Many neurons voting</b> <span class="arrow">→</span> a limit on voting',
+  'brain.h3b':
+    'Voting only helps if voters make different mistakes',
+  'brain.p2':
+    'Adding up many neurons cancels noise, but only when each one makes its own random errors. If they go wrong together, adding more does not help. Compressed copies of one model go wrong together, so adding more of them stops helping quickly. The fix is copies made in genuinely different ways.',
+  'brain.c2':
+    'Measured: two of our copies were wrong together almost every time (correlation up to 0.978). This is why the vote above did not improve accuracy.',
+  'brain.from3':
+    '<b>Expectation</b> <span class="arrow">→</span> a stated preference',
+  'brain.h3c':
+    'Break a near-tie with a stated preference',
+  'brain.p3':
+    'Faced with something ambiguous, the brain leans toward what it expects. The spec breaks a near-tie between two words the same way: the schema can say which value to prefer. It deliberately does <em>not</em> use “whatever we answered last time for something similar”, because “similar” is fuzzy and would bring randomness back in.',
+  'brain.c3':
+    'Not built. Without a stated preference, the spec falls back to a fixed rule.',
+  'brain.from4':
+    'The one we rejected: <b>making up a story</b>',
+  'brain.h3d':
+    'The part of the mind that invents a reason',
+  'brain.p4':
+    'Studies of split-brain patients show the mind inventing a convincing explanation after the fact, and believing it. That is exactly what DAOS must not do: giving the same answer every time does not make the answer trustworthy.',
+  'brain.tagline':
+    'Rejected on purpose: a system that invents its own certainty is the failure, not the feature.',
+  'brain.foot':
+    'These ideas come from the DAOS spec. They show where the design could go, not features you can switch on today.',
   'close.kicker':
-    'The takeaway',
+    'In short',
   'close.h2':
-    'If the variance is costing you, DAOS is the layer that removes it.',
+    'If getting a different answer every time is costing you, DAOS removes it.',
   'close.lead':
-    'Testability, auditability, cache correctness, a clean experiment — when “a different answer every time” is the problem, pinned mode hands you a pure function, with the receipts to prove it. Not a lower temperature. A fixed point.',
+    'Tests that mean something, audits you can answer, bugs you can reproduce, comparisons you can trust. DAOS gives back the same answer for the same request, with a signed record to prove it.',
   'footer.guarantee':
-    'Semantic-tier guarantee · SPEC v1.6',
+    'Same request, same answer · spec v1.6',
 };
 
 export type DaosKey = keyof typeof en;
@@ -264,701 +264,701 @@ export type DaosDict = Record<DaosKey, string>;
 
 const it: DaosDict = {
   'hero.kicker':
-    'Il determinismo come garanzia a runtime',
+    'Stessa domanda, stessa risposta',
   'hero.h1':
-    `Stesso input.<br>L'output <span class="id">byte-identico</span>.<br>Ogni volta.`,
+    'Chiedi una volta.<br>Ottieni la <span class="id">stessa risposta</span><br>ogni volta dopo.',
   'hero.lede':
-    'Un LLM ti dà una risposta diversa a ogni chiamata. DAOS trasforma quella chiamata in una funzione pura: un input, un contesto e uno schema si risolvono <em>una volta</em> in un oggetto di output canonico, che viene poi fissato, firmato e riprodotto byte per byte — nel tempo, e su ogni macchina che esegue la stessa variante e lo stesso backend designati.',
+    `Fai due volte la stessa domanda a un modello di IA e puoi ricevere due risposte diverse. Questo manda in crisi test, audit e segnalazioni di bug. DAOS interroga il modello <em>una sola volta</em>, firma la risposta così che qualsiasi modifica successiva venga scoperta, e restituisce esattamente quella risposta, byte per byte, ogni volta che arriva la stessa richiesta, senza richiamare il modello.`,
   'proof.cap1':
-    'Modalità pinned',
+    'Un ticket di assistenza',
   'proof.cap2':
-    'il prodotto rilasciato',
+    'ciò che esiste oggi',
   'proof.resolve':
-    'Risolvi una volta',
+    'La prima volta',
   'proof.cost1':
-    '1 inferenza',
+    '1 chiamata al modello',
   'proof.ticket':
     '“…addebitati $49.99 due volte questo mese…”',
   'proof.step':
-    'risolvi · greedy → canonicalizza → firma in cache',
+    'il modello risponde → DAOS ripulisce la risposta → la firma e la salva',
   'proof.reproduce':
-    "Riproduci quell'esecuzione",
+    'Ogni volta dopo',
   'proof.cost0':
-    '0 inferenze',
+    '0 chiamate al modello',
   'proof.when':
-    'un golden test in CI · un revisore · una seconda macchina',
+    `un'esecuzione di test · un revisore · una segnalazione di bug settimane dopo`,
   'proof.replay':
     '—&nbsp;gli stessi byte&nbsp;—',
   'proof.subnote':
-    "Non aspetti che lo stesso ticket arrivi due volte — <b>riproduci l'esecuzione che ti interessa</b>, byte per byte, dal suo input registrato. Il determinismo è una proprietà della <b>funzione</b>, non una scommessa sul traffico ripetuto. Riprodurre in un processo nuovo è <b>misurato</b> (§&thinsp;04); una seconda macchina vale <b>per progetto</b>, entro una stessa quantizzazione e uno stesso backend.",
+    `Non devi aspettare che arrivi di nuovo lo stesso ticket: puoi <b>rieseguire qualsiasi run registrato</b> e riavere esattamente ciò che il modello disse allora. La riesecuzione in un processo nuovo è <b>misurata</b>. Su una seconda macchina dovrebbe reggere <b>per progetto</b>, purché quella macchina usi lo stesso file del modello e lo stesso software di esecuzione.`,
   'proof.footK':
     'Misurato',
   'proof.footV':
-    '20 esecuzioni greedy → 1 output · riprodotto in un processo nuovo, 0 inferenze',
+    '20 run → 1 risposta · rieseguito in un processo nuovo con 0 chiamate al modello',
   'hero.fnComment':
-    '// una funzione pura al livello semantico — una variante designata, risolta una volta, riprodotta byte per byte',
+    '// stessa richiesta in ingresso, stessa risposta in uscita: un modello scelto, interrogato una volta, poi riprodotto',
   'nc.p':
-    `<span class="sl-callout__title">Questa non è una cache</span>Memoizzare un modello non deterministico è un <b>bug di correttezza</b>: restituisce una risposta che il modello non darebbe più, e non può accorgersi che è sbagliata. DAOS si guadagna il diritto di fare cache <b>prima</b> — l'hash del modello e la configurazione di caricamento entrano nella chiave, così un cambio di modello <b>invalida</b> invece di servire dati stantii, e un replay che non combacia col log firmato viene segnalato come <b>bug rilevato</b>. Lo store è a valle della garanzia, non è il prodotto.`,
-  's01.kicker':
-    "L'hai già provato",
-  's01.h2':
-    '<span class="k">temperature=0</span> non è determinismo. È una forma più silenziosa di fortuna.',
-  's01.tag1':
-    'La manopola di configurazione',
-  's01.h3a':
-    'Abbassare il sampler',
-  's01.p1':
-    'Imposta <span class="mono">temperature=0</span>, <span class="mono">top_k=1</span>, <span class="mono">top_p</span> basso, e la <em>regola di selezione</em> diventa deterministica: prendi sempre il token argmax. Nelle nostre prove ha persino tenuto — 20 generazioni greedy sequenziali, quattro seed, una sotto un thread concorrente sulla stessa macchina: <b class="ink">un unico output distinto</b>.',
-  's01.note1':
-    'Quindi su una variante, un backend, una macchina, greedy può essere byte-stabile. È lì che la maggior parte dei team si ferma — ed è lì che la garanzia che credono di avere non esiste.',
-  's01.tag2':
+    `<span class="sl-callout__title">Non è solo una cache?</span>No, e una semplice cache sarebbe rischiosa. Se il modello cambia, una cache continua a servire una risposta che il modello non darebbe più, e nessuno ti avvisa. DAOS lega ogni risposta salvata al modello esatto che l'ha prodotta, quindi <b>cambiare modello significa che le vecchie risposte non vengono usate</b>. Ogni risposta è firmata, quindi <b>una risposta modificata viene scoperta</b>. E se rieseguire un run dà qualcosa di diverso da ciò che dice il registro, DAOS lo <b>segnala come bug</b>.`,
+  'why.kicker':
+    'Forse ci hai già provato',
+  'why.h2':
+    '<span class="k">temperature=0</span> rende un modello meno casuale. Non lo rende ripetibile.',
+  'why.tag1':
+    'Cosa si prova di solito',
+  'why.h3a':
+    'Abbassare la casualità',
+  'why.p1':
+    `Imposta <span class="mono">temperature=0</span> e il modello sceglie sempre la parola successiva più probabile. Nei nostri test ha tenuto: 20 run di fila, con quattro seed diversi e, in uno di questi, un altro lavoro in competizione per la macchina, hanno dato <b class="ink">una sola risposta</b>.`,
+  'why.note1':
+    'Quindi con un modello su una macchina può funzionare. Molti team si fermano qui e credono di avere una garanzia che in realtà non hanno.',
+  'why.tag2':
     'Perché non basta',
-  's01.h3b':
-    'Greedy rimuove uno strato di rumore su sei',
-  's01.p2':
-    `L'argmax è deterministico, ma i <em>punteggi su cui sceglie</em> non sono stabili sugli assi che contano. Cinque strati sopravvivono a <span class="mono">temperature=0</span> intatti:`,
-  's01.li1':
-    "entropia di campionamento — l'unico strato che una temperatura bassa rimuove",
-  's01.li2':
-    'non-associatività in virgola mobile nelle riduzioni dei kernel GPU',
-  's01.li3':
-    'il continuous batching che cambia la numerica della tua chiamata',
-  's01.li4':
-    'quantizzazione — una diversa ampiezza di bit calcola una funzione diversa <span class="tie">— misurato: Q4 si è discostato da FP16 su 9 campi su 40 (§04)</span>',
-  's01.li5':
-    'drift silenzioso del modello su un endpoint gestito',
-  's01.li6':
-    'entropia a livello di agente — ordine dei tool, timestamp, retrieval',
-  's01.punch':
-    `<span class="mono">temperature=0</span> ricalcola la risposta e spera che coincida. Su un token a basso margine l'argmax si ribalta — e non ricevi alcun segnale che sia successo, né modo di dimostrare che la risposta di oggi è uguale a quella di ieri. <b>DAOS risolve una volta, canonicalizza l'oggetto, lo firma in una cache content-addressable e lo riproduce — byte per byte, 0 inferenze.</b> La modalità pinned <em>è</em> decoding greedy, più le tre cose che una manopola non può darti: una forma canonica, una voce fissata e una ricevuta.`,
-  's02.h2':
-    'Il determinismo spostato via dal flusso di token',
-  's02.lead':
-    'Parte del non-determinismo non si può rimuovere — due quantizzazioni di uno stesso modello calcolano funzioni diverse e non emetteranno mai gli stessi token. Perciò DAOS non combatte per token identici. Sposta il contratto di determinismo su un <b class="ink">oggetto di output canonicalizzato e vincolato allo schema</b>.',
-  's02.note1':
-    `Il prodotto rilasciato è la <b class="ink">modalità pinned</b>: una variante designata, una generazione, canonicalizzata e validata contro uno schema delimitato, con l'hash del modello della variante e la configurazione di caricamento fusi nella chiave. Il risultato viene congelato in una cache content-addressable firmata HMAC e registrato in un event log firmato e riproducibile.`,
-  's02.note2':
-    'La canonicalizzazione è ciò che rende ben definiti i byte memorizzati: una generazione grezza di <span class="mono">confidence: 0.8500000119</span> viene resa <span class="mono ink-2">0.85</span> — la forma numerica è <b class="ink">di proprietà dello schema</b> (<span class="mono">multipleOf&nbsp;0.05</span>), che prevale sulla forma più corta del serializzatore — poi unicode NFC, poi chiavi ordinate secondo JCS.',
-  's02.note3':
-    'La garanzia è un punto fisso su cui puoi costruire — lo stesso input si risolve nello stesso oggetto di output, poi ogni ripetizione è un replay firmato, non un nuovo tiro di dadi. Non “di solito uguale”. Uguale.',
-  's03.kicker':
-    'Design informato dalle neuroscienze · revisione spec v1.4',
-  'ui.designChoice':
-    'Scelta di progetto',
-  's03.h2':
-    "Il problema del substrato stocastico è antico. I cervelli l'hanno risolto per primi.",
-  's03.lead':
-    'Un sistema neurale biologico tiene un pensiero coerente sopra hardware rumoroso, a spike, inaffidabile. Il layer di risoluzione di DAOS prende in prestito tre meccanismi che lo rendono possibile — e scarta di proposito quello che rende i cervelli testimoni inaffidabili.',
-  's03.from1':
-    '<b>Dinamiche di attrattore</b> <span class="arrow">→</span> decoding aggregato',
-  's03.h3a':
-    'Fai assestare la popolazione, poi leggila',
-  's03.p1':
-    "Una popolazione corticale alimentata da input rumoroso cade verso uno di pochi stati stabili, ripulendo il rumore lungo la discesa. La strategia logit-pool di DAOS fa lo stesso: media le <em>distribuzioni</em> di probabilità delle varianti a ogni passo e assegna il token aggregato a tutte in lockstep — risolvendo l'ensemble in una scelta discreta <em>prima</em> di collassare all'argmax, non dopo.",
-  's03.c1':
-    'R7.7 · aggrega probabilità, mai logit grezzi · richiede un tokenizer condiviso (solo cross-quant) e accesso in-process a livello di passo — esclude vLLM / LM Studio / TGI.',
-  's03.from2':
-    '<b>Codifica di popolazione</b> <span class="arrow">→</span> il tetto della correlazione',
-  's03.h3b':
-    'La media scala solo con errori indipendenti',
-  's03.p2':
-    "Aggregare N neuroni sopprime il rumore come √N — ma solo quando i loro errori sono indipendenti. Il rumore correlato impone un tetto netto. Lo stesso teorema limita un quorum: l'errore di quantizzazione è <em>sistematico</em>, quindi impilare più varianti di ampiezza di bit raggiunge presto un plateau. DAOS dichiara questo limite invece di nasconderlo — decorrela con <em>metodi</em> di quantizzazione diversi, non aggiungerne solo di più.",
-  's03.c2':
-    "R7.8 · un limite reso esplicito, non una feature vantata · la stessa correlazione che limita l'informazione studiata nella codifica di popolazione.",
-  's03.from3':
-    '<b>Codifica predittiva</b> <span class="arrow">→</span> un prior dichiarato',
-  's03.h3c':
-    "Pesa l'ambiguità verso un prior",
-  's03.p3':
-    'Il cervello stabilizza un percetto ambiguo pesandolo verso un prior. DAOS spezza un voto in parità allo stesso modo, con un prior dichiarato dallo schema — e ha <em>rifiutato</em> con decisione il seducente “prior = risposta passata più simile”, perché una funzione di similarità reintroduce di soppiatto il non-determinismo.',
-  's03.c3':
-    'R3.3(a) · permesso solo come funzione pura e versionata dello stato registrato · backstop su token-ID mantenuto.',
-  's03.from4':
-    'Quella che abbiamo scartato: <b>confabulazione</b>',
-  's03.h3d':
-    "L'interprete che inventa coerenza",
-  's03.p4':
-    "Il lavoro sullo split-brain mostra la mente che fabbrica una storia coerente <em>dopo</em> il fatto — e ci crede. Quella coerenza post-hoc è esattamente l'anti-obiettivo di DAOS: riproducibile non è lo stesso che affidabile. Il meccanismo stesso che fa sentire certo un cervello è quello che un motore di determinismo deve rifiutare.",
-  's03.tagline':
-    'Respinto in review · una macchina che fabbrica la propria certezza è la modalità di fallimento, non la feature.',
-  's03.foot':
-    'Logit-pool (R7.7) è una strategia di risoluzione a livello di spec per la ricerca Track&nbsp;B, non un interruttore che un consumatore attiva oggi — la stessa onestà che governa il resto di questa pagina.',
-  's04.kicker':
-    'Misurato su modelli reali, non solo progettato',
-  's04.h2':
-    'Llama-3.2 a tre ampiezze di bit, su un Apple M3 Pro.',
-  's04.mlabel1':
-    'Il prodotto · modalità pinned',
-  's04.lab1':
-    'venti generazioni greedy sequenziali della variante pinned — un unico output distinto, stabile sotto quattro seed e un thread concorrente',
-  's04.lab2':
-    "chiamate di inferenza per riprodurre un'esecuzione registrata — riprodotta byte per byte in un processo nuovo con una nuova chiave di firma",
-  's04.mlabel2':
-    'Lo stress test <span class="sl-tag">Track&nbsp;B · research</span>',
-  's04.lab3':
-    "oggetto canonico riconciliato da tre varianti di quantizzazione di uno stesso modello — un'asticella più alta del determinismo a variante singola",
-  's04.lab4':
-    'tasso di minoranza solitaria di Q4; FP16 non è mai stato la minoranza solitaria — il dissenso è monotòno nella precisione',
-  's04.capA':
-    'Risoluzione cross-quant',
-  's04.capB':
-    '1 modello base · 3 ampiezze di bit',
-  's04.leaf':
-    'Votazione della foglia <b>priority</b>',
-  's04.lone':
-    '← minoranza solitaria',
-  's04.collapse':
-    'maggioranza campo per campo',
-  's04.subnote':
-    "Il dissenso di Q4 viene registrato e il campo segnalato <b>fragile</b>. La regola dell'arbitro (vince la precisione più alta) interviene solo nei pareggi <em>senza maggioranza</em> — qui la maggioranza 2–1 decide già.",
-  's04.foot':
-    "Su 40 campi risolti, 31 erano unanimi e 9 si sono divisi 2–1 su 6 dei 10 task — dove l'identità byte è stata prodotta dalla risoluzione, non da tre varianti che per caso concordano. Il quorum ha comprato <em>determinismo</em>, non accuratezza: cross-quant non fa alcuna affermazione di accuratezza, e il core non lo rilascia più come superficie di prodotto.",
-  's05.h2':
-    'Dieci punti in cui si ripaga',
-  's05.h1':
-    'Rendere le feature LLM testabili, punto',
-  'ui.howItWorks':
+  'why.h3b':
+    'La casualità è solo una delle sei cose che cambiano la risposta',
+  'why.p2':
+    `Il modello sceglie ancora la parola più probabile, ma <em>quale</em> parola risulti la più probabile può cambiare per motivi che con la temperatura non c'entrano. Cinque di questi non sono toccati da <span class="mono">temperature=0</span>:`,
+  'why.li1':
+    `campionamento casuale: l'unico che una temperatura bassa elimina`,
+  'why.li2':
+    'minuscole differenze di arrotondamento nel modo in cui una GPU somma i numeri',
+  'why.li3':
+    'il server che elabora la tua richiesta insieme a quelle di altri',
+  'why.li4':
+    `una copia più piccola e compressa del modello, che in realtà è un modello leggermente diverso <span class="tie">(vedi §06)</span>`,
+  'why.li5':
+    'un modello ospitato che viene aggiornato senza preavviso',
+  'why.li6':
+    `tutto il resto in un agente: l'ordine in cui girano gli strumenti, gli orari, i risultati di ricerca`,
+  'why.punch':
+    `<span class="mono">temperature=0</span> chiede di nuovo al modello e spera che la risposta coincida. Quando due parole sono quasi ugualmente probabili, può andare dall'altra parte, e nessuno ti avvisa. <b>DAOS chiede una volta, tiene quella risposta e la restituisce ogni volta dopo, byte per byte, senza chiamare il modello.</b> Usa la stessa impostazione a bassa casualità e aggiunge ciò che un'impostazione non può darti: una forma fissa per la risposta, una copia salvata e un registro firmato.`,
+  'how.h2':
     'Come funziona',
-  's05.p1':
-    'Non puoi fare asserzioni contro un bersaglio in movimento, così i team smettono di scrivere i test. Con un output fisso, un golden test torna a significare qualcosa: una modifica al prompt o al modello diventa un diff che revisioni, non rumore che impari a ignorare.',
-  's05.h2c':
-    'Audit e compliance in domini regolamentati',
-  's05.p2':
-    "Finanza, assicurazioni, sanità: “perché ha prodotto questo, e sai riprodurlo?” — a volte anni dopo, davanti a un regolatore. DAOS registra ogni risoluzione in un log firmato e append-only e riproduce l'esecuzione esatta su richiesta. A prova di manomissione per firma; riproducibile per costruzione.",
-  's05.h3':
-    'Migrare quantizzazione o backend',
-  's05.p3':
-    "Passa al modello Q4 più economico o a un nuovo server di inferenza senza uno spostamento silenzioso nel comportamento. Il quorum cross-quant di Track B ha risolto FP16, Q8 e Q4 in un unico oggetto canonico — prova che il livello semantico sopravvive a un cambio di ampiezza di bit. Ti dice che una migrazione è <em>sicura da testare</em>, dimostrabile con un replay prima/dopo; è un risultato di ricerca, non un interruttore di prodotto. In pratica: un platform team fissa Q4 per il costo, poi riesegue i golden input dell'ultimo trimestre per provare che il cambio non ha alterato nulla prima del rollout.",
-  's05.h4':
-    'Caching deterministico e controllo dei costi k×',
-  's05.p4':
-    `La prima risoluzione scrive la risposta una volta; ogni richiesta semanticamente identica dopo di essa è un cache hit che salta l'inferenza. La chiave di cache è la forma canonica dell'input, così <span class="mono">0.9</span> e <span class="mono">0.90</span> o chiavi riordinate collassano in un'unica voce. Il determinismo è ciò che rende il riuso <em>corretto</em>.`,
-  's05.h5':
-    'Contratti stabili tra gli stadi di una pipeline',
-  's05.p5':
-    "In un agente multi-step, ogni stadio consuma l'output del precedente; il rumore a monte si propaga a cascata e i fallimenti smettono di riprodursi. Un contratto a forma di schema a ogni confine rende l'intera pipeline riproducibile e inchioda un fallimento allo stadio che l'ha causato. In pratica: una pipeline documentale notturna riesegue extract → classify → route sugli stessi input, così una regressione è un diff revisionabile a un solo stadio, non un mistero emerso tre stadi dopo.",
-  's05.h6':
-    'Il disaccordo come segnale di confidenza',
-  's05.p6':
-    'Quando FP16, Q8 e Q4 si dividono su un campo, quel campo è fragile — a basso margine, il tipo che si ribalta sotto batching o un aggiornamento del modello. Il quorum registra il voto campo per campo e attribuisce ogni dissenso alla sua variante, così i campi contesi vanno in review e quelli unanimi passano intatti. Una capacità di ricerca, non parte del prodotto pinned. In pratica: un estrattore di sinistri manda a una persona solo i campi su cui le tre varianti si sono divise, e auto-approva quelli unanimi.',
-  's05.h7':
-    'Estrazione strutturata di cui ti puoi fidare a livello di schema',
-  's05.p7':
-    "Fatture, contratti, documento-verso-JSON: output conforme ogni volta, lo stesso documento che produce la stessa riga. La generazione è vincolata alla grammatica, validata, poi riparata oppure <em>fallisce ad alta voce</em> — mai spazzatura dall'aria plausibile passata a valle.",
-  's05.h8':
-    'A/B testing con un segnale pulito',
-  's05.p8':
-    "Per sapere se il prompt v2 batte v1, devi rimuovere la varianza dell'output o non puoi separare un guadagno reale dalla fortuna di campionamento. DAOS la elimina, così ogni variazione nell'output è attribuibile alla modifica che hai fatto — l'esperimento misura la cosa che stai testando. In pratica: il prompt v2 va in produzione dietro un flag e riesegui lo stesso set di eval — il delta di output è il prompt, non il sampler.",
-  's05.h9':
-    'Ricerca, benchmark ed eval riproducibili',
-  's05.p9':
-    "I risultati sono credibili solo quando qualcun altro riesegue la tua eval pubblicata sulla propria macchina. <b>Misurato:</b> rieseguire la stessa tripla in un processo nuovo con una nuova chiave di firma ha restituito gli stessi byte, 0 inferenze — l'eval misura il modello, non il pavimento di rumore. Estenderlo a una seconda macchina è lo <b>scope di progetto</b>: l'identità byte vale tra macchine che eseguono una stessa quantizzazione e uno stesso backend, mai attraverso un cambio di backend.",
-  's05.h10':
-    'Forense degli incidenti sul comportamento in produzione',
-  's05.p10':
-    "Quando esce un output sbagliato, il primo passo — riprodurlo — è di solito il più difficile, perché le condizioni sono sparite. DAOS riproduce l'esecuzione esatta dal suo log firmato con zero inferenze. E se il replay non combacia, quella divergenza è essa stessa segnalata come bug rilevato. In pratica: un cliente contesta una risposta di tre settimane fa; riproduci l'esecuzione registrata e vedi gli esatti byte che ha visto, non un'approssimazione.",
-  's06.h2':
-    'Dove DAOS non è la risposta',
-  's06.intro':
-    "L'onestà è parte della proposta — la disciplina che produce la garanzia produce un confine netto attorno ad essa.",
-  's06.h3a':
-    '<span class="x">×</span> Generazione aperta o creativa',
-  's06.pa':
-    "DAOS vincola l'output a uno schema e premia l'accordo. Se vuoi varietà, è il layer sbagliato.",
-  's06.h3b':
-    '<span class="x">×</span> Correttezza',
-  's06.pb':
-    "DAOS rende l'output <em>stabile</em>, non <em>vero</em>. Una risposta sbagliata si fissa in modo affidabile quanto una giusta — il determinismo è ortogonale all'accuratezza, e il prodotto rivendica solo il primo.",
-  's06.h3c':
-    '<span class="x">×</span> Token identici bit a bit tra quantizzazioni',
-  's06.pc':
-    "Matematicamente impossibile — la quantizzazione cambia la funzione calcolata. DAOS garantisce il livello semantico e lo dice, invece di rivendicare l'impossibile.",
-  's06.h3d':
-    '<span class="x">×</span> Quorum cross-quant in produzione',
-  's06.pd':
-    'È ricerca Track B senza alcuna affermazione di accuratezza; il core solleva <span class="mono">UnsupportedMode</span>. Il prodotto rilasciato è la modalità pinned — una variante designata.',
-  's06.h3e':
-    '<span class="x">×</span> Parità di latenza con una singola chiamata',
-  's06.pe':
-    'La risoluzione costa inferenza alla prima chiamata, poi va in cache. Compri il determinismo con il compute: un costo reale a freddo, una lookup a caldo.',
-  's06.h3f':
-    '<span class="x">×</span> Rilevare che un modello è andato in drift',
-  's06.pf':
-    "Il replay dimostra la pipeline, non il modello — consuma l'output di ieri, così un modello che è cambiato riproduce comunque verde. Quella è drift detection: sulla roadmap.",
+  'how.lead':
+    `Non puoi impedire a un modello di variare, quindi DAOS non ci prova. Interroga <b class="ink">un modello scelto</b> una volta e rende quella risposta quella ufficiale.`,
+  'how.note1':
+    `<b class="ink">1. Chiedi una volta.</b> Invii l'input insieme a uno <em>schema</em>: la forma esatta che deve avere la risposta, cioè campi, valori ammessi e precisione dei numeri. DAOS interroga il modello e controlla la risposta rispetto allo schema. Una risposta che non rispetta lo schema è un errore, mai passata avanti come se andasse bene.`,
+  'how.note2':
+    `<b class="ink">2. Ripulisci.</b> Due risposte che significano la stessa cosa devono essere gli stessi byte. Quindi uno <span class="mono">0.8500000119</span> grezzo diventa <span class="mono ink-2">0.85</span> (la precisione la decide lo schema), il testo viene normalizzato e i campi vengono messi in un ordine fisso.`,
+  'how.note3':
+    `<b class="ink">3. Firma, salva, riesegui.</b> La risposta ripulita viene firmata e salvata. Da lì in poi la stessa richiesta riceve la risposta salvata, senza chiamare il modello. Attiva il registro e ogni run viene anche annotato in un registro firmato, così puoi rieseguirlo più tardi.`,
+  'measured.kicker':
+    'Misurato, non solo promesso',
+  'measured.h2':
+    'Provato su un modello reale: Llama-3.2, su un Apple M3 Pro.',
+  'measured.label':
+    'Il prodotto',
+  'measured.n1':
+    `run di fila della stessa richiesta hanno dato una sola risposta, con quattro seed diversi, uno con un altro lavoro in competizione per la macchina`,
+  'measured.n2':
+    'chiamate al modello per rieseguire un run registrato, byte per byte, in un processo nuovo con una nuova chiave di firma',
+  'uses.h2':
+    'Cosa ci puoi fare',
+  'ui.realOutput':
+    'Output reale',
+  'uses.h1':
+    'Scrivi test per le funzioni di IA che abbiano senso',
+  'uses.p1':
+    `Non puoi testare contro una risposta che continua a cambiare, quindi i team smettono di scrivere i test. Con DAOS salvi la risposta a un input noto come risultato atteso, e il test la verifica a ogni build. Quando qualcuno cambia il prompt o il modello, il test mostra esattamente cosa è cambiato: una differenza da rivedere, non rumore da ignorare.`,
+  'uses.h2c':
+    'Mostra a un revisore esattamente cosa ha detto il modello',
+  'uses.p2':
+    `Finanza, assicurazioni, sanità: “perché ha deciso così, e puoi mostrarlo di nuovo?”, a volte anni dopo. Con il registro attivo, ogni risposta finisce in un registro firmato che non si può modificare senza che la modifica venga scoperta, e DAOS riesegue quel run esatto su richiesta.`,
+  'uses.h3':
+    'Riproduci una risposta sbagliata finita in produzione',
+  'uses.p3':
+    `Quando una risposta sbagliata arriva a un cliente, il passo più difficile è riprodurla, perché le condizioni non ci sono più. Un cliente contesta una risposta di tre settimane fa: riesegui il run registrato e vedi i byte esatti che ha visto lui, non un'approssimazione. Se la riesecuzione non coincide con il registro, la differenza viene segnalata come bug.`,
+  'uses.h4':
+    'Estrai dati dai documenti in una forma fissa',
+  'uses.p4':
+    `Fatture, contratti, ticket di assistenza in JSON. Ogni risposta viene controllata rispetto allo schema che definisci, e quella che non lo rispetta fallisce con il motivo preciso, invece di far arrivare al passo successivo spazzatura dall'aspetto plausibile. Lo stesso documento dà sempre la stessa riga.`,
+  'uses.h5':
+    'Smetti di pagare due volte la stessa risposta',
+  'uses.p5':
+    `La prima richiesta paga una chiamata al modello. Ogni richiesta successiva che significa la stessa cosa viene servita dall'archivio: <span class="mono">0.9</span> e <span class="mono">0.90</span>, o gli stessi campi in un ordine diverso, contano come una sola richiesta. Poiché il modello fa parte della chiave, cambiare modello non serve mai una vecchia risposta.`,
+  'uses.h6':
+    'Confronta due prompt in modo onesto',
+  'uses.p6':
+    `Per sapere se il prompt v2 batte il v1 devi togliere la variazione casuale, altrimenti non distingui un vero miglioramento dalla fortuna. Esegui lo stesso insieme di test con ciascun prompt: senza casualità, ogni differenza nell'output viene dal prompt.`,
+  'limits.h2':
+    'Cosa DAOS non fa',
+  'limits.intro':
+    'La stessa disciplina che crea la garanzia ne traccia anche un confine chiaro.',
+  'limits.h3a':
+    '<span class="x">×</span> Scrittura creativa o aperta',
+  'limits.pa':
+    'DAOS costringe le risposte in una forma fissa e le mantiene uguali. Se vuoi varietà, è lo strumento sbagliato.',
+  'limits.h3b':
+    '<span class="x">×</span> Rendere le risposte corrette',
+  'limits.pb':
+    'DAOS rende le risposte <em>stabili</em>, non <em>giuste</em>. Una risposta sbagliata viene ripetuta con la stessa fedeltà di una giusta.',
+  'limits.h3c':
+    '<span class="x">×</span> Una prima chiamata gratuita',
+  'limits.pc':
+    'La prima volta il modello deve comunque rispondere, a costo e velocità pieni. Solo le ripetizioni sono istantanee e gratuite.',
+  'limits.h3d':
+    '<span class="x">×</span> Accorgersi che un modello è cambiato',
+  'limits.pd':
+    'Rieseguire un run riusa la risposta salvata, quindi un modello che ora risponde in modo diverso viene rieseguito senza problemi. Rilevarlo è previsto, non realizzato.',
+  'limits.h3e':
+    `<span class="x">×</span> La stessa risposta dopo aver cambiato il modello o il modo in cui gira`,
+  'limits.pe':
+    `La garanzia vale per un file del modello caricato con le stesse impostazioni. Un altro file o altre impostazioni di caricamento contano come un modello nuovo, quindi DAOS chiede di nuovo, e la nuova risposta può essere diversa. Spostare lo stesso modello su un altro software di esecuzione non è coperto.`,
+  'limits.h3f':
+    '<span class="x">×</span> Rieseguire chiamate mai registrate',
+  'limits.pf':
+    'Si possono rieseguire solo i run scritti nel registro firmato. Una chiamata fatta senza registro riceve la risposta salvata ma non lascia nulla da rieseguire.',
+  'research.kicker':
+    'Ricerca · non nel prodotto',
+  'research.h2':
+    'Cosa stiamo ancora esplorando',
+  'research.intro':
+    'Tutto ciò che sta sopra esiste oggi. Questa sezione è diversa: esperimenti e idee di progetto dalla specifica di DAOS che <b>non</b> sono nel prodotto. Sono qui perché hanno dato forma al prodotto, e perché alcuni non hanno funzionato.',
+  'research.qh3':
+    'Tre copie dello stesso modello possono votare la risposta?',
+  'research.qp':
+    `Abbiamo fatto girare un modello in tre misure, a precisione piena e compresso a 8 bit e a 4 bit, e le abbiamo fatte votare campo per campo. Dove non erano d'accordo vinceva la maggioranza, così tutte e tre finivano sempre con la stessa risposta finale.`,
+  'research.n1':
+    'risposta finale da tre copie compresse in modo diverso dello stesso modello, ogni volta',
+  'research.n2':
+    `dei campi in cui la copia a 4 bit era l'unica in disaccordo; la copia a precisione piena mai`,
+  'research.capA':
+    'Tre copie votano',
+  'research.capB':
+    '1 modello · 3 misure',
+  'research.leaf':
+    'Voto sul campo <b>priority</b>',
+  'research.lone':
+    `← l'unica in disaccordo`,
+  'research.collapse':
+    'vince la maggioranza',
+  'research.subnote':
+    `Il disaccordo della copia a 4 bit viene registrato e il campo è segnato come <b>fragile</b>. Esiste una regola di spareggio (vince la copia più precisa) per quando non c'è maggioranza; qui decide già la maggioranza di due a uno.`,
+  'research.foot':
+    'Su 40 campi, 31 hanno avuto lo stesso valore da tutte e tre le copie e 9 si sono divisi due a uno, in 6 compiti su 10. Ciò che il voto <em>non</em> ha fatto è rendere le risposte più accurate: su 600 compiti con risposta nota non è andato meglio della sola copia a precisione piena. Le copie tendono a fare gli stessi errori, quindi la maggioranza li ripete. Per questo il voto non è nel prodotto.',
+  'research.i1h':
+    'Passare a una copia più economica del modello, in sicurezza',
+  'research.i1p':
+    `Se una copia a 4 bit dà le stesse risposte finali del modello completo, potresti passare a lei per risparmiare, e rieseguire gli input del trimestre scorso per mostrare che non è cambiato nulla. L'esperimento suggerisce che può funzionare. Non è una funzione del prodotto.`,
+  'research.i2h':
+    `Il disaccordo come spia d'allarme`,
+  'research.i2p':
+    `Un campo su cui le copie non sono d'accordo è un campo su cui il modello è incerto. Poiché il voto registra chi era in disaccordo, quei campi potrebbero andare a una persona mentre il resto procede senza intoppi.`,
+  'brain.kicker':
+    'Idee prese in prestito dalle neuroscienze',
+  'ui.notBuilt':
+    'Nella specifica',
+  'brain.h2':
+    'Anche i cervelli ricavano un pensiero chiaro da parti rumorose.',
+  'brain.lead':
+    'I neuroni sono rumorosi e inaffidabili, eppure un cervello si ferma su un solo pensiero. La specifica di DAOS prende in prestito tre trucchi che lo rendono possibile e ne scarta di proposito un quarto. Nessuno è nel prodotto. Uno è stato misurato.',
+  'brain.from1':
+    '<b>Neuroni che si assestano su uno stato</b> <span class="arrow">→</span> risposte messe in comune',
+  'brain.h3a':
+    'Lascia che le copie si accordino prima di scegliere ogni parola',
+  'brain.p1':
+    'Un gruppo di neuroni che riceve un segnale rumoroso cade in un unico schema stabile e ripulisce il rumore lungo la strada. La specifica applica la stessa idea alle copie di un modello: a ogni parola, si combina quanto ogni copia ritiene probabile ciascuna opzione, si sceglie una parola insieme e si va avanti in sincrono.',
+  'brain.c1':
+    'Non realizzato. Richiede che ogni copia giri dentro un unico programma, parola per parola, cosa che i server di modelli più diffusi non permettono.',
+  'brain.from2':
+    '<b>Molti neuroni che votano</b> <span class="arrow">→</span> un limite del voto',
+  'brain.h3b':
+    'Votare aiuta solo se chi vota sbaglia in modi diversi',
+  'brain.p2':
+    'Sommare molti neuroni cancella il rumore, ma solo se ciascuno fa i propri errori casuali. Se sbagliano insieme, aggiungerne altri non serve. Le copie compresse di uno stesso modello sbagliano insieme, quindi aggiungerne smette presto di servire. La soluzione sono copie fatte in modi davvero diversi.',
+  'brain.c2':
+    `Misurato: due delle nostre copie sbagliavano insieme quasi sempre (correlazione fino a 0.978). Per questo il voto qui sopra non ha migliorato l'accuratezza.`,
+  'brain.from3':
+    '<b>Aspettativa</b> <span class="arrow">→</span> una preferenza dichiarata',
+  'brain.h3c':
+    'Risolvi un quasi-pareggio con una preferenza dichiarata',
+  'brain.p3':
+    `Di fronte a qualcosa di ambiguo, il cervello propende per ciò che si aspetta. La specifica risolve allo stesso modo un quasi-pareggio tra due parole: lo schema può dire quale valore preferire. Di proposito <em>non</em> usa “quello che abbiamo risposto l'ultima volta in un caso simile”, perché “simile” è vago e riporterebbe dentro la casualità.`,
+  'brain.c3':
+    'Non realizzato. Senza una preferenza dichiarata, la specifica ripiega su una regola fissa.',
+  'brain.from4':
+    'Quella che abbiamo scartato: <b>inventarsi una storia</b>',
+  'brain.h3d':
+    'La parte della mente che inventa un motivo',
+  'brain.p4':
+    'Gli studi sui pazienti con cervello diviso mostrano la mente che inventa a posteriori una spiegazione convincente, e ci crede. È esattamente ciò che DAOS non deve fare: dare la stessa risposta ogni volta non rende la risposta affidabile.',
+  'brain.tagline':
+    'Scartata di proposito: un sistema che inventa la propria certezza è il difetto, non la funzione.',
+  'brain.foot':
+    'Queste idee vengono dalla specifica di DAOS. Mostrano dove il progetto potrebbe andare, non funzioni che puoi attivare oggi.',
   'close.kicker':
-    'In sintesi',
+    'In breve',
   'close.h2':
-    'Se la varianza ti sta costando, DAOS è il layer che la rimuove.',
+    'Se ottenere ogni volta una risposta diversa ti costa, DAOS lo elimina.',
   'close.lead':
-    'Testabilità, auditabilità, correttezza della cache, un esperimento pulito — quando “una risposta diversa ogni volta” è il problema, la modalità pinned ti consegna una funzione pura, con le ricevute per provarlo. Non una temperatura più bassa. Un punto fisso.',
+    'Test che hanno senso, audit a cui sai rispondere, bug che puoi riprodurre, confronti di cui ti puoi fidare. DAOS restituisce la stessa risposta per la stessa richiesta, con un registro firmato che lo prova.',
   'footer.guarantee':
-    'Garanzia a livello semantico · SPEC v1.6',
+    'Stessa richiesta, stessa risposta · specifica v1.6',
 };
 
 const es: DaosDict = {
   'hero.kicker':
-    'El determinismo como garantía en tiempo de ejecución',
+    'La misma pregunta, la misma respuesta',
   'hero.h1':
-    'La misma entrada.<br>La salida <span class="id">idéntica byte a byte</span>.<br>Cada vez.',
+    'Pregunta una vez.<br>Obtén la <span class="id">misma respuesta</span><br>cada vez después.',
   'hero.lede':
-    'Un LLM te da una respuesta distinta en cada llamada. DAOS convierte esa llamada en una función pura: una entrada, un contexto y un esquema se resuelven <em>una vez</em> en un objeto de salida canónico, que luego se fija, se firma y se reproduce byte a byte — a lo largo del tiempo y en cada máquina que ejecuta la misma variante y el mismo backend designados.',
+    'Hazle la misma pregunta dos veces a un modelo de IA y puedes recibir dos respuestas distintas. Eso rompe pruebas, auditorías e informes de errores. DAOS consulta al modelo <em>una sola vez</em>, firma la respuesta para que cualquier cambio posterior se detecte, y devuelve exactamente esa respuesta, byte a byte, cada vez que llega la misma petición, sin volver a llamar al modelo.',
   'proof.cap1':
-    'Modo pinned',
+    'Un ticket de soporte',
   'proof.cap2':
-    'el producto lanzado',
+    'lo que existe hoy',
   'proof.resolve':
-    'Resuelve una vez',
+    'La primera vez',
   'proof.cost1':
-    '1 inferencia',
+    '1 llamada al modelo',
   'proof.ticket':
-    '“…cobrados $49.99 dos veces este mes…”',
+    '“…me han cobrado $49.99 dos veces este mes…”',
   'proof.step':
-    'resuelve · greedy → canonicaliza → firma en caché',
+    'el modelo responde → DAOS ordena la respuesta → la firma y la guarda',
   'proof.reproduce':
-    'Reproduce esa ejecución',
+    'Cada vez después',
   'proof.cost0':
-    '0 inferencias',
+    '0 llamadas al modelo',
   'proof.when':
-    'una prueba golden en CI · un auditor · una segunda máquina',
+    'una ejecución de pruebas · un auditor · un informe de error semanas después',
   'proof.replay':
     '—&nbsp;los mismos bytes&nbsp;—',
   'proof.subnote':
-    'No esperas a que el mismo ticket llegue dos veces — <b>reproduces la ejecución que te importa</b>, byte a byte, desde su entrada registrada. El determinismo es una propiedad de la <b>función</b>, no una apuesta al tráfico repetido. Reproducir en un proceso nuevo está <b>medido</b> (§&thinsp;04); una segunda máquina se cumple <b>por diseño</b>, dentro de una misma cuantización y un mismo backend.',
+    'No hace falta esperar a que llegue otra vez el mismo ticket: puedes <b>repetir cualquier ejecución registrada</b> y obtener exactamente lo que dijo el modelo en su momento. Repetirla en un proceso nuevo está <b>medido</b>. En una segunda máquina debería cumplirse <b>por diseño</b>, siempre que esa máquina use el mismo archivo de modelo y el mismo software de ejecución.',
   'proof.footK':
     'Medido',
   'proof.footV':
-    '20 ejecuciones greedy → 1 salida · reproducido en un proceso nuevo, 0 inferencias',
+    '20 ejecuciones → 1 respuesta · repetida en un proceso nuevo con 0 llamadas al modelo',
   'hero.fnComment':
-    '// una función pura en el nivel semántico — una variante designada, resuelta una vez, reproducida byte a byte',
+    '// misma petición de entrada, misma respuesta de salida: un modelo elegido, consultado una vez y luego repetido',
   'nc.p':
-    '<span class="sl-callout__title">Esto no es una caché</span>Memoizar un modelo no determinista es un <b>bug de corrección</b>: sirve una respuesta que el modelo ya no daría, y no puede saber que está mal. DAOS se gana el derecho a cachear <b>primero</b> — el hash del modelo y la configuración de carga entran en la clave, así un cambio de modelo <b>invalida</b> en lugar de servir datos obsoletos, y un replay que no coincide con el log firmado se marca como <b>bug detectado</b>. El almacén está aguas abajo de la garantía, no es el producto.',
-  's01.kicker':
-    'Ya lo intentaste',
-  's01.h2':
-    '<span class="k">temperature=0</span> no es determinismo. Es una forma más silenciosa de suerte.',
-  's01.tag1':
-    'La perilla de configuración',
-  's01.h3a':
-    'Bajar el sampler',
-  's01.p1':
-    'Pon <span class="mono">temperature=0</span>, <span class="mono">top_k=1</span>, <span class="mono">top_p</span> bajo, y la <em>regla de selección</em> se vuelve determinista: toma siempre el token argmax. En nuestras propias ejecuciones incluso se sostuvo — 20 generaciones greedy secuenciales, cuatro semillas, una bajo un hilo en competencia en la misma máquina: <b class="ink">una única salida distinta</b>.',
-  's01.note1':
-    'Así que en una variante, un backend, una máquina, greedy puede ser byte-estable. Ahí es donde la mayoría de los equipos se detiene — y donde la garantía que creen tener no existe.',
-  's01.tag2':
+    '<span class="sl-callout__title">¿No es solo una caché?</span>No, y una caché simple sería arriesgada. Si el modelo cambia, una caché sigue sirviendo una respuesta que el modelo ya no daría, y nada te avisa. DAOS ata cada respuesta guardada al modelo exacto que la produjo, así que <b>cambiar de modelo significa que las respuestas antiguas no se usan</b>. Cada respuesta va firmada, así que <b>una respuesta editada se detecta</b>. Y si repetir una ejecución da algo distinto de lo que dice el registro, DAOS lo <b>informa como un error</b>.',
+  'why.kicker':
+    'Quizá ya lo hayas probado',
+  'why.h2':
+    '<span class="k">temperature=0</span> hace que un modelo sea menos aleatorio. No lo hace repetible.',
+  'why.tag1':
+    'Lo que suele probarse',
+  'why.h3a':
+    'Bajar la aleatoriedad',
+  'why.p1':
+    `Pon <span class="mono">temperature=0</span> y el modelo siempre elige la palabra siguiente más probable. En nuestras propias pruebas funcionó: 20 ejecuciones seguidas, con cuatro semillas distintas y, en una de ellas, otro trabajo compitiendo por la máquina, dieron <b class="ink">una única respuesta</b>.`,
+  'why.note1':
+    'Así que con un modelo en una máquina puede funcionar. La mayoría de los equipos se queda ahí y da por hecha una garantía que en realidad no tiene.',
+  'why.tag2':
     'Por qué no basta',
-  's01.h3b':
-    'Greedy quita una capa de ruido de seis',
-  's01.p2':
-    'El argmax es determinista, pero los <em>puntajes sobre los que elige</em> no son estables en los ejes que importan. Cinco capas sobreviven a <span class="mono">temperature=0</span> intactas:',
-  's01.li1':
-    'entropía de muestreo — la única capa que quita una temperatura baja',
-  's01.li2':
-    'no-asociatividad en punto flotante en las reducciones de kernels de GPU',
-  's01.li3':
-    'el continuous batching cambiando la numérica de tu llamada',
-  's01.li4':
-    'cuantización — un ancho de bits distinto calcula una función distinta <span class="tie">— medido: Q4 se separó de FP16 en 9 de 40 campos (§04)</span>',
-  's01.li5':
-    'deriva silenciosa del modelo en un endpoint alojado',
-  's01.li6':
-    'entropía a nivel de agente — orden de herramientas, timestamps, retrieval',
-  's01.punch':
-    '<span class="mono">temperature=0</span> recalcula la respuesta y espera que coincida. En un token de bajo margen el argmax se voltea — y no recibes ninguna señal de que ocurrió, ni forma de probar que la respuesta de hoy es igual a la de ayer. <b>DAOS resuelve una vez, canonicaliza el objeto, lo firma en una caché direccionable por contenido y lo reproduce — byte a byte, 0 inferencias.</b> El modo pinned <em>es</em> decodificación greedy, más las tres cosas que una perilla no puede darte: una forma canónica, una entrada fijada y un recibo.',
-  's02.h2':
-    'El determinismo movido fuera del flujo de tokens',
-  's02.lead':
-    'Parte del no-determinismo no se puede eliminar — dos cuantizaciones de un mismo modelo calculan funciones distintas y nunca emitirán los mismos tokens. Así que DAOS no pelea por tokens idénticos. Mueve el contrato de determinismo a un <b class="ink">objeto de salida canonicalizado y restringido por esquema</b>.',
-  's02.note1':
-    'El producto lanzado es el <b class="ink">modo pinned</b>: una variante designada, una generación, canonicalizada y validada contra un esquema acotado, con el hash del modelo de la variante y la configuración de carga fundidos en la clave. El resultado se congela en una caché direccionable por contenido y firmada con HMAC, y se registra en un event log firmado y reproducible.',
-  's02.note2':
-    'La canonicalización es lo que hace que los bytes almacenados estén bien definidos: una generación cruda de <span class="mono">confidence: 0.8500000119</span> se representa como <span class="mono ink-2">0.85</span> — la forma numérica es <b class="ink">propiedad del esquema</b> (<span class="mono">multipleOf&nbsp;0.05</span>), que prevalece sobre la forma más corta del serializador — luego unicode NFC, luego claves ordenadas según JCS.',
-  's02.note3':
-    'La garantía es un punto fijo sobre el que puedes construir — la misma entrada se resuelve al mismo objeto de salida, y cada repetición es un replay firmado, no una nueva tirada. No “casi siempre igual”. Igual.',
-  's03.kicker':
-    'Diseño informado por la neurociencia · revisión spec v1.4',
-  'ui.designChoice':
-    'Decisión de diseño',
-  's03.h2':
-    'El problema del sustrato estocástico es viejo. Los cerebros lo resolvieron primero.',
-  's03.lead':
-    'Un sistema neuronal biológico sostiene un pensamiento coherente sobre hardware ruidoso, con spikes, poco fiable. La capa de resolución de DAOS toma prestados tres mecanismos que lo hacen posible — y descarta a propósito el que vuelve a los cerebros testigos poco fiables.',
-  's03.from1':
-    '<b>Dinámica de atractores</b> <span class="arrow">→</span> decodificación agrupada',
-  's03.h3a':
-    'Deja asentar la población, luego léela',
-  's03.p1':
-    'Una población cortical alimentada con entrada ruidosa cae hacia uno de unos pocos estados estables, limpiando el ruido en la bajada. La estrategia logit-pool de DAOS hace lo mismo: promedia las <em>distribuciones</em> de probabilidad de las variantes en cada paso y asigna el token agrupado a todas al unísono — resolviendo el ensemble en una elección discreta <em>antes</em> de colapsar al argmax, no después.',
-  's03.c1':
-    'R7.7 · agrega probabilidades, nunca logits crudos · requiere un tokenizer compartido (solo cross-quant) y acceso in-process a nivel de paso — excluye vLLM / LM Studio / TGI.',
-  's03.from2':
-    '<b>Codificación de población</b> <span class="arrow">→</span> el techo de la correlación',
-  's03.h3b':
-    'El promedio solo escala con error independiente',
-  's03.p2':
-    'Agrupar N neuronas suprime el ruido como √N — pero solo cuando sus errores son independientes. El ruido correlacionado impone un techo duro. El mismo teorema acota un quórum: el error de cuantización es <em>sistemático</em>, así que apilar más variantes de ancho de bits llega pronto a una meseta. DAOS declara este límite en lugar de ocultarlo — decorrela con <em>métodos</em> de cuantización distintos, no solo añadas más.',
-  's03.c2':
-    'R7.8 · un límite expuesto, no una función reclamada · la misma correlación limitante de información estudiada en la codificación de población.',
-  's03.from3':
-    '<b>Codificación predictiva</b> <span class="arrow">→</span> un prior declarado',
-  's03.h3c':
-    'Pondera la ambigüedad hacia un prior',
-  's03.p3':
-    'El cerebro estabiliza un percepto ambiguo ponderándolo hacia un prior. DAOS rompe un empate del mismo modo, con un prior declarado por el esquema — y <em>rechazó</em> deliberadamente el seductor “prior = respuesta pasada más similar”, porque una función de similitud vuelve a colar el no-determinismo.',
-  's03.c3':
-    'R3.3(a) · permitido solo como función pura y versionada del estado registrado · se mantiene el respaldo por token-ID.',
-  's03.from4':
-    'La que descartamos: <b>confabulación</b>',
-  's03.h3d':
-    'El intérprete que inventa coherencia',
-  's03.p4':
-    'El trabajo con cerebro dividido muestra a la mente fabricando una historia coherente <em>después</em> del hecho — y creyéndosela. Esa coherencia post-hoc es justamente el anti-objetivo de DAOS: reproducible no es lo mismo que fiable. El mismo mecanismo que hace que un cerebro se sienta seguro es el que un motor de determinismo tiene que rechazar.',
-  's03.tagline':
-    'Rechazado en revisión · una máquina que fabrica su propia certeza es el modo de fallo, no la función.',
-  's03.foot':
-    'Logit-pool (R7.7) es una estrategia de resolución a nivel de spec para la investigación de Track&nbsp;B, no un interruptor que un consumidor activa hoy — la misma honestidad que gobierna el resto de esta página.',
-  's04.kicker':
-    'Medido en modelos reales, no solo diseñado',
-  's04.h2':
-    'Llama-3.2 en tres anchos de bits, en un Apple M3 Pro.',
-  's04.mlabel1':
-    'El producto · modo pinned',
-  's04.lab1':
-    'veinte generaciones greedy secuenciales de la variante pinned — una única salida distinta, estable bajo cuatro semillas y un hilo en competencia',
-  's04.lab2':
-    'llamadas de inferencia para reproducir una ejecución registrada — reproducida byte a byte en un proceso nuevo con una nueva clave de firma',
-  's04.mlabel2':
-    'La prueba de estrés <span class="sl-tag">Track&nbsp;B · research</span>',
-  's04.lab3':
-    'objeto canónico reconciliado a partir de tres variantes de cuantización de un mismo modelo — un listón más alto que el determinismo de variante única',
-  's04.lab4':
-    'tasa de minoría solitaria de Q4; FP16 nunca fue la minoría solitaria — el disenso es monótono en la precisión',
-  's04.capA':
-    'Resolución cross-quant',
-  's04.capB':
-    '1 modelo base · 3 anchos de bits',
-  's04.leaf':
-    'Votando la hoja <b>priority</b>',
-  's04.lone':
-    '← minoría solitaria',
-  's04.collapse':
-    'mayoría campo por campo',
-  's04.subnote':
-    'El disenso de Q4 se registra y el campo se marca <b>frágil</b>. La regla del árbitro (gana la mayor precisión) solo interviene en empates <em>sin mayoría</em> — aquí la mayoría 2–1 ya decide.',
-  's04.foot':
-    'De 40 campos resueltos, 31 fueron unánimes y 9 se dividieron 2–1 en 6 de las 10 tareas — donde la identidad byte fue producida por la resolución, no por tres variantes que por casualidad coinciden. El quórum compró <em>determinismo</em>, no exactitud: cross-quant no hace ninguna afirmación de exactitud, y el core ya no lo lanza como superficie de producto.',
-  's05.h2':
-    'Diez lugares donde se paga solo',
-  's05.h1':
-    'Hacer testeables las features de LLM, punto',
-  'ui.howItWorks':
+  'why.h3b':
+    'La aleatoriedad es solo una de las seis cosas que cambian la respuesta',
+  'why.p2':
+    'El modelo sigue eligiendo su palabra más probable, pero <em>cuál</em> cuenta como la más probable puede cambiar por motivos que nada tienen que ver con la temperatura. Cinco de ellos no los toca <span class="mono">temperature=0</span>:',
+  'why.li1':
+    'el muestreo aleatorio: el único que una temperatura baja elimina',
+  'why.li2':
+    'pequeñas diferencias de redondeo en cómo una GPU suma los números',
+  'why.li3':
+    'el servidor que procesa tu petición junto con las de otras personas',
+  'why.li4':
+    `una copia más pequeña y comprimida del modelo, que en realidad es un modelo ligeramente distinto <span class="tie">(ver §06)</span>`,
+  'why.li5':
+    'un modelo alojado que se actualiza sin avisar',
+  'why.li6':
+    'todo lo demás en un agente: el orden en que se ejecutan las herramientas, las marcas de hora, los resultados de búsqueda',
+  'why.punch':
+    '<span class="mono">temperature=0</span> vuelve a preguntar al modelo y confía en que la respuesta coincida. Cuando dos palabras son casi igual de probables, puede inclinarse hacia la otra, y nada te avisa. <b>DAOS pregunta una vez, guarda esa respuesta y la devuelve cada vez después, byte a byte, sin llamar al modelo.</b> Usa el mismo ajuste de poca aleatoriedad y añade lo que un ajuste no puede darte: una forma fija para la respuesta, una copia guardada y un registro firmado.',
+  'how.h2':
     'Cómo funciona',
-  's05.p1':
-    'No puedes aseverar contra un blanco en movimiento, así que los equipos dejan de escribir los tests. Con una salida fija, un golden test vuelve a significar algo: un cambio de prompt o de modelo se convierte en un diff que revisas, no en ruido que aprendes a ignorar.',
-  's05.h2c':
-    'Auditoría y cumplimiento en dominios regulados',
-  's05.p2':
-    'Finanzas, seguros, salud: “¿por qué produjo esto, y puedes reproducirlo?” — a veces años después, ante un regulador. DAOS registra cada resolución en un log firmado y de solo anexado, y reproduce la ejecución exacta a demanda. A prueba de manipulación por firma; reproducible por construcción.',
-  's05.h3':
-    'Migrar cuantización o backend',
-  's05.p3':
-    'Pasa al modelo Q4 más barato o a un nuevo servidor de inferencia sin un cambio silencioso en el comportamiento. El quórum cross-quant de Track B resolvió FP16, Q8 y Q4 a un único objeto canónico — evidencia de que el nivel semántico sobrevive a un cambio de ancho de bits. Te dice que una migración es <em>segura de probar</em>, demostrable con un replay antes/después; es un resultado de investigación, no un cambio de producto. En la práctica: un equipo de plataforma fija Q4 por coste, luego reejecuta los golden inputs del trimestre pasado para probar que el cambio no alteró nada antes del despliegue.',
-  's05.h4':
-    'Caché determinista y control de coste k×',
-  's05.p4':
-    'La primera resolución escribe la respuesta una vez; cada solicitud semánticamente idéntica después de ella es un cache hit que salta la inferencia. La clave de caché es la forma canónica de la entrada, así <span class="mono">0.9</span> y <span class="mono">0.90</span> o claves reordenadas colapsan a una sola entrada. El determinismo es lo que hace que la reutilización sea <em>correcta</em>.',
-  's05.h5':
-    'Contratos estables entre las etapas de una pipeline',
-  's05.p5':
-    'En un agente multi-paso, cada etapa consume la salida de la anterior; el ruido aguas arriba se propaga en cascada y los fallos dejan de reproducirse. Un contrato con forma de esquema en cada frontera hace toda la pipeline reproducible y fija un fallo a la etapa que lo causó. En la práctica: una pipeline documental nocturna reejecuta extract → classify → route sobre las mismas entradas, así que una regresión es un diff revisable en una etapa, no un misterio que surgió tres etapas después.',
-  's05.h6':
-    'El desacuerdo como señal de confianza',
-  's05.p6':
-    'Cuando FP16, Q8 y Q4 se dividen en un campo, ese campo es frágil — de bajo margen, del tipo que se voltea bajo batching o una actualización de modelo. El quórum registra el voto campo por campo y atribuye cada disenso a su variante, así los campos en disputa van a revisión y los unánimes pasan intactos. Una capacidad de investigación, no parte del producto pinned. En la práctica: un extractor de siniestros manda a una persona solo los campos en los que las tres variantes se dividieron, y auto-aprueba los unánimes.',
-  's05.h7':
-    'Extracción estructurada en la que puedes confiar a nivel de esquema',
-  's05.p7':
-    'Facturas, contratos, documento-a-JSON: salida que cumple cada vez, el mismo documento que produce la misma fila. La generación está restringida por gramática, validada, luego reparada o <em>falla en voz alta</em> — nunca basura de apariencia plausible pasada aguas abajo.',
-  's05.h8':
-    'A/B testing con una señal limpia',
-  's05.p8':
-    'Para saber si el prompt v2 le gana a v1, debes eliminar la varianza de salida o no puedes separar una mejora real de la suerte del muestreo. DAOS la quita, así cualquier cambio en la salida es atribuible al cambio que hiciste — el experimento mide lo que estás probando. En la práctica: el prompt v2 sale detrás de un flag y reejecutas el mismo set de eval — el delta de salida es el prompt, no el sampler.',
-  's05.h9':
-    'Investigación, benchmarks y evals reproducibles',
-  's05.p9':
-    'Los resultados solo son creíbles cuando otra persona reejecuta tu eval publicada en su propia máquina. <b>Medido:</b> reejecutar la misma tripleta en un proceso nuevo con una nueva clave de firma devolvió los mismos bytes, 0 inferencias — la eval mide el modelo, no el piso de ruido. Extender eso a una segunda máquina es el <b>alcance de diseño</b>: la identidad byte se cumple entre máquinas que ejecutan una misma cuantización y un mismo backend, nunca a través de un cambio de backend.',
-  's05.h10':
-    'Forense de incidentes sobre el comportamiento en producción',
-  's05.p10':
-    'Cuando sale una salida mala, el primer paso — reproducirla — suele ser el más difícil, porque las condiciones ya no están. DAOS reproduce la ejecución exacta desde su log firmado con cero inferencias. Y si el replay no coincide, esa divergencia se marca ella misma como un bug detectado. En la práctica: un cliente disputa una respuesta de hace tres semanas; reproduces la ejecución registrada y ves los bytes exactos que vio, no una aproximación.',
-  's06.h2':
-    'Dónde DAOS no es la respuesta',
-  's06.intro':
-    'La honestidad es parte del pitch — la disciplina que produce la garantía produce un límite claro a su alrededor.',
-  's06.h3a':
-    '<span class="x">×</span> Generación abierta o creativa',
-  's06.pa':
-    'DAOS restringe la salida a un esquema y premia el acuerdo. Si quieres variedad, es la capa equivocada.',
-  's06.h3b':
-    '<span class="x">×</span> Corrección',
-  's06.pb':
-    'DAOS hace la salida <em>estable</em>, no <em>verdadera</em>. Una respuesta equivocada se fija tan fiablemente como una correcta — el determinismo es ortogonal a la exactitud, y el producto solo reclama lo primero.',
-  's06.h3c':
-    '<span class="x">×</span> Tokens idénticos bit a bit entre cuantizaciones',
-  's06.pc':
-    'Matemáticamente imposible — la cuantización cambia la función calculada. DAOS garantiza el nivel semántico y lo dice, en lugar de reclamar lo imposible.',
-  's06.h3d':
-    '<span class="x">×</span> Quórum cross-quant en producción',
-  's06.pd':
-    'Es investigación de Track B sin ninguna afirmación de exactitud; el core lanza <span class="mono">UnsupportedMode</span>. El producto lanzado es el modo pinned — una variante designada.',
-  's06.h3e':
-    '<span class="x">×</span> Paridad de latencia con una sola llamada',
-  's06.pe':
-    'La resolución cuesta inferencia en la primera llamada, luego cachea. Compras el determinismo con cómputo: un coste real en frío, una lookup en caliente.',
-  's06.h3f':
-    '<span class="x">×</span> Detectar que un modelo derivó',
-  's06.pf':
-    'El replay prueba la pipeline, no el modelo — consume la salida de ayer, así que un modelo que cambió aún reproduce en verde. Eso es detección de deriva: en la hoja de ruta.',
+  'how.lead':
+    'No se puede impedir que un modelo varíe, así que DAOS no lo intenta. Consulta una vez a <b class="ink">un modelo elegido</b> y convierte esa respuesta en la oficial.',
+  'how.note1':
+    '<b class="ink">1. Pregunta una vez.</b> Envías la entrada junto con un <em>esquema</em>: la forma exacta que debe tener la respuesta, es decir, sus campos, los valores permitidos y la precisión de los números. DAOS consulta al modelo y comprueba la respuesta contra el esquema. Una respuesta que no encaja es un error, nunca se da por buena.',
+  'how.note2':
+    '<b class="ink">2. Ordénala.</b> Dos respuestas que significan lo mismo deben ser los mismos bytes. Así, un <span class="mono">0.8500000119</span> en bruto pasa a <span class="mono ink-2">0.85</span> (el esquema fija la precisión), el texto se normaliza y los campos se colocan en un orden fijo.',
+  'how.note3':
+    `<b class="ink">3. Firma, guarda, repite.</b> La respuesta ordenada se firma y se guarda. A partir de ahí, la misma petición recibe la respuesta guardada, sin llamar al modelo. Activa el registro y cada ejecución queda además anotada en un registro firmado, para que puedas repetirla más tarde.`,
+  'measured.kicker':
+    'Medido, no solo prometido',
+  'measured.h2':
+    'Probado con un modelo real: Llama-3.2, en un Apple M3 Pro.',
+  'measured.label':
+    'El producto',
+  'measured.n1':
+    `ejecuciones seguidas de la misma petición dieron una única respuesta, con cuatro semillas distintas, una con otro trabajo compitiendo por la máquina`,
+  'measured.n2':
+    'llamadas al modelo para repetir una ejecución registrada, byte a byte, en un proceso nuevo con una clave de firma nueva',
+  'uses.h2':
+    'Qué puedes hacer con él',
+  'ui.realOutput':
+    'Salida real',
+  'uses.h1':
+    'Escribe pruebas con sentido para funciones de IA',
+  'uses.p1':
+    'No se puede probar contra una respuesta que no deja de cambiar, así que los equipos dejan de escribir pruebas. Con DAOS guardas la respuesta a una entrada conocida como resultado esperado, y la prueba la comprueba en cada build. Cuando alguien cambia el prompt o el modelo, la prueba muestra exactamente qué cambió: una diferencia que revisar, no ruido que ignorar.',
+  'uses.h2c':
+    'Enseña a un auditor exactamente lo que dijo el modelo',
+  'uses.p2':
+    `Finanzas, seguros, sanidad: «¿por qué decidió esto y puede mostrarlo otra vez?», a veces años después. Con el registro activado, cada respuesta va a un registro firmado que no se puede editar sin que se detecte, y DAOS repite esa ejecución exacta cuando se le pide.`,
+  'uses.h3':
+    'Reproduce una mala respuesta que llegó a producción',
+  'uses.p3':
+    'Cuando una mala respuesta llega a un cliente, lo más difícil es reproducirla, porque las condiciones ya no existen. Un cliente discute una respuesta de hace tres semanas: repites la ejecución registrada y ves los bytes exactos que vio él, no una aproximación. Si la repetición no coincide con el registro, esa diferencia se informa como un error.',
+  'uses.h4':
+    'Saca datos de documentos con una forma fija',
+  'uses.p4':
+    'Facturas, contratos, tickets de soporte a JSON. Cada respuesta se comprueba contra el esquema que defines, y la que no encaja falla con el motivo exacto, en lugar de que basura de aspecto plausible llegue al paso siguiente. El mismo documento siempre da la misma fila.',
+  'uses.h5':
+    'Deja de pagar dos veces por la misma respuesta',
+  'uses.p5':
+    'La primera petición paga una llamada al modelo. Cada petición posterior que significa lo mismo se sirve desde el almacén: <span class="mono">0.9</span> y <span class="mono">0.90</span>, o los mismos campos en otro orden, cuentan como una sola petición. Como el modelo forma parte de la clave, cambiar de modelo nunca sirve una respuesta antigua.',
+  'uses.h6':
+    'Compara dos prompts con justicia',
+  'uses.p6':
+    'Para saber si el prompt v2 supera al v1 hay que quitar la variación aleatoria, o no distinguirás una mejora real de la suerte. Ejecuta el mismo conjunto de pruebas con cada prompt: sin aleatoriedad, cualquier diferencia en la salida viene del prompt.',
+  'limits.h2':
+    'Lo que DAOS no hace',
+  'limits.intro':
+    'La misma disciplina que crea la garantía también le marca un límite claro.',
+  'limits.h3a':
+    '<span class="x">×</span> Escritura creativa o abierta',
+  'limits.pa':
+    'DAOS obliga a las respuestas a tener una forma fija y las mantiene iguales. Si quieres variedad, es la herramienta equivocada.',
+  'limits.h3b':
+    '<span class="x">×</span> Hacer que las respuestas sean correctas',
+  'limits.pb':
+    'DAOS hace las respuestas <em>estables</em>, no <em>acertadas</em>. Una respuesta equivocada se repite con la misma fidelidad que una correcta.',
+  'limits.h3c':
+    '<span class="x">×</span> Una primera llamada gratis',
+  'limits.pc':
+    'La primera vez, el modelo tiene que responder igualmente, a coste y velocidad completos. Solo las repeticiones son instantáneas y gratuitas.',
+  'limits.h3d':
+    '<span class="x">×</span> Darse cuenta de que un modelo cambió',
+  'limits.pd':
+    'Repetir una ejecución reutiliza la respuesta guardada, así que un modelo que ahora responde distinto se repite sin problema. Detectarlo está previsto, no construido.',
+  'limits.h3e':
+    `<span class="x">×</span> La misma respuesta tras cambiar el modelo o cómo se ejecuta`,
+  'limits.pe':
+    `La garantía cubre un archivo de modelo cargado con los mismos ajustes. Otro archivo u otros ajustes de carga cuentan como un modelo nuevo, así que DAOS vuelve a preguntar, y la nueva respuesta puede ser distinta. Mover el mismo modelo a otro software de ejecución no está cubierto.`,
+  'limits.h3f':
+    '<span class="x">×</span> Repetir llamadas que nunca se registraron',
+  'limits.pf':
+    'Solo se pueden repetir las ejecuciones escritas en el registro firmado. Una llamada hecha sin registro recibe la respuesta guardada, pero no deja nada que repetir.',
+  'research.kicker':
+    'Investigación · no está en el producto',
+  'research.h2':
+    'Lo que seguimos explorando',
+  'research.intro':
+    'Todo lo anterior existe hoy. Esta sección es distinta: experimentos e ideas de diseño de la especificación de DAOS que <b>no</b> están en el producto. Están aquí porque le dieron forma, y porque algunas no funcionaron.',
+  'research.qh3':
+    '¿Pueden tres copias de un mismo modelo votar la respuesta?',
+  'research.qp':
+    'Ejecutamos un modelo en tres tamaños, a precisión completa y comprimido a 8 y a 4 bits, y los hicimos votar campo por campo. Donde discrepaban ganaba la mayoría, así que las tres acababan siempre con la misma respuesta final.',
+  'research.n1':
+    'respuesta final de tres copias comprimidas de distinta forma de un mismo modelo, siempre',
+  'research.n2':
+    'de los campos en que la copia de 4 bits fue la única en discrepar; la de precisión completa, nunca',
+  'research.capA':
+    'Tres copias votan',
+  'research.capB':
+    '1 modelo · 3 tamaños',
+  'research.leaf':
+    'Votación del campo <b>priority</b>',
+  'research.lone':
+    '← la única que discrepa',
+  'research.collapse':
+    'gana la mayoría',
+  'research.subnote':
+    `La discrepancia de la copia de 4 bits queda registrada y el campo se marca como <b>frágil</b>. Existe una regla de desempate (gana la copia más precisa) para cuando no hay mayoría; aquí ya decide la mayoría de dos a uno.`,
+  'research.foot':
+    'De 40 campos, 31 recibieron el mismo valor de las tres copias y 9 se dividieron dos contra uno, en 6 de las 10 tareas. Lo que la votación <em>no</em> hizo fue volver las respuestas más precisas: en 600 tareas con respuesta conocida no fue mejor que la copia de precisión completa sola. Las copias tienden a cometer los mismos errores, así que la mayoría los repite. Por eso la votación no está en el producto.',
+  'research.i1h':
+    'Cambiar a una copia más barata del modelo, con seguridad',
+  'research.i1p':
+    'Si una copia de 4 bits da las mismas respuestas finales que el modelo completo, podrías cambiarte a ella para ahorrar, y repetir las entradas del trimestre pasado para demostrar que nada cambió. El experimento sugiere que puede funcionar. No es una función del producto.',
+  'research.i2h':
+    'El desacuerdo como luz de aviso',
+  'research.i2p':
+    'Un campo en el que las copias discrepan es un campo del que el modelo no está seguro. Como la votación registra quién discrepó, esos campos podrían pasar a una persona mientras el resto sigue sin tocarse.',
+  'brain.kicker':
+    'Ideas tomadas de la neurociencia',
+  'ui.notBuilt':
+    'En la especificación',
+  'brain.h2':
+    'Los cerebros también sacan un pensamiento claro de piezas ruidosas.',
+  'brain.lead':
+    'Las neuronas son ruidosas y poco fiables, y aun así un cerebro se decide por un solo pensamiento. La especificación de DAOS toma prestados tres trucos que lo hacen posible y rechaza a propósito un cuarto. Ninguno está en el producto. Uno se ha medido.',
+  'brain.from1':
+    '<b>Neuronas que se asientan en un estado</b> <span class="arrow">→</span> respuestas combinadas',
+  'brain.h3a':
+    'Deja que las copias se pongan de acuerdo antes de elegir cada palabra',
+  'brain.p1':
+    'Un grupo de neuronas que recibe una señal ruidosa cae en un único patrón estable y limpia el ruido por el camino. La especificación aplica la misma idea a las copias de un modelo: en cada palabra, se combina lo probable que cada copia considera cada opción, se elige una palabra entre todas y se avanza al unísono.',
+  'brain.c1':
+    'No construido. Exige que todas las copias se ejecuten dentro de un solo programa, palabra a palabra, algo que los servidores de modelos habituales no permiten.',
+  'brain.from2':
+    '<b>Muchas neuronas votando</b> <span class="arrow">→</span> un límite de la votación',
+  'brain.h3b':
+    'Votar solo ayuda si quienes votan se equivocan de formas distintas',
+  'brain.p2':
+    'Sumar muchas neuronas cancela el ruido, pero solo cuando cada una comete sus propios errores aleatorios. Si fallan a la vez, añadir más no ayuda. Las copias comprimidas de un mismo modelo fallan a la vez, así que añadir más deja de servir enseguida. La solución son copias hechas de formas realmente distintas.',
+  'brain.c2':
+    'Medido: dos de nuestras copias se equivocaron juntas casi siempre (correlación de hasta 0.978). Por eso la votación de arriba no mejoró la precisión.',
+  'brain.from3':
+    '<b>Expectativa</b> <span class="arrow">→</span> una preferencia declarada',
+  'brain.h3c':
+    'Rompe un casi empate con una preferencia declarada',
+  'brain.p3':
+    'Ante algo ambiguo, el cerebro se inclina hacia lo que espera. La especificación rompe un casi empate entre dos palabras del mismo modo: el esquema puede indicar qué valor preferir. A propósito <em>no</em> usa «lo que respondimos la última vez ante algo parecido», porque «parecido» es difuso y volvería a meter aleatoriedad.',
+  'brain.c3':
+    'No construido. Sin una preferencia declarada, la especificación recurre a una regla fija.',
+  'brain.from4':
+    'La que rechazamos: <b>inventarse una historia</b>',
+  'brain.h3d':
+    'La parte de la mente que inventa una razón',
+  'brain.p4':
+    'Los estudios con pacientes de cerebro dividido muestran a la mente inventando a posteriori una explicación convincente, y creyéndosela. Eso es exactamente lo que DAOS no debe hacer: dar la misma respuesta siempre no hace que la respuesta sea digna de confianza.',
+  'brain.tagline':
+    'Rechazada a propósito: un sistema que inventa su propia certeza es el fallo, no la función.',
+  'brain.foot':
+    'Estas ideas vienen de la especificación de DAOS. Muestran hacia dónde podría ir el diseño, no funciones que puedas activar hoy.',
   'close.kicker':
-    'La conclusión',
+    'En resumen',
   'close.h2':
-    'Si la varianza te está costando, DAOS es la capa que la elimina.',
+    'Si recibir una respuesta distinta cada vez te está costando caro, DAOS lo elimina.',
   'close.lead':
-    'Testeabilidad, auditabilidad, corrección de caché, un experimento limpio — cuando “una respuesta distinta cada vez” es el problema, el modo pinned te entrega una función pura, con los recibos para probarlo. No una temperatura más baja. Un punto fijo.',
+    'Pruebas con sentido, auditorías a las que puedes responder, errores que puedes reproducir, comparaciones en las que puedes confiar. DAOS devuelve la misma respuesta para la misma petición, con un registro firmado que lo prueba.',
   'footer.guarantee':
-    'Garantía a nivel semántico · SPEC v1.6',
+    'Misma petición, misma respuesta · especificación v1.6',
 };
 
 const de: DaosDict = {
   'hero.kicker':
-    'Determinismus als Laufzeitgarantie',
+    'Gleiche Frage, gleiche Antwort',
   'hero.h1':
-    'Gleiche Eingabe.<br>Die <span class="id">byte-identische</span> Ausgabe.<br>Jedes Mal.',
+    'Frag einmal.<br>Bekomm danach jedes Mal<br>die <span class="id">gleiche Antwort</span>.',
   'hero.lede':
-    'Ein LLM gibt bei jedem Aufruf eine andere Antwort. DAOS macht aus diesem Aufruf eine reine Funktion: Eingabe, Kontext und Schema lösen sich <em>einmal</em> zu einem kanonischen Ausgabeobjekt auf, das dann fixiert, signiert und Byte für Byte reproduziert wird — über die Zeit hinweg und auf jeder Maschine, die dieselbe festgelegte Variante und dasselbe Backend ausführt.',
+    'Stell einem KI-Modell zweimal dieselbe Frage, und du kannst zwei verschiedene Antworten bekommen. Das bringt Tests, Prüfungen und Fehlerberichte durcheinander. DAOS fragt das Modell <em>ein einziges Mal</em>, signiert die Antwort, damit jede spätere Änderung auffällt, und liefert genau diese Antwort, Byte für Byte, immer wieder, wenn dieselbe Anfrage eintrifft, ohne das Modell erneut aufzurufen.',
   'proof.cap1':
-    'Pinned-Modus',
+    'Ein Support-Ticket',
   'proof.cap2':
-    'das ausgelieferte Produkt',
+    'was heute schon läuft',
   'proof.resolve':
-    'Einmal auflösen',
+    'Beim ersten Mal',
   'proof.cost1':
-    '1 Inferenz',
+    '1 Modellaufruf',
   'proof.ticket':
-    '“…$49.99 diesen Monat zweimal berechnet…”',
+    '„…diesen Monat zweimal $49.99 abgebucht…“',
   'proof.step':
-    'auflösen · greedy → kanonisieren → in Cache signieren',
+    'das Modell antwortet → DAOS bringt die Antwort in Form → signiert sie und speichert sie',
   'proof.reproduce':
-    'Diesen Lauf reproduzieren',
+    'Jedes Mal danach',
   'proof.cost0':
-    '0 Inferenz',
+    '0 Modellaufrufe',
   'proof.when':
-    'ein Golden-Test in CI · ein Prüfer · eine zweite Maschine',
+    'ein Testlauf · ein Prüfer · ein Fehlerbericht Wochen später',
   'proof.replay':
     '—&nbsp;dieselben Bytes&nbsp;—',
   'proof.subnote':
-    'Du wartest nicht, bis dasselbe Ticket ein zweites Mal eintrifft — du <b>reproduzierst den Lauf, der dich interessiert</b>, Byte für Byte, aus seiner protokollierten Eingabe. Determinismus ist eine Eigenschaft der <b>Funktion</b>, keine Wette auf wiederkehrenden Traffic. Die Reproduktion in einem frischen Prozess ist <b>gemessen</b> (§&thinsp;04); eine zweite Maschine gilt <b>konstruktionsbedingt</b>, innerhalb einer Quantisierung und eines Backends.',
+    'Du musst nicht warten, bis dasselbe Ticket wieder kommt: Du kannst <b>jeden protokollierten Lauf wiederholen</b> und bekommst genau das zurück, was das Modell damals gesagt hat. Die Wiederholung in einem frischen Prozess ist <b>gemessen</b>. Auf einem zweiten Rechner sollte sie <b>laut Entwurf</b> halten, solange dieser Rechner dieselbe Modelldatei mit derselben Software ausführt.',
   'proof.footK':
     'Gemessen',
   'proof.footV':
-    '20 Greedy-Läufe → 1 Ausgabe · in einem frischen Prozess reproduziert, 0 Inferenz',
+    '20 Läufe → 1 Antwort · in einem frischen Prozess wiederholt, mit 0 Modellaufrufen',
   'hero.fnComment':
-    '// eine reine Funktion auf der semantischen Ebene — eine festgelegte Variante, einmal aufgelöst, Byte für Byte reproduziert',
+    '// gleiche Anfrage rein, gleiche Antwort raus: ein gewähltes Modell, einmal gefragt, dann wiederholt',
   'nc.p':
-    '<span class="sl-callout__title">Das ist kein Cache</span>Ein nicht-deterministisches Modell zu memoisieren ist ein <b>Korrektheits-Bug</b>: Es liefert eine Antwort, die das Modell nicht mehr geben würde, und kann nicht erkennen, dass sie falsch ist. DAOS verdient sich das Recht zu cachen <b>zuerst</b> — Modell-Hash und Ladekonfiguration fließen in den Schlüssel ein, sodass ein Modellwechsel <b>invalidiert</b>, statt Veraltetes zu liefern, und ein Replay, das nicht zum signierten Log passt, wird als <b>erkannter Bug</b> markiert. Der Store liegt hinter der Garantie, er ist nicht das Produkt.',
-  's01.kicker':
-    'Das hast du schon versucht',
-  's01.h2':
-    '<span class="k">temperature=0</span> ist kein Determinismus. Es ist eine leisere Art von Glück.',
-  's01.tag1':
-    'Der Konfigurationsregler',
-  's01.h3a':
-    'Den Sampler herunterdrehen',
-  's01.p1':
-    'Setze <span class="mono">temperature=0</span>, <span class="mono">top_k=1</span>, <span class="mono">top_p</span> niedrig, und die <em>Auswahlregel</em> wird deterministisch: nimm immer das Argmax-Token. In unseren eigenen Läufen hielt es sogar — 20 aufeinanderfolgende Greedy-Generierungen, vier Seeds, einer unter einem konkurrierenden Thread auf derselben Maschine: <b class="ink">eine einzige eindeutige Ausgabe</b>.',
-  's01.note1':
-    'Also auf einer Variante, einem Backend, einer Maschine kann Greedy byte-stabil sein. Genau dort hören die meisten Teams auf — und genau dort existiert die Garantie, die sie zu haben glauben, nicht.',
-  's01.tag2':
+    '<span class="sl-callout__title">Ist das nicht einfach ein Cache?</span>Nein, und ein einfacher Cache wäre riskant. Ändert sich das Modell, liefert ein Cache weiter eine Antwort, die das Modell so nicht mehr geben würde, und nichts warnt dich. DAOS bindet jede gespeicherte Antwort an das genaue Modell, das sie erzeugt hat, also <b>werden beim Wechsel des Modells die alten Antworten nicht benutzt</b>. Jede Antwort ist signiert, also <b>fällt eine veränderte Antwort auf</b>. Und wenn die Wiederholung eines Laufs etwas anderes ergibt als das Protokoll, <b>meldet DAOS das als Fehler</b>.',
+  'why.kicker':
+    'Vielleicht hast du das schon versucht',
+  'why.h2':
+    '<span class="k">temperature=0</span> macht ein Modell weniger zufällig. Es macht es nicht wiederholbar.',
+  'why.tag1':
+    'Was Leute versuchen',
+  'why.h3a':
+    'Den Zufall herunterdrehen',
+  'why.p1':
+    `Setz <span class="mono">temperature=0</span>, und das Modell wählt immer das wahrscheinlichste nächste Wort. In unseren eigenen Tests hat das gehalten: 20 Läufe hintereinander, mit vier verschiedenen Seeds und bei einem davon mit einem zweiten Auftrag auf demselben Rechner, ergaben <b class="ink">eine einzige Antwort</b>.`,
+  'why.note1':
+    'Mit einem Modell auf einem Rechner kann es also funktionieren. Die meisten Teams hören hier auf und glauben an eine Garantie, die sie in Wahrheit nicht haben.',
+  'why.tag2':
     'Warum das nicht reicht',
-  's01.h3b':
-    'Greedy entfernt eine von sechs Rauschschichten',
-  's01.p2':
-    'Das Argmax ist deterministisch, aber die <em>Werte, über die es wählt</em>, sind nicht stabil auf den Achsen, die zählen. Fünf Schichten überstehen <span class="mono">temperature=0</span> unberührt:',
-  's01.li1':
-    'Sampling-Entropie — die einzige Schicht, die eine niedrige Temperatur entfernt',
-  's01.li2':
-    'Gleitkomma-Nichtassoziativität in GPU-Kernel-Reduktionen',
-  's01.li3':
-    'Continuous Batching, das die Numerik deines Aufrufs verändert',
-  's01.li4':
-    'Quantisierung — eine andere Bitbreite berechnet eine andere Funktion <span class="tie">— gemessen: Q4 wich von FP16 bei 9 von 40 Feldern ab (§04)</span>',
-  's01.li5':
-    'stilles Modell-Drift auf einem gehosteten Endpoint',
-  's01.li6':
-    'Entropie auf Agentenebene — Tool-Reihenfolge, Zeitstempel, Retrieval',
-  's01.punch':
-    '<span class="mono">temperature=0</span> berechnet die Antwort neu und hofft, dass sie übereinstimmt. Bei einem Token mit geringem Abstand kippt das Argmax — und du bekommst kein Signal, dass es passiert ist, und keine Möglichkeit zu beweisen, dass die heutige Antwort gleich der gestrigen ist. <b>DAOS löst einmal auf, kanonisiert das Objekt, signiert es in einen inhaltsadressierten Cache und reproduziert es — Byte für Byte, 0 Inferenz.</b> Der Pinned-Modus <em>ist</em> Greedy-Decoding, plus die drei Dinge, die ein Regler dir nicht geben kann: eine kanonische Form, einen fixierten Eintrag und eine Quittung.',
-  's02.h2':
-    'Determinismus weg vom Token-Strom verlagert',
-  's02.lead':
-    'Manches Nicht-Determinismus lässt sich nicht entfernen — zwei Quantisierungen eines Modells berechnen unterschiedliche Funktionen und werden nie dieselben Tokens ausgeben. Also kämpft DAOS nicht um identische Tokens. Es verlagert den Determinismus-Vertrag auf ein <b class="ink">kanonisiertes, schema-beschränktes Ausgabeobjekt</b>.',
-  's02.note1':
-    'Das ausgelieferte Produkt ist der <b class="ink">Pinned-Modus</b>: eine festgelegte Variante, eine Generierung, kanonisiert und gegen ein begrenztes Schema validiert, mit dem Modell-Hash der Variante und der Ladekonfiguration im Schlüssel verschmolzen. Das Ergebnis wird in einem inhaltsadressierten, HMAC-signierten Cache eingefroren und in einem signierten, wiederholbaren Event-Log festgehalten.',
-  's02.note2':
-    'Die Kanonisierung macht die gespeicherten Bytes wohldefiniert: eine rohe Generierung von <span class="mono">confidence: 0.8500000119</span> wird als <span class="mono ink-2">0.85</span> dargestellt — die Zahlenform ist <b class="ink">schema-eigen</b> (<span class="mono">multipleOf&nbsp;0.05</span>) und überschreibt die kürzeste Form des Serialisierers — dann NFC-Unicode, dann JCS-sortierte Schlüssel.',
-  's02.note3':
-    'Die Garantie ist ein Fixpunkt, auf dem du aufbauen kannst — dieselbe Eingabe löst sich zum selben Ausgabeobjekt auf, und jede Wiederholung ist ein signiertes Replay, kein neuer Wurf. Nicht „meistens gleich“. Gleich.',
-  's03.kicker':
-    'Neurowissenschaftlich fundiertes Design · Spec-v1.4-Revision',
-  'ui.designChoice':
-    'Design-Entscheidung',
-  's03.h2':
-    'Das Problem des stochastischen Substrats ist alt. Gehirne lösten es zuerst.',
-  's03.lead':
-    'Ein biologisches neuronales System hält einen kohärenten Gedanken auf verrauschter, spikender, unzuverlässiger Hardware. Die Auflösungsschicht von DAOS entleiht drei Mechanismen, die das möglich machen — und wirft bewusst den einen weg, der Gehirne zu unzuverlässigen Zeugen macht.',
-  's03.from1':
-    '<b>Attraktordynamik</b> <span class="arrow">→</span> gepooltes Decoding',
-  's03.h3a':
-    'Lass die Population sich setzen, dann lies sie',
-  's03.p1':
-    'Eine kortikale Population, die mit verrauschter Eingabe gespeist wird, fällt in einen von wenigen stabilen Zuständen und säubert dabei das Rauschen auf dem Weg nach unten. Die Logit-Pool-Strategie von DAOS macht dasselbe: sie mittelt die Wahrscheinlichkeits-<em>Verteilungen</em> der Varianten bei jedem Schritt und übergibt das gepoolte Token allen im Gleichschritt — sie löst das Ensemble in eine diskrete Wahl auf, <em>bevor</em> sie zum Argmax kollabiert, nicht danach.',
-  's03.c1':
-    'R7.7 · aggregiere Wahrscheinlichkeiten, nie rohe Logits · erfordert einen gemeinsamen Tokenizer (nur cross-quant) und In-Process-Zugriff auf Schrittebene — schließt vLLM / LM Studio / TGI aus.',
-  's03.from2':
-    '<b>Populationscodierung</b> <span class="arrow">→</span> die Korrelationsdecke',
-  's03.h3b':
-    'Mitteln skaliert nur bei unabhängigem Fehler',
-  's03.p2':
-    'Das Poolen von N Neuronen unterdrückt Rauschen wie √N — aber nur, wenn ihre Fehler unabhängig sind. Korreliertes Rauschen erzwingt eine harte Decke. Derselbe Satz begrenzt ein Quorum: der Quantisierungsfehler ist <em>systematisch</em>, also erreicht das Stapeln weiterer Bitbreiten-Varianten schnell ein Plateau. DAOS benennt diese Grenze, statt sie zu verbergen — dekorreliere mit verschiedenen Quantisierungs-<em>Methoden</em>, füge nicht einfach mehr hinzu.',
-  's03.c2':
-    'R7.8 · eine offengelegte Grenze, keine behauptete Funktion · dieselbe informationsbegrenzende Korrelation, die in der Populationscodierung untersucht wird.',
-  's03.from3':
-    '<b>Prädiktive Codierung</b> <span class="arrow">→</span> ein deklarierter Prior',
-  's03.h3c':
-    'Gewichte Mehrdeutigkeit zu einem Prior',
-  's03.p3':
-    'Das Gehirn stabilisiert einen mehrdeutigen Perzept, indem es ihn zu einem Prior gewichtet. DAOS bricht eine Stimmengleichheit auf dieselbe Weise, mit einem schema-deklarierten Prior — und <em>lehnte</em> den verlockenden „Prior = ähnlichste vergangene Antwort“ pointiert ab, weil eine Ähnlichkeitsfunktion den Nicht-Determinismus direkt wieder einschmuggelt.',
-  's03.c3':
-    'R3.3(a) · nur als reine, versionierte Funktion des protokollierten Zustands erlaubt · Token-ID-Rückfall beibehalten.',
-  's03.from4':
-    'Die eine, die wir wegwarfen: <b>Konfabulation</b>',
-  's03.h3d':
-    'Der Interpret, der Kohärenz erfindet',
-  's03.p4':
-    'Split-Brain-Forschung zeigt den Geist, wie er <em>nach</em> dem Ereignis eine kohärente Geschichte fabriziert — und ihr glaubt. Diese nachträgliche Kohärenz ist genau das Anti-Ziel von DAOS: reproduzierbar ist nicht dasselbe wie vertrauenswürdig. Genau der Mechanismus, der ein Gehirn sich sicher fühlen lässt, ist der, den eine Determinismus-Engine verweigern muss.',
-  's03.tagline':
-    'Im Review abgelehnt · eine Maschine, die ihre eigene Gewissheit fabriziert, ist der Fehlermodus, nicht die Funktion.',
-  's03.foot':
-    'Logit-Pool (R7.7) ist eine Auflösungsstrategie auf Spec-Ebene für die Track&nbsp;B-Forschung, kein Schalter, den ein Konsument heute umlegt — dieselbe Ehrlichkeit, die den Rest dieser Seite bestimmt.',
-  's04.kicker':
-    'An realen Modellen gemessen, nicht nur entworfen',
-  's04.h2':
-    'Llama-3.2 in drei Bitbreiten, auf einem Apple M3 Pro.',
-  's04.mlabel1':
-    'Das Produkt · Pinned-Modus',
-  's04.lab1':
-    'zwanzig aufeinanderfolgende Greedy-Generierungen der Pinned-Variante — eine einzige eindeutige Ausgabe, stabil unter vier Seeds und einem konkurrierenden Thread',
-  's04.lab2':
-    'Inferenzaufrufe, um einen protokollierten Lauf zu reproduzieren — Byte für Byte in einem frischen Prozess mit einem neuen Signaturschlüssel reproduziert',
-  's04.mlabel2':
-    'Der Stresstest <span class="sl-tag">Track&nbsp;B · research</span>',
-  's04.lab3':
-    'kanonisches Objekt, versöhnt aus drei Quantisierungsvarianten eines Modells — eine höhere Latte als Determinismus mit einer einzigen Variante',
-  's04.lab4':
-    'Q4-Alleinminderheitsrate; FP16 war nie die Alleinminderheit — Dissens ist monoton in der Präzision',
-  's04.capA':
-    'Cross-Quant-Auflösung',
-  's04.capB':
-    '1 Basismodell · 3 Bitbreiten',
-  's04.leaf':
-    'Abstimmung über das Blatt <b>priority</b>',
-  's04.lone':
-    '← Alleinminderheit',
-  's04.collapse':
-    'feldweise Mehrheit',
-  's04.subnote':
-    'Der Dissens von Q4 wird protokolliert und das Feld als <b>fragil</b> markiert. Die Schiedsrichterregel (höchste Präzision gewinnt) greift nur bei <em>mehrheitslosen</em> Gleichständen — hier entscheidet die 2–1-Mehrheit bereits.',
-  's04.foot':
-    'Von 40 aufgelösten Feldern waren 31 einstimmig und 9 spalteten sich 2–1 über 6 der 10 Aufgaben — wo Byte-Identität durch Auflösung erzeugt wurde, nicht dadurch, dass drei Varianten zufällig übereinstimmen. Das Quorum kaufte <em>Determinismus</em>, nicht Genauigkeit: Cross-Quant erhebt keinen Genauigkeitsanspruch, und der Core liefert es nicht mehr als Produktfläche aus.',
-  's05.h2':
-    'Zehn Stellen, an denen es sich auszahlt',
-  's05.h1':
-    'LLM-Features überhaupt testbar machen',
-  'ui.howItWorks':
+  'why.h3b':
+    'Zufall ist nur eines von sechs Dingen, die die Antwort verändern',
+  'why.p2':
+    'Das Modell wählt zwar weiter sein wahrscheinlichstes Wort, aber <em>welches</em> Wort als das wahrscheinlichste gilt, kann sich aus Gründen verschieben, die mit der Temperatur nichts zu tun haben. Fünf davon lässt <span class="mono">temperature=0</span> unberührt:',
+  'why.li1':
+    'zufällige Auswahl: das Einzige, was eine niedrige Temperatur beseitigt',
+  'why.li2':
+    'winzige Rundungsunterschiede, wie eine GPU Zahlen addiert',
+  'why.li3':
+    'der Server, der deine Anfrage zusammen mit denen anderer Leute bearbeitet',
+  'why.li4':
+    `eine kleinere, komprimierte Kopie des Modells, die in Wahrheit ein etwas anderes Modell ist <span class="tie">(siehe §06)</span>`,
+  'why.li5':
+    'ein gehostetes Modell, das ohne Vorankündigung aktualisiert wird',
+  'why.li6':
+    'alles andere in einem Agenten: die Reihenfolge, in der Werkzeuge laufen, Zeitstempel, Suchergebnisse',
+  'why.punch':
+    '<span class="mono">temperature=0</span> fragt das Modell noch einmal und hofft, dass die Antwort gleich ausfällt. Sind zwei Wörter fast gleich wahrscheinlich, kann es in die andere Richtung kippen, und nichts warnt dich. <b>DAOS fragt einmal, behält diese Antwort und liefert sie danach jedes Mal Byte für Byte zurück, ohne Modellaufruf.</b> Es nutzt dieselbe Einstellung für wenig Zufall und ergänzt, was eine Einstellung nicht leisten kann: eine feste Form für die Antwort, eine gespeicherte Kopie und ein signiertes Protokoll.',
+  'how.h2':
     'So funktioniert es',
-  's05.p1':
-    'Man kann nicht gegen ein bewegliches Ziel assertieren, also hören Teams auf, die Tests zu schreiben. Mit einer festen Ausgabe bedeutet ein Golden-Test wieder etwas: eine Prompt- oder Modelländerung wird zu einem Diff, den du prüfst, nicht zu Rauschen, das du zu ignorieren lernst.',
-  's05.h2c':
-    'Audit und Compliance in regulierten Bereichen',
-  's05.p2':
-    'Finanzen, Versicherung, Gesundheit: „warum hat es das produziert, und kannst du es reproduzieren?“ — manchmal Jahre später, gegenüber einer Aufsichtsbehörde. DAOS protokolliert jede Auflösung in einem signierten, nur-anhängenden Log und reproduziert den exakten Lauf auf Abruf. Manipulationssicher durch Signatur; reproduzierbar durch Konstruktion.',
-  's05.h3':
-    'Quantisierung oder Backend migrieren',
-  's05.p3':
-    'Wechsle zum günstigeren Q4-Modell oder zu einem neuen Inferenzserver ohne stille Verhaltensänderung. Das Cross-Quant-Quorum von Track B löste FP16, Q8 und Q4 zu einem kanonischen Objekt auf — Beleg dafür, dass die semantische Ebene einen Bitbreitenwechsel übersteht. Es sagt dir, dass eine Migration <em>sicher zu testen</em> ist, beweisbar mit einem Vorher/Nachher-Replay; es ist ein Forschungsergebnis, kein Produktumschalter. In der Praxis: ein Plattform-Team fixiert Q4 aus Kostengründen und lässt dann die Golden-Inputs des letzten Quartals erneut laufen, um vor dem Rollout zu beweisen, dass der Wechsel nichts geändert hat.',
-  's05.h4':
-    'Deterministisches Caching und k×-Kostenkontrolle',
-  's05.p4':
-    'Die erste Auflösung schreibt die Antwort einmal; jede semantisch identische Anfrage danach ist ein Cache-Hit, der die Inferenz überspringt. Der Cache-Schlüssel ist die kanonische Form der Eingabe, sodass <span class="mono">0.9</span> und <span class="mono">0.90</span> oder umsortierte Schlüssel zu einem Eintrag kollabieren. Determinismus ist das, was die Wiederverwendung <em>korrekt</em> macht.',
-  's05.h5':
-    'Stabile Verträge zwischen Pipeline-Stufen',
-  's05.p5':
-    'In einem mehrstufigen Agenten konsumiert jede Stufe die Ausgabe der vorigen; Rauschen weiter oben kaskadiert und Fehler hören auf, sich zu reproduzieren. Ein schema-förmiger Vertrag an jeder Grenze macht die ganze Pipeline reproduzierbar und heftet einen Fehler an die Stufe, die ihn verursacht hat. In der Praxis: eine nächtliche Dokument-Pipeline lässt extract → classify → route auf denselben Eingaben erneut laufen, sodass eine Regression ein prüfbarer Diff an einer Stufe ist, kein Rätsel, das drei Stufen später auftauchte.',
-  's05.h6':
-    'Uneinigkeit als Konfidenzsignal',
-  's05.p6':
-    'Wenn FP16, Q8 und Q4 sich bei einem Feld spalten, ist dieses Feld fragil — geringer Abstand, die Art, die unter Batching oder einem Modell-Update kippt. Das Quorum protokolliert die feldweise Abstimmung und schreibt jeden Dissens seiner Variante zu, sodass umstrittene Felder ins Review gehen und einstimmige unberührt laufen. Eine Forschungsfähigkeit, nicht Teil des Pinned-Produkts. In der Praxis: ein Schadenextraktor schickt einem Menschen nur die Felder, bei denen sich die drei Varianten spalteten, und genehmigt die einstimmigen automatisch.',
-  's05.h7':
-    'Strukturierte Extraktion, der du auf Schema-Ebene vertrauen kannst',
-  's05.p7':
-    'Rechnungen, Verträge, Dokument-zu-JSON: Ausgabe, die jedes Mal konform ist, dasselbe Dokument, das dieselbe Zeile liefert. Die Generierung ist grammatik-beschränkt, validiert, dann repariert oder <em>schlägt laut fehl</em> — nie plausibel aussehender Müll, der weitergereicht wird.',
-  's05.h8':
-    'A/B-Testing mit einem sauberen Signal',
-  's05.p8':
-    'Um zu wissen, ob Prompt v2 v1 schlägt, musst du die Ausgabevarianz entfernen, sonst kannst du einen echten Gewinn nicht vom Glück der Stichprobe trennen. DAOS entfernt sie, sodass jede Änderung in der Ausgabe der von dir gemachten Änderung zuzuschreiben ist — das Experiment misst das, was du testest. In der Praxis: Prompt v2 geht hinter einem Flag live und du lässt dasselbe Eval-Set erneut laufen — das Ausgabe-Delta ist der Prompt, nicht der Sampler.',
-  's05.h9':
-    'Reproduzierbare Forschung, Benchmarks, Evals',
-  's05.p9':
-    'Ergebnisse sind nur glaubwürdig, wenn jemand anderes deine veröffentlichte Eval auf seiner eigenen Maschine erneut laufen lässt. <b>Gemessen:</b> dieselbe Tripel in einem frischen Prozess mit einem neuen Signaturschlüssel erneut auszuführen lieferte dieselben Bytes, 0 Inferenz — die Eval misst das Modell, nicht den Rauschboden. Das auf eine zweite Maschine auszudehnen ist der <b>Design-Bereich</b>: Byte-Identität gilt zwischen Maschinen, die eine Quantisierung und ein Backend ausführen, nie über einen Backend-Wechsel hinweg.',
-  's05.h10':
-    'Incident-Forensik zum Verhalten in der Produktion',
-  's05.p10':
-    'Wenn eine schlechte Ausgabe ausgeliefert wird, ist der erste Schritt — sie zu reproduzieren — meist der schwierigste, weil die Bedingungen weg sind. DAOS reproduziert den exakten Lauf aus seinem signierten Log mit null Inferenz. Und wenn das Replay nicht übereinstimmt, wird diese Divergenz selbst als erkannter Bug markiert. In der Praxis: ein Kunde bestreitet eine Antwort von vor drei Wochen; du reproduzierst den protokollierten Lauf und siehst die exakten Bytes, die er sah, keine Näherung.',
-  's06.h2':
-    'Wo DAOS nicht die Antwort ist',
-  's06.intro':
-    'Ehrlichkeit ist Teil des Pitches — die Disziplin, die die Garantie erzeugt, erzeugt eine klare Grenze um sie herum.',
-  's06.h3a':
-    '<span class="x">×</span> Offene oder kreative Generierung',
-  's06.pa':
-    'DAOS beschränkt die Ausgabe auf ein Schema und belohnt Übereinstimmung. Wenn du Vielfalt willst, ist es die falsche Schicht.',
-  's06.h3b':
-    '<span class="x">×</span> Korrektheit',
-  's06.pb':
-    'DAOS macht die Ausgabe <em>stabil</em>, nicht <em>wahr</em>. Eine falsche Antwort fixiert sich so zuverlässig wie eine richtige — Determinismus ist orthogonal zur Genauigkeit, und das Produkt beansprucht nur Ersteres.',
-  's06.h3c':
-    '<span class="x">×</span> Bitweise identische Tokens über Quantisierungen',
-  's06.pc':
-    'Mathematisch unmöglich — Quantisierung ändert die berechnete Funktion. DAOS garantiert die semantische Ebene und sagt das, statt das Unmögliche zu beanspruchen.',
-  's06.h3d':
-    '<span class="x">×</span> Cross-Quant-Quorum in der Produktion',
-  's06.pd':
-    'Es ist Track-B-Forschung ohne Genauigkeitsanspruch; der Core wirft <span class="mono">UnsupportedMode</span>. Das ausgelieferte Produkt ist der Pinned-Modus — eine festgelegte Variante.',
-  's06.h3e':
-    '<span class="x">×</span> Latenzgleichheit mit einem einzelnen Aufruf',
-  's06.pe':
-    'Die Auflösung kostet Inferenz beim ersten Aufruf, dann cacht sie. Du kaufst Determinismus mit Rechenleistung: echte Kosten kalt, eine Lookup warm.',
-  's06.h3f':
-    '<span class="x">×</span> Erkennen, dass ein Modell gedriftet ist',
-  's06.pf':
-    'Replay beweist die Pipeline, nicht das Modell — es konsumiert die gestrige Ausgabe, sodass ein Modell, das sich geändert hat, trotzdem grün wiederholt. Das ist Drift-Erkennung: auf der Roadmap.',
+  'how.lead':
+    'Man kann ein Modell nicht davon abhalten zu schwanken, also versucht DAOS es gar nicht erst. Es fragt <b class="ink">ein gewähltes Modell</b> einmal und macht diese Antwort zur offiziellen.',
+  'how.note1':
+    '<b class="ink">1. Einmal fragen.</b> Du schickst die Eingabe zusammen mit einem <em>Schema</em>: der genauen Form, die die Antwort haben muss, also Felder, erlaubte Werte und Genauigkeit der Zahlen. DAOS fragt das Modell und prüft die Antwort gegen das Schema. Eine Antwort, die nicht passt, ist ein Fehler und wird nie weitergereicht, als wäre alles in Ordnung.',
+  'how.note2':
+    '<b class="ink">2. In Form bringen.</b> Zwei Antworten, die dasselbe bedeuten, sollen dieselben Bytes sein. Aus einem rohen <span class="mono">0.8500000119</span> wird also <span class="mono ink-2">0.85</span> (das Schema legt die Genauigkeit fest), Text wird vereinheitlicht und Felder kommen in eine feste Reihenfolge.',
+  'how.note3':
+    `<b class="ink">3. Signieren, speichern, wiederholen.</b> Die bereinigte Antwort wird signiert und gespeichert. Ab da bekommt dieselbe Anfrage die gespeicherte Antwort, ohne das Modell aufzurufen. Schalte das Protokoll ein, und jeder Lauf wird zusätzlich signiert protokolliert, sodass du ihn später wiederholen kannst.`,
+  'measured.kicker':
+    'Gemessen, nicht nur versprochen',
+  'measured.h2':
+    'Getestet an einem echten Modell: Llama-3.2, auf einem Apple M3 Pro.',
+  'measured.label':
+    'Das Produkt',
+  'measured.n1':
+    `Läufe in Folge mit derselben Anfrage ergaben eine einzige Antwort, mit vier Seeds, einer davon mit einem zweiten Auftrag auf dem Rechner`,
+  'measured.n2':
+    'Modellaufrufe, um einen protokollierten Lauf Byte für Byte zu wiederholen, in einem frischen Prozess mit neuem Signaturschlüssel',
+  'uses.h2':
+    'Was du damit machen kannst',
+  'ui.realOutput':
+    'Echte Ausgabe',
+  'uses.h1':
+    'Schreib Tests für KI-Funktionen, die etwas aussagen',
+  'uses.p1':
+    'Gegen eine Antwort, die sich ständig ändert, kann man nicht testen, also hören Teams auf, Tests zu schreiben. Mit DAOS speicherst du die Antwort auf eine bekannte Eingabe als erwartetes Ergebnis, und der Test prüft sie bei jedem Build. Ändert jemand den Prompt oder das Modell, zeigt der Test genau, was sich geändert hat: ein Unterschied zum Prüfen, kein Rauschen zum Ignorieren.',
+  'uses.h2c':
+    'Zeig einem Prüfer genau, was das Modell gesagt hat',
+  'uses.p2':
+    `Finanzen, Versicherung, Gesundheit: „Warum wurde so entschieden, und kannst du es noch einmal zeigen?“, manchmal Jahre später. Mit eingeschaltetem Protokoll landet jede Antwort in einem signierten Protokoll, das sich nicht ändern lässt, ohne dass es auffällt, und DAOS wiederholt auf Wunsch genau diesen Lauf.`,
+  'uses.h3':
+    'Eine schlechte Antwort aus der Produktion nachstellen',
+  'uses.p3':
+    'Wenn eine schlechte Antwort einen Kunden erreicht, ist das Nachstellen der schwerste Schritt, weil die Bedingungen weg sind. Ein Kunde bestreitet eine Antwort von vor drei Wochen: Du wiederholst den protokollierten Lauf und siehst genau die Bytes, die er gesehen hat, keine Annäherung. Passt die Wiederholung nicht zum Protokoll, wird dieser Unterschied als Fehler gemeldet.',
+  'uses.h4':
+    'Daten aus Dokumenten in eine feste Form bringen',
+  'uses.p4':
+    'Rechnungen, Verträge, Support-Tickets als JSON. Jede Antwort wird gegen das Schema geprüft, das du festlegst, und eine, die nicht passt, scheitert mit dem genauen Grund, statt dass plausibel aussehender Unsinn im nächsten Schritt ankommt. Dasselbe Dokument ergibt immer dieselbe Zeile.',
+  'uses.h5':
+    'Nicht mehr zweimal für dieselbe Antwort zahlen',
+  'uses.p5':
+    'Die erste Anfrage bezahlt einen Modellaufruf. Jede spätere Anfrage, die dasselbe bedeutet, kommt aus dem Speicher: <span class="mono">0.9</span> und <span class="mono">0.90</span> oder dieselben Felder in anderer Reihenfolge zählen als eine Anfrage. Weil das Modell Teil des Schlüssels ist, wird beim Modellwechsel nie eine alte Antwort geliefert.',
+  'uses.h6':
+    'Zwei Prompts fair vergleichen',
+  'uses.p6':
+    'Um zu wissen, ob Prompt v2 besser ist als v1, musst du die zufällige Schwankung entfernen, sonst kannst du eine echte Verbesserung nicht von Glück unterscheiden. Lass dieselben Tests mit jedem Prompt laufen: Ohne Zufall kommt jeder Unterschied in der Ausgabe vom Prompt.',
+  'limits.h2':
+    'Was DAOS nicht tut',
+  'limits.intro':
+    'Dieselbe Strenge, die die Garantie möglich macht, zieht auch eine klare Grenze um sie.',
+  'limits.h3a':
+    '<span class="x">×</span> Kreatives oder offenes Schreiben',
+  'limits.pa':
+    'DAOS zwingt Antworten in eine feste Form und hält sie gleich. Wenn du Abwechslung willst, ist es das falsche Werkzeug.',
+  'limits.h3b':
+    '<span class="x">×</span> Antworten richtig machen',
+  'limits.pb':
+    'DAOS macht Antworten <em>stabil</em>, nicht <em>richtig</em>. Eine falsche Antwort wird genauso treu wiederholt wie eine richtige.',
+  'limits.h3c':
+    '<span class="x">×</span> Ein kostenloser erster Aufruf',
+  'limits.pc':
+    'Beim ersten Mal muss das Modell trotzdem antworten, zu vollen Kosten und in voller Zeit. Nur die Wiederholungen sind sofort da und kostenlos.',
+  'limits.h3d':
+    '<span class="x">×</span> Bemerken, dass sich ein Modell geändert hat',
+  'limits.pd':
+    'Eine Wiederholung nutzt die gespeicherte Antwort, also läuft sie auch dann sauber, wenn das Modell inzwischen anders antwortet. Das zu erkennen ist geplant, nicht gebaut.',
+  'limits.h3e':
+    `<span class="x">×</span> Dieselbe Antwort nach einem Wechsel von Modell oder Laufzeitumgebung`,
+  'limits.pe':
+    `Die Garantie gilt für eine Modelldatei, die mit denselben Einstellungen geladen wird. Eine andere Datei oder andere Ladeeinstellungen zählen als neues Modell, also fragt DAOS neu, und die neue Antwort kann abweichen. Dasselbe Modell auf einer anderen Laufzeit-Software ist gar nicht abgedeckt.`,
+  'limits.h3f':
+    '<span class="x">×</span> Aufrufe wiederholen, die nie protokolliert wurden',
+  'limits.pf':
+    'Nur Läufe, die ins signierte Protokoll geschrieben wurden, lassen sich wiederholen. Ein Aufruf ohne Protokoll bekommt die gespeicherte Antwort, hinterlässt aber nichts zum Wiederholen.',
+  'research.kicker':
+    'Forschung · nicht im Produkt',
+  'research.h2':
+    'Was wir noch erkunden',
+  'research.intro':
+    'Alles oben gibt es heute. Dieser Abschnitt ist anders: Experimente und Entwurfsideen aus der DAOS-Spezifikation, die <b>nicht</b> im Produkt sind. Sie stehen hier, weil sie es geprägt haben und weil manche nicht aufgegangen sind.',
+  'research.qh3':
+    'Können drei Kopien eines Modells über die Antwort abstimmen?',
+  'research.qp':
+    'Wir haben ein Modell in drei Größen laufen lassen, in voller Genauigkeit und auf 8 Bit und 4 Bit komprimiert, und sie Feld für Feld abstimmen lassen. Wo sie uneins waren, gewann die Mehrheit, sodass alle drei am Ende immer dieselbe Antwort hatten.',
+  'research.n1':
+    'Endantwort aus drei unterschiedlich komprimierten Kopien eines Modells, jedes Mal',
+  'research.n2':
+    'der Felder, in denen nur die 4-Bit-Kopie abwich; die Kopie in voller Genauigkeit nie',
+  'research.capA':
+    'Drei Kopien stimmen ab',
+  'research.capB':
+    '1 Modell · 3 Größen',
+  'research.leaf':
+    'Abstimmung über das Feld <b>priority</b>',
+  'research.lone':
+    '← die einzige, die abweicht',
+  'research.collapse':
+    'die Mehrheit gewinnt',
+  'research.subnote':
+    `Die Abweichung der 4-Bit-Kopie wird festgehalten und das Feld als <b>fragil</b> markiert. Gibt es keine Mehrheit, entscheidet eine feste Regel: Die genaueste Kopie gewinnt. Hier entscheidet schon die Zwei-zu-eins-Mehrheit.`,
+  'research.foot':
+    'Von 40 Feldern bekamen 31 von allen drei Kopien denselben Wert und 9 teilten sich zwei zu eins, verteilt auf 6 der 10 Aufgaben. Was die Abstimmung <em>nicht</em> geschafft hat: Antworten genauer zu machen. Bei 600 Aufgaben mit bekannter Lösung war sie nicht besser als die Kopie in voller Genauigkeit allein. Die Kopien machen tendenziell dieselben Fehler, also wiederholt die Mehrheit sie nur. Deshalb ist das Abstimmen nicht im Produkt.',
+  'research.i1h':
+    'Sicher auf eine günstigere Kopie des Modells wechseln',
+  'research.i1p':
+    'Wenn eine 4-Bit-Kopie dieselben Endantworten liefert wie das volle Modell, könntest du zum Sparen auf sie wechseln und die Eingaben des letzten Quartals wiederholen, um zu zeigen, dass sich nichts geändert hat. Das Experiment deutet an, dass das klappen kann. Es ist keine Produktfunktion.',
+  'research.i2h':
+    'Uneinigkeit als Warnlicht',
+  'research.i2p':
+    'Ein Feld, bei dem die Kopien uneins sind, ist ein Feld, bei dem sich das Modell unsicher ist. Weil die Abstimmung festhält, wer abwich, könnten diese Felder an einen Menschen gehen, während der Rest unangetastet durchläuft.',
+  'brain.kicker':
+    'Ideen aus der Neurowissenschaft',
+  'ui.notBuilt':
+    'In der Spezifikation',
+  'brain.h2':
+    'Auch Gehirne gewinnen aus unruhigen Teilen einen klaren Gedanken.',
+  'brain.lead':
+    'Neuronen sind unruhig und unzuverlässig, und trotzdem legt sich ein Gehirn auf einen Gedanken fest. Die DAOS-Spezifikation leiht sich drei Kniffe, die das möglich machen, und lehnt einen vierten bewusst ab. Keiner davon ist im Produkt. Einer wurde gemessen.',
+  'brain.from1':
+    '<b>Neuronen, die sich auf einen Zustand einpendeln</b> <span class="arrow">→</span> gebündelte Antworten',
+  'brain.h3a':
+    'Die Kopien sich einigen lassen, bevor jedes Wort gewählt wird',
+  'brain.p1':
+    'Eine Gruppe von Neuronen, die ein verrauschtes Signal bekommt, fällt in ein einziges stabiles Muster und räumt dabei das Rauschen weg. Die Spezifikation überträgt das auf Kopien eines Modells: Bei jedem Wort wird zusammengerechnet, wie wahrscheinlich jede Kopie jede Option findet, gemeinsam ein Wort gewählt und im Gleichschritt weitergemacht.',
+  'brain.c1':
+    'Nicht gebaut. Dafür müssten alle Kopien Wort für Wort in einem Programm laufen, was gängige Modellserver nicht erlauben.',
+  'brain.from2':
+    '<b>Viele Neuronen stimmen ab</b> <span class="arrow">→</span> eine Grenze der Abstimmung',
+  'brain.h3b':
+    'Abstimmen hilft nur, wenn die Abstimmenden unterschiedliche Fehler machen',
+  'brain.p2':
+    'Viele Neuronen zusammenzuzählen hebt das Rauschen auf, aber nur, wenn jedes seine eigenen zufälligen Fehler macht. Liegen sie gemeinsam daneben, hilft mehr davon nicht. Komprimierte Kopien eines Modells liegen gemeinsam daneben, also hilft es schnell nicht mehr, weitere hinzuzunehmen. Die Lösung sind Kopien, die auf wirklich verschiedene Weise entstanden sind.',
+  'brain.c2':
+    'Gemessen: Zwei unserer Kopien lagen fast immer gemeinsam falsch (Korrelation bis 0.978). Deshalb hat die Abstimmung oben die Genauigkeit nicht verbessert.',
+  'brain.from3':
+    '<b>Erwartung</b> <span class="arrow">→</span> eine erklärte Vorliebe',
+  'brain.h3c':
+    'Ein knappes Patt mit einer erklärten Vorliebe auflösen',
+  'brain.p3':
+    'Vor etwas Mehrdeutigem neigt das Gehirn zu dem, was es erwartet. Die Spezifikation löst ein knappes Patt zwischen zwei Wörtern genauso: Das Schema kann sagen, welcher Wert bevorzugt wird. Sie nutzt bewusst <em>nicht</em> „was wir beim letzten ähnlichen Fall geantwortet haben“, denn „ähnlich“ ist unscharf und würde den Zufall zurückbringen.',
+  'brain.c3':
+    'Nicht gebaut. Ohne erklärte Vorliebe greift die Spezifikation auf eine feste Regel zurück.',
+  'brain.from4':
+    'Die, die wir verworfen haben: <b>sich eine Geschichte ausdenken</b>',
+  'brain.h3d':
+    'Der Teil des Geistes, der sich einen Grund ausdenkt',
+  'brain.p4':
+    'Studien an Split-Brain-Patienten zeigen, wie der Geist nachträglich eine überzeugende Erklärung erfindet und ihr glaubt. Genau das darf DAOS nicht tun: Jedes Mal dieselbe Antwort zu geben macht die Antwort nicht vertrauenswürdig.',
+  'brain.tagline':
+    'Mit Absicht verworfen: Ein System, das sich seine eigene Sicherheit ausdenkt, ist der Fehler, nicht die Funktion.',
+  'brain.foot':
+    'Diese Ideen stammen aus der DAOS-Spezifikation. Sie zeigen, wohin der Entwurf gehen könnte, nicht Funktionen, die du heute einschalten kannst.',
   'close.kicker':
-    'Das Fazit',
+    'Kurz gesagt',
   'close.h2':
-    'Wenn die Varianz dich kostet, ist DAOS die Schicht, die sie entfernt.',
+    'Wenn dich jedes Mal eine andere Antwort Geld kostet, nimmt DAOS dir das ab.',
   'close.lead':
-    'Testbarkeit, Auditierbarkeit, Cache-Korrektheit, ein sauberes Experiment — wenn „jedes Mal eine andere Antwort“ das Problem ist, gibt dir der Pinned-Modus eine reine Funktion, mit den Belegen, es zu beweisen. Keine niedrigere Temperatur. Ein Fixpunkt.',
+    'Tests, die etwas aussagen, Prüfungen, auf die du antworten kannst, Fehler, die du nachstellen kannst, Vergleiche, denen du trauen kannst. DAOS liefert für dieselbe Anfrage dieselbe Antwort, mit einem signierten Protokoll als Beweis.',
   'footer.guarantee':
-    'Garantie auf semantischer Ebene · SPEC v1.6',
+    'Gleiche Anfrage, gleiche Antwort · Spezifikation v1.6',
 };
 
 export const DAOS_I18N: Record<DaosLang, DaosDict> = { en, it, es, de };

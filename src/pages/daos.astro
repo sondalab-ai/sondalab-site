@@ -15,93 +15,88 @@ import Base from '../layouts/Base.astro';
 import DaosText from '../components/DaosText.astro';
 import { DAOS_LANGS, DAOS_LANG_NAMES, type DaosKey } from '../lib/daos-i18n';
 
-// Real output pasted from `uv run python` in the daos repo. Not translated:
+// Real output pasted from `uv run python` in the daos repo; the `#` lines are
+// ours, in plain words. Not translated:
 // code reads the same in every language. Strings, because Astro would read
 // the braces in the JSON as template expressions.
 const PINNED = '{"category":"billing",<wbr>"confidence":0.85,<wbr>"escalate":true,<wbr>"priority":"high"}';
 
 const ARTIFACTS = {
-  test: `<span class="c"># raw generation: float noise + arbitrary key order</span>
+  test: `<span class="c"># what the model said: a messy number, fields in random order</span>
 canonicalize_output({<span class="k">"priority":"high","confidence":0.8500000119,...</span>})
   <span class="c">→</span> <span class="k">{"category":"billing","confidence":0.85,"escalate":true,"priority":"high"}</span>
-<span class="c"># same bytes on re-run, any process → the golden assert holds</span>`,
-  audit: `<span class="c"># every resolution appended to the signed, append-only event log</span>
+<span class="c"># tidied: the same bytes every run, so the test can compare them</span>`,
+  audit: `<span class="c"># each answer is added to the signed log</span>
 append(LogEvent(kind=<span class="k">"resolved"</span>, output=<span class="k">{"category":"billing","confidence":0.85,...}</span>))  <span class="c">→</span> seq 1
 read_run("ticket-01...")  <span class="c">→</span> <span class="ok">MAC-verified ✓</span>
-<span class="c"># flip one byte of a stored answer (billing → refund), re-read:</span>
+<span class="c"># change one stored answer by hand (billing → refund) and read again:</span>
   <span class="c">→</span> <span class="no">IntegrityError: event 'ticket-01...'/1 failed HMAC verification</span>`,
-  cache: `<span class="c"># two inputs, semantically equal, keys reordered</span>
+  cache: `<span class="c"># two requests that mean the same thing, written differently</span>
 canon({"threshold":<span class="k">0.9</span>,...}) == canon({...,"threshold":<span class="k">0.90</span>})  <span class="c">→</span>  <span class="ok">True</span>
-<span class="c"># both → {"threshold":0.9,...} → one cache entry, one inference paid</span>`,
-  extract: `<span class="c"># an invalid extraction is caught, not passed on</span>
+<span class="c"># both count as one request: one model call, one stored answer</span>`,
+  extract: `<span class="c"># an answer that does not fit the schema is stopped</span>
 validate({"category":<span class="no">"banana"</span>, "confidence":<span class="no">1.3</span>, ...})
   <span class="c">→</span> <span class="no">$.category: 'banana' is not one of ['billing','outage',...]</span>
   <span class="c">→</span> <span class="no">$.confidence: 1.3 is greater than the maximum of 1</span>
-<span class="c"># a signed, cacheable DAOSFailure — never plausible garbage</span>`,
+<span class="c"># it becomes a clear error, never a plausible-looking wrong answer</span>`,
 } as const;
 
-/** `how`: the plain "How it works" tag; `track`: the accent Track B tag. */
-type CaseTag = 'how' | 'track' | null;
-
-/** Section 05's ledger. `mech` is the mechanism tag, kept English like the code. */
-const CASES: { h: DaosKey; p: DaosKey; tag: CaseTag; art?: keyof typeof ARTIFACTS; mech: string; accent?: boolean }[] = [
-  { h: 's05.h1', p: 's05.p1', tag: 'how', art: 'test', mech: 'Canonical object &middot; <b>byte-identity</b>' },
-  { h: 's05.h2c', p: 's05.p2', tag: 'how', art: 'audit', mech: 'L6 event log &middot; <b>signed trust root</b>' },
-  { h: 's05.h3', p: 's05.p3', tag: 'track', mech: 'Cross-quant quorum &middot; <b>Track B</b>', accent: true },
-  { h: 's05.h4', p: 's05.p4', tag: 'how', art: 'cache', mech: 'L4 content-addressable cache' },
-  { h: 's05.h5', p: 's05.p5', tag: null, mech: 'Schema-constrained boundary' },
-  { h: 's05.h6', p: 's05.p6', tag: 'track', mech: 'Quorum record &middot; <b>dissent attribution</b>', accent: true },
-  { h: 's05.h7', p: 's05.p7', tag: 'how', art: 'extract', mech: 'L2 CFG decoder &middot; L9 verify/repair &middot; <b>G4</b>' },
-  { h: 's05.h8', p: 's05.p8', tag: null, mech: 'Pure function &middot; <b>G1</b>' },
-  { h: 's05.h9', p: 's05.p9', tag: null, mech: 'Pure function &middot; replay <b>(fresh process, measured)</b>' },
-  { h: 's05.h10', p: 's05.p10', tag: null, mech: 'L6 replay &middot; <b>divergence detection (R6.2)</b>' },
+/** Section 04's ledger: cases that ship today. `art` is real output from the daos repo. */
+const CASES: { h: DaosKey; p: DaosKey; art?: keyof typeof ARTIFACTS }[] = [
+  { h: 'uses.h1', p: 'uses.p1', art: 'test' },
+  { h: 'uses.h2c', p: 'uses.p2', art: 'audit' },
+  { h: 'uses.h3', p: 'uses.p3' },
+  { h: 'uses.h4', p: 'uses.p4', art: 'extract' },
+  { h: 'uses.h5', p: 'uses.p5', art: 'cache' },
+  { h: 'uses.h6', p: 'uses.p6' },
 ];
 
 const LAYERS: { k: DaosKey; g: string; gone?: boolean }[] = [
-  { k: 's01.li1', g: '1&times;', gone: true },
-  { k: 's01.li2', g: '2' },
-  { k: 's01.li3', g: '3' },
-  { k: 's01.li4', g: '4' },
-  { k: 's01.li5', g: '5' },
-  { k: 's01.li6', g: '6' },
+  { k: 'why.li1', g: '1&times;', gone: true },
+  { k: 'why.li2', g: '2' },
+  { k: 'why.li3', g: '3' },
+  { k: 'why.li4', g: '4' },
+  { k: 'why.li5', g: '5' },
+  { k: 'why.li6', g: '6' },
 ];
 
+/** Spec ideas, not product: each card's `c` line says whether it is built or measured. */
 const BRAIN: { from: DaosKey; h: DaosKey; p: DaosKey; c: DaosKey }[] = [
-  { from: 's03.from1', h: 's03.h3a', p: 's03.p1', c: 's03.c1' },
-  { from: 's03.from2', h: 's03.h3b', p: 's03.p2', c: 's03.c2' },
-  { from: 's03.from3', h: 's03.h3c', p: 's03.p3', c: 's03.c3' },
+  { from: 'brain.from1', h: 'brain.h3a', p: 'brain.p1', c: 'brain.c1' },
+  { from: 'brain.from2', h: 'brain.h3b', p: 'brain.p2', c: 'brain.c2' },
+  { from: 'brain.from3', h: 'brain.h3c', p: 'brain.p3', c: 'brain.c3' },
 ];
 
-const METRICS: { label: DaosKey; items: { value: string; unit: string; note: DaosKey }[] }[] = [
-  {
-    label: 's04.mlabel1',
-    items: [
-      { value: '20', unit: '&rarr;1', note: 's04.lab1' },
-      { value: '0', unit: '&nbsp;inf.', note: 's04.lab2' },
-    ],
-  },
-  {
-    label: 's04.mlabel2',
-    items: [
-      { value: '1', unit: '&nbsp;/ 3', note: 's04.lab3' },
-      { value: '17.5', unit: '%', note: 's04.lab4' },
-    ],
-  },
+type Metric = { value: string; unit: string; note: DaosKey };
+
+const MEASURED: Metric[] = [
+  { value: '20', unit: '&rarr;1', note: 'measured.n1' },
+  { value: '0', unit: '', note: 'measured.n2' },
+];
+
+const RESEARCH_METRICS: Metric[] = [
+  { value: '1', unit: '&nbsp;/ 3', note: 'research.n1' },
+  { value: '17.5', unit: '%', note: 'research.n2' },
+];
+
+const IDEAS: { h: DaosKey; p: DaosKey }[] = [
+  { h: 'research.i1h', p: 'research.i1p' },
+  { h: 'research.i2h', p: 'research.i2p' },
 ];
 
 const LIMITS: { h: DaosKey; p: DaosKey }[] = [
-  { h: 's06.h3a', p: 's06.pa' },
-  { h: 's06.h3b', p: 's06.pb' },
-  { h: 's06.h3c', p: 's06.pc' },
-  { h: 's06.h3d', p: 's06.pd' },
-  { h: 's06.h3e', p: 's06.pe' },
-  { h: 's06.h3f', p: 's06.pf' },
+  { h: 'limits.h3a', p: 'limits.pa' },
+  { h: 'limits.h3b', p: 'limits.pb' },
+  { h: 'limits.h3c', p: 'limits.pc' },
+  { h: 'limits.h3d', p: 'limits.pd' },
+  { h: 'limits.h3e', p: 'limits.pe' },
+  { h: 'limits.h3f', p: 'limits.pf' },
 ];
 ---
 
 <Base
   title="DAOS — Deterministic Agent Output System"
-  description="DAOS turns an LLM call into a pure function: input, context and schema resolve once to a canonical output that is pinned, signed and replayed byte-for-byte."
+  description="DAOS asks an AI model once, signs the answer, and gives back exactly that answer every time the same request comes in, with no new model call."
 >
   <div class="daos" data-daos>
     {/* Arms the scroll reveal before the first paint, so the hero card never
@@ -153,7 +148,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
 
           <figure
             class="sl-card proof proof--hero"
-            aria-label="One ticket resolved and pinned once, then reproduced byte-for-byte with zero inference whenever that exact run is replayed — in a test, an audit, or on another machine"
+            aria-label="One support ticket answered by the model once, then given back byte for byte with no model call whenever that run is replayed: in a test, an audit or a bug report"
           >
             <div class="cap"><DaosText k="proof.cap1" /><DaosText k="proof.cap2" /></div>
             <div class="calls">
@@ -173,7 +168,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
             <div class="proof-foot">
               <DaosText class="pf-k" k="proof.footK" />
               <DaosText class="pf-v" k="proof.footV" />
-              <span class="pf-ref">&sect;&thinsp;04</span>
+              <span class="pf-ref">&sect;&thinsp;03</span>
             </div>
           </figure>
         </div>
@@ -181,28 +176,23 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
       </div>
     </div>
 
-    <!-- NOT A CACHE: names the inversion so the hero card doesn't read as memoization -->
-    <div class="sl-wrap">
-      <div class="sl-callout not-cache"><DaosText as="p" class="sl-callout__body" k="nc.p" /></div>
-    </div>
-
-    <!-- 01 · THE temperature=0 TRAP -->
+    <!-- 01 · WHY temperature=0 IS NOT ENOUGH -->
     <section class="sl-section">
       <div class="sl-wrap">
-        <div class="sl-section__head sec-head"><span class="sl-section__idx">01</span><DaosText as="p" class="sl-eyebrow" k="s01.kicker" /></div>
-        <DaosText as="h2" class="knob-h2" k="s01.h2" />
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">01</span><DaosText as="p" class="sl-eyebrow" k="why.kicker" /></div>
+        <DaosText as="h2" class="knob-h2" k="why.h2" />
 
         <div class="sl-hgrid compare">
           <div class="col">
-            <DaosText class="sl-eyebrow" k="s01.tag1" />
-            <DaosText as="h3" k="s01.h3a" />
-            <DaosText as="p" class="sl-prose" k="s01.p1" />
-            <DaosText as="p" class="note sl-prose" k="s01.note1" />
+            <DaosText class="sl-eyebrow" k="why.tag1" />
+            <DaosText as="h3" k="why.h3a" />
+            <DaosText as="p" class="sl-prose" k="why.p1" />
+            <DaosText as="p" class="note sl-prose" k="why.note1" />
           </div>
           <div class="col runtime">
-            <DaosText class="sl-eyebrow" k="s01.tag2" />
-            <DaosText as="h3" k="s01.h3b" />
-            <DaosText as="p" class="sl-prose" k="s01.p2" />
+            <DaosText class="sl-eyebrow" k="why.tag2" />
+            <DaosText as="h3" k="why.h3b" />
+            <DaosText as="p" class="sl-prose" k="why.p2" />
             <ul class="layers">
               {LAYERS.map((l) => (
                 <li class={l.gone ? 'gone' : 'stays'}><span class="g" set:html={l.g} /><DaosText k={l.k} /></li>
@@ -212,102 +202,50 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
         </div>
 
         <div class="punch sl-invert">
-          <DaosText as="p" k="s01.punch" />
+          <DaosText as="p" k="why.punch" />
         </div>
       </div>
     </section>
 
-    <!-- 02 · WHAT IT DOES -->
+    <!-- 02 · HOW IT WORKS: the not-a-cache callout closes it, so the store never reads as the product -->
     <section class="sl-section">
       <div class="sl-wrap">
-        <div class="sl-section__head sec-head"><span class="sl-section__idx">02</span><DaosText as="h2" k="s02.h2" /></div>
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">02</span><DaosText as="h2" k="how.h2" /></div>
         <div class="two-col">
-          <DaosText as="p" class="lead-para sl-prose" k="s02.lead" />
+          <DaosText as="p" class="lead-para sl-prose" k="how.lead" />
           <div>
-            <DaosText as="p" class="note sl-prose" k="s02.note1" />
-            <DaosText as="p" class="note sl-prose" k="s02.note2" />
-            <DaosText as="p" class="note sl-prose" k="s02.note3" />
+            <DaosText as="p" class="note sl-prose" k="how.note1" />
+            <DaosText as="p" class="note sl-prose" k="how.note2" />
+            <DaosText as="p" class="note sl-prose" k="how.note3" />
           </div>
         </div>
+        <div class="sl-callout not-cache"><DaosText as="p" class="sl-callout__body" k="nc.p" /></div>
       </div>
     </section>
 
-    <!-- 03 · BRAIN BIOLOGY -->
-    <section class="sl-section">
-      <div class="sl-wrap">
-        <div class="sl-section__head sec-head">
-          <span class="sl-section__idx">03</span>
-          <DaosText as="p" class="sl-eyebrow" k="s03.kicker" />
-          <DaosText class="sl-tag" k="ui.designChoice" />
-        </div>
-        <DaosText as="h2" class="brain-h2" k="s03.h2" />
-        <DaosText as="p" class="lead-para brain-lead sl-prose" k="s03.lead" />
-
-        <div class="sl-hgrid brain-grid">
-          {BRAIN.map((b) => (
-            <div class="bcard">
-              <DaosText as="p" class="from" k={b.from} />
-              <DaosText as="h3" k={b.h} />
-              <DaosText as="p" k={b.p} />
-              <DaosText as="p" class="constraint" k={b.c} />
-            </div>
-          ))}
-          <div class="bcard rejected sl-invert">
-            <DaosText as="p" class="from" k="s03.from4" />
-            <DaosText as="h3" k="s03.h3d" />
-            <DaosText as="p" k="s03.p4" />
-            <DaosText as="p" class="tagline" k="s03.tagline" />
-          </div>
-        </div>
-        <DaosText as="p" class="note brain-foot sl-prose" k="s03.foot" />
-      </div>
-    </section>
-
-    <!-- 04 · EVIDENCE (the inversion band) -->
+    <!-- 03 · MEASURED: the shipped product only; the research numbers live in 06 -->
     <section class="sl-section sl-invert">
       <div class="sl-wrap">
-        <div class="sl-section__head sec-head"><span class="sl-section__idx">04</span><DaosText as="p" class="sl-eyebrow" k="s04.kicker" /></div>
-        <DaosText as="h2" class="evidence-h2" k="s04.h2" />
-
-        {METRICS.map((g, gi) => (
-          <div class="mgroup">
-            <DaosText as="div" class="mgroup-label" k={g.label} />
-            <div class="sl-hgrid metrics">
-              {g.items.map((m) => (
-                <div class="sl-stat metric">
-                  <span class="sl-stat__value">{m.value}<small set:html={m.unit} /></span>
-                  <DaosText as="p" class="metric-note" k={m.note} />
-                </div>
-              ))}
-            </div>
-            {gi === 1 && (
-              <Fragment>
-                <div class="research-card-wrap">
-                  <figure class="sl-card proof research" aria-label="Three quantization variants voting a leaf; a genuine value split resolved by majority">
-                    <div class="cap"><DaosText k="s04.capA" /><DaosText k="s04.capB" /></div>
-                    <DaosText as="p" class="leaf" k="s04.leaf" />
-                    <div class="variants">
-                      <div class="vrow"><span class="q">F16</span><span class="raw">"high"</span></div>
-                      <div class="vrow"><span class="q">Q8_0</span><span class="raw">"high"</span></div>
-                      <div class="vrow"><span class="q">Q4_K_M</span><span class="raw">"medium" &nbsp;<DaosText class="lone" k="s04.lone" /></span></div>
-                    </div>
-                    <DaosText as="div" class="collapse" k="s04.collapse" />
-                    <div class="canon"><span class="q">OUTPUT</span><span class="out">"priority": "high"</span></div>
-                    <DaosText as="p" class="subnote" k="s04.subnote" />
-                  </figure>
-                </div>
-                <DaosText as="p" class="foot-note" k="s04.foot" />
-              </Fragment>
-            )}
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">03</span><DaosText as="p" class="sl-eyebrow" k="measured.kicker" /></div>
+        <DaosText as="h2" class="evidence-h2" k="measured.h2" />
+        <div class="mgroup">
+          <DaosText as="div" class="mgroup-label" k="measured.label" />
+          <div class="sl-hgrid metrics">
+            {MEASURED.map((m) => (
+              <div class="sl-stat metric">
+                <span class="sl-stat__value">{m.value}{m.unit && <small set:html={m.unit} />}</span>
+                <DaosText as="p" class="metric-note" k={m.note} />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
 
-    <!-- 05 · USE CASES -->
+    <!-- 04 · USE CASES -->
     <section class="sl-section">
       <div class="sl-wrap">
-        <div class="sl-section__head sec-head"><span class="sl-section__idx">05</span><DaosText as="h2" k="s05.h2" /></div>
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">04</span><DaosText as="h2" k="uses.h2" /></div>
         <div class="ledger">
           {CASES.map((c, i) => (
             <article class="case">
@@ -315,12 +253,10 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
               <div>
                 <div class="htop">
                   <DaosText as="h3" k={c.h} />
-                  {c.tag === 'how' && <DaosText class="sl-tag sl-tag--plain" k="ui.howItWorks" />}
-                  {c.tag === 'track' && <span class="sl-tag">Track&nbsp;B &middot; research</span>}
+                  {c.art && <DaosText class="sl-tag sl-tag--plain" k="ui.realOutput" />}
                 </div>
                 <DaosText as="p" k={c.p} />
                 {c.art && <pre class="artifact sl-invert" set:html={ARTIFACTS[c.art]} />}
-                <span class:list={['sl-tag', 'mech', { 'sl-tag--plain': !c.accent }]} set:html={c.mech} />
               </div>
             </article>
           ))}
@@ -328,15 +264,87 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
       </div>
     </section>
 
-    <!-- 06 · LIMITS -->
+    <!-- 05 · LIMITS -->
     <section class="sl-section">
       <div class="sl-wrap">
-        <div class="sl-section__head sec-head"><span class="sl-section__idx">06</span><DaosText as="h2" k="s06.h2" /></div>
-        <DaosText as="p" class="note limits-intro sl-prose" k="s06.intro" />
+        <div class="sl-section__head sec-head"><span class="sl-section__idx">05</span><DaosText as="h2" k="limits.h2" /></div>
+        <DaosText as="p" class="note limits-intro sl-prose" k="limits.intro" />
         <div class="sl-hgrid limits">
           {LIMITS.map((l) => (
             <div class="limit"><DaosText as="h3" k={l.h} /><DaosText as="p" class="sl-prose" k={l.p} /></div>
           ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 · RESEARCH: everything that is not the product, kept apart from it -->
+    <section class="sl-section research-band">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head">
+          <span class="sl-section__idx">06</span>
+          <DaosText as="p" class="sl-eyebrow" k="research.kicker" />
+        </div>
+        <DaosText as="h2" class="research-h2" k="research.h2" />
+        <DaosText as="p" class="lead-para research-lead sl-prose" k="research.intro" />
+
+        <div class="rblock">
+          <DaosText as="h3" class="rblock-h3" k="research.qh3" />
+          <DaosText as="p" class="note rblock-p sl-prose" k="research.qp" />
+          <div class="sl-hgrid metrics">
+            {RESEARCH_METRICS.map((m) => (
+              <div class="sl-stat metric">
+                <span class="sl-stat__value">{m.value}<small set:html={m.unit} /></span>
+                <DaosText as="p" class="metric-note" k={m.note} />
+              </div>
+            ))}
+          </div>
+          <div class="research-card-wrap">
+            <figure class="sl-card proof research" aria-label="Three compressed copies of one model voting on one field; a two-to-one split decided by the majority">
+              <div class="cap"><DaosText k="research.capA" /><DaosText k="research.capB" /></div>
+              <DaosText as="p" class="leaf" k="research.leaf" />
+              <div class="variants">
+                <div class="vrow"><span class="q">F16</span><span class="raw">"high"</span></div>
+                <div class="vrow"><span class="q">Q8_0</span><span class="raw">"high"</span></div>
+                <div class="vrow"><span class="q">Q4_K_M</span><span class="raw">"medium" &nbsp;<DaosText class="lone" k="research.lone" /></span></div>
+              </div>
+              <DaosText as="div" class="collapse" k="research.collapse" />
+              <div class="canon"><span class="q">OUTPUT</span><span class="out">"priority": "high"</span></div>
+              <DaosText as="p" class="subnote" k="research.subnote" />
+            </figure>
+          </div>
+          <DaosText as="p" class="foot-note" k="research.foot" />
+          <div class="sl-hgrid limits ideas">
+            {IDEAS.map((d) => (
+              <div class="limit"><DaosText as="h3" k={d.h} /><DaosText as="p" class="sl-prose" k={d.p} /></div>
+            ))}
+          </div>
+        </div>
+
+        <div class="rblock">
+          <div class="brain-head">
+            <DaosText as="p" class="sl-eyebrow" k="brain.kicker" />
+            <DaosText class="sl-tag" k="ui.notBuilt" />
+          </div>
+          <DaosText as="h3" class="brain-h2" k="brain.h2" />
+          <DaosText as="p" class="note brain-lead sl-prose" k="brain.lead" />
+
+          <div class="sl-hgrid brain-grid">
+            {BRAIN.map((b) => (
+              <div class="bcard">
+                <DaosText as="p" class="from" k={b.from} />
+                <DaosText as="h3" k={b.h} />
+                <DaosText as="p" k={b.p} />
+                <DaosText as="p" class="constraint" k={b.c} />
+              </div>
+            ))}
+            <div class="bcard rejected sl-invert">
+              <DaosText as="p" class="from" k="brain.from4" />
+              <DaosText as="h3" k="brain.h3d" />
+              <DaosText as="p" k="brain.p4" />
+              <DaosText as="p" class="tagline" k="brain.tagline" />
+            </div>
+          </div>
+          <DaosText as="p" class="note brain-foot sl-prose" k="brain.foot" />
         </div>
       </div>
     </section>
@@ -798,8 +806,19 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .punch .mono { color: var(--slc-text-muted); }
   .daos .punch b { font-weight: 600; }
 
-  /* ---- 03 · brain-biology cards ------------------------------------------ */
-  .daos .brain-h2 { max-width: 20ch; }
+  /* ---- 06 · research: set apart from the product by a dashed rule ------- */
+  .daos .research-band { border-top: 1px dashed var(--slc-border); }
+  .daos .research-h2 { max-width: 22ch; }
+  .daos .research-lead { margin-top: var(--sl-space-5); max-width: 62ch; }
+  .daos .rblock { margin-top: clamp(var(--sl-space-8), 6vw, 4.4rem); }
+  .daos .rblock-h3 { font-size: clamp(1.2rem, 1.05rem + 0.7vw, 1.6rem); margin: 0; max-width: 32ch; }
+  .daos .rblock-p { margin: var(--sl-space-3) 0 var(--sl-space-5); max-width: 62ch; }
+  .daos .ideas { margin-top: var(--sl-space-6); }
+  .daos .brain-head { display: flex; align-items: center; gap: var(--sl-space-3); flex-wrap: wrap; margin-bottom: var(--sl-space-3); }
+  .daos .brain-head .sl-eyebrow { margin: 0; }
+
+  /* ---- brain-biology cards (inside 06) ----------------------------------- */
+  .daos .brain-h2 { font-size: clamp(1.2rem, 1.05rem + 0.7vw, 1.6rem); margin: 0; max-width: 28ch; }
   .daos .brain-lead { margin-top: 1.6rem; max-width: 60ch; }
   .daos .brain-grid { margin-top: 2.4rem; }
   .daos .bcard { display: flex; flex-direction: column; }
@@ -839,7 +858,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   }
   .daos .brain-foot { margin-top: var(--sl-space-5); }
 
-  /* ---- 04 · evidence band (the inversion) -------------------------------- */
+  /* ---- 03 · evidence band (the inversion), and the metric grids in 06 ---- */
   .daos .evidence-h2 { max-width: 24ch; }
   .daos .mgroup { margin-top: 2.6rem; }
   .daos .mgroup + .mgroup { margin-top: var(--sl-space-8); }
@@ -887,7 +906,7 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .foot-note { margin-top: var(--sl-space-5); color: var(--slc-text-muted); font-size: 0.86rem; max-width: 74ch; }
   .daos .research-card-wrap { margin-top: var(--sl-space-5); }
 
-  /* ---- 05 · use-case ledger ---------------------------------------------- */
+  /* ---- 04 · use-case ledger ---------------------------------------------- */
   .daos .ledger { display: flex; flex-direction: column; border-top: 1px solid var(--slc-border); }
   .daos .case {
     display: grid;
@@ -914,13 +933,8 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
   .daos .case .htop { display: flex; align-items: center; gap: var(--sl-space-3); flex-wrap: wrap; margin: 0 0 var(--sl-space-2); }
   .daos .case h3 { font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.42rem); margin: 0; }
   .daos .case p { margin: 0; color: var(--slc-text-secondary); max-width: 66ch; }
-  /* a mechanism tag is one run of text with a <b> inside: flow it inline so a
-     narrow column wraps the words, not the flex items */
-  .daos .case .mech { display: inline-block; margin-top: var(--sl-space-4); max-width: 100%; line-height: 1.4; }
-  .daos .case .mech::before { display: inline-block; vertical-align: middle; margin: -0.15em var(--sl-space-2) 0 0; }
-  .daos .case .mech b { font-weight: 700; }
 
-  /* ---- 06 · limits ------------------------------------------------------- */
+  /* ---- 05 · limits, and the research ideas in 06 ------------------------- */
   .daos .limits-intro { margin: 0 0 2rem; max-width: 58ch; }
   .daos .limit h3 { font-size: 1.02rem; margin: 0 0 var(--sl-space-2); display: flex; gap: var(--sl-space-3); }
   .daos .limit h3 .x { font-family: var(--sl-font-mono); color: var(--slc-text-muted); }

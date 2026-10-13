@@ -1,6 +1,6 @@
 ---
 name: daos
-tagline: Determinism you can measure, and prove.
+tagline: Same question, same answer. Every time.
 accent: default
 form: Library
 order: 3
@@ -9,20 +9,20 @@ repoPublic: false
 fullPage:
   href: /daos/
   label: Read the full DAOS page
-summary: "The Deterministic Agent Output System: a Python library that caches and <strong>HMAC-signs</strong> agent output, so the same input yields the same answer and a <strong>fail-closed runtime</strong> refuses anything unsigned."
+summary: "A Python library that asks an AI model <strong>once</strong>, signs the answer, and gives back <strong>exactly that answer</strong> every time the same request comes in, with no new model call."
 ---
 
-daos, the Deterministic Agent Output System, is the measurement bench for
-answering whether an agent does the same thing twice, and proving it rather than
-trusting it. Outputs are cached and cryptographically signed, so a repeated
-input returns the identical answer and any tampering is detectable.
+AI models can answer the same question differently each time, which makes them
+hard to test, audit or debug. DAOS asks the model once, tidies the answer into a
+fixed shape, signs it and stores it. From then on the same request gets that
+stored answer back, byte for byte, and any logged run can be replayed later to
+show exactly what the model said.
 
-The signing key is the trust root of the whole guarantee: whoever can write the
-cache decides every future answer, so the runtime refuses to start without
-`DAOS_CACHE_HMAC_KEY` and there is no unsigned mode: fail-closed by design. It's
-a local, single-user Python library (built and tested with `uv` + `pytest`: unit,
-property, concurrency and structural suites), the execution-path implementation
-of a written specification.
+The signature is what makes the stored answers trustworthy: anyone who could
+edit them could decide every future answer. So DAOS refuses to start without a
+signing key, and an answer that was changed after signing is caught. It is a
+local, single-user Python library, built from a written specification and
+tested with unit, property, concurrency and structural suites.
 
-No UI, no terminal chrome: the quiet instrument the rest of the suite leans on
-when a claim needs to be checked. The source repository is currently private.
+There is no user interface: it is the quiet tool the rest of the suite relies
+on when a claim needs checking. The source repository is currently private.
