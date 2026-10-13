@@ -15,40 +15,66 @@ import Base from '../layouts/Base.astro';
 import DaosText from '../components/DaosText.astro';
 import { DAOS_LANGS, DAOS_LANG_NAMES, type DaosKey } from '../lib/daos-i18n';
 
-// Real output pasted from `uv run python` in the daos repo; the `#` lines are
-// ours, in plain words. Not translated:
-// code reads the same in every language. Strings, because Astro would read
-// the braces in the JSON as template expressions.
+// Each excerpt is either real output pasted from `uv run python` in the daos
+// repo (`output`) or the real commands from its README (`commands`); the `#`
+// lines are ours, in plain words. Only excerpts a visitor can read without the
+// spec belong here. Not translated: code reads the same in every language.
+// Strings, because Astro would read the braces in the JSON as template
+// expressions.
 const PINNED = '{"category":"billing",<wbr>"confidence":0.85,<wbr>"escalate":true,<wbr>"priority":"high"}';
 
-const ARTIFACTS = {
-  test: `<span class="c"># what the model said: a messy number, fields in random order</span>
-canonicalize_output({<span class="k">"priority":"high","confidence":0.8500000119,...</span>})
-  <span class="c">→</span> <span class="k">{"category":"billing","confidence":0.85,"escalate":true,"priority":"high"}</span>
-<span class="c"># tidied: the same bytes every run, so the test can compare them</span>`,
-  audit: `<span class="c"># each answer is added to the signed log</span>
-append(LogEvent(kind=<span class="k">"resolved"</span>, output=<span class="k">{"category":"billing","confidence":0.85,...}</span>))  <span class="c">→</span> seq 1
+type Excerpt = { kind: 'output' | 'commands'; html: string };
+
+const ARTIFACTS: Record<string, Excerpt> = {
+  audit: {
+    kind: 'output',
+    html: `<span class="c"># read back a logged run: the signature checks out</span>
 read_run("ticket-01...")  <span class="c">→</span> <span class="ok">MAC-verified ✓</span>
-<span class="c"># change one stored answer by hand (billing → refund) and read again:</span>
+<span class="c"># someone edits the stored answer by hand (billing → refund), read again:</span>
   <span class="c">→</span> <span class="no">IntegrityError: event 'ticket-01...'/1 failed HMAC verification</span>`,
-  cache: `<span class="c"># two requests that mean the same thing, written differently</span>
-canon({"threshold":<span class="k">0.9</span>,...}) == canon({...,"threshold":<span class="k">0.90</span>})  <span class="c">→</span>  <span class="ok">True</span>
-<span class="c"># both count as one request: one model call, one stored answer</span>`,
-  extract: `<span class="c"># an answer that does not fit the schema is stopped</span>
+  },
+  extract: {
+    kind: 'output',
+    html: `<span class="c"># the model's answer breaks the schema: it is stopped, with the reason</span>
 validate({"category":<span class="no">"banana"</span>, "confidence":<span class="no">1.3</span>, ...})
   <span class="c">→</span> <span class="no">$.category: 'banana' is not one of ['billing','outage',...]</span>
-  <span class="c">→</span> <span class="no">$.confidence: 1.3 is greater than the maximum of 1</span>
-<span class="c"># it becomes a clear error, never a plausible-looking wrong answer</span>`,
-} as const;
+  <span class="c">→</span> <span class="no">$.confidence: 1.3 is greater than the maximum of 1</span>`,
+  },
+  inspect: {
+    kind: 'commands',
+    html: `<span class="c"># check stored answers every day (03:30 by default)</span>
+uv run daos-inspect schedule install --config <span class="k">inspector.toml</span>
+<span class="c"># go through what it flagged</span>
+uv run daos-inspect review --config <span class="k">inspector.toml</span> --actor <span class="k">you@example.org</span>`,
+  },
+  correct: {
+    kind: 'commands',
+    html: `<span class="c"># look at one stored answer</span>
+uv run python scripts/admin/quarantine.py show daos-cache.sqlite <span class="k">KEY</span>
+<span class="c"># replace it with a fixed one, saying why</span>
+uv run python scripts/admin/quarantine.py apply daos-cache.sqlite <span class="k">KEY</span> \\
+  --reason <span class="k">"wrong capital"</span> --replacement-file <span class="k">fixed.json</span> ...`,
+  },
+  proxy: {
+    kind: 'commands',
+    html: `<span class="c"># start DAOS in front of your local model</span>
+uv run python -m daos.proxy <span class="k">profiles.json</span> --port 1235
+<span class="c"># in your app, change only the address</span>
+client = OpenAI(base_url=<span class="k">"http://127.0.0.1:1235/v1"</span>, api_key=<span class="k">"local"</span>)`,
+  },
+};
 
-/** Section 04's ledger: cases that ship today. `art` is real output from the daos repo. */
+/** Section 04's ledger: cases that ship today, each with an excerpt only where it reads plainly. */
 const CASES: { h: DaosKey; p: DaosKey; art?: keyof typeof ARTIFACTS }[] = [
-  { h: 'uses.h1', p: 'uses.p1', art: 'test' },
+  { h: 'uses.h1', p: 'uses.p1' },
   { h: 'uses.h2c', p: 'uses.p2', art: 'audit' },
   { h: 'uses.h3', p: 'uses.p3' },
+  { h: 'uses.h8', p: 'uses.p8', art: 'inspect' },
+  { h: 'uses.h9', p: 'uses.p9', art: 'correct' },
   { h: 'uses.h4', p: 'uses.p4', art: 'extract' },
-  { h: 'uses.h5', p: 'uses.p5', art: 'cache' },
+  { h: 'uses.h5', p: 'uses.p5' },
   { h: 'uses.h6', p: 'uses.p6' },
+  { h: 'uses.h7', p: 'uses.p7', art: 'proxy' },
 ];
 
 const LAYERS: { k: DaosKey; g: string; gone?: boolean }[] = [
@@ -253,10 +279,10 @@ const LIMITS: { h: DaosKey; p: DaosKey }[] = [
               <div>
                 <div class="htop">
                   <DaosText as="h3" k={c.h} />
-                  {c.art && <DaosText class="sl-tag sl-tag--plain" k="ui.realOutput" />}
+                  {c.art && <DaosText class="sl-tag sl-tag--plain" k={ARTIFACTS[c.art].kind === 'output' ? 'ui.realOutput' : 'ui.commands'} />}
                 </div>
                 <DaosText as="p" k={c.p} />
-                {c.art && <pre class="artifact sl-invert" set:html={ARTIFACTS[c.art]} />}
+                {c.art && <pre class="artifact sl-invert" set:html={ARTIFACTS[c.art].html} />}
               </div>
             </article>
           ))}
