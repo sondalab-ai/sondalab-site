@@ -101,7 +101,7 @@
         // aurora near the viewport; the mark goes with it. Its observer may set
         // it again on a scroll, and nothing reads it without the aurora class.
         // (Replacing the button with a clone would unhook that observer, but
-        // mount() then gives the new button the ink sweep this one never had.)
+        // mount() then gives the new button the ink (a pool of light under the pointer) this one never had.)
         primary.classList.remove('sl-fx-aurora', 'sl-fx-aurora--linear');
         primary.removeAttribute('data-sl-fx-near');
         primary.classList.add('sl-fx-glitch');
