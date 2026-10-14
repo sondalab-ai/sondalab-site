@@ -141,15 +141,16 @@ B). Nothing is committed to `spexr/docs/screenshots` in this work.
 
 ## Delivery and cost
 
-| Slice | Repo | Content |
-|---|---|---|
-| 1 | spexr | A1 + A2: marketing set, DPR, workflow, model cache |
-| 2 | spexr | A3 + A4: showcase fixture and scenes; iterate on CI until shots read well |
-| 3 | site | Part B page with the chosen shots, product link, copy fix |
+One PR per repo (owner, 2026-10-14: a single PR for the spexr work):
 
-About 3 PRs, Sonnet authors, one review pass per slice. Slice 2 is the risk:
-each CI round is a full build plus model fetch (first run ~25 min, cached
-runs ~15 min); budget 3–4 rounds.
+| PR | Repo | Content |
+|---|---|---|
+| 1 | spexr | All of Part A: marketing set, DPR, workflow, model cache, showcase fixture, scenes; iterate on CI until shots read well |
+| 2 | site | Part B page with the chosen shots, product link, copy fix |
+
+Sonnet authors, one review pass per PR. PR 1 is the risk: each CI round is a
+full build plus model fetch (first run ~25 min, cached runs ~15 min); budget
+3–4 rounds. The site PR waits for the owner's pick of shots from PR 1.
 
 ## Verification
 
