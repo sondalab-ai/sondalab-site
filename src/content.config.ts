@@ -23,6 +23,12 @@ const ACCENT = ['default', 'spexr', 'introspect', 'local-agents'] as const;
  */
 const FORM = ['IDE', 'App', 'Page', 'Term', 'Library', 'Utils'] as const;
 
+/**
+ * Which shelf of the index a product sits on: a tool you use, or a research
+ * bench whose findings are the point. The home page renders the two apart.
+ */
+const KIND = ['product', 'research'] as const;
+
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
   schema: z.object({
@@ -32,6 +38,7 @@ const products = defineCollection({
     status: z.enum(STATUS).optional(),
     accent: z.enum(ACCENT).default('default'),
     form: z.enum(FORM),
+    kind: z.enum(KIND).default('product'),
     /** Sort order in the editorial index; flagship first. */
     order: z.number().int().nonnegative(),
     /** Canonical source repo. Rendered as a link only when repoPublic is true. */

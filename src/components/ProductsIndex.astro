@@ -10,6 +10,12 @@ const products = (await getCollection('products')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
+// Two shelves, each numbered from 01: the tools, then the research benches.
+const shelves = [
+  { kind: 'product', label: 'Products', items: products.filter((p) => p.data.kind === 'product') },
+  { kind: 'research', label: 'Research', items: products.filter((p) => p.data.kind === 'research') },
+];
+
 // Which statuses actually appear, for the legend below the list (some products
 // carry no status, so drop undefined).
 const usedStatuses = [
@@ -32,7 +38,6 @@ const usedStatuses = [
         <strong>writing and running</strong> the work,{' '}
         <strong>watching</strong> every step as it happens,{' '}
         <strong>scoping</strong> what a session loads,{' '}
-        <strong>proving</strong> a result repeats,{' '}
         <strong>hosting</strong> it all on hardware you own, and{' '}
         <strong>extending</strong> what an agent can do. Different forms (an
         IDE, dashboards, a launcher, a runtime, a toolbox), one stance
@@ -41,44 +46,61 @@ const usedStatuses = [
       </p>
     </div>
 
-    <ol class="products__list">
-      {products.map((p, i) => {
-        const acc = accentVars(p.data.accent as AccentKey);
-        const meta = p.data.status ? STATUS_META[p.data.status] : null;
-        return (
-          <li class="gnum-slot" style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
-            <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on" href={`/products/${p.id}/`}>
-              <span class="sr-only">{i + 1}.</span>
-              <span class="prow__rule" aria-hidden="true"></span>
-              <div class="prow__main">
-                <div class="prow__headline">
-                  <h3
-                    class="prow__name sl-fx-glitch sl-fx-glitch--shatter"
-                    data-text={p.data.name}
-                    style={`--slfx-n:${NAME_BANDS}`}
-                  >
-                    <span class="sl-fx-glitch__text">{p.data.name}</span>
-                    <span class="sl-fx-glitch__shards" aria-hidden="true">
-                      {nameShards.map((i) => (
-                        <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{p.data.name}</span>
-                      ))}
-                    </span>
-                  </h3>
-                  {meta && <span class="sl-tag">{meta.label}</span>}
-                </div>
-                <p class="prow__tagline">{p.data.tagline}</p>
-                <p class="prow__summary" set:html={p.data.summary}></p>
-              </div>
-              <span class="prow__form">{p.data.form}</span>
-              <span class="prow__go" aria-hidden="true">→</span>
-            </a>
-            <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
-                  data-num={String(i + 1).padStart(2, '0')}
-                  aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          </li>
-        );
-      })}
-    </ol>
+    {shelves.map((shelf) => (
+      <div class={`shelf shelf--${shelf.kind}`}>
+        {shelf.kind === 'research' && (
+          <div class="shelf__head">
+            <h3 class="shelf__title">{shelf.label}</h3>
+            <p class="shelf__lede">
+              Where we test an idea before it becomes a tool: whether an answer
+              can be made to <strong>repeat</strong>, and whether a coding agent
+              can <strong>carry its project's experience</strong> from one
+              session to the next.
+            </p>
+          </div>
+        )}
+        <ol class={`products__list mosaic mosaic--${shelf.kind}`}>
+          {shelf.items.map((p, i) => {
+            // The research shelf sits under its own h3, so its names step down.
+            const Name = shelf.kind === 'research' ? 'h4' : 'h3';
+            const acc = accentVars(p.data.accent as AccentKey);
+            const meta = p.data.status ? STATUS_META[p.data.status] : null;
+            return (
+              <li class="gnum-slot" style={`--row-accent-light:${acc.light};--row-accent-dark:${acc.dark}`}>
+                <a class="prow glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-aurora" data-sl-fx-live="on" href={`/products/${p.id}/`}>
+                  <span class="sr-only">{i + 1}.</span>
+                  <span class="prow__rule" aria-hidden="true"></span>
+                  <div class="prow__main">
+                    <div class="prow__headline">
+                      <Name
+                        class="prow__name sl-fx-glitch sl-fx-glitch--shatter"
+                        data-text={p.data.name}
+                        style={`--slfx-n:${NAME_BANDS}`}
+                      >
+                        <span class="sl-fx-glitch__text">{p.data.name}</span>
+                        <span class="sl-fx-glitch__shards" aria-hidden="true">
+                          {nameShards.map((i) => (
+                            <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{p.data.name}</span>
+                          ))}
+                        </span>
+                      </Name>
+                      {meta && <span class="sl-tag">{meta.label}</span>}
+                    </div>
+                    <p class="prow__tagline">{p.data.tagline}</p>
+                    <p class="prow__summary" set:html={p.data.summary}></p>
+                  </div>
+                  <span class="prow__form">{p.data.form}</span>
+                  <span class="prow__go" aria-hidden="true">→</span>
+                </a>
+                <span class="gnum glass-thick sl-fx-glass sl-fx-glass--pane sl-fx-glass--text"
+                      data-num={String(i + 1).padStart(2, '0')}
+                      aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    ))}
 
     <dl class="legend" aria-label="Status legend">
       {usedStatuses.map((s) => (
@@ -123,13 +145,41 @@ const usedStatuses = [
     color: var(--sl-text-primary);
   }
 
+  /* A mosaic on a 12-column grid. Products: the flagship is a tall tile on
+     the left, the next two stack beside it, the last two split a row.
+     Research: two equal tiles. Each tile's numeral sits in its top-left
+     corner, so the grid needs no gutter for it. */
   .products__list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: clamp(0.85rem, 2vw, 1.4rem);
   }
+  .products__list > li { display: grid; grid-column: span 6; }
+  .mosaic--product > li:nth-child(1) { grid-column: span 7; grid-row: span 2; }
+  .mosaic--product > li:nth-child(2),
+  .mosaic--product > li:nth-child(3) { grid-column: span 5; }
+
+  .shelf + .shelf { margin-top: clamp(3rem, 7vw, 5rem); }
+  .shelf__head {
+    max-width: 40rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .shelf__title {
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: var(--step-h3);
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .shelf__lede {
+    margin: 0.75rem 0 0;
+    color: var(--sl-text-secondary);
+    max-width: 52ch;
+  }
+  .shelf__lede strong { font-weight: 600; color: var(--sl-text-primary); }
 
   .products__list li { --row-accent: var(--row-accent-dark); }
   :root[data-sl-theme='light'] .products__list li { --row-accent: var(--row-accent-light); }
@@ -148,22 +198,31 @@ const usedStatuses = [
     --slc-accent-subtle: color-mix(in srgb, var(--row-accent) 12%, var(--slc-surface));
   }
 
-  /* The numeral is a sibling now, not a cell, and the left padding is its
-     gutter. See site.css: a pane inside a pane gets no lens. */
+  /* The numeral is the tile's sibling, not a child (site.css: a pane inside
+     a pane gets no lens), pinned to the tile's top-left corner. The tile's top
+     padding is the numeral's band: its height (line-height 0.8) plus the
+     inset above and a gap below. */
+  .gnum-slot {
+    --gnum-size: clamp(2.75rem, 1rem + 4.5vw, 4.75rem);
+    --gnum-inset: clamp(1.1rem, 2.4vw, 1.75rem);
+  }
+  .mosaic--product > .gnum-slot:first-child {
+    --gnum-size: clamp(2.75rem, 1rem + 8vw, 7rem);
+  }
+  .gnum-slot > .gnum,
+  .gnum-slot > :global(.sl-fx-glass__glow) {
+    top: var(--gnum-inset);
+    translate: none;
+  }
+  .gnum-slot > .gnum { font-size: var(--gnum-size); }
+
   .prow {
-    display: grid;
-    grid-template-columns: 3px 1fr auto auto;
-    align-items: center;
-    gap: clamp(1rem, 3vw, 2.5rem);
-    padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
-    padding-inline: clamp(0.5rem, 2vw, 1.25rem);
-    margin-inline: clamp(-0.5rem, -2vw, -1.25rem);
-    /* The numeral's gutter, and it has to come AFTER padding-inline — a
-       shorthand written later resets the longhand, which is how this row kept
-       its original 20px and let its text run under the figure. Plus what the
-       bleed takes back: the row starts left of its slot, so the slot's gutter
-       is short by exactly that margin. */
-    padding-left: calc(var(--gnum-gutter) - clamp(-0.5rem, -2vw, -1.25rem));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: var(--gnum-inset);
+    padding-top: calc(var(--gnum-inset) + var(--gnum-size) * 0.8 + 1.25rem);
     text-decoration: none;
     color: inherit;
     /* NO `transition` shorthand here. The kit puts one on .sl-fx-glass--pane —
@@ -193,7 +252,19 @@ const usedStatuses = [
     --slg-rim-lo: transparent;
   }
 
+  .prow__main { flex: 1; }
+  /* The flagship tile is two rows tall: its copy sits at the foot, under a
+     larger tagline, rather than leaving the lower half empty. */
+  .mosaic--product > li:first-child .prow__main {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .mosaic--product > li:first-child .prow__tagline { font-size: var(--sl-text-lg); }
   .prow__go {
+    position: absolute;
+    right: var(--gnum-inset);
+    bottom: var(--gnum-inset);
     font-family: var(--sl-font-mono);
     font-size: var(--sl-text-lg);
     color: var(--row-accent-text);
@@ -215,17 +286,17 @@ const usedStatuses = [
   }
 
   .prow__rule {
-    align-self: stretch;
-    width: 3px;
+    width: 2.5rem;
+    height: 3px;
     background: var(--row-accent-text);
     border-radius: var(--sl-radius-pill);
-    transform: scaleY(0.35);
-    transform-origin: center;
+    transform: scaleX(0.5);
+    transform-origin: left;
     opacity: 0.55;
     transition: transform var(--sl-motion-mid) var(--sl-motion-ease),
       opacity var(--sl-motion-mid) var(--sl-motion-ease);
   }
-  .prow:hover .prow__rule { transform: scaleY(1); opacity: 1; }
+  .prow:hover .prow__rule { transform: scaleX(1); opacity: 1; }
 
   .prow__headline {
     display: flex;
@@ -263,6 +334,9 @@ const usedStatuses = [
      the summary: the label sits on the lens too, and the secondary read
      3.76:1 there (light). */
   .prow__form {
+    position: absolute;
+    top: var(--gnum-inset);
+    right: var(--gnum-inset);
     font-family: var(--sl-font-mono);
     font-weight: 500;
     font-size: var(--sl-text-micro);
@@ -294,18 +368,9 @@ const usedStatuses = [
     color: var(--sl-text-muted);
   }
 
-  @media (max-width: 40rem) {
-    .prow {
-      grid-template-columns: 1fr;
-      gap: 0.75rem 1.25rem;
-      padding-left: clamp(1.25rem, 5vw, 2rem);
-    }
-    .prow__rule { display: none; }
-    .prow__form { display: none; }
-    .prow__go { display: none; }
-    /* No room for a 152px figure beside the text on a phone: the numeral is
-       decorative and the screen reader already has the number. */
-    .gnum, :global(.sl-fx-glass__glow) { display: none; }
+  @media (max-width: 52rem) {
+    .products__list > li,
+    .mosaic--product > li:nth-child(n) { grid-column: 1 / -1; grid-row: auto; }
   }
 </style>
 
