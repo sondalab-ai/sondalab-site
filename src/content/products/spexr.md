@@ -7,6 +7,9 @@ form: IDE
 order: 0
 repo: https://github.com/sondalab-ai/spexr-ide
 repoPublic: true
+fullPage:
+  href: /spexr/
+  label: See SPEXR in action
 links:
   - label: Download (releases)
     href: https://github.com/sondalab-ai/spexr-ide/releases
@@ -27,6 +30,6 @@ summaries, and one-click resume.
 
 Transparent about how it works: SPEXR does **not** call any hosted model API; it
 spawns your locally installed agent binary and reuses its stored credentials.
-Today that means a working agent CLI is a hard dependency, with
-multi-harness support (OpenCode) on the way. It's public beta: MIT, on macOS,
-Windows and Linux.
+Today that means a working agent CLI is a hard dependency; it runs Claude Code
+and opencode sessions side by side. It's public beta: MIT, on macOS, Windows
+and Linux.
