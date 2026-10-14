@@ -17,11 +17,12 @@ const STATUS = ['shipped', 'public-beta', 'beta', 'poc'] as const;
 const ACCENT = ['default', 'spexr', 'introspect', 'local-agents'] as const;
 
 /**
- * What kind of thing the product is, as shown to a visitor. The first four match
- * the design system's substrate matrix (substrate-matrix.json); Library and Utils
- * are site-only labels for products that ship no UI substrate of their own.
+ * What kind of thing the product is, as shown to a visitor. IDE, App and Page
+ * match the design system's substrate matrix (substrate-matrix.json); CLI is its
+ * "Term" substrate under a name a visitor reads at a glance; Library and Kit are
+ * site-only labels for products that ship no UI substrate of their own.
  */
-const FORM = ['IDE', 'App', 'Page', 'Term', 'Library', 'Utils'] as const;
+const FORM = ['IDE', 'App', 'Page', 'CLI', 'Library', 'Kit'] as const;
 
 /**
  * Which shelf of the index a product sits on: a tool you use, or a research
