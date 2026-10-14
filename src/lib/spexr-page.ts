@@ -51,11 +51,11 @@ export const SPEXR_SECTIONS: readonly SpexrSection[] = [
     kicker: 'Darkfactory',
     h2: 'Every agent session on one wall.',
     body: [
-      'Darkfactory lists every local agent session, grouped by project. Each card shows whether the agent is working, idle or waiting for you, with a summary written on your machine.',
-      'Click a card to pick the session up. Find an old one by describing it, open the pull request or local page it produced, and chain sessions into a schedule that runs them in order.',
+      'Darkfactory lists every local agent session, grouped by project. Each card shows whether the agent is working, idle, done or waiting for you, and a summary written on your machine.',
+      'Click a card to pick the session up. Find an old one by describing it, open the pull request or local page it produced, and chain tasks into a schedule where each one waits for the ones it needs.',
     ],
     shots: [
-      { file: 'darkfactory.png', alt: 'The Darkfactory wall: session cards for the ledgerline project, one flagged as needing you, each with an on-device summary', caption: 'Live state and an on-device summary on every card.' },
+      { file: 'darkfactory.png', alt: 'The Darkfactory wall: session cards for the ledgerline project, one flagged as needing you, with summaries written on the device', caption: 'Live state, and summaries written on your machine.' },
       { file: 'df-search.png', alt: 'Darkfactory search for “the one about month-end dates” with three matching sessions, and a plant schedule of three tasks', caption: 'Find a session by describing it. The schedule runs tasks in order.' },
       { file: 'df-card.png', alt: 'A pinned session card with its summary, a terminal, and a browser showing the reconcile report the session served', caption: 'A card opens its session, with a browser on what it produced.' },
     ],
@@ -65,7 +65,7 @@ export const SPEXR_SECTIONS: readonly SpexrSection[] = [
     kicker: 'Experts',
     h2: 'The right expert for each step.',
     body: [
-      'SPEXR ships seven built-in expert personas, such as Design, Review and Software Engineering. Add the ones a project needs, and the matching expert switches on when a spec moves to a new step.',
+      'SPEXR ships seven built-in expert personas, such as Design, Review and Software Engineering. Add the ones a project needs, and the expert that fits each workflow step switches on when that step goes to the agent.',
     ],
     shots: [
       { file: 'experts.png', alt: 'The Experts panel: Design, Review and Software Engineering added to the project, Software Engineering active, more in the marketplace', caption: 'One expert is active at a time.' },
@@ -76,7 +76,7 @@ export const SPEXR_SECTIONS: readonly SpexrSection[] = [
     kicker: 'Memory',
     h2: 'What the agent learns, it keeps.',
     body: [
-      'Memory is plain Markdown notes, kept for you and for the project, and loaded into every session. Move a note between the two as it proves useful beyond one project.',
+      'Memory is plain Markdown notes, kept for you and for the project, and loaded into every Claude session. Move a note between the two as it proves useful beyond one project.',
     ],
     shots: [
       { file: 'memory.png', alt: 'The Memory panel listing project, reference and user notes, each with a short description', caption: 'Notes the agent loads in every session.' },
