@@ -1,0 +1,178 @@
+---
+// The SPEXR product page: what it does, one feature per section, each shown
+// with a real screenshot. The short product page (/products/spexr/) links
+// here. Content and the verified claims live in src/lib/spexr-page.ts; this
+// file is layout. The pictures are dark-theme captures, so they sit on a
+// dark mat in both site themes.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import { accentVars } from '../lib/accents';
+import { SPEXR_HERO, SPEXR_RELEASES, SPEXR_REPO, SPEXR_SECTIONS, type SpexrShot } from '../lib/spexr-page';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/spexr/*.png', { eager: true });
+const img = (shot: SpexrShot): ImageMetadata => {
+  const found = files[`../assets/spexr/${shot.file}`];
+  if (!found) throw new Error(`spexr page: no screenshot ${shot.file}`);
+  return found.default;
+};
+const acc = accentVars('spexr');
+const SIZES = '(min-width: 1240px) 1160px, 100vw';
+---
+
+<Base
+  title="SPEXR — the spec-based IDE"
+  description="An IDE where the agent session is the main surface and every change traces back to a spec. See it in action."
+>
+  <article
+    class="spexr"
+    data-product
+    style={`--acc-light:${acc.light};--acc-dark:${acc.dark};--acc-fill-light:${acc.fill.light};--acc-fill-dark:${acc.fill.dark}`}
+  >
+    <header class="sl-wrap hero">
+      <p class="sl-eyebrow">SPEXR · public beta</p>
+      <h1 class="sl-anchor">The spec-based IDE where agents do the work and you keep command.</h1>
+      <p class="hero__lede sl-prose">
+        SPEXR puts the agent session at the centre and ties every change to a written spec. It runs the
+        agent you already have installed, and its own AI features run on your machine.
+      </p>
+      <div class="hero__actions">
+        <a class="sl-btn sl-btn--primary" href={SPEXR_RELEASES}>Download</a>
+        <a class="sl-btn" href={SPEXR_REPO}>Source on GitHub</a>
+      </div>
+      <div class="hero__stage">
+        <a class="shot__full hero__frame" href={img(SPEXR_HERO).src} aria-label={`Open full size: ${SPEXR_HERO.alt}`}>
+          <Image src={img(SPEXR_HERO)} alt={SPEXR_HERO.alt} widths={[720, 1440, 2160, 2880]} sizes={SIZES} loading="eager" fetchpriority="high" />
+        </a>
+      </div>
+    </header>
+
+    {SPEXR_SECTIONS.map((section, i) => (
+      <section id={section.id} class:list={['sl-section', i % 2 === 1 && 'sl-invert']}>
+        <div class="sl-wrap">
+          <div class="sl-section__head sec-head">
+            <span class="sl-section__idx">{String(i + 1).padStart(2, '0')}</span>
+            <p class="sl-eyebrow">{section.kicker}</p>
+          </div>
+          <h2 class="big-h2">{section.h2}</h2>
+          <div class="sec-body">
+            {section.body.map((p) => <p class="sl-prose">{p}</p>)}
+          </div>
+          <div class:list={['shots', `shots--${section.shots.length}`, section.aside && 'shots--aside']}>
+            {section.shots.map((shot) => (
+              <figure class="shot">
+                <a class="shot__full" href={img(shot).src} aria-label={`Open full size: ${shot.alt}`}>
+                  <Image src={img(shot)} alt={shot.alt} widths={[720, 1440, 2160, 2880]} sizes={SIZES} />
+                </a>
+                {shot.caption && <figcaption>{shot.caption}</figcaption>}
+              </figure>
+            ))}
+            {section.aside && (
+              <aside class="sl-card aside">
+                <h3>{section.aside.h3}</h3>
+                <p class="sl-prose">{section.aside.p}</p>
+              </aside>
+            )}
+          </div>
+        </div>
+      </section>
+    ))}
+
+    <section id="runs" class="sl-section">
+      <div class="sl-wrap">
+        <div class="sl-section__head sec-head"><p class="sl-eyebrow">How it runs</p></div>
+        <h2 class="big-h2">Your agent, your machine.</h2>
+        <ul class="runs">
+          <li>SPEXR calls no hosted model API. It starts the agent CLI you have installed and uses its sign-in.</li>
+          <li>Summaries, search and commit messages come from small models that run on your machine.</li>
+          <li>Open source under the MIT licence, for macOS, Windows and Linux.</li>
+          <li>Public beta: it works day to day, and it still changes often.</li>
+        </ul>
+        <div class="hero__actions">
+          <a class="sl-btn sl-btn--primary" href={SPEXR_RELEASES}>Download SPEXR</a>
+          <a class="sl-btn" href="/products/spexr/">Product summary</a>
+        </div>
+      </div>
+    </section>
+  </article>
+</Base>
+
+<style>
+  /* The product's accent, as products/[slug].astro repaints it (see there for why each role). */
+  [data-product] {
+    --sl-accent-default: var(--acc-dark);
+    --slc-accent: var(--acc-dark);
+    --slc-accent-fill: var(--acc-fill-dark);
+    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 80%, white);
+    --slc-accent-subtle: color-mix(in srgb, var(--slc-accent) 12%, transparent);
+    --slc-accent-text: oklch(from var(--slc-accent) min(l, var(--sl-accent-text-lmax, 1)) c h);
+    --slc-focus: var(--slc-accent-text);
+  }
+  :root[data-sl-theme='light'] [data-product] {
+    --sl-accent-default: var(--acc-light);
+    --slc-accent: var(--acc-light);
+    --slc-accent-fill: var(--acc-fill-light);
+    --slc-accent-hover: color-mix(in srgb, var(--slc-accent) 89%, black);
+  }
+
+  .spexr {
+    font-size: clamp(1rem, 0.96rem + 0.2vw, 1.075rem);
+    line-height: var(--sl-line-relaxed);
+  }
+  .spexr p.sl-eyebrow { margin: 0; }
+  :where(.spexr) :is(h1, h2, h3) {
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+    line-height: var(--sl-line-tight);
+  }
+
+  /* ---- hero: the welcome page, tilted toward the reader ----------------- */
+  .hero { padding-block: clamp(2.5rem, 6vw, 5rem) 0; display: grid; gap: var(--sl-space-5); }
+  .hero h1 { max-width: 22ch; margin: 0; font-size: clamp(2rem, 1.3rem + 3vw, 3.6rem); }
+  .hero__lede { max-width: 60ch; margin: 0; color: var(--slc-text-secondary); font-size: clamp(1.05rem, 1rem + 0.4vw, 1.24rem); }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sl-space-3); }
+  .hero__stage { perspective: 1800px; padding-block: clamp(1rem, 3vw, 2rem) clamp(2.5rem, 6vw, 5rem); }
+  .hero__frame {
+    transform: rotateX(14deg) rotateY(-10deg) rotateZ(2deg) scale(0.92);
+    transform-origin: 50% 40%;
+    box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.55);
+  }
+  .hero__frame { transition: transform 0.4s ease; }
+  .hero__frame:hover { transform: rotateX(8deg) rotateY(-6deg) rotateZ(1deg) scale(0.95); }
+
+  /* ---- sections ----------------------------------------------------------- */
+  .spexr > .sl-section { padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
+  .sec-head { flex-wrap: wrap; margin-bottom: var(--sl-space-6); }
+  .big-h2 { max-width: 24ch; font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.6rem); margin: 0 0 var(--sl-space-5); }
+  .sec-body { display: grid; gap: var(--sl-space-3); max-width: 62ch; margin-bottom: clamp(1.6rem, 3vw, 2.4rem); }
+  .sec-body p { margin: 0; }
+
+  .shots { display: grid; gap: clamp(1rem, 2.5vw, 2rem); }
+  @media (min-width: 900px) {
+    .shots--3 { grid-template-columns: 1fr 1fr; }
+    .shots--3 > .shot:first-child { grid-column: 1 / -1; }
+    .shots--2 { grid-template-columns: 1fr 1fr; }
+    .shots--aside { grid-template-columns: 2fr 1fr; align-items: start; }
+  }
+  .shot { margin: 0; display: grid; gap: var(--sl-space-3); min-width: 0; }
+  .shot figcaption { color: var(--slc-text-secondary); font-size: 0.92rem; }
+
+  /* The captures are dark-theme pictures that fill their frame; a hairline
+     keeps their edge on the dark site theme. */
+  .shot__full {
+    display: block;
+    border-radius: var(--sl-radius-md, 10px);
+    overflow: hidden;
+    border: 1px solid var(--slc-border-subtle);
+  }
+  .shot__full:focus-visible { outline: 2px solid var(--slc-focus); outline-offset: 3px; }
+  .shot__full :global(img) { display: block; width: 100%; height: auto; }
+
+  .aside { display: grid; gap: var(--sl-space-2); }
+  .aside h3 { margin: 0; font-size: 1.2rem; }
+  .aside p { margin: 0; }
+
+  .runs { display: grid; gap: var(--sl-space-3); max-width: 62ch; margin: 0 0 var(--sl-space-6); padding-left: 1.2em; }
+</style>
