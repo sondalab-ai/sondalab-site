@@ -2,7 +2,7 @@
 name: MxM
 tagline: Your coding agent remembers every session, on your machine, where you can read it.
 accent: default
-form: Term
+form: CLI
 kind: research
 order: 6
 repo: https://github.com/sondalab-ai/MxM
