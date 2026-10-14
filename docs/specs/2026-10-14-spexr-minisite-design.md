@@ -70,8 +70,8 @@ parity fixture `probe-engine`. It is a small, plausible project:
 - `docs/specs/`: 5–6 specs spread across the 7 steps (one shipped, one
   mid-Implement with plan checklist, one at Clarify, ...), each with a
   context folder.
-- `docs/memory/` plus a seeded user memory under the fixture HOME: a handful
-  of notes across the 4 types, one promoted, one shadowed.
+- `docs/memory/`: a handful of notes across the 4 types, with `MEMORY.md`
+  index. The view reads project memory only, so no user memory is seeded.
 - `docs/agents/`: 3 experts added from the catalog; one active.
 - Claude sessions: 8–10 transcripts across 2–3 projects via the existing
   `manifest.json` mechanism, some live (claude stub), one "needs you".
@@ -93,10 +93,10 @@ parity fixture `probe-engine`. It is a small, plausible project:
 | `mk-df-search` | Wall with a "Find a session" query and its hits |
 | `mk-df-card` | One pinned card with the card browser on |
 | `mk-experts` | Experts view with active expert and marketplace |
-| `mk-memory` | Memory view, both scopes |
+| `mk-memory` | Memory view (it lists project memory only; user memory has no view) |
 | `mk-search` | Smart search with hits and their one-line descriptions |
 | `mk-git` | Source Control with a model-written commit message |
-| `mk-harness` | Darkfactory showing a Claude and an opencode card side by side |
+| `mk-harness` | Crop of the wall: the project group holding a Claude and an opencode card |
 
 The owner reviews the artifact; chosen PNGs are copied into the site (Part
 B). Nothing is committed to `spexr/docs/screenshots` in this work.
