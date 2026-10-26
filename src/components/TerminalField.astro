@@ -19,6 +19,7 @@
   import { mountCrtSurface, type CrtSource } from '../lib/crt-surface';
   import { createTerminal } from '../lib/crt-terminal';
   import { CRT_SHADER } from '../lib/crt-shader';
+  import { bracketLabel } from '../lib/relabel';
 
   const canvas = document.querySelector<HTMLCanvasElement>('[data-crt-field]');
   const hero = canvas?.closest<HTMLElement>('.hero');
@@ -91,17 +92,17 @@
         // carry punctuation. Done in JS so the fallback button is never touched.
         const primary = hero!.querySelector<HTMLElement>('.hero__actions .sl-btn');
         if (!primary) return;
-        const label = `[ ${primary.textContent?.trim()} ]`;
-        primary.textContent = label;
-        primary.dataset.text = label;
+        // Text nodes only: a hover before this point has injected the kit's
+        // dither layer, and writing textContent would delete it under the kit.
+        primary.dataset.text = bracketLabel(primary);
         // The glitch takes ::before and ::after, and the linear aurora drew its
         // line on the same ::after: the glitch's `inset: 0` dragged it to the
         // top edge, a second line inside the focus ring. One family per
         // element here; the ring and its halo carry focus. mount() marked the
         // aurora near the viewport; the mark goes with it. Its observer may set
         // it again on a scroll, and nothing reads it without the aurora class.
-        // (Replacing the button with a clone would unhook that observer, but
-        // mount() then gives the new button the ink (a pool of light under the pointer) this one never had.)
+        // (Replacing the button with a clone would unhook that observer; the
+        // dither hover is delegated from the root, so either button keeps it.)
         primary.classList.remove('sl-fx-aurora', 'sl-fx-aurora--linear');
         primary.removeAttribute('data-sl-fx-near');
         primary.classList.add('sl-fx-glitch');

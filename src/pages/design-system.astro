@@ -52,9 +52,14 @@ const NOTES: [RegExp, string][] = [
 ];
 const SECTION_NOTES: Record<string, string> = {
   workbench: 'Workbench components are desktop chrome: they keep their width and scroll sideways on a narrow screen instead of collapsing.',
+  terminal: 'Terminal blocks are a character grid: they keep their columns and scroll sideways on a narrow screen instead of wrapping.',
   effects: 'Every effect stills under prefers-reduced-motion (the goo drift is refused outright and the field stays welded). [data-sl-fx="off"] switches the layer off for a subtree, and the high-contrast theme turns it off site-wide.',
 };
-const workbenchAt = sections.findIndex((x) => /^Workbench/.test(x.title));
+// Desktop chrome and the character grid keep their width on a narrow screen.
+// A renamed section fails the build rather than silently losing its width.
+const WIDE = ['workbench', 'terminal'];
+const wideAt = new Set(WIDE.map((a) => anchors.indexOf(a)));
+if (wideAt.has(-1)) throw new Error(`catalog sections ${WIDE.join(', ')} expected, found: ${anchors.join(', ')}`);
 
 const count = sections.reduce((n, s) => n + s.entries.length, 0);
 const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
@@ -189,7 +194,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
                   {note && <p class="ds-note">{note}</p>}
                   {e.snippets.map((html) => (
                     <>
-                      <div class:list={['ds-spec', { 'ds-spec--fx': isEffect(e.classes), 'ds-spec--wide': i === workbenchAt }]} set:html={specimen(html, assets)} />
+                      <div class:list={['ds-spec', { 'ds-spec--fx': isEffect(e.classes), 'ds-spec--wide': wideAt.has(i) }]} set:html={specimen(html, assets)} />
                       <details class="ds-code">
                         <summary>Markup</summary>
                         <button class="sl-btn sl-btn--ghost sl-btn--sm ds-copycode" type="button" data-ds-copy-code>Copy</button>

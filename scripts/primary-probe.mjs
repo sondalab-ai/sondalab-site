@@ -95,7 +95,7 @@ for (const { product, sel, tag } of TARGETS) {
       await page.mouse.move(5, 5);
       await sleep(900);
       const rest = await measure(page, el);
-      // Hover lets the ink (a pool of light that trails the pointer) settle; press holds the button.
+      // Hover lets the dither wipe (an 8x8 Bayer fill of 3px cells) settle; press holds the button.
       await page.mouse.move(...center);
       await sleep(1600);
       const hover = await measure(page, el);
