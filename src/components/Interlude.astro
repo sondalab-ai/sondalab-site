@@ -15,6 +15,7 @@ const pool = JSON.stringify(data.lines);
 ---
 
 <aside class:list={['interlude', { 'sl-invert': data.variant === 'invert' }]}>
+  <hr class="sl-rule sl-rule--weave interlude__rule" aria-hidden="true" />
   <div class="sl-wrap interlude__wrap" data-interlude data-pool={pool}>
     <span
       class="interlude__marker sl-fx-glitch sl-fx-glitch--shatter"
@@ -36,9 +37,20 @@ const pool = JSON.stringify(data.lines);
 </aside>
 
 <style>
+  /* The band's top line is the kit's weave (0.41). It stands 13px inside the
+     band, out of the flow, so its 24px strip never straddles the section
+     above (the stance band, or the tools' canvas) and paints on one ground.
+     The transparent border keeps the band's height as it was. */
   .interlude {
-    border-top: 1px solid var(--rule);
+    position: relative;
+    border-top: 1px solid transparent;
     padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .interlude__rule {
+    position: absolute;
+    top: 13px;
+    inset-inline: 0;
+    margin: 0;
   }
 
   .interlude__wrap {

@@ -213,6 +213,9 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
             })}
           </section>
         ))}
+        <div class="sl-empty sl-empty--shapes ds-empty" data-ds-empty hidden>
+          <p class="sl-empty__title">No entry matches that filter.</p>
+        </div>
       </div>
     </div>
 
@@ -360,6 +363,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   const input = document.querySelector<HTMLInputElement>('[data-ds-filter]')!;
   const count = document.querySelector<HTMLElement>('[data-ds-count]')!;
   const entries = $$<HTMLElement>('[data-ds-entry]');
+  const none = document.querySelector<HTMLElement>('[data-ds-empty]')!;
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     let shown = 0;
@@ -378,6 +382,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
     $$<HTMLElement>('#tokens, #contrast').forEach((s) => (s.hidden = !!q));
     $$<HTMLElement>('[data-ds-static]').forEach((li) => (li.hidden = !!q));
     count.textContent = q ? `${shown} of ${entries.length} entries` : '';
+    none.hidden = !(q && shown === 0);
   });
 
   // Scroll-spy: the contents link of the section or entry in view.
@@ -435,6 +440,7 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   .ds-sec { margin-top: var(--sl-space-8); scroll-margin-top: 5rem; }
   .ds-sec:first-child { margin-top: 0; }
   .ds-sec[hidden] { display: none; }
+  .ds-empty[hidden] { display: none; }
   .ds-sec > h2 { font-size: var(--sl-text-xl); margin-bottom: var(--sl-space-3); }
   .ds-note { max-width: 70ch; color: var(--sl-text-secondary); font-size: var(--sl-text-sm); margin: 0 0 var(--sl-space-4); }
 

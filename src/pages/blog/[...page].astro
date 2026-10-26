@@ -143,7 +143,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
         </li>
       </template>
 
-      <p class="tlog-empty" data-tempty hidden>
+      <p class="tlog-empty sl-empty sl-empty--void" data-tempty hidden>
         // no transmission matches that signal
       </p>
 
@@ -395,13 +395,20 @@ const BAND_SCENES = ['uprising', 'kinship'];
     .trow__go { display: none; }
   }
 
+  /* The kit's void (0.41) frames the line in a Molnár field. The floor (the
+     kit showcase's) leaves strokes above and below the 150px erased zone from
+     390px up; below that the 210px zone fills the height and the strokes
+     frame the sides. The kit holds secondary text, not muted, to 4.5:1 on the
+     strokes, and at phone width the line is wider than that zone, so it takes
+     the secondary ink. */
   .tlog-empty {
     margin: 2.5rem 0 0;
+    min-height: 13rem;
     font-family: var(--sl-font-mono);
     font-weight: var(--mono-hair);
     font-size: var(--sl-text-sm);
     letter-spacing: 0.08em;
-    color: var(--sl-text-muted);
+    color: var(--slc-text-secondary);
   }
   .tlog-empty[hidden] { display: none; }
 
