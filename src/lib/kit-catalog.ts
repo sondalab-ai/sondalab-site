@@ -88,9 +88,10 @@ const PROSE =
 const FILL: [RegExp, string][] = [
   [/<div class="sl-prose">\s*<p>…<\/p>\s*<\/div>/g, `<div class="sl-prose">${PROSE}</div>`],
   [/(<(?:aside|main|div) class="sl-pane"[^>]*aria-label="([^"]+)"[^>]*>)…(<\/(?:aside|main|div)>)/g, '$1<p class="sl-eyebrow">$2</p><p>' + LINE + '</p>$3'],
-  [/(<article class="sl-card[^"]*"[^>]*>)…(<\/article>)/g, '$1<strong>Card title</strong><p>' + LINE + '</p>$2'],
+  [/(<article class="sl-card[^"]*"[^>]*>)\s*…\s*(<\/article>)/g, '$1<strong>Card title</strong><p>' + LINE + '</p>$2'],
   [/(<div class="sl-wrap">) … (<\/div>)/g, '$1<p class="ds-wrapbox">sl-wrap: the content measure</p>$2'],
   [/(<section class="sl-haze">) … (<\/section>)/g, '$1<div class="sl-wrap"><h2>Light as atmosphere</h2><p>' + LINE + '</p></div>$2'],
+  [/(<section class="sl-art-field">) … (<\/section>)/g, '$1<p>' + LINE + '</p>$2'],
 ];
 const HGRID_CELL = '<p class="sl-eyebrow">Metric</p><p><strong>42</strong></p><p>One line of copy.</p>';
 
