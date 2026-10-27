@@ -14,6 +14,7 @@
 import Base from '../layouts/Base.astro';
 import DaosText from '../components/DaosText.astro';
 import { DAOS_LANGS, DAOS_LANG_NAMES, type DaosKey } from '../lib/daos-i18n';
+import { PAGE_POSTERS } from '../lib/posters';
 
 // Excerpts: real output pasted from `uv run python` in the daos repo, real
 // commands from its README, or (`exact`) the input rule shown on two requests.
@@ -145,23 +146,27 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
             <DaosText as="p" class="hero-sub" k="hero.sub" />
             <DaosText as="p" class="hero-lede sl-prose" k="hero.lede" />
           </div>
-          <aside class="sl-card glance sl-art-corner">
-            <DaosText as="p" class="glance__cap" k="glance.cap" />
-            <dl class="glance__list">
-              {GLANCE.map((g) => (
-                <div class="glance__row">
-                  <dt class="glance__value" set:html={g.value} />
-                  <DaosText as="dd" class="glance__note" k={g.note} />
-                </div>
-              ))}
-            </dl>
-          </aside>
+          <div class="hero-side">
+            <div class={`hero-poster ${PAGE_POSTERS.daos}`} aria-hidden="true"></div>
+            <aside class="sl-card glance sl-art-corner">
+              <DaosText as="p" class="glance__cap" k="glance.cap" />
+              <dl class="glance__list">
+                {GLANCE.map((g) => (
+                  <div class="glance__row">
+                    <dt class="glance__value" set:html={g.value} />
+                    <DaosText as="dd" class="glance__note" k={g.note} />
+                  </div>
+                ))}
+              </dl>
+            </aside>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 01 · THE PROBLEM -->
     <section class="sl-section">
+      <div class="sec-bed sl-art-field sl-art-field--fade-end" aria-hidden="true"></div>
       <div class="sl-wrap">
         <div class="sl-section__head sec-head"><span class="sl-section__idx">01</span><DaosText as="p" class="sl-eyebrow sl-eyebrow--mark" k="p.kicker" /></div>
         <DaosText as="h2" class="big-h2" k="p.h2" />
@@ -221,6 +226,7 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
 
     <!-- 04 · THE EXACT-INPUT RULE -->
     <section class="sl-section">
+      <div class="sec-bed sl-art-field sl-art-field--stripes sl-art-field--fade-end" aria-hidden="true"></div>
       <div class="sl-wrap">
         <div class="sl-section__head sec-head"><span class="sl-section__idx">04</span><DaosText as="p" class="sl-eyebrow sl-eyebrow--mark sl-eyebrow--mark-circle" k="r.kicker" /></div>
         <DaosText as="h2" class="big-h2" k="r.h2" />
@@ -304,6 +310,7 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
 
     <!-- 07 · CHECK AND FIX -->
     <section class="sl-section">
+      <div class="sec-bed sl-art-field sl-art-field--grid sl-art-field--fade-end" aria-hidden="true"></div>
       <div class="sl-wrap">
         <div class="sl-section__head sec-head"><span class="sl-section__idx">07</span><DaosText as="p" class="sl-eyebrow sl-eyebrow--mark" k="w.kicker" /></div>
         <DaosText as="h2" class="big-h2" k="w.h2" />
@@ -356,6 +363,7 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
 
     <!-- CLOSE -->
     <section class="sl-section close">
+      <div class="sec-bed sl-art-field sl-art-field--albers sl-art-field--fade-end" aria-hidden="true"></div>
       <div class="sl-wrap">
         <DaosText as="p" class="sl-eyebrow" k="close.kicker" />
         <DaosText as="h2" k="close.h2" />
@@ -544,6 +552,17 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
   @media (min-width: 1000px) {
     .daos .hero-grid { grid-template-columns: 1.3fr 0.7fr; align-items: center; }
   }
+  /* The note's poster (src/lib/posters.ts) heads the glance column, beside
+     the title and never behind it (owner, 2026-10-26). Widths are whole
+     multiples of 48px, so the kit's cell loses nothing to rounding. */
+  .daos .hero-side { display: grid; gap: var(--sl-space-5); }
+  .daos .hero-poster { width: 192px; justify-self: end; }
+  @media (max-width: 29.99rem) {
+    .daos .hero-poster { width: 144px; }
+  }
+  @media (min-width: 1000px) {
+    .daos .hero-poster { width: 240px; }
+  }
   .daos .hero h1 { margin-top: var(--sl-space-5); }
   /* An underline that hugs the baseline: at the kit's solid display leading
      (line-height 1) a border below the box ran into the next line's capitals. */
@@ -710,7 +729,12 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
   /* ---- sections --------------------------------------------------------- */
   /* A denser rhythm than the site's 8rem: this is one long argument, not a
      run of statements. */
-  .daos > .sl-section { padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
+  .daos > .sl-section { position: relative; padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
+  /* A few plain sections lie on a bed of the kit's art fields, each a
+     different tile, fading out toward the text: the home page's pattern
+     (Method, ProductsIndex). */
+  .daos .sec-bed { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .daos > .sl-section > .sl-wrap { position: relative; z-index: 1; }
   .daos .sec-head { flex-wrap: wrap; margin-bottom: var(--sl-space-6); }
   .daos .big-h2 { max-width: 24ch; font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.6rem); margin: 0 0 clamp(1.6rem, 3vw, 2.4rem); }
   .daos .block-lead { margin: 0 0 clamp(1.6rem, 3vw, 2.4rem); max-width: 62ch; }

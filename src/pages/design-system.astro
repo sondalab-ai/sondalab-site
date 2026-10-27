@@ -14,6 +14,7 @@ import '@sondalab/ui-kit/workbench.css';
 import halftoneSrc from '@sondalab/ui-kit/assets/avatar-ink.png?url';
 import Base from '../layouts/Base.astro';
 import { assertUniqueIds, loadKitCatalog, loadKitTokens, proseParts, specimen } from '../lib/kit-catalog';
+import { PAGE_POSTERS } from '../lib/posters';
 
 const { sections, json } = loadKitCatalog();
 const { version, groups } = loadKitTokens();
@@ -69,19 +70,25 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
   title="Design system"
   description="The Sondalab UI kit: tokens, components and effects, rendered live from the package this site is built with."
 >
-  <div class="ds sl-wrap">
-    <header class="ds-head">
-      <p class="sl-eyebrow">Design system</p>
-      <h1>
-        Sondalab UI kit
-        <a class="ds-ver" href={`https://www.npmjs.com/package/@sondalab/ui-kit/v/${version}`} rel="noopener">v{version}</a>
-      </h1>
-      <p class="ds-lede">
-        {count} entries (components, effects and patterns; a component with several demos counts once) and {tokenCount}
-        tokens, drawn by the kit's own CSS. This page is generated from the package installed at build time, so it is
-        always the version this site runs.
-      </p>
+  <div class="ds-open sl-art-field sl-art-field--stripes sl-art-field--fade-down">
+    <header class="ds-head sl-wrap">
+      <div>
+        <p class="sl-eyebrow">Design system</p>
+        <h1>
+          Sondalab UI kit
+          <a class="ds-ver" href={`https://www.npmjs.com/package/@sondalab/ui-kit/v/${version}`} rel="noopener">v{version}</a>
+        </h1>
+        <p class="ds-lede">
+          {count} entries (components, effects and patterns; a component with several demos counts once) and {tokenCount}
+          tokens, drawn by the kit's own CSS. This page is generated from the package installed at build time, so it is
+          always the version this site runs.
+        </p>
+      </div>
+      <div class={`ds-head__poster ${PAGE_POSTERS.designSystem}`} aria-hidden="true"></div>
     </header>
+  </div>
+
+  <div class="ds sl-wrap">
 
     <div class="ds-layout">
       <nav class="ds-nav" aria-label="On this page">
@@ -410,9 +417,23 @@ const tokenCount = groups.reduce((n, g) => n + g.tokens.length, 0);
 </script>
 
 <style is:global>
-  .ds { padding-block: var(--sl-space-8); }
-  .ds-head { margin-bottom: var(--sl-space-6); }
-  .ds h1 { font-size: var(--sl-text-3xl); line-height: var(--sl-line-tight); margin: var(--sl-space-2) 0; }
+  /* The head is a full-width band on the kit's stripes, fading down, with
+     the page's poster (src/lib/posters.ts) beside the text, never behind it
+     (owner, 2026-10-26); below 64rem the poster follows the lede at the end
+     of the line. Widths are whole multiples of 48px, so the kit's cell loses
+     nothing to rounding. */
+  .ds-open { padding-block: var(--sl-space-8) var(--sl-space-6); }
+  .ds-head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sl-space-5); }
+  .ds-head__poster { width: 192px; justify-self: end; }
+  @media (max-width: 29.99rem) {
+    .ds-head__poster { width: 144px; }
+  }
+  @media (min-width: 64rem) {
+    .ds-head { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sl-space-8); align-items: center; }
+    .ds-head__poster { width: 240px; }
+  }
+  .ds { padding-block: 0 var(--sl-space-8); }
+  .ds-head h1 { font-size: var(--sl-text-3xl); line-height: var(--sl-line-tight); margin: var(--sl-space-2) 0; }
   .ds-ver { font: var(--sl-text-md) var(--sl-font-mono); color: var(--sl-text-secondary); }
   .ds-lede { max-width: 60ch; color: var(--sl-text-secondary); }
 

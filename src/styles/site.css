@@ -178,6 +178,18 @@ a { color: inherit; }
   font-size: var(--sl-text-sm);
 }
 
+/* The page-head posters (ui-kit 0.42.0, .sl-art-poster). The mirror is the
+   site's own (src/lib/posters.ts): four compositions become eight looks, and
+   on a box whose width is a multiple of 48px it stays on whole px. High
+   contrast and forced colours paint no poster but keep its box, so a head
+   would keep an empty column: the site closes the gap instead. The design
+   system page's own specimens keep the kit's behaviour. */
+.poster--flip { transform: scaleX(-1); }
+:root[data-sl-theme='high-contrast'] .sl-art-poster:not(.ds-spec *) { display: none; }
+@media (forced-colors: active) {
+  .sl-art-poster:not(.ds-spec *) { display: none; }
+}
+
 /* .lede is a site class, so the kit's band cannot re-derive it. */
 .sl-invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 /* --- a thicker glass on the cards ---------------------------------------- *

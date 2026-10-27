@@ -6,15 +6,18 @@ import { STATUS_META } from '../../lib/site';
 import { NOVELLAS } from '../../lib/novellas';
 import { Image } from 'astro:assets';
 import { SCREENS } from '../../lib/screens';
+import { posterSequence } from '../../lib/posters';
 
 export async function getStaticPaths() {
   const products = (await getCollection('products')).sort(
     (a, b) => a.data.order - b.data.order,
   );
+  const posters = posterSequence(products.map((p) => p.id));
   return products.map((p, i) => ({
     params: { slug: p.id },
     props: {
       product: p,
+      poster: posters.get(p.id)!,
       prev: products[i - 1] ?? null,
       next: products[i + 1] ?? null,
       total: products.length,
@@ -22,7 +25,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { product, prev, next, total } = Astro.props;
+const { product, poster, prev, next, total } = Astro.props;
 const { data } = product;
 const { Content } = await render(product);
 
@@ -51,33 +54,36 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       <a class="product__back" href="/#products">← All tools</a>
 
       <header class="product__head">
-        <p class="sl-eyebrow">{data.kind === 'research' ? 'Research' : 'Tool'} · {data.form}</p>
-        <h1
-          class="product__name sl-fx-glitch sl-fx-glitch--shatter"
-          data-text={data.name}
-          style={`--slfx-n:${NAME_BANDS}`}
-        >
-          <span class="sl-fx-glitch__text">{data.name}</span>
-          <span class="sl-fx-glitch__shards" aria-hidden="true">
-            {nameShards.map((i) => (
-              <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{data.name}</span>
-            ))}
-          </span>
-        </h1>
-        <p class="product__tagline">{data.tagline}</p>
+        <div class="product__intro">
+          <p class="sl-eyebrow">{data.kind === 'research' ? 'Research' : 'Tool'} · {data.form}</p>
+          <h1
+            class="product__name sl-fx-glitch sl-fx-glitch--shatter"
+            data-text={data.name}
+            style={`--slfx-n:${NAME_BANDS}`}
+          >
+            <span class="sl-fx-glitch__text">{data.name}</span>
+            <span class="sl-fx-glitch__shards" aria-hidden="true">
+              {nameShards.map((i) => (
+                <span class="sl-fx-glitch__shard" style={`--slfx-i:${i}`}>{data.name}</span>
+              ))}
+            </span>
+          </h1>
+          <p class="product__tagline">{data.tagline}</p>
 
-        {meta && (
-          <div class="product__meta">
-            <span class="sl-tag">{meta.label}</span>
-            <span class="product__meta-note">{meta.note}</span>
-          </div>
-        )}
+          {meta && (
+            <div class="product__meta">
+              <span class="sl-tag">{meta.label}</span>
+              <span class="product__meta-note">{meta.note}</span>
+            </div>
+          )}
 
-        {data.fullPage && (
-          <p class="product__full">
-            <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-glass--pane sl-fx-press sl-fx-aurora sl-fx-aurora--rim" href={data.fullPage.href}>{data.fullPage.label} →</a>
-          </p>
-        )}
+          {data.fullPage && (
+            <p class="product__full">
+              <a class="sl-btn sl-btn--primary sl-fx-glass sl-fx-glass--pane sl-fx-press sl-fx-aurora sl-fx-aurora--rim" href={data.fullPage.href}>{data.fullPage.label} →</a>
+            </p>
+          )}
+        </div>
+        <div class={`product__poster ${poster}`} aria-hidden="true"></div>
       </header>
 
       <div class="product__body">
@@ -247,10 +253,31 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .product__back:hover { color: var(--slc-accent-text); }
 
+  /* The head is the text and the product's poster (src/lib/posters.ts) beside
+     it, never behind it (owner, 2026-10-26). Below 64rem the poster drops
+     under the text, aligned to the end. Its widths are whole multiples of
+     48px, so the kit's cell (the width over 48) loses nothing to rounding. */
   .product__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
     padding-block: clamp(2rem, 5vw, 3.5rem);
     border-bottom: 1px solid var(--sl-border-subtle);
   }
+  .product__poster { width: 192px; justify-self: end; }
+  @media (max-width: 29.99rem) {
+    .product__poster { width: 144px; }
+  }
+  @media (min-width: 64rem) {
+    .product__head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
+    .product__poster { width: 288px; }
+  }
+  @media (min-width: 80rem) {
+    .product__poster { width: 384px; }
+  }
+  /* A burst's shard copies do not wrap with the name: held to its box, plus
+     the jitter, so they never cross into the poster's column. */
+  .product__name .sl-fx-glitch__shards { overflow: clip; overflow-clip-margin: 1.25rem; }
   .product__name {
     /* .sl-fx-glitch is inline-block, and .sl-eyebrow above is inline-flex: left
        as an inline box this heading shares a line with the eyebrow. */
