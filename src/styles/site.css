@@ -107,13 +107,15 @@ a { color: inherit; }
    the dash, and three page heads (blog, post, product) rely on it being
    inline-flex. The dash is a 1px line, so it takes the accent-as-text role:
    the raw light-theme accent is a fill. Face, size, weight and tracking are
-   the kit's micro register (0.30, L1). */
-.sl-eyebrow:not(.ds-spec *) {
+   the kit's micro register (0.30, L1). A --mark eyebrow leads with the kit's
+   glyph instead, seated by the kit, so neither rule touches it: the dash
+   would override the glyph's box and leave a 1px sliver of its mask. */
+.sl-eyebrow:not(.ds-spec *, .sl-eyebrow--mark) {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
 }
-.sl-eyebrow:not(.ds-spec *)::before {
+.sl-eyebrow:not(.ds-spec *, .sl-eyebrow--mark)::before {
   content: '';
   width: 1.6em;
   height: 1px;

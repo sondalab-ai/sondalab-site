@@ -28,7 +28,7 @@ const pillars = [
     <div class="thesis__head">
       <div class="sl-section__head">
         <span class="sl-section__idx">01</span>
-        <span class="sl-eyebrow">The stance</span>
+        <span class="sl-eyebrow sl-eyebrow--mark">The stance</span>
       </div>
       <h2 class="h2">Tools that keep you in command of the machines working for you.</h2>
       <p class="lede">
@@ -42,7 +42,7 @@ const pillars = [
 
     <ol class="triptych">
       {pillars.map((p, i) => (
-        <li class="panel">
+        <li class="panel sl-art-corner">
           <canvas class="sscene" data-sl-halftone data-sl-grid="130" data-sl-src={p.scene.src} aria-hidden="true"></canvas>
           <span class="panel__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <h3 class="panel__verb">{p.verb}</h3>

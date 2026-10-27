@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "@sondalab/ui-kit": "^0.40.0",
+    "@sondalab/ui-kit": "^0.41.0",
     "astro": "^7.2.5",
     "vgpu": "0.3.1"
   },
