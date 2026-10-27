@@ -21,6 +21,10 @@ const PAGES = {
 };
 /** How many section heads each page has, so a head the regex misses fails. */
 const HEADS = { home: 4, daos: 9, apparel: 2 };
+/** The kit's stylesheet: a glyph must be a modifier it defines, not one this
+ *  repo believes in. */
+const KIT_CSS = readFileSync(new URL('../node_modules/@sondalab/ui-kit/components.css', import.meta.url), 'utf8');
+const kitHas = (g) => g === 'quarter' || KIT_CSS.includes(`.sl-eyebrow--mark-${g}::before`);
 
 /** The eyebrow class attribute of each `sl-section__head`, in source order. */
 function headEyebrows(file) {
@@ -45,7 +49,7 @@ for (const [page, files] of Object.entries(PAGES)) {
   test(`${page}: every section head carries a mark, and neighbours differ`, () => {
     const glyphs = files.flatMap(headEyebrows).map(glyphOf);
     assert.equal(glyphs.length, HEADS[page], `${page}: section heads found`);
-    for (const g of glyphs) assert.ok(MARK_GLYPHS.includes(g === 'quarter' ? '' : g), `${page}: unknown glyph ${g}`);
+    for (const g of glyphs) assert.ok(kitHas(g), `${page}: the kit has no glyph ${g}`);
     assertNeighboursDiffer(page, glyphs);
   });
 }
@@ -68,5 +72,6 @@ test('markClass cycles every glyph without repeating a neighbour', () => {
   assertNeighboursDiffer('spexr', run);
   const cycle = MARK_GLYPHS.map((_, i) => glyphOf(markClass(i)));
   assert.equal(new Set(cycle).size, MARK_GLYPHS.length);
+  for (const g of cycle) assert.ok(kitHas(g), `markClass: the kit has no glyph ${g}`);
   assert.equal(markClass(MARK_GLYPHS.length), markClass(0));
 });
