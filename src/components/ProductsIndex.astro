@@ -24,11 +24,11 @@ const usedStatuses = [
 ---
 
 <section id="products" class="sl-section products">
-  <div class="products__bed sl-art-field" aria-hidden="true"></div>
+  <div class="products__bed sl-art-field sl-art-field--grid sl-art-field--fade-end" aria-hidden="true"></div>
   <div class="sl-wrap">
     <div class="sl-section__head">
       <span class="sl-section__idx">02</span>
-      <span class="sl-eyebrow sl-eyebrow--mark">The tools</span>
+      <span class="sl-eyebrow sl-eyebrow--mark sl-eyebrow--mark-square">The tools</span>
     </div>
 
     <div class="products__intro">
@@ -118,7 +118,8 @@ const usedStatuses = [
      not read as glass: a backdrop filter with nothing behind it blurs nothing,
      and the lens has nothing to bend. So the section declares a bed of its
      own — soft blooms at 45% of full strength, because a list of tools is
-     something to read and not a statement. */
+     something to read and not a statement. The art field on the bed is the
+     kit's grid, fading out toward the intro at the inline start. */
   .products {
     position: relative;
     --bed: url('../assets/backdrops/products-dark.svg');

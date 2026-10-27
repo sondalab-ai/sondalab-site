@@ -7,6 +7,7 @@ import cityFlat from '../../assets/scenes/city-flat.webp';
 import cityFlatLight from '../../assets/scenes/city-flat-light.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
+import { PAGE_POSTERS } from '../../lib/posters';
 
 const { storeUrl, categories } = APPAREL;
 const open = storeUrl !== null;
@@ -54,22 +55,26 @@ const ledger = [
     />
 
     <div class="sl-wrap ap-open__inner">
-      <p class="sl-eyebrow">Apparel</p>
-      <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
-      <p class="lede ap-open__lede">
-        Sondalab's tools are open, local, and free to run. None of that pays for
-        itself. Apparel is how the research gets funded: you get something worth
-        wearing, the work gets another month.
-      </p>
+      <div>
+        <p class="sl-eyebrow">Apparel</p>
+        <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
+        <p class="lede ap-open__lede">
+          Sondalab's tools are open, local, and free to run. None of that pays for
+          itself. Apparel is how the research gets funded: you get something worth
+          wearing, the work gets another month.
+        </p>
+      </div>
+      <div class={`ap-open__poster ${PAGE_POSTERS.apparel}`} aria-hidden="true"></div>
     </div>
   </section>
 
   <section class="sl-section ap-pact">
+    <div class="ap-bed sl-art-field sl-art-field--stripes sl-art-field--fade-end" aria-hidden="true"></div>
     <div class="sl-wrap ap-pact__grid">
       <div>
         <div class="sl-section__head">
           <span class="sl-section__idx">01</span>
-          <span class="sl-eyebrow">The pact</span>
+          <span class="sl-eyebrow sl-eyebrow--mark sl-eyebrow--mark-tri">The pact</span>
         </div>
         <h2 class="h2">Independent work needs a source of money.</h2>
         <p class="ap-pact__body">
@@ -93,10 +98,11 @@ const ledger = [
   </section>
 
   <section class="sl-section ap-cats">
+    <div class="ap-bed sl-art-field sl-art-field--fade-down" aria-hidden="true"></div>
     <div class="sl-wrap">
       <div class="sl-section__head">
         <span class="sl-section__idx">02</span>
-        <span class="sl-eyebrow">The pieces</span>
+        <span class="sl-eyebrow sl-eyebrow--mark sl-eyebrow--mark-half">The pieces</span>
       </div>
 
       <ol class="ap-cats__list" data-reveal-list>
@@ -212,6 +218,26 @@ const ledger = [
   .ap-open__inner {
     position: relative;
     z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+  /* The page's poster (src/lib/posters.ts), beside the heading and never
+     behind it (owner, 2026-10-26). From 64rem it hangs on the city like a
+     bill on a wall: a plate of the page's own canvas, so its ink reads off
+     the page's ground rather than off the picture. Below that the scene is
+     masked away from the bottom of the section, and the poster follows the
+     lede there on plain ground. Widths are whole multiples of 48px, so the
+     kit's cell loses nothing to rounding. */
+  .ap-open { --ap-poster-room: calc(128px + 2rem); }
+  .ap-open__poster { width: 192px; justify-self: end; }
+  @media (max-width: 29.99rem) {
+    .ap-open { --ap-poster-room: calc(96px + 2rem); }
+    .ap-open__poster { width: 144px; }
+  }
+  @media (min-width: 64rem) {
+    .ap-open__inner { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
+    .ap-open__poster { width: 288px; background: var(--sl-bg-canvas); }
   }
   .ap-open__h {
     margin-top: 1.5rem;
@@ -228,13 +254,27 @@ const ledger = [
      (large, it clears its 3:1 there), and dissolves toward the bottom of the
      section over 7rem, gone 15rem up from it, the height of the lede and the
      padding under it at these widths. Nothing of it comes back below the
-     words. From 64rem the lede sits in the lit left (1024px: passes). */
+     words. From 64rem the lede sits in the lit left (1024px: passes).
+     The poster follows the lede at these widths, so the clear zone grows by
+     its height and the gap above it (--ap-poster-room): without that the
+     lede rose back into the scene and read 2.83:1 at 390px (light). */
   @media (max-width: 63.99rem) {
     :global(.crt-scene.ap-open__field) {
-      -webkit-mask-image: linear-gradient(to top, transparent 15rem, #000 22rem);
-      mask-image: linear-gradient(to top, transparent 15rem, #000 22rem);
+      --ap-room: calc(15rem + var(--ap-poster-room));
+      -webkit-mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
+      mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
     }
   }
+
+  /* --- the beds ------------------------------------------------------ */
+  /* Both sections lie on a bed of the kit's art fields, as the home page
+     lays its own (Method, ProductsIndex): the stripes under the pact, fading
+     out toward its text, and the truchet under the pieces, fading down. */
+  .ap-pact,
+  .ap-cats { position: relative; }
+  .ap-bed { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .ap-pact > .sl-wrap,
+  .ap-cats > .sl-wrap { position: relative; z-index: 1; }
 
   /* --- the pact ------------------------------------------------------ */
   .ap-pact__grid {

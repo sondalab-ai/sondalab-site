@@ -26,12 +26,12 @@ const points = [
 ---
 
 <section id="method" class="sl-section method">
-  <div class="method__bed sl-art-field" aria-hidden="true"></div>
+  <div class="method__bed sl-art-field sl-art-field--albers sl-art-field--fade-end" aria-hidden="true"></div>
   <div class="sl-wrap method__grid">
     <div class="method__head">
       <div class="sl-section__head">
         <span class="sl-section__idx">03</span>
-        <span class="sl-eyebrow sl-eyebrow--mark">The method</span>
+        <span class="sl-eyebrow sl-eyebrow--mark sl-eyebrow--mark-stair">The method</span>
       </div>
       <h2 class="h2">We run on our own tools first.</h2>
       <p class="lede">
@@ -56,7 +56,11 @@ const points = [
 </section>
 
 <style>
-  /* The bed, the same plate as the stance and the tools. */
+  /* The bed, the same plate as the stance and the tools. Its art field is the
+     kit's Albers squares, not the tools' grid, so the two beds differ; it
+     fades out toward the head column. Albers over stripes: with the stripes
+     the light theme's "03" measured 4.45:1 on the bloom, with Albers it
+     clears 4.5:1 (contrast-probe, 2026-10-27). */
   .method {
     position: relative;
     --bed: url('../assets/backdrops/method-dark.svg');

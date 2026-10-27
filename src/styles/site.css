@@ -163,9 +163,31 @@ a { color: inherit; }
    role, which the inversion band (Thesis) re-points to the uncapped accent. */
 .sl-section__idx:not(.ds-spec *) {
   font-weight: var(--mono-hair);
-  font-size: var(--sl-text-sm);
+  font-size: var(--sl-text-md);
   letter-spacing: 0.1em;
   color: var(--slc-accent-text);
+}
+/* A section's label line reads at body-small, not the kit's micro register:
+   the owner found the section titles too small (2026-10-27). Only inside a
+   section head, so the page-head eyebrows (blog, post, product, hero) keep
+   the micro size. The glyph grows with the label by whole cells: the kit sizes
+   a 4px cell for a label of about 0.875rem. Face, case and tracking stay the
+   kit's. */
+.sl-section__head:not(.ds-spec *) .sl-eyebrow {
+  --sl-art-mark-cell: 4px;
+  font-size: var(--sl-text-sm);
+}
+
+/* The page-head posters (ui-kit 0.42.0, .sl-art-poster). The mirror is the
+   site's own (src/lib/posters.ts): four compositions become eight looks, and
+   on a box whose width is a multiple of 48px it stays on whole px. High
+   contrast and forced colours paint no poster but keep its box, so a head
+   would keep an empty column: the site closes the gap instead. The design
+   system page's own specimens keep the kit's behaviour. */
+.poster--flip { transform: scaleX(-1); }
+:root[data-sl-theme='high-contrast'] .sl-art-poster:not(.ds-spec *) { display: none; }
+@media (forced-colors: active) {
+  .sl-art-poster:not(.ds-spec *) { display: none; }
 }
 
 /* .lede is a site class, so the kit's band cannot re-derive it. */
