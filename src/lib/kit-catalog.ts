@@ -91,7 +91,9 @@ const FILL: [RegExp, string][] = [
   [/(<article class="sl-card[^"]*"[^>]*>)\s*…\s*(<\/article>)/g, '$1<strong>Card title</strong><p>' + LINE + '</p>$2'],
   [/(<div class="sl-wrap">) … (<\/div>)/g, '$1<p class="ds-wrapbox">sl-wrap: the content measure</p>$2'],
   [/(<section class="sl-haze">) … (<\/section>)/g, '$1<div class="sl-wrap"><h2>Light as atmosphere</h2><p>' + LINE + '</p></div>$2'],
-  [/(<section class="sl-art-field">) … (<\/section>)/g, '$1<p>' + LINE + '</p>$2'],
+  [/(<section class="sl-art-field[^"]*">) … (<\/section>)/g, '$1<p>' + LINE + '</p>$2'],
+  // The poster's page head (ui-kit 0.42): specimen() has already turned the catalog's <h1> into a <div> by this point.
+  [/(<header>\s*<div>) <div>…<\/div> <p>…<\/p> (<\/div>)/g, '$1<p><strong>A page head</strong></p><p>' + LINE + '</p>$2'],
 ];
 const HGRID_CELL = '<p class="sl-eyebrow">Metric</p><p><strong>42</strong></p><p>One line of copy.</p>';
 
