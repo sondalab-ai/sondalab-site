@@ -78,7 +78,14 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // and a product name all burst on their own timers, and at the default
       // of 1 most of them would simply be dropped.
       import { mount } from '@sondalab/ui-kit/effects.js';
+      import { mountArt } from '@sondalab/ui-kit/art.js';
       mount(document, { ignoreReducedMotion: true, bursts: 3 });
+
+      // The procedural art (ui-kit 0.45): each poster draws its page's own
+      // picture from data-sl-art-seed, and the footer's horizon is drawn at
+      // the page's real width. Static: it never animates. Without it the
+      // kit's stylesheet shows the canonical pictures.
+      mountArt();
 
       // The numerals are glass cut to their own letterforms: mount() arms
       // `sl-fx-glass--text`, measures the mask off the rendered type and seats

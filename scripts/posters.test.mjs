@@ -4,32 +4,31 @@ import { readFileSync } from 'node:fs';
 import {
   PAGE_POSTERS,
   PAGE_POSTER_LOOKS,
-  POSTER_FLIP,
+  PAGE_POSTER_SEEDS,
   POSTER_VARIANTS,
   posterClass,
   posterSequence,
 } from '../src/lib/posters.ts';
 
-// Every internal page head wears a poster from the kit (ui-kit 0.42), beside
-// its text, and two pages a reader opens one after the other do not wear the
-// same composition (owner, 2026-10-27: "the site must appear unique"). Read
-// from the source, since CI runs the tests before the build.
+// Every internal page head wears a poster from the kit (procedural prints
+// since ui-kit 0.45), beside its text. Two pages a reader opens one after the
+// other do not wear the same scene, and every page has a seed of its own, so
+// no two pages show the same picture (owner, 2026-10-27: "the site must
+// appear unique"). Read from the source, since CI runs the tests before the
+// build.
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const KIT_CSS = read('node_modules/@sondalab/ui-kit/components.css');
 const SITE_CSS = read('src/styles/site.css');
 
-/** A poster's classes exist where they are painted: the kit's, or the site's mirror. */
+/** A poster's classes exist where they are painted: in the kit. */
 function assertPainted(cls) {
   const parts = cls.split(' ');
   assert.equal(parts[0], 'sl-art-poster', cls);
-  for (const c of parts.slice(1)) {
-    const where = c === POSTER_FLIP ? SITE_CSS : KIT_CSS;
-    assert.ok(where.includes(`.${c}`), `nothing paints .${c}`);
-  }
+  for (const c of parts.slice(1)) assert.ok(KIT_CSS.includes(`.${c}`), `nothing paints .${c}`);
 }
 
-/** The composition a class string names: its modifier, or '' for the bare horizon. */
+/** The scene a class string names: its modifier, or '' for the bare dawn. */
 const variantOf = (cls) => cls.match(/sl-art-poster--(\w+)/)?.[1] ?? '';
 
 // Enough slugs to reach every look; their order stands in for a reading order.
@@ -39,7 +38,8 @@ test('every composition the helper names is one the kit paints', () => {
   for (const v of POSTER_VARIANTS) {
     if (v) assert.ok(KIT_CSS.includes(`.sl-art-poster--${v}::before`), `the kit has no poster ${v}`);
   }
-  assert.match(SITE_CSS, new RegExp(`\\.${POSTER_FLIP}\\s*\\{[^}]*transform:\\s*scaleX\\(-1\\)`), 'site.css mirrors the flip');
+  assert.deepEqual([...POSTER_VARIANTS], ['', 'overprint', 'hills', 'orbit']);
+  assert.doesNotMatch(SITE_CSS, /poster--flip/, 'the 0.42 mirror is gone: a seed varies the picture');
 });
 
 test('posterSequence is deterministic and keyed by slug', () => {
@@ -50,7 +50,7 @@ test('posterSequence is deterministic and keyed by slug', () => {
   for (const cls of a.values()) assertPainted(cls);
 });
 
-test('posterSequence never gives neighbours the same composition, mirrored or not', () => {
+test('posterSequence never gives neighbours the same scene', () => {
   for (const before of [undefined, ...POSTER_VARIANTS]) {
     const run = [...posterSequence(SLUGS, before).values()].map(variantOf);
     if (before !== undefined) assert.notEqual(run[0], before, `the first page repeats the one before it (${before})`);
@@ -58,38 +58,55 @@ test('posterSequence never gives neighbours the same composition, mirrored or no
   }
 });
 
-test('posterSequence reaches all eight looks', () => {
+test('posterSequence reaches all four scenes', () => {
   const looks = new Set(posterSequence(SLUGS).values());
-  const all = POSTER_VARIANTS.flatMap((v) => [posterClass(v), posterClass(v, true)]);
-  assert.deepEqual([...looks].sort(), all.sort());
+  assert.deepEqual([...looks].sort(), POSTER_VARIANTS.map((v) => posterClass(v)).sort());
 });
 
-test('the fixed pages each wear a different look', () => {
-  const looks = Object.values(PAGE_POSTERS);
+test('the fixed pages each show a picture of their own: a scene and a seed', () => {
+  const looks = Object.entries(PAGE_POSTER_LOOKS).map(([, [variant, seed]]) => `${variant}:${seed}`);
   assert.equal(new Set(looks).size, looks.length);
-  for (const cls of looks) assertPainted(cls);
-  assert.equal(PAGE_POSTERS.blog, posterClass(...PAGE_POSTER_LOOKS.blog));
+  const seeds = Object.values(PAGE_POSTER_SEEDS);
+  assert.equal(new Set(seeds).size, seeds.length, 'two fixed pages share a seed');
+  for (const seed of seeds) assert.match(seed, /^[a-z][a-z-]*$/, `${seed} is not a text seed`);
+  for (const cls of Object.values(PAGE_POSTERS)) assertPainted(cls);
+  assert.equal(PAGE_POSTERS.blog, posterClass(PAGE_POSTER_LOOKS.blog[0]));
+});
+
+test('the kit draws the art: Base.astro mounts it once for every page', () => {
+  const base = read('src/layouts/Base.astro');
+  assert.match(base, /import \{ mountArt \} from '@sondalab\/ui-kit\/art\.js';/);
+  assert.match(base, /\bmountArt\(\);/);
+});
+
+test('every page ends on a horizon, seeded by its path, with its content above it', () => {
+  const footer = read('src/components/SiteFooter.astro');
+  assert.match(footer, /<footer class:list=\{\['site-footer', 'sl-art-horizon', dawn && 'sl-art-horizon--dawn'\]\} data-sl-art-seed=\{path\}>/);
+  assert.ok(KIT_CSS.includes('.sl-art-horizon::before') && KIT_CSS.includes('.sl-art-horizon--dawn::before'), 'the kit has no horizon');
+  // The horizon is 200px tall: the footer's bottom padding clears all of it.
+  assert.match(KIT_CSS, /\.sl-art-horizon::after\s*\{[^}]*height:\s*min\(200px, 100%\)/);
+  assert.match(footer, /padding-block:\s*2\.5rem calc\(2\.5rem \+ 200px\);/);
 });
 
 // Each internal page head, from where it opens to where it ends, and the
 // expression its poster's class is built from.
 const HEADS = [
-  ['src/pages/products/[slug].astro', '<header class="product__head">', '</header>', 'poster'],
-  ['src/pages/blog/[slug].astro', '<header class="post__head">', '</header>', 'poster'],
-  ['src/pages/blog/[...page].astro', '<header class="tlog-head">', '</header>', 'PAGE_POSTERS.blog'],
-  ['src/pages/spexr.astro', '<header class="sl-wrap hero">', '</header>', 'PAGE_POSTERS.spexr'],
-  ['src/pages/daos.astro', '<div class="hero">', '<!-- 01', 'PAGE_POSTERS.daos'],
-  ['src/pages/apparel/index.astro', '<section class="ap-open">', '</section>', 'PAGE_POSTERS.apparel'],
-  ['src/pages/design-system.astro', '<header class="ds-head sl-wrap">', '</header>', 'PAGE_POSTERS.designSystem'],
+  ['src/pages/products/[slug].astro', '<header class="product__head">', '</header>', 'poster', 'product.id'],
+  ['src/pages/blog/[slug].astro', '<header class="post__head">', '</header>', 'poster', 'post.id'],
+  ['src/pages/blog/[...page].astro', '<header class="tlog-head">', '</header>', 'PAGE_POSTERS.blog', 'PAGE_POSTER_SEEDS.blog'],
+  ['src/pages/spexr.astro', '<header class="sl-wrap hero">', '</header>', 'PAGE_POSTERS.spexr', 'PAGE_POSTER_SEEDS.spexr'],
+  ['src/pages/daos.astro', '<div class="hero">', '<!-- 01', 'PAGE_POSTERS.daos', 'PAGE_POSTER_SEEDS.daos'],
+  ['src/pages/apparel/index.astro', '<section class="ap-open">', '</section>', 'PAGE_POSTERS.apparel', 'PAGE_POSTER_SEEDS.apparel'],
+  ['src/pages/design-system.astro', '<header class="ds-head sl-wrap">', '</header>', 'PAGE_POSTERS.designSystem', 'PAGE_POSTER_SEEDS.designSystem'],
 ];
 
-for (const [file, open, close, expr] of HEADS) {
-  test(`${file}: the head carries an empty, hidden poster`, () => {
+for (const [file, open, close, expr, seed] of HEADS) {
+  test(`${file}: the head carries an empty, hidden poster with the page's seed`, () => {
     const src = read(file);
     const start = src.indexOf(open);
     assert.ok(start >= 0, `no ${open}`);
     const head = src.slice(start, src.indexOf(close, start));
-    const poster = new RegExp(`<div class=\\{\`[\\w-]+ \\$\\{${expr.replace('.', '\\.')}\\}\`\\} aria-hidden="true"></div>`);
+    const poster = new RegExp(`<div class=\\{\`[\\w-]+ \\$\\{${expr.replace('.', '\\.')}\\}\`\\} data-sl-art-seed=\\{${seed.replace('.', '\\.')}\\} aria-hidden="true"></div>`);
     assert.match(head, poster);
   });
 }
@@ -104,12 +121,12 @@ test('products and posts take their poster from posterSequence', () => {
   assert.match(read('src/pages/blog/[slug].astro'), /posterSequence\(posts\.map\(\(p\) => p\.id\), PAGE_POSTER_LOOKS\.blog\[0\]\)/);
 });
 
-// The kit's cell is the box's width over 48, rounded down: a width that is
-// not a multiple of 48 loses its remainder as an uneven margin.
-test('every poster width is a whole multiple of 48px, at least 144px', () => {
+// The kit's cell is the box's width over 126, rounded down: a width that is
+// not a multiple of 126 loses its remainder as an uneven margin.
+test('every poster width is a whole multiple of 126px', () => {
   for (const [file] of HEADS) {
     const widths = [...read(file).matchAll(/poster[\w-]*\s*\{[^}]*?width:\s*(\d+)px/g)].map((m) => Number(m[1]));
     assert.ok(widths.length >= 2, `${file}: poster widths found`);
-    for (const w of widths) assert.ok(w % 48 === 0 && w >= 144, `${file}: ${w}px`);
+    for (const w of widths) assert.ok(w % 126 === 0 && w >= 126, `${file}: ${w}px`);
   }
 });

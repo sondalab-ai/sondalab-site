@@ -5,7 +5,7 @@ import CrtScene from '../../components/CrtScene.astro';
 import uprisingFlat from '../../assets/scenes/uprising-flat.webp';
 import uprisingFlatLight from '../../assets/scenes/uprising-flat-light.webp';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
-import { PAGE_POSTERS } from '../../lib/posters';
+import { PAGE_POSTERS, PAGE_POSTER_SEEDS } from '../../lib/posters';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPosts();
@@ -71,7 +71,7 @@ const BAND_SCENES = ['uprising', 'kinship'];
           </div>
 
           <div class="tlog-head__side">
-            <div class={`tlog-head__poster ${PAGE_POSTERS.blog}`} aria-hidden="true"></div>
+            <div class={`tlog-head__poster ${PAGE_POSTERS.blog}`} data-sl-art-seed={PAGE_POSTER_SEEDS.blog} aria-hidden="true"></div>
             <label class="sl-field tsearch" data-tsearch-box hidden>
               <span class="sl-field__label">Filter</span>
               <input
@@ -254,9 +254,9 @@ const BAND_SCENES = ['uprising', 'kinship'];
      beside the wordmark and never behind it (owner, 2026-10-26). Widths are
      whole multiples of 48px, so the kit's cell loses nothing to rounding. */
   .tlog-head__side { display: grid; }
-  .tlog-head__poster { width: 192px; justify-self: end; margin-bottom: 1.5rem; }
+  .tlog-head__poster { width: 252px; justify-self: end; margin-bottom: 1.5rem; }
   @media (max-width: 29.99rem) {
-    .tlog-head__poster { width: 144px; }
+    .tlog-head__poster { width: 126px; }
   }
   .tlog-head__h {
     /* .sl-fx-glitch is inline-block, and .sl-eyebrow above is inline-flex: left

@@ -79,7 +79,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
             <span>{mins} min</span>
           </p>
         </div>
-        <div class={`post__poster ${poster}`} aria-hidden="true"></div>
+        <div class={`post__poster ${poster}`} data-sl-art-seed={post.id} aria-hidden="true"></div>
       </header>
 
       <p class="post__standfirst">{post.data.summary}</p>
@@ -160,13 +160,13 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     padding-block: clamp(2rem, 5vw, 3.5rem);
     border-bottom: 1px solid var(--sl-border-subtle);
   }
-  .post__poster { width: 192px; justify-self: end; }
+  .post__poster { width: 252px; justify-self: end; }
   @media (max-width: 29.99rem) {
-    .post__poster { width: 144px; }
+    .post__poster { width: 126px; }
   }
   @media (min-width: 64rem) {
     .post__head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: end; }
-    .post__poster { width: 288px; }
+    .post__poster { width: 252px; }
   }
   /* A burst's shard copies do not wrap with the title: held to its box, plus
      the jitter, so they never cross into the poster's column. */

@@ -83,7 +83,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
             </p>
           )}
         </div>
-        <div class={`product__poster ${poster}`} aria-hidden="true"></div>
+        <div class={`product__poster ${poster}`} data-sl-art-seed={product.id} aria-hidden="true"></div>
       </header>
 
       <div class="product__body">
@@ -264,16 +264,16 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     padding-block: clamp(2rem, 5vw, 3.5rem);
     border-bottom: 1px solid var(--sl-border-subtle);
   }
-  .product__poster { width: 192px; justify-self: end; }
+  .product__poster { width: 252px; justify-self: end; }
   @media (max-width: 29.99rem) {
-    .product__poster { width: 144px; }
+    .product__poster { width: 126px; }
   }
   @media (min-width: 64rem) {
     .product__head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
-    .product__poster { width: 288px; }
+    .product__poster { width: 252px; }
   }
   @media (min-width: 80rem) {
-    .product__poster { width: 384px; }
+    .product__poster { width: 378px; }
   }
   /* A burst's shard copies do not wrap with the name: held to its box, plus
      the jitter, so they never cross into the poster's column. */

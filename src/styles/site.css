@@ -170,21 +170,20 @@ a { color: inherit; }
 /* A section's label line reads at body-small, not the kit's micro register:
    the owner found the section titles too small (2026-10-27). Only inside a
    section head, so the page-head eyebrows (blog, post, product, hero) keep
-   the micro size. The glyph grows with the label by whole cells: the kit sizes
-   a 4px cell for a label of about 0.875rem. Face, case and tracking stay the
+   the micro size. The glyph grows with the label by whole cells: a 3px cell
+   (27 x 18px; the kit's default is 2px since 0.45) for a label of about 0.875rem. Face, case and tracking stay the
    kit's. */
 .sl-section__head:not(.ds-spec *) .sl-eyebrow {
-  --sl-art-mark-cell: 4px;
+  --sl-art-mark-cell: 3px;
   font-size: var(--sl-text-sm);
 }
 
-/* The page-head posters (ui-kit 0.42.0, .sl-art-poster). The mirror is the
-   site's own (src/lib/posters.ts): four compositions become eight looks, and
-   on a box whose width is a multiple of 48px it stays on whole px. High
+/* The page-head posters (.sl-art-poster; procedural prints since ui-kit
+   0.45, src/lib/posters.ts). The frame is 126 cells wide, so a poster's box
+   is 126, 252 or 378px: the picture then fills it on whole px. High
    contrast and forced colours paint no poster but keep its box, so a head
    would keep an empty column: the site closes the gap instead. The design
    system page's own specimens keep the kit's behaviour. */
-.poster--flip { transform: scaleX(-1); }
 :root[data-sl-theme='high-contrast'] .sl-art-poster:not(.ds-spec *) { display: none; }
 @media (forced-colors: active) {
   .sl-art-poster:not(.ds-spec *) { display: none; }

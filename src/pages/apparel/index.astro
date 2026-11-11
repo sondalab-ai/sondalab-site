@@ -7,7 +7,7 @@ import cityFlat from '../../assets/scenes/city-flat.webp';
 import cityFlatLight from '../../assets/scenes/city-flat-light.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
-import { PAGE_POSTERS } from '../../lib/posters';
+import { PAGE_POSTERS, PAGE_POSTER_SEEDS } from '../../lib/posters';
 
 const { storeUrl, categories } = APPAREL;
 const open = storeUrl !== null;
@@ -64,7 +64,7 @@ const ledger = [
           wearing, the work gets another month.
         </p>
       </div>
-      <div class={`ap-open__poster ${PAGE_POSTERS.apparel}`} aria-hidden="true"></div>
+      <div class={`ap-open__poster ${PAGE_POSTERS.apparel}`} data-sl-art-seed={PAGE_POSTER_SEEDS.apparel} aria-hidden="true"></div>
     </div>
   </section>
 
@@ -230,14 +230,14 @@ const ledger = [
      lede there on plain ground. Widths are whole multiples of 48px, so the
      kit's cell loses nothing to rounding. */
   .ap-open { --ap-poster-room: calc(128px + 2rem); }
-  .ap-open__poster { width: 192px; justify-self: end; }
+  .ap-open__poster { width: 252px; justify-self: end; }
   @media (max-width: 29.99rem) {
     .ap-open { --ap-poster-room: calc(96px + 2rem); }
-    .ap-open__poster { width: 144px; }
+    .ap-open__poster { width: 126px; }
   }
   @media (min-width: 64rem) {
     .ap-open__inner { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
-    .ap-open__poster { width: 288px; background: var(--sl-bg-canvas); }
+    .ap-open__poster { width: 252px; background: var(--sl-bg-canvas); }
   }
   .ap-open__h {
     margin-top: 1.5rem;

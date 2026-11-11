@@ -94,6 +94,8 @@ const FILL: [RegExp, string][] = [
   [/(<section class="sl-art-field[^"]*">) … (<\/section>)/g, '$1<p>' + LINE + '</p>$2'],
   // The poster's page head (ui-kit 0.42): specimen() has already turned the catalog's <h1> into a <div> by this point.
   [/(<header>\s*<div>) <div>…<\/div> <p>…<\/p> (<\/div>)/g, '$1<p><strong>A page head</strong></p><p>' + LINE + '</p>$2'],
+  // The horizon's section (ui-kit 0.45): its <h2> is a <div> by this point too.
+  [/(<section class="sl-art-horizon[^"]*"[^>]*>) <div>…<\/div> <p>…<\/p> (<\/section>)/g, '$1<p><strong>A section</strong></p><p>' + LINE + '</p>$2'],
 ];
 const HGRID_CELL = '<p class="sl-eyebrow">Metric</p><p><strong>42</strong></p><p>One line of copy.</p>';
 

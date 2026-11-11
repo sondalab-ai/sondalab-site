@@ -163,6 +163,7 @@ test('a closed dialog opens, an open one is left, an ellipsis button gets an ico
 test('the art hosts get sample copy: a spaced card ellipsis and an art field (ui-kit 0.41)', () => {
   assert.match(run('<article class="sl-card sl-art-corner"> … </article>'), /<article class="sl-card sl-art-corner"><strong>Card title<\/strong><p>/);
   assert.match(run('<section class="sl-art-field"> … </section>'), /<section class="sl-art-field"><p>Sample copy/);
+  assert.match(run('<section class="sl-art-horizon" style="padding-bottom: 12.5rem"> <div>…</div> <p>…</p> </section>'), /<section class="sl-art-horizon" style="padding-bottom: 12\.5rem"><p><strong>A section<\/strong><\/p><p>Sample copy/);
 });
 
 test('a script in a snippet fails the build', () => {
