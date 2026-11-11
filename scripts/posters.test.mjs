@@ -70,7 +70,7 @@ test('the fixed pages each show a picture of their own: a scene and a seed', () 
   assert.equal(new Set(seeds).size, seeds.length, 'two fixed pages share a seed');
   for (const seed of seeds) assert.match(seed, /^[a-z][a-z-]*$/, `${seed} is not a text seed`);
   for (const cls of Object.values(PAGE_POSTERS)) assertPainted(cls);
-  assert.equal(PAGE_POSTERS.blog, posterClass(PAGE_POSTER_LOOKS.blog[0]));
+  assert.equal(PAGE_POSTERS.spexr, posterClass(PAGE_POSTER_LOOKS.spexr[0]));
 });
 
 test('the kit draws the art: Base.astro mounts it once for every page', () => {
@@ -79,9 +79,12 @@ test('the kit draws the art: Base.astro mounts it once for every page', () => {
   assert.match(base, /\bmountArt\(\);/);
 });
 
-test('every page ends on a horizon, seeded by its path, with its content above it', () => {
+test('every page ends on a horizon, new on every visit, with its content above it', () => {
   const footer = read('src/components/SiteFooter.astro');
-  assert.match(footer, /<footer class:list=\{\['site-footer', 'sl-art-horizon', dawn && 'sl-art-horizon--dawn'\]\} data-sl-art-seed=\{path\}>/);
+  assert.match(footer, /<footer class="site-footer sl-art-horizon" data-site-horizon>/);
+  // The seed and the scene are picked in the browser, so no two visits end alike.
+  assert.match(footer, /classList\.toggle\('sl-art-horizon--dawn', Math\.random\(\) < 0\.5\)/);
+  assert.match(footer, /dataset\.slArtSeed = String\(1 \+ Math\.floor\(Math\.random\(\) \* 0xfffffffe\)\)/);
   assert.ok(KIT_CSS.includes('.sl-art-horizon::before') && KIT_CSS.includes('.sl-art-horizon--dawn::before'), 'the kit has no horizon');
   // The horizon is 200px tall: the footer's bottom padding clears all of it.
   assert.match(KIT_CSS, /\.sl-art-horizon::after\s*\{[^}]*height:\s*min\(200px, 100%\)/);
@@ -93,10 +96,8 @@ test('every page ends on a horizon, seeded by its path, with its content above i
 const HEADS = [
   ['src/pages/products/[slug].astro', '<header class="product__head">', '</header>', 'poster', 'product.id'],
   ['src/pages/blog/[slug].astro', '<header class="post__head">', '</header>', 'poster', 'post.id'],
-  ['src/pages/blog/[...page].astro', '<header class="tlog-head">', '</header>', 'PAGE_POSTERS.blog', 'PAGE_POSTER_SEEDS.blog'],
   ['src/pages/spexr.astro', '<header class="sl-wrap hero">', '</header>', 'PAGE_POSTERS.spexr', 'PAGE_POSTER_SEEDS.spexr'],
   ['src/pages/daos.astro', '<div class="hero">', '<!-- 01', 'PAGE_POSTERS.daos', 'PAGE_POSTER_SEEDS.daos'],
-  ['src/pages/apparel/index.astro', '<section class="ap-open">', '</section>', 'PAGE_POSTERS.apparel', 'PAGE_POSTER_SEEDS.apparel'],
   ['src/pages/design-system.astro', '<header class="ds-head sl-wrap">', '</header>', 'PAGE_POSTERS.designSystem', 'PAGE_POSTER_SEEDS.designSystem'],
 ];
 
@@ -116,9 +117,20 @@ test('every fixed page poster is worn by exactly one page', () => {
   assert.deepEqual(used.map((e) => e.slice('PAGE_POSTERS.'.length)).sort(), Object.keys(PAGE_POSTERS).sort());
 });
 
+// One picture to a head (owner, 2026-11-11): the flat print over the
+// photographic scene read as a patchwork.
+test('a head that carries a CRT scene wears no poster', () => {
+  for (const file of ['src/pages/blog/[...page].astro', 'src/pages/apparel/index.astro']) {
+    const src = read(file);
+    assert.match(src, /<CrtScene\b/, `${file} has no scene`);
+    assert.doesNotMatch(src, /sl-art-poster|PAGE_POSTERS|posterSequence/, `${file} wears a poster over its scene`);
+  }
+  for (const [file] of HEADS) assert.doesNotMatch(read(file), /<CrtScene\b/, `${file} has a scene and a poster`);
+});
+
 test('products and posts take their poster from posterSequence', () => {
   assert.match(read('src/pages/products/[slug].astro'), /posterSequence\(products\.map\(\(p\) => p\.id\)\)/);
-  assert.match(read('src/pages/blog/[slug].astro'), /posterSequence\(posts\.map\(\(p\) => p\.id\), PAGE_POSTER_LOOKS\.blog\[0\]\)/);
+  assert.match(read('src/pages/blog/[slug].astro'), /posterSequence\(posts\.map\(\(p\) => p\.id\)\)/);
 });
 
 // The kit's cell is the box's width over 126, rounded down: a width that is

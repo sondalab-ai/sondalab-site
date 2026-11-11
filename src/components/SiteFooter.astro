@@ -2,14 +2,12 @@
 import Wordmark from './Wordmark.astro';
 import { SITE } from '../lib/site';
 const year = new Date().getFullYear();
-// The page ends on the kit's horizon (ui-kit 0.45): hills at the footer's
-// foot, the page as their sky. The path is the seed, so every page ends on
-// hills of its own; the archive and the posts end on the dawn.
-const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const dawn = path.startsWith('/blog');
+// The page ends on the kit's horizon (ui-kit 0.45): a scene at the footer's
+// foot, the page as its sky. The script below gives every visit a horizon of
+// its own; with no JavaScript the page ends on the kit's canonical hills.
 ---
 
-<footer class:list={['site-footer', 'sl-art-horizon', dawn && 'sl-art-horizon--dawn']} data-sl-art-seed={path}>
+<footer class="site-footer sl-art-horizon" data-site-horizon>
   <div class="sl-wrap site-footer__inner">
     <div class="site-footer__brand">
       <Wordmark size="1.2rem" />
@@ -22,6 +20,18 @@ const dawn = path.startsWith('/blog');
     </p>
   </div>
 </footer>
+
+<script>
+  // A new horizon on every visit (owner, 2026-11-11): a random seed and one
+  // of the kit's two scenes. The kit's mountArt() (Base.astro) follows the
+  // seed and the class, whichever script runs first, and draws the scene at
+  // the footer's real width.
+  const foot = document.querySelector<HTMLElement>('[data-site-horizon]');
+  if (foot) {
+    foot.classList.toggle('sl-art-horizon--dawn', Math.random() < 0.5);
+    foot.dataset.slArtSeed = String(1 + Math.floor(Math.random() * 0xfffffffe));
+  }
+</script>
 
 <style>
   /* The horizon is 200px tall and behind the footer's content: the bottom

@@ -16,15 +16,13 @@ export function posterClass(variant: PosterVariant): string {
 
 /**
  * The fixed posters of the pages that are not a collection entry: the scene
- * and the seed of each. Five pages and four scenes, so one scene comes back
- * on the two pages furthest apart (apparel and the design system), from
- * another seed.
+ * and the seed of each. A head that already carries a CRT scene (the
+ * archive, apparel) wears no poster: one picture to a head, or the flat
+ * print and the photographic scene read as two sites (owner, 2026-11-11).
  */
 export const PAGE_POSTER_LOOKS = {
-  blog: ['orbit', 'transmissions'],
   spexr: ['hills', 'spexr'],
   daos: ['overprint', 'daos'],
-  apparel: ['', 'apparel'],
   designSystem: ['', 'design-system'],
 } as const satisfies Record<string, readonly [PosterVariant, string]>;
 
@@ -46,7 +44,7 @@ function slugLook(slug: string): number {
  * order, posts newest first), keyed by slug. Each page starts from its slug's
  * scene and steps on past the scene of the page before it, so neighbours
  * never share a scene. `before` is the scene of the page that leads into the
- * first one (the archive's own poster, for the newest post). The page's slug
+ * first one, when it wears a poster. The page's slug
  * is also its seed, so two pages of one scene still show two pictures. The
  * guarantee stops at the ends: the oldest post's "read next" wraps to the
  * newest, which may match, and a new post shifts the scenes of the ones
