@@ -2,12 +2,13 @@
 import Wordmark from './Wordmark.astro';
 import { SITE } from '../lib/site';
 const year = new Date().getFullYear();
-// The page ends on the kit's horizon (ui-kit 0.45): a scene at the footer's
-// foot, the page as its sky. The script below gives every visit a horizon of
-// its own; with no JavaScript the page ends on the kit's canonical hills.
+// The page ends on a band of signal traces (src/lib/traces.ts), in the
+// page's own ink and accent, new on every visit (owner, 2026-11-11). It is
+// the site's one new piece of art: the heads carry none.
 ---
 
-<footer class="site-footer sl-art-horizon" data-site-horizon>
+<footer class="site-footer">
+  <canvas class="site-footer__band" data-foot-band aria-hidden="true"></canvas>
   <div class="sl-wrap site-footer__inner">
     <div class="site-footer__brand">
       <Wordmark size="1.2rem" />
@@ -22,29 +23,37 @@ const year = new Date().getFullYear();
 </footer>
 
 <script>
-  // A new horizon on every visit (owner, 2026-11-11): a random seed and one
-  // of the kit's two scenes. The kit's mountArt() (Base.astro) follows the
-  // seed and the class, whichever script runs first, and draws the scene at
-  // the footer's real width.
-  const foot = document.querySelector<HTMLElement>('[data-site-horizon]');
-  if (foot) {
-    foot.classList.toggle('sl-art-horizon--dawn', Math.random() < 0.5);
-    foot.dataset.slArtSeed = String(1 + Math.floor(Math.random() * 0xfffffffe));
-  }
+  import { mountTraces } from '../lib/traces';
+  const band = document.querySelector<HTMLCanvasElement>('[data-foot-band]');
+  if (band) mountTraces(band, 1 + Math.floor(Math.random() * 99999));
 </script>
 
 <style>
-  /* The horizon is 200px tall and behind the footer's content: the bottom
-     padding is its height, so the claim and the meta line stay on the page
-     ground above it. High contrast and forced colours paint no horizon, and
-     the footer gives the space back. */
+  /* The band is 150px tall, under the footer's content: the bottom padding
+     is its height, so the claim and the meta line stay on clear ground above
+     it. High contrast and forced colours draw no band, and the footer gives
+     the space back. */
   .site-footer {
     border-top: 1px solid var(--sl-border-subtle);
-    padding-block: 2.5rem calc(2.5rem + 200px);
+    padding-block: 2.5rem calc(2.5rem + 150px);
+    position: relative;
   }
+  .site-footer__band {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    color: color-mix(in srgb, var(--slc-text) 50%, transparent);
+    outline-color: var(--slc-accent-text);
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+  :global(:root[data-sl-theme='high-contrast']) .site-footer__band { display: none; }
   :global(:root[data-sl-theme='high-contrast']) .site-footer { padding-block-end: 2.5rem; }
   @media (forced-colors: active) {
     .site-footer { padding-block-end: 2.5rem; }
+    .site-footer__band { display: none; }
   }
   .site-footer__inner {
     display: flex;

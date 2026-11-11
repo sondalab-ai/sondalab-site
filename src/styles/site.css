@@ -178,17 +178,6 @@ a { color: inherit; }
   font-size: var(--sl-text-sm);
 }
 
-/* The page-head posters (.sl-art-poster; procedural prints since ui-kit
-   0.45, src/lib/posters.ts). The frame is 126 cells wide, so a poster's box
-   is 126, 252 or 378px: the picture then fills it on whole px. High
-   contrast and forced colours paint no poster but keep its box, so a head
-   would keep an empty column: the site closes the gap instead. The design
-   system page's own specimens keep the kit's behaviour. */
-:root[data-sl-theme='high-contrast'] .sl-art-poster:not(.ds-spec *) { display: none; }
-@media (forced-colors: active) {
-  .sl-art-poster:not(.ds-spec *) { display: none; }
-}
-
 /* .lede is a site class, so the kit's band cannot re-derive it. */
 .sl-invert .lede { color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent); }
 /* --- a thicker glass on the cards ---------------------------------------- *

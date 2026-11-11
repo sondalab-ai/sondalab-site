@@ -6,18 +6,15 @@ import { STATUS_META } from '../../lib/site';
 import { NOVELLAS } from '../../lib/novellas';
 import { Image } from 'astro:assets';
 import { SCREENS } from '../../lib/screens';
-import { posterSequence } from '../../lib/posters';
 
 export async function getStaticPaths() {
   const products = (await getCollection('products')).sort(
     (a, b) => a.data.order - b.data.order,
   );
-  const posters = posterSequence(products.map((p) => p.id));
   return products.map((p, i) => ({
     params: { slug: p.id },
     props: {
       product: p,
-      poster: posters.get(p.id)!,
       prev: products[i - 1] ?? null,
       next: products[i + 1] ?? null,
       total: products.length,
@@ -25,7 +22,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { product, poster, prev, next, total } = Astro.props;
+const { product, prev, next, total } = Astro.props;
 const { data } = product;
 const { Content } = await render(product);
 
@@ -83,7 +80,6 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
             </p>
           )}
         </div>
-        <div class={`product__poster ${poster}`} data-sl-art-seed={product.id} aria-hidden="true"></div>
       </header>
 
       <div class="product__body">
@@ -253,10 +249,6 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   }
   .product__back:hover { color: var(--slc-accent-text); }
 
-  /* The head is the text and the product's poster (src/lib/posters.ts) beside
-     it, never behind it (owner, 2026-10-26). Below 64rem the poster drops
-     under the text, aligned to the end. Its widths are whole multiples of
-     48px, so the kit's cell (the width over 48) loses nothing to rounding. */
   .product__head {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -264,19 +256,8 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     padding-block: clamp(2rem, 5vw, 3.5rem);
     border-bottom: 1px solid var(--sl-border-subtle);
   }
-  .product__poster { width: 252px; justify-self: end; }
-  @media (max-width: 29.99rem) {
-    .product__poster { width: 126px; }
-  }
-  @media (min-width: 64rem) {
-    .product__head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
-    .product__poster { width: 252px; }
-  }
-  @media (min-width: 80rem) {
-    .product__poster { width: 378px; }
-  }
   /* A burst's shard copies do not wrap with the name: held to its box, plus
-     the jitter, so they never cross into the poster's column. */
+     the jitter. */
   .product__name .sl-fx-glitch__shards { overflow: clip; overflow-clip-margin: 1.25rem; }
   .product__name {
     /* .sl-fx-glitch is inline-block, and .sl-eyebrow above is inline-flex: left
