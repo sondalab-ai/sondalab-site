@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 // The site's art. No page wears a kit poster or a kit horizon: the pictures
 // are the inked prints in src/assets/art (owner, 2026-11-12). The footer ends
-// on the wordmark as type. Read from the source, since CI runs the tests
+// on a still life drawn in the page's ink. Read from the source, since CI runs the tests
 // before the build.
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -19,15 +19,12 @@ test('no page or component wears a kit poster or a kit horizon', () => {
   }
 });
 
-test('the footer ends on the wordmark, as type, and gives the space back without it', () => {
+test('the footer ends on the still life, in one ink, and gives the space back without it', () => {
   const footer = read('src/components/SiteFooter.astro');
-  // Type in the brand face, not a canvas and not a script.
-  assert.match(footer, /<div class="site-footer__mark" aria-hidden="true">sondalab<span>\.<\/span><\/div>/);
-  assert.match(footer, /\.site-footer__mark\s*\{[^}]*font-family:\s*var\(--sl-font-brand\)/);
+  // A mask painted in the page's own text colour: no canvas, no script, no colour of its own.
+  assert.match(footer, /<div class="site-footer__still" style=\{`--still:url\(\$\{still\.src\}\)`\} aria-hidden="true"><\/div>/);
+  assert.match(footer, /\.site-footer__still\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--slc-text\) 42%, transparent\);[^}]*mask:\s*var\(--still\)/);
   assert.doesNotMatch(footer, /<canvas|<script|mountTraces/);
-  // Its two colours are the page's: the ink, faint, and the accent.
-  assert.match(footer, /\.site-footer__mark\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--slc-text\) 9%, transparent\)/);
-  assert.match(footer, /\.site-footer__mark span\s*\{[^}]*var\(--sl-accent-default\)/);
-  assert.match(footer, /high-contrast'\]\) \.site-footer__mark \{ display: none; \}/);
-  assert.match(footer, /forced-colors: active[\s\S]*\.site-footer__mark \{ display: none; \}/);
+  assert.match(footer, /high-contrast'\]\) \.site-footer__still \{ display: none; \}/);
+  assert.match(footer, /forced-colors: active[\s\S]*\.site-footer__still \{ display: none; \}/);
 });
