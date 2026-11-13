@@ -1,0 +1,112 @@
+---
+// A poster hero: one print is the whole band. The print is made for it, with
+// its subject in the right half and empty ground in the left half, where the
+// slot's text stands in dark ink. Every poster print has its ground repainted
+// to one orange, and `ground` is a swatch of that same orange: stretched
+// across the band, it continues the print with no seam, and the stylesheet
+// holds no colour.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  print: ImageMetadata;
+  ground: ImageMetadata;
+}
+const { print, ground } = Astro.props;
+---
+
+<div class="ph">
+  <Image class="ph__ground" src={ground} alt="" width={8} loading="eager" />
+  <div class="ph__stage">
+    <Image class="ph__ground" src={ground} alt="" width={8} loading="eager" />
+    <Image class="ph__print" src={print} alt="" widths={[768, 1152, 1536]} sizes="(min-width: 60rem) 60rem, 100vw" loading="eager" fetchpriority="high" />
+    <div class="sl-wrap ph__in">
+      <div class="ph__text"><slot /></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ph {
+    /* The ground is light in both themes, so the ink is the dark end of the
+       theme: the canvas in the dark theme, the text in the light theme. */
+    --ph-ink: var(--sl-bg-canvas);
+    --ph-paper: var(--sl-text-primary);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  :global(:root[data-sl-theme='light']) .ph { --ph-ink: var(--sl-text-primary); --ph-paper: var(--sl-bg-canvas); }
+
+  /* The band is full width. The poster itself, the stage, stops at 92rem and
+     stays centred, so the figure stays near the text on a wide screen. Outside
+     the stage the same ground runs on, a step darker and softer: a grey of the
+     theme's ink and paper laid over it, which takes some colour out as well. */
+  .ph::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: color-mix(in srgb, color-mix(in srgb, var(--ph-ink) 82%, var(--ph-paper)) 17%, transparent);
+  }
+  .ph__stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    max-width: 92rem;
+    margin-inline: auto;
+  }
+  .ph__ground,
+  .ph__print { position: absolute; top: 0; height: 100%; max-width: none; }
+  .ph__ground { left: 0; width: 100%; z-index: -3; }
+  .ph__stage > .ph__ground { z-index: -2; }
+  .ph__print { right: 0; width: auto; z-index: -1; }
+
+  .ph__in {
+    display: flex;
+    align-items: center;
+    /* About half a screen, never more than 34rem: the band is a head, and the
+       page goes on below it in the first view. */
+    min-height: clamp(24rem, 52vh, 34rem);
+    padding-block: clamp(2.5rem, 4vw, 4rem);
+  }
+  /* Wide enough that a long headline takes few lines and does not push the
+     band taller. The print's own left half is empty, so the text may run under
+     the print's box as far as its middle. */
+  .ph__text { max-width: min(42rem, 56%); }
+  /* Text elements only. A `span` rule would also repaint the layers that the
+     kit puts inside a button on hover. */
+  .ph__text :global(:is(p, h1, h2, dt, dd, li)),
+  .ph__text :global(.sl-btn:not(.sl-btn--primary)) {
+    color: var(--ph-ink);
+  }
+  .ph__text :global(.sl-btn:not(.sl-btn--primary)) { border-color: var(--ph-ink); }
+
+  /* Narrow: the text first on the ground, then the subject half of the print,
+     which stands on the band's bottom edge as it does on a wide screen. */
+  @media (max-width: 60rem) {
+    .ph__stage { display: flex; flex-direction: column; }
+    .ph__in { order: 1; min-height: 0; padding-block: 3rem 1.5rem; }
+    .ph__text { max-width: none; }
+    .ph__print {
+      order: 2;
+      position: static;
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+      object-position: 100% 100%;
+    }
+  }
+
+  /* No print and no ground: the hero is plain text on the page, in the theme's ink. */
+  :global(:root[data-sl-theme='high-contrast']) .ph { --ph-ink: initial; }
+  :global(:root[data-sl-theme='high-contrast']) .ph :is(.ph__ground, .ph__print) { display: none; }
+  :global(:root[data-sl-theme='high-contrast']) .ph::after { display: none; }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .ph { --ph-ink: initial; }
+    .ph__ground, .ph__print { display: none; }
+    .ph::after { display: none; }
+  }
+</style>

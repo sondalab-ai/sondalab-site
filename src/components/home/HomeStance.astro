@@ -1,0 +1,38 @@
+---
+import PrintHero from '../PrintHero.astro';
+import print from '../../assets/art/band-stance.webp';
+import ground from '../../assets/art/band-ground.webp';
+---
+
+<section class="hs">
+  <PrintHero print={print} ground={ground}>
+    <p class="sl-eyebrow hs__label">The stance</p>
+    <h2 class="hs__claim">
+      Tools that keep you in command of the machines working for you.
+    </h2>
+    <p class="hs__body">
+      Sondalab builds software that runs, watches and improves the agents doing
+      your work, and keeps them legible, controllable and yours. The stance
+      holds as machines grow more capable: from today's software agents toward
+      the physical systems, and robotics, ahead.
+    </p>
+  </PrintHero>
+</section>
+
+<style>
+  .hs__label { margin-bottom: 1.5rem; }
+  .hs__claim {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(2.2rem, 1rem + 3.4vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+  .hs__body {
+    margin: 1.5rem 0 0;
+    font-size: var(--sl-text-lg);
+    line-height: var(--sl-line-normal);
+  }
+</style>

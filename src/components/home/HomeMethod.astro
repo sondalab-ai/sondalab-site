@@ -1,0 +1,135 @@
+---
+import { Image } from 'astro:assets';
+import shot from '../../assets/spexr/spec-detail.png';
+
+const points = [
+  {
+    claim: 'We write the intent first.',
+    proof: 'Every change starts as a written decision, before an agent touches a file.',
+  },
+  {
+    claim: 'The machines show their work.',
+    proof: 'Each step is visible while it runs and traceable afterwards, so nothing lands unexplained.',
+  },
+  {
+    claim: "Drift doesn't ship.",
+    proof: 'A design audit and a content schema stop the build on any mismatch. This page passed both.',
+  },
+];
+---
+
+<section id="method" class="sl-section hm">
+  <div class="sl-wrap hm__grid">
+    <div class="hm__text">
+      <p class="sl-eyebrow">The method</p>
+      <h2 class="h2 hm__title">We run on our own tools first.</h2>
+      <p class="lede hm__lede">
+        Sondalab is built by directing agents with the same tools we ship. What
+        reaches you has already carried our own work.
+      </p>
+
+      <ol class="hm__steps">
+        {points.map((p, i) => (
+          <li class="hm__step">
+            <span class="hm__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h3 class="hm__claim">{p.claim}</h3>
+              <p class="hm__proof">{p.proof}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <figure class="hm__fig">
+      <div class="hm__window">
+        <Image
+          src={shot}
+          alt="A spec open in SPEXR: five acceptance criteria as tasks, two ticked, and the seven workflow steps from Specify to Ship with Implement in progress."
+          widths={[720, 1080, 1440, 2160]}
+          sizes="(min-width: 60rem) 56rem, 92vw"
+        />
+      </div>
+      <figcaption class="hm__cap">
+        This site's own kind of work, in SPEXR: the spec first, its acceptance
+        criteria ticked as the agent lands them.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hm { overflow: clip; }
+  .hm__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+    gap: 3rem clamp(2rem, 5vw, 5rem);
+    align-items: start;
+  }
+  .hm__title { margin-top: 1.25rem; }
+  .hm__lede { margin: 1.25rem 0 0; }
+
+  .hm__steps {
+    list-style: none;
+    margin: clamp(2rem, 4vw, 3rem) 0 0;
+    padding: 0;
+  }
+  .hm__step {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--rule);
+  }
+  .hm__n {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+    color: var(--slc-accent-text);
+    padding-top: 0.2rem;
+  }
+  .hm__claim {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: var(--sl-text-xl);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  .hm__proof {
+    margin: 0.4rem 0 0;
+    color: var(--sl-text-secondary);
+    line-height: var(--sl-line-normal);
+  }
+
+  /* The window is wider than its column and runs off the page edge: the
+     reader sees the left part of a real screen, at a size where its text
+     reads. */
+  .hm__fig { margin: 0; min-width: 0; }
+  .hm__window {
+    width: 56rem;
+    max-width: none;
+    border-radius: var(--sl-radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--sl-border-default),
+      var(--sl-shadow-lg);
+    background: var(--sl-bg-surface);
+  }
+  .hm__window img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hm__cap {
+    margin-top: 1rem;
+    max-width: 44ch;
+    font-size: var(--sl-text-sm);
+    line-height: var(--sl-line-normal);
+    color: var(--sl-text-secondary);
+  }
+
+  @media (max-width: 60rem) {
+    .hm__grid { grid-template-columns: 1fr; }
+    .hm__window { width: 100%; }
+  }
+</style>

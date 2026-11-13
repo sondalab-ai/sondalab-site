@@ -16,6 +16,8 @@ export const STATUS_META: Record<
   'public-beta': { label: 'Public beta', note: 'usable, still stabilising' },
   beta: { label: 'Beta', note: 'early, evolving fast' },
   poc: { label: 'PoC', note: 'proof of concept, not delivered' },
+  research: { label: 'Active research', note: 'the solution is being polished for production' },
+  archived: { label: 'Archived', note: 'finished research, no longer developed' },
 };
 
 /**

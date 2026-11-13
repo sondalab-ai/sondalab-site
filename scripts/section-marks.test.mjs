@@ -7,20 +7,14 @@ import { SPEXR_SECTIONS } from '../src/lib/spexr-page.ts';
 // Every section head's eyebrow wears the kit's glyph, and no two neighbouring
 // heads on a page wear the same one (owner, 2026-10-27: "a bit of variation on
 // the art symbols"). Read from the source, since CI runs the tests before the
-// build. Files are listed in page order, so the home page's four components
-// are checked as one run of heads.
+// build. The home page is not listed: since 2026-11-12 its sections have no
+// numbered heads, so it has no marks to vary.
 const PAGES = {
-  home: [
-    'src/components/Thesis.astro',
-    'src/components/ProductsIndex.astro',
-    'src/components/Method.astro',
-    'src/components/Contact.astro',
-  ],
   daos: ['src/pages/daos.astro'],
   apparel: ['src/pages/apparel/index.astro'],
 };
 /** How many section heads each page has, so a head the regex misses fails. */
-const HEADS = { home: 4, daos: 9, apparel: 2 };
+const HEADS = { daos: 9, apparel: 2 };
 /** The kit's stylesheet: a glyph must be a modifier it defines, not one this
  *  repo believes in. */
 const KIT_CSS = readFileSync(new URL('../node_modules/@sondalab/ui-kit/components.css', import.meta.url), 'utf8');
@@ -53,11 +47,6 @@ for (const [page, files] of Object.entries(PAGES)) {
     assertNeighboursDiffer(page, glyphs);
   });
 }
-
-test('home: the four sections wear four different glyphs', () => {
-  const glyphs = PAGES.home.flatMap(headEyebrows).map(glyphOf);
-  assert.equal(new Set(glyphs).size, 4);
-});
 
 // The spexr page renders its heads in a loop through markClass, plus the
 // closing "How it runs" head at the next index.

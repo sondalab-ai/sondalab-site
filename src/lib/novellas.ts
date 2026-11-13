@@ -1,7 +1,6 @@
 /**
  * Per-product "operator's log": a serial cyberpunk novella, one chapter per
- * tool, distinct from the home interludes: longer, literary (serif), and tied
- * by a fil rouge. One operator, one long night (≈2am → dawn along product
+ * tool, tied by a fil rouge. One operator, one long night (≈2am → dawn along product
  * order), a recurring antagonist ("the service", the remote cloud that wants
  * the work back) and a recurring refrain ("the switch is yours"). Keyed by
  * product id; each value is the chapter's paragraphs. The chapter number comes
@@ -44,3 +43,14 @@ export const NOVELLAS: Record<string, string[]> = {
     "Tomorrow night starts where this one ended. The switch is yours. End of shift.",
   ],
 };
+
+/** The night in chapter order: one tool per hour, 2am to the end of the shift. */
+export const NIGHT: { id: string; hour: string }[] = [
+  { id: 'spexr', hour: '02:00' },
+  { id: 'introspect', hour: '03:00' },
+  { id: 'claude-loadout', hour: '04:00' },
+  { id: 'daos', hour: '05:00' },
+  { id: 'local-agents', hour: '06:00' },
+  { id: 'skillkit', hour: '07:00' },
+  { id: 'mxm', hour: '08:00' },
+];

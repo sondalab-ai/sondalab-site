@@ -2,12 +2,11 @@
 import { Image, getImage } from 'astro:assets';
 
 import Base from '../../layouts/Base.astro';
-import CrtScene from '../../components/CrtScene.astro';
-import cityFlat from '../../assets/scenes/city-flat.webp';
-import cityFlatLight from '../../assets/scenes/city-flat-light.webp';
+import PrintHero from '../../components/PrintHero.astro';
+import wearer from '../../assets/art/band-apparel.webp';
+import wearerGround from '../../assets/art/band-ground.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
-import { PAGE_POSTERS } from '../../lib/posters';
 
 const { storeUrl, categories } = APPAREL;
 const open = storeUrl !== null;
@@ -40,22 +39,7 @@ const ledger = [
   description="Sondalab apparel: tees, caps and pants. Every piece funds the open-source research behind the tools."
 >
   <section class="ap-open">
-    {/* The city sits behind the opening rather than beside it, so the page
-        starts inside the world the clothes come from. It runs at roughly a
-        third of full intensity: the heading and the lede are on the glass, and
-        a tube bright enough to be admired is a tube nobody can read off. The
-        figure is the one scripts/contrast-probe.mjs settled on, not a taste. */}
-    <CrtScene
-      scene="city"
-      flat={cityFlat}
-      flatLight={cityFlatLight}
-      intensity={0.35}
-      class="ap-open__field"
-      pointerHost=".ap-open"
-    />
-
-    <div class="sl-wrap ap-open__inner">
-      <div>
+    <PrintHero print={wearer} ground={wearerGround}>
         <p class="sl-eyebrow">Apparel</p>
         <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
         <p class="lede ap-open__lede">
@@ -63,13 +47,10 @@ const ledger = [
           itself. Apparel is how the research gets funded: you get something worth
           wearing, the work gets another month.
         </p>
-      </div>
-      <div class={`ap-open__poster ${PAGE_POSTERS.apparel}`} aria-hidden="true"></div>
-    </div>
+    </PrintHero>
   </section>
 
   <section class="sl-section ap-pact">
-    <div class="ap-bed sl-art-field sl-art-field--stripes sl-art-field--fade-end" aria-hidden="true"></div>
     <div class="sl-wrap ap-pact__grid">
       <div>
         <div class="sl-section__head">
@@ -98,7 +79,6 @@ const ledger = [
   </section>
 
   <section class="sl-section ap-cats">
-    <div class="ap-bed sl-art-field sl-art-field--fade-down" aria-hidden="true"></div>
     <div class="sl-wrap">
       <div class="sl-section__head">
         <span class="sl-section__idx">02</span>
@@ -173,72 +153,6 @@ const ledger = [
 
 <style>
   /* --- opening ------------------------------------------------------- */
-  .ap-open {
-    position: relative;
-    isolation: isolate;
-    padding-block: clamp(5rem, 12vw, 10rem) clamp(4rem, 9vw, 8rem);
-  }
-  /* `:global()` because the element is rendered by CrtScene.astro and carries
-     that component's scope rather than this page's. The class is doubled up
-     with `.crt-scene` to win on specificity: the component declares
-     `position: relative` for its own children, and a single-class rule here
-     loses to it on source order — which collapses the backdrop to zero height,
-     since everything inside it is absolutely positioned. */
-  :global(.crt-scene.ap-open__field) {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  /*
-   * The words need a ground of their own, and dimming the picture until they
-   * get one is the wrong trade: measured with scripts/contrast-probe.mjs, the
-   * light theme bottoms out at 1.00:1 — the tube matching the lede's own colour
-   * exactly — and the scene has to fall to a smudge before it clears 4.5:1.
-   * Both themes are ink-on-paper or light-on-glass, and the text is the same
-   * substance as the picture behind it.
-   *
-   * So the left of the tube is lit to the page's own canvas colour and falls off
-   * across the frame: a broadcast's lower-third rather than a wash over a photo.
-   * The picture survives where nothing is read, which is most of it.
-   */
-  .ap-open::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      95deg,
-      var(--sl-bg-canvas) 0%,
-      var(--sl-bg-canvas) 44%,
-      color-mix(in srgb, var(--sl-bg-canvas) 60%, transparent) 64%,
-      transparent 84%
-    );
-  }
-  .ap-open__inner {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2rem;
-  }
-  /* The page's poster (src/lib/posters.ts), beside the heading and never
-     behind it (owner, 2026-10-26). From 64rem it hangs on the city like a
-     bill on a wall: a plate of the page's own canvas, so its ink reads off
-     the page's ground rather than off the picture. Below that the scene is
-     masked away from the bottom of the section, and the poster follows the
-     lede there on plain ground. Widths are whole multiples of 48px, so the
-     kit's cell loses nothing to rounding. */
-  .ap-open { --ap-poster-room: calc(128px + 2rem); }
-  .ap-open__poster { width: 192px; justify-self: end; }
-  @media (max-width: 29.99rem) {
-    .ap-open { --ap-poster-room: calc(96px + 2rem); }
-    .ap-open__poster { width: 144px; }
-  }
-  @media (min-width: 64rem) {
-    .ap-open__inner { grid-template-columns: minmax(0, 1fr) auto; column-gap: 3rem; align-items: center; }
-    .ap-open__poster { width: 288px; background: var(--sl-bg-canvas); }
-  }
   .ap-open__h {
     margin-top: 1.5rem;
     max-width: 14ch;
@@ -247,32 +161,8 @@ const ledger = [
     margin-top: clamp(1.75rem, 4vw, 2.75rem);
     max-width: 46ch;
   }
-  /* Below 64rem the lede runs across the tube, past the lit left of the
-     frame: it read 2.63:1 over the live scene and 1.27:1 over its flat image
-     at 390px, and 2.48:1 over the image at 768px (light). So the scene is
-     composed above it: it holds the top and the right, behind the heading
-     (large, it clears its 3:1 there), and dissolves toward the bottom of the
-     section over 7rem, gone 15rem up from it, the height of the lede and the
-     padding under it at these widths. Nothing of it comes back below the
-     words. From 64rem the lede sits in the lit left (1024px: passes).
-     The poster follows the lede at these widths, so the clear zone grows by
-     its height and the gap above it (--ap-poster-room): without that the
-     lede rose back into the scene and read 2.83:1 at 390px (light). */
-  @media (max-width: 63.99rem) {
-    :global(.crt-scene.ap-open__field) {
-      --ap-room: calc(15rem + var(--ap-poster-room));
-      -webkit-mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
-      mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
-    }
-  }
-
-  /* --- the beds ------------------------------------------------------ */
-  /* Both sections lie on a bed of the kit's art fields, as the home page
-     lays its own (Method, ProductsIndex): the stripes under the pact, fading
-     out toward its text, and the truchet under the pieces, fading down. */
   .ap-pact,
   .ap-cats { position: relative; }
-  .ap-bed { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .ap-pact > .sl-wrap,
   .ap-cats > .sl-wrap { position: relative; z-index: 1; }
 

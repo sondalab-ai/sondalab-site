@@ -1,7 +1,14 @@
 ---
 import Wordmark from './Wordmark.astro';
+import still from '../assets/art/footer-still.png';
 import { SITE } from '../lib/site';
 const year = new Date().getFullYear();
+// The page ends on the end of the shift: the helmet on the desk, its wires
+// unplugged, the jacket on the chair, the lamp off. The picture is a dithered
+// mask: 2px squares through the kit's Bayer matrix, the same texture as the
+// kit's dither hover. The page paints it in its own text colour at a low
+// share, so it follows the theme. It is a closing line, not a second hero.
+// The file is used as it is: a resize would blur the squares.
 ---
 
 <footer class="site-footer">
@@ -16,12 +23,32 @@ const year = new Date().getFullYear();
       <a class="site-footer__feed" href="/rss.xml">RSS</a>
     </p>
   </div>
+  <div class="sl-wrap">
+    <div class="site-footer__still" style={`--still:url(${still.src})`} aria-hidden="true"></div>
+  </div>
 </footer>
 
 <style>
   .site-footer {
     border-top: 1px solid var(--sl-border-subtle);
-    padding-block: 2.5rem;
+    padding-block: 2.5rem 0;
+    overflow: hidden;
+  }
+  /* 352 x 154 cells. At 44rem a cell is 2px, so the squares are whole. It
+     stands on the bottom edge of the page. */
+  .site-footer__still {
+    margin: 2.5rem auto 0;
+    width: min(100%, 44rem);
+    aspect-ratio: 352 / 154;
+    background: color-mix(in srgb, var(--slc-text) 42%, transparent);
+    -webkit-mask: var(--still) center / 100% 100% no-repeat;
+    mask: var(--still) center / 100% 100% no-repeat;
+  }
+  :global(:root[data-sl-theme='high-contrast']) .site-footer__still { display: none; }
+  :global(:root[data-sl-theme='high-contrast']) .site-footer { padding-block-end: 2.5rem; }
+  @media (forced-colors: active) {
+    .site-footer { padding-block-end: 2.5rem; }
+    .site-footer__still { display: none; }
   }
   .site-footer__inner {
     display: flex;
@@ -38,7 +65,6 @@ const year = new Date().getFullYear();
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
   .site-footer__feed:hover { color: var(--slc-accent-text); }
-  /* Its underline joins the focus ring (site.css): left neutral it is a band. */
   .site-footer__feed:focus-visible { border-bottom-color: var(--slc-focus); }
   .site-footer__claim {
     margin: 0;

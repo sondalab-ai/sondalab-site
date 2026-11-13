@@ -1,11 +1,9 @@
 ---
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
-import CrtScene from '../../components/CrtScene.astro';
-import uprisingFlat from '../../assets/scenes/uprising-flat.webp';
-import uprisingFlatLight from '../../assets/scenes/uprising-flat-light.webp';
+import { Image } from 'astro:assets';
+import desk from '../../assets/art/blog-desk.webp';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
-import { PAGE_POSTERS } from '../../lib/posters';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPosts();
@@ -36,10 +34,6 @@ const rows = page.data.map((post, i) => ({
 const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
 const pageHref = (n: number) => (n === 1 ? '/blog/' : `/blog/${n}/`);
 
-// Both readings of the same brief — machines against us, machines alongside us.
-// The tube changes channel between them on a timer rather than one per archive
-// page, so a visitor sees both without paging.
-const BAND_SCENES = ['uprising', 'kinship'];
 ---
 
 <Base
@@ -53,6 +47,9 @@ const BAND_SCENES = ['uprising', 'kinship'];
         within one screen of each other. */}
     <div class="tlog-open">
       <div class="sl-wrap tlog-open__inner">
+        <div class="tlog-print">
+          <Image src={desk} alt="" widths={[768, 1216, 1536]} sizes="(min-width: 80rem) 76rem, 92vw" loading="eager" />
+        </div>
         <header class="tlog-head">
           <div class="tlog-head__title">
             <p class="sl-eyebrow">Transmissions</p>
@@ -71,7 +68,6 @@ const BAND_SCENES = ['uprising', 'kinship'];
           </div>
 
           <div class="tlog-head__side">
-            <div class={`tlog-head__poster ${PAGE_POSTERS.blog}`} aria-hidden="true"></div>
             <label class="sl-field tsearch" data-tsearch-box hidden>
               <span class="sl-field__label">Filter</span>
               <input
@@ -89,16 +85,6 @@ const BAND_SCENES = ['uprising', 'kinship'];
           </div>
         </header>
       </div>
-      {/* After the head in the document, behind it on screen: a screen reader
-          reaches the archive's title before the scene that decorates it, and
-          the tube's own position is set by the stylesheet either way. */}
-      <CrtScene
-        scene={BAND_SCENES}
-        flat={uprisingFlat}
-        flatLight={uprisingFlatLight}
-        class="tlog-open__field"
-        pointerHost=".tlog-open"
-      />
     </div>
 
     <div class="sl-wrap">
@@ -177,63 +163,17 @@ const BAND_SCENES = ['uprising', 'kinship'];
 <style>
   .tlog-page { padding-block: 0 clamp(4rem, 8vw, 7rem); }
 
-  /*
-   * The head is read off the tube instead of standing above it. A band between
-   * the two cost 490px at 1440x900 — a full screen of title and picture with no
-   * transmission in it — and the archive is a log, not a poster.
-   *
-   * `--tube` is how much of the section sits above the first line of type. The
-   * scrim keys off the same measure, so the picture runs clean where nothing is
-   * read and the words get a ground exactly where they start.
-   */
-  .tlog-open {
-    /* The measure follows the width as well as the height. Full-bleed, a height
-       keyed to `vh` alone turns the tube into a slit as the screen widens: at
-       3440px it ran at 9:1. The `vw` term keeps the aspect honest and the cap
-       stops the picture from pushing the archive off the screen. */
-    --tube: clamp(13rem, max(34vh, 17vw), 30rem);
-    position: relative;
-    isolation: isolate;
-    padding-top: var(--tube);
+  /* The archive opens on one print, the operator's desk, at its own shape and
+     inside the page column. The head stands below it on plain ground. */
+  .tlog-open { padding-top: clamp(1.5rem, 4vw, 3rem); }
+  .tlog-print img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--sl-radius-md);
   }
-  /* `:global()` because the element is rendered by CrtScene.astro and carries
-     that component's scope. Doubled with `.crt-scene` to beat the component's
-     own `position: relative`, which would otherwise collapse the backdrop to
-     zero height — everything inside it is absolutely positioned. */
-  :global(.crt-scene.tlog-open__field) {
-    position: absolute;
-    /* Stops short of the section's foot rather than filling it. The tube frames
-       its scene to the box it is given, so a box as tall as the whole head puts
-       the crowd behind the type and leaves the sky where the picture is actually
-       seen. Ending a little below the first line keeps the subject in the clear
-       and still carries the picture under the words. */
-    inset: 0 0 auto;
-    height: calc(var(--tube) + 9rem);
-    z-index: 0;
-  }
-  /*
-   * Not a decorative wash. The picture runs untouched down to two thirds of
-   * `--tube` and the type below keeps a ground it can be read off, with a tenth
-   * of the broadcast still coming through so the head reads as glass rather
-   * than as a panel laid over one. The readouts pay for that in ink rather than
-   * in opacity: they run at `--sl-text-secondary` here, not the site's muted
-   * grey, which on paper measures 3.49:1 against bare canvas and has nothing
-   * left to give. Measured with scripts/contrast-probe.mjs.
-   */
-  .tlog-open::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      transparent 0,
-      transparent calc(var(--tube) * 0.62),
-      color-mix(in srgb, var(--sl-bg-canvas) 62%, transparent) calc(var(--tube) * 0.85),
-      color-mix(in srgb, var(--sl-bg-canvas) 88%, transparent) var(--tube),
-      color-mix(in srgb, var(--sl-bg-canvas) 96%, transparent) 100%
-    );
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .tlog-print { display: none; }
   }
   .tlog-open__inner { position: relative; z-index: 2; }
 
@@ -249,14 +189,6 @@ const BAND_SCENES = ['uprising', 'kinship'];
   @media (min-width: 52rem) {
     .tlog-head { grid-template-columns: 1.5fr 0.85fr; align-items: end; }
     .tlog-head__side { padding-bottom: 0.5rem; }
-  }
-  /* The archive's poster (src/lib/posters.ts) heads the operator column,
-     beside the wordmark and never behind it (owner, 2026-10-26). Widths are
-     whole multiples of 48px, so the kit's cell loses nothing to rounding. */
-  .tlog-head__side { display: grid; }
-  .tlog-head__poster { width: 192px; justify-self: end; margin-bottom: 1.5rem; }
-  @media (max-width: 29.99rem) {
-    .tlog-head__poster { width: 144px; }
   }
   .tlog-head__h {
     /* .sl-fx-glitch is inline-block, and .sl-eyebrow above is inline-flex: left

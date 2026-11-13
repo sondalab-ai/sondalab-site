@@ -12,19 +12,11 @@
  * entirely.
  */
 import { SITE } from './site';
-import { NOVELLAS } from './novellas';
+import { NIGHT, NOVELLAS } from './novellas';
 
-/** Chapter order matches the products' order: one long night, 2am to dawn. */
-const ORDER = ['spexr', 'introspect', 'claude-loadout', 'daos', 'local-agents', 'skillkit', 'mxm'] as const;
-const HOURS: Record<string, string> = {
-  spexr: '02:00',
-  introspect: '03:00',
-  'claude-loadout': '04:00',
-  daos: '05:00',
-  'local-agents': '06:00',
-  skillkit: '07:00',
-  mxm: '08:00',
-};
+/** Chapter order and hours come from the one list of the night, 2am to 8am. */
+const ORDER = NIGHT.map((n) => n.id);
+const HOURS: Record<string, string> = Object.fromEntries(NIGHT.map((n) => [n.id, n.hour]));
 
 type Kind =
   | 'boot' | 'eyebrow' | 'claim' | 'claim-accent' | 'tagline'

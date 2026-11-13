@@ -1,0 +1,218 @@
+---
+import { Image } from 'astro:assets';
+import shot from '../../assets/spexr/darkfactory.png';
+
+
+// The three pins sit on real things in the capture. x and y are shares of the
+// picture's own box, so they hold at every width.
+const pins = [
+  {
+    x: 5.25,
+    y: 59.5,
+    verb: 'See it',
+    body: 'Every session says what it is doing now, in plain words, while it runs. <strong>No black boxes.</strong>',
+  },
+  {
+    x: 23.8,
+    y: 40.6,
+    verb: 'Steer it',
+    body: 'A session that needs you stops and says so. You direct it, correct it or take the controls back. <strong>Assistance, never autopilot.</strong>',
+  },
+  {
+    x: 10.6,
+    y: 18.4,
+    verb: 'Own it',
+    body: 'Your project, your harness, your machine. The data and <strong>the off-switch stay yours</strong>.',
+  },
+];
+---
+
+<section class="hh">
+  <div class="sl-wrap">
+    <header class="hh__head">
+      <p class="hh__stamp">Operator's log · SPEXR</p>
+      <p class="hh__line">
+        The whole floor, every session, glows on one dark wall{' '}
+        <span class="hh__line-accent">where you can see it breathe.</span>
+      </p>
+    </header>
+
+    <figure class="hh__fig" id="approach">
+      <div class="hh__window">
+        <Image
+          src={shot}
+          alt="SPEXR, the agents view: four agent sessions on one project. Each card shows what the session is doing now. One card is marked 'needs you'."
+          widths={[720, 1080, 1440, 2160, 2880]}
+          sizes="(min-width: 80rem) 76rem, 92vw"
+                  />
+        <ol class="hh__pins" aria-hidden="true">
+          {pins.map((p, i) => (
+            <li class="hh__pin" style={`--x:${p.x}%;--y:${p.y}%`}>{i + 1}</li>
+          ))}
+        </ol>
+      </div>
+
+      <figcaption class="hh__cap">
+        <p class="hh__src">
+          <span>SPEXR · the agents view</span>
+          <a href="/products/spexr/">Open the product →</a>
+        </p>
+        <ol class="hh__legend">
+          {pins.map((p, i) => (
+            <li class="hh__item">
+              <span class="hh__n" aria-hidden="true">{i + 1}</span>
+              <h3 class="hh__verb">{p.verb}</h3>
+              <p class="hh__body" set:html={p.body}></p>
+            </li>
+          ))}
+        </ol>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hh {
+    padding-block: clamp(3rem, 7vw, 6.5rem) clamp(4rem, 8vw, 7rem);
+  }
+
+  .hh__stamp {
+    margin: 0 0 1.5rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sl-text-secondary);
+  }
+  .hh__line {
+    margin: 0;
+    max-width: 22ch;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 1rem + 4vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+  .hh__line-accent { color: var(--sl-text-muted); }
+
+  .hh__fig {
+    margin: clamp(2.5rem, 5vw, 4.5rem) 0 0;
+    scroll-margin-top: 6rem;
+  }
+
+  /* The capture carries its own title bar, so the frame is only a corner, a
+     hairline and a cast. */
+  .hh__window {
+    position: relative;
+    border-radius: var(--sl-radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--sl-border-default),
+      var(--sl-shadow-lg);
+    background: var(--sl-bg-surface);
+  }
+  .hh__window img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hh__pins {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .hh__pin,
+  .hh__n {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--sl-radius-sm);
+    background: var(--sl-accent-default);
+    color: var(--sl-text-on-accent);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .hh__pin {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    translate: -50% -50%;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sl-accent-default) 28%, transparent);
+  }
+
+  .hh__src {
+    margin: 1rem 0 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sl-text-secondary);
+  }
+  .hh__src a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .hh__src a:hover { color: var(--sl-text-primary); }
+
+  .hh__legend {
+    list-style: none;
+    margin: clamp(2rem, 4vw, 3.5rem) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--rule);
+  }
+  .hh__item {
+    padding: 1.5rem 2rem 0 0;
+  }
+  .hh__item + .hh__item {
+    padding-left: 2rem;
+    border-left: 1px solid var(--rule);
+  }
+  .hh__verb {
+    margin: 1rem 0 0.5rem;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: var(--step-h3);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .hh__body {
+    margin: 0;
+    max-width: 34ch;
+    color: var(--sl-text-secondary);
+    font-size: var(--sl-text-md);
+    line-height: var(--sl-line-normal);
+  }
+  .hh__body :global(strong) {
+    color: var(--sl-text-primary);
+    font-weight: 600;
+  }
+
+  @media (max-width: 44rem) {
+    .hh__window { border-radius: var(--sl-radius-md); }
+    .hh__pin { width: 1.125rem; height: 1.125rem; font-size: 0.625rem; box-shadow: none; }
+    .hh__legend { grid-template-columns: 1fr; }
+    .hh__item { padding: 1.5rem 0; }
+    .hh__item + .hh__item {
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+    .hh__src { flex-direction: column; gap: 0.25rem; }
+  }
+
+  @media (forced-colors: active) {
+    .hh__pin, .hh__n { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  }
+</style>

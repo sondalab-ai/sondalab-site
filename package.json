@@ -15,25 +15,19 @@
     "kit-names": "node scripts/kit-names-gate.mjs",
     "test": "node --test scripts/*.test.mjs",
     "check": "astro check",
-    "scenes:placeholders": "node scripts/make-scene-placeholders.mjs",
-    "scenes:plates": "node scripts/make-scene-plates.mjs",
-    "scenes:flats": "node scripts/make-scene-flats.mjs",
     "contrast": "node scripts/contrast-probe.mjs",
     "contrast:all": "node scripts/contrast-probe.mjs --all --widths 1440,390 --gpu on,off",
     "primary:probe": "node scripts/primary-probe.mjs",
     "shoot:fallback": "node scripts/shoot-fallback.mjs",
     "shoot:live": "node scripts/shoot-live.mjs",
-    "backdrops": "node scripts/make-backdrops.mjs",
-    "scenes:crops": "node scripts/make-scene-crops.mjs",
-    "method:probe": "node scripts/method-probe.mjs",
-    "stance:probe": "node scripts/stance-probe.mjs",
     "layout:probe": "node scripts/layout-probe.mjs",
     "post:probe": "node scripts/post-probe.mjs",
-    "daos:probe": "node scripts/daos-probe.mjs"
+    "daos:probe": "node scripts/daos-probe.mjs",
+    "post:cover": "node scripts/make-post-cover.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "@sondalab/ui-kit": "^0.42.0",
+    "@sondalab/ui-kit": "^0.45.0",
     "astro": "^7.2.5",
     "vgpu": "0.3.1"
   },

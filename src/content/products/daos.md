@@ -4,6 +4,7 @@ tagline: A research bench for getting the same answer twice.
 accent: default
 form: Library
 kind: research
+status: archived
 order: 3
 repo: https://github.com/sondalab-ai/daos
 repoPublic: false
