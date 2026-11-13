@@ -1,11 +1,10 @@
 /**
  * The plumbing behind every CRT surface on the site, with the content left out.
  *
- * The hero's terminal and the scene fields on /blog and /apparel differ only in
- * what they draw on a 2D canvas; the double-guarded boot, the texture upload,
- * the relayout, the theme observer and the run/stop policy are identical. They
- * were written once for the hero and are extracted here so a second surface does
- * not re-earn the traps documented in docs/webgpu-surfaces.md.
+ * The hero's terminal is the one surface today. The double-guarded boot, the
+ * texture upload, the relayout, the theme observer and the run/stop policy are
+ * kept apart from what the terminal draws, so a second surface does not
+ * re-earn the traps documented in docs/webgpu-surfaces.md.
  *
  * A source knows nothing about the shader. It owns a canvas, redraws it when it
  * feels like it, and reports which polarity the tube should be in.
@@ -40,7 +39,7 @@ export interface CrtSurfaceOptions {
   host: HTMLElement;
   /** The WGSL module to run. */
   shader: string;
-  /** Frozen look constants for this surface; scenes and terminals differ. */
+  /** Frozen look constants for this surface. */
   look: Record<string, number>;
   /**
    * Built once the viewport class is known, because a source usually needs the
