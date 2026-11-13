@@ -1,7 +1,6 @@
 /**
  * Per-product "operator's log": a serial cyberpunk novella, one chapter per
- * tool, distinct from the home interludes: longer, literary (serif), and tied
- * by a fil rouge. One operator, one long night (≈2am → dawn along product
+ * tool, tied by a fil rouge. One operator, one long night (≈2am → dawn along product
  * order), a recurring antagonist ("the service", the remote cloud that wants
  * the work back) and a recurring refrain ("the switch is yours"). Keyed by
  * product id; each value is the chapter's paragraphs. The chapter number comes
