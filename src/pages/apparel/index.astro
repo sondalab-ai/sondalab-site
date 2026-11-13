@@ -2,7 +2,9 @@
 import { Image, getImage } from 'astro:assets';
 
 import Base from '../../layouts/Base.astro';
-import wearer from '../../assets/art/apparel.webp';
+import PrintHero from '../../components/PrintHero.astro';
+import wearer from '../../assets/art/band-apparel.webp';
+import wearerGround from '../../assets/art/band-ground.webp';
 import pactPrint from '../../assets/art/page-pact.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
@@ -38,8 +40,7 @@ const ledger = [
   description="Sondalab apparel: tees, caps and pants. Every piece funds the open-source research behind the tools."
 >
   <section class="ap-open">
-    <div class="sl-wrap ap-open__inner">
-      <div>
+    <PrintHero print={wearer} ground={wearerGround}>
         <p class="sl-eyebrow">Apparel</p>
         <h1 class="display ap-open__h">Wear the thesis.<br />Fund the work.</h1>
         <p class="lede ap-open__lede">
@@ -47,11 +48,7 @@ const ledger = [
           itself. Apparel is how the research gets funded: you get something worth
           wearing, the work gets another month.
         </p>
-      </div>
-      <div class="ap-open__print">
-        <Image src={wearer} alt="" widths={[480, 768, 1024]} sizes="(min-width: 60rem) 30rem, 92vw" loading="eager" />
-      </div>
-    </div>
+    </PrintHero>
   </section>
 
   <section class="sl-section ap-pact">
@@ -162,28 +159,6 @@ const ledger = [
 
 <style>
   /* --- opening ------------------------------------------------------- */
-  /* The opening is the claim on the left and one print on the right: the
-     operator in the shirt. The print keeps its own 4:5 shape. */
-  .ap-open { padding-block: clamp(3rem, 7vw, 6rem); }
-  .ap-open__inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
-    gap: 2.5rem clamp(2rem, 6vw, 6rem);
-    align-items: center;
-  }
-  .ap-open__print img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: var(--sl-radius-md);
-  }
-  @media (max-width: 60rem) {
-    .ap-open__inner { grid-template-columns: 1fr; }
-  }
-  @media (prefers-contrast: more), (forced-colors: active) {
-    .ap-open__inner { grid-template-columns: 1fr; }
-    .ap-open__print { display: none; }
-  }
   .ap-open__h {
     margin-top: 1.5rem;
     max-width: 14ch;
