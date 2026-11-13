@@ -9,6 +9,9 @@ import type { ImageMetadata } from 'astro';
 import Base from '../layouts/Base.astro';
 import { accentVars } from '../lib/accents';
 import { markClass } from '../lib/marks';
+import PrintHero from '../components/PrintHero.astro';
+import heroPrint from '../assets/art/poster-spexr.webp';
+import heroGround from '../assets/art/poster-spexr-ground.webp';
 import { SPEXR_HERO, SPEXR_RELEASES, SPEXR_REPO, SPEXR_SECTIONS, type SpexrShot } from '../lib/spexr-page';
 
 const files = import.meta.glob<{ default: ImageMetadata }>('../assets/spexr/*.png', { eager: true });
@@ -19,11 +22,6 @@ const img = (shot: SpexrShot): ImageMetadata => {
 };
 const acc = accentVars('spexr');
 const SIZES = '(min-width: 1240px) 1160px, 100vw';
-// The plain sections (the odd ones are inversion bands) lie on a bed of the
-// kit's art fields, a different tile on each, fading out toward the text.
-const BED_FIELDS = ['', 'stripes', 'grid'] as const;
-const bedClass = (field: string) =>
-  `sec-bed sl-art-field${field ? ` sl-art-field--${field}` : ''} sl-art-field--fade-end`;
 ---
 
 <Base
@@ -35,27 +33,30 @@ const bedClass = (field: string) =>
     data-product
     style={`--acc-light:${acc.light};--acc-dark:${acc.dark};--acc-fill-light:${acc.fill.light};--acc-fill-dark:${acc.fill.dark}`}
   >
-    <header class="sl-wrap hero">
-      <p class="sl-eyebrow">SPEXR · public beta</p>
-      <h1 class="sl-anchor">The spec-based IDE where agents do the work and you keep command.</h1>
-      <p class="hero__lede sl-prose">
-        SPEXR puts the agent session at the centre and ties every change to a written spec. It runs the
-        agent you already have installed, and its own AI features run on your machine.
-      </p>
-      <div class="hero__actions">
-        <a class="sl-btn sl-btn--primary" href={SPEXR_RELEASES}>Download</a>
-        <a class="sl-btn" href={SPEXR_REPO}>Source on GitHub</a>
-      </div>
+    <header class="hero">
+      <PrintHero print={heroPrint} ground={heroGround}>
+        <p class="sl-eyebrow">SPEXR · public beta</p>
+        <h1 class="sl-anchor">The spec-based IDE where agents do the work and you keep command.</h1>
+        <p class="hero__lede sl-prose">
+          SPEXR puts the agent session at the centre and ties every change to a written spec. It runs the
+          agent you already have installed, and its own AI features run on your machine.
+        </p>
+        <div class="hero__actions">
+          <a class="sl-btn sl-btn--primary" href={SPEXR_RELEASES}>Download</a>
+          <a class="sl-btn" href={SPEXR_REPO}>Source on GitHub</a>
+        </div>
+      </PrintHero>
+      <div class="sl-wrap">
       <div class="hero__stage">
         <a class="shot__full hero__frame" href={img(SPEXR_HERO).src} aria-label={`Open full size: ${SPEXR_HERO.alt}`}>
           <Image src={img(SPEXR_HERO)} alt={SPEXR_HERO.alt} widths={[720, 1440, 2160, 2880]} sizes={SIZES} loading="eager" fetchpriority="high" />
         </a>
       </div>
+      </div>
     </header>
 
     {SPEXR_SECTIONS.map((section, i) => (
       <section id={section.id} class:list={['sl-section', i % 2 === 1 && 'sl-invert']}>
-        {i % 2 === 0 && <div class={bedClass(BED_FIELDS[(i / 2) % BED_FIELDS.length])} aria-hidden="true"></div>}
         <div class="sl-wrap">
           <div class="sl-section__head sec-head">
             <span class="sl-section__idx">{String(i + 1).padStart(2, '0')}</span>
@@ -86,7 +87,6 @@ const bedClass = (field: string) =>
     ))}
 
     <section id="runs" class="sl-section">
-      <div class={bedClass('albers')} aria-hidden="true"></div>
       <div class="sl-wrap">
         <div class="sl-section__head sec-head"><p class={markClass(SPEXR_SECTIONS.length)}>How it runs</p></div>
         <h2 class="big-h2">Your agent, your machine.</h2>
@@ -137,7 +137,7 @@ const bedClass = (field: string) =>
   }
 
   /* ---- hero: the welcome page, tilted toward the reader ----------------- */
-  .hero { padding-block: clamp(2.5rem, 6vw, 5rem) 0; display: grid; gap: var(--sl-space-5); }
+  .hero :global(.ph__text) { display: grid; gap: var(--sl-space-5); }
   .hero h1 { max-width: 22ch; margin: 0; font-size: clamp(2rem, 1.3rem + 3vw, 3.6rem); }
   .hero__lede { max-width: 60ch; margin: 0; color: var(--slc-text-secondary); font-size: clamp(1.05rem, 1rem + 0.4vw, 1.24rem); }
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sl-space-3); }
@@ -152,9 +152,6 @@ const bedClass = (field: string) =>
 
   /* ---- sections ----------------------------------------------------------- */
   .spexr > .sl-section { position: relative; padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
-  /* The bed, as the home page lays its own (Method, ProductsIndex). */
-  .sec-bed { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-  .spexr > .sl-section > .sl-wrap { position: relative; z-index: 1; }
   .sec-head { flex-wrap: wrap; margin-bottom: var(--sl-space-6); }
   .big-h2 { max-width: 24ch; font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.6rem); margin: 0 0 var(--sl-space-5); }
   .sec-body { display: grid; gap: var(--sl-space-3); max-width: 62ch; margin-bottom: clamp(1.6rem, 3vw, 2.4rem); }

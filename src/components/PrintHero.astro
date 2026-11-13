@@ -1,0 +1,78 @@
+---
+// A poster hero: one print is the whole band. The print is made for it, with
+// its subject in the right half and empty ground in the left half, where the
+// slot's text stands in dark ink. `ground` is the print's own left edge as a
+// thin strip: stretched across the band, it continues the print's ground row
+// by row, so the band has no seam and the stylesheet holds no colour.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  print: ImageMetadata;
+  ground: ImageMetadata;
+}
+const { print, ground } = Astro.props;
+---
+
+<div class="ph">
+  <Image class="ph__ground" src={ground} alt="" width={8} loading="eager" />
+  <Image class="ph__print" src={print} alt="" widths={[768, 1152, 1536]} sizes="(min-width: 60rem) 66vw, 100vw" loading="eager" fetchpriority="high" />
+  <div class="sl-wrap ph__in">
+    <div class="ph__text"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .ph {
+    /* The ground is light in both themes, so the ink is the dark end of the
+       theme: the canvas in the dark theme, the text in the light theme. */
+    --ph-ink: var(--sl-bg-canvas);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    max-width: 120rem;
+    margin-inline: auto;
+  }
+  :global(:root[data-sl-theme='light']) .ph { --ph-ink: var(--sl-text-primary); }
+
+  .ph__ground,
+  .ph__print { position: absolute; top: 0; height: 100%; max-width: none; }
+  .ph__ground { left: 0; width: 100%; z-index: -2; }
+  .ph__print { right: 0; width: auto; z-index: -1; }
+
+  .ph__in {
+    display: flex;
+    align-items: center;
+    min-height: clamp(30rem, 68vh, 42rem);
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+  .ph__text { max-width: min(33rem, 47%); }
+  .ph__text :global(:is(p, h1, h2, span, dt, dd, li)),
+  .ph__text :global(.sl-btn:not(.sl-btn--primary)) {
+    color: var(--ph-ink);
+  }
+  .ph__text :global(.sl-btn:not(.sl-btn--primary)) { border-color: var(--ph-ink); }
+
+  /* Narrow: the text first on the ground, then the subject half of the print. */
+  @media (max-width: 60rem) {
+    .ph__in { min-height: 0; padding-block: 3rem 2rem; }
+    .ph__text { max-width: none; }
+    .ph__print {
+      position: static;
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+      object-position: 100% 50%;
+    }
+  }
+
+  /* No print and no ground: the hero is plain text on the page, in the theme's ink. */
+  :global(:root[data-sl-theme='high-contrast']) .ph { --ph-ink: initial; }
+  :global(:root[data-sl-theme='high-contrast']) .ph :is(.ph__ground, .ph__print) { display: none; }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .ph { --ph-ink: initial; }
+    .ph__ground, .ph__print { display: none; }
+  }
+</style>
