@@ -146,6 +146,7 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
             <DaosText as="h1" class="sl-anchor" k="hero.h1" />
             <DaosText as="p" class="hero-sub" k="hero.sub" />
             <DaosText as="p" class="hero-lede sl-prose" k="hero.lede" />
+            <DaosText as="p" class="hero-archived" k="hero.archived" />
       </PrintHero>
       <div class="sl-wrap">
           <div class="hero-side">
@@ -573,6 +574,18 @@ const SOURCES: { by: string; title: string; where: string; href: string }[] = [
     letter-spacing: -0.015em;
     color: var(--slc-text);
     text-wrap: balance;
+  }
+  /* Said plainly in the head: this work is finished. A boxed line in the
+     band's ink, so it cannot be missed and is not an alarm. */
+  .daos .hero-archived {
+    margin: var(--sl-space-5) 0 0;
+    padding: 0.6rem 0.85rem;
+    max-width: 56ch;
+    border: 1.5px solid currentColor;
+    border-radius: var(--sl-radius-sm);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+    line-height: var(--sl-line-normal);
   }
   .daos .hero-lede {
     margin-top: var(--sl-space-5);

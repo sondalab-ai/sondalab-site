@@ -4,6 +4,7 @@ tagline: Your coding agent remembers every session, on your machine, where you c
 accent: default
 form: CLI
 kind: research
+status: research
 order: 6
 repo: https://github.com/sondalab-ai/MxM
 repoPublic: false

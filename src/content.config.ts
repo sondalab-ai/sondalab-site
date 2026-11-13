@@ -7,7 +7,7 @@ import { z } from 'astro:schema';
  * page. A closed enum is the whole point: an agent editing a product file
  * cannot silently promote a PoC to "shipped", a wrong value fails the build.
  */
-const STATUS = ['shipped', 'public-beta', 'beta', 'poc'] as const;
+const STATUS = ['shipped', 'public-beta', 'beta', 'poc', 'research', 'archived'] as const;
 
 /**
  * Accent keys are the registered products in @sondalab/ui-kit's

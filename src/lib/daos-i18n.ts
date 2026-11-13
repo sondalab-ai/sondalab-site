@@ -27,6 +27,8 @@ export const DAOS_LANG_NAMES: Record<DaosLang, string> = {
 };
 
 const en = {
+  'hero.archived':
+    'Archived. This research is finished and DAOS is no longer developed. The findings stand as measured in July 2026.',
   'hero.kicker':
     'A research note · DAOS',
   'hero.h1':
@@ -247,6 +249,8 @@ export type DaosKey = keyof typeof en;
 export type DaosDict = Record<DaosKey, string>;
 
 const it: DaosDict = {
+  'hero.archived':
+    'Archiviato. Questa ricerca è conclusa e DAOS non è più sviluppato. I risultati restano quelli misurati a luglio 2026.',
   'hero.kicker':
     `Una nota di ricerca · DAOS`,
   'hero.h1':
@@ -464,6 +468,8 @@ const it: DaosDict = {
 };
 
 const es: DaosDict = {
+  'hero.archived':
+    'Archivado. Esta investigación ha terminado y DAOS ya no se desarrolla. Los resultados son los medidos en julio de 2026.',
   'hero.kicker':
     `Una nota de investigación · DAOS`,
   'hero.h1':
@@ -681,6 +687,8 @@ const es: DaosDict = {
 };
 
 const de: DaosDict = {
+  'hero.archived':
+    'Archiviert. Diese Forschung ist abgeschlossen, und DAOS wird nicht mehr weiterentwickelt. Die Ergebnisse gelten wie im Juli 2026 gemessen.',
   'hero.kicker':
     `Eine Forschungsnotiz · DAOS`,
   'hero.h1':

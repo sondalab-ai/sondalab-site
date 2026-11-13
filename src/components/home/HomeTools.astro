@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import { accentVars, type AccentKey } from '../../lib/accents';
 import { STATUS_META } from '../../lib/site';
 import { Image } from 'astro:assets';
-import { NIGHT, NOVELLAS } from '../../lib/novellas';
 import sSwitch from '../../assets/art/tile-switch.webp';
 import sEye from '../../assets/art/tile-eye-lens.webp';
 import sPlug from '../../assets/art/tile-plug.webp';
@@ -12,7 +11,7 @@ import sRobot from '../../assets/art/tile-robot.webp';
 import sTorch from '../../assets/art/tile-flashlight.webp';
 import sDisc from '../../assets/art/tile-disc.webp';
 
-// One object per tool: what the operator holds at that hour.
+// One object per tool.
 const STICKER: Record<string, ImageMetadata> = {
   spexr: sSwitch,
   introspect: sEye,
@@ -23,13 +22,20 @@ const STICKER: Record<string, ImageMetadata> = {
   mxm: sDisc,
 };
 
-// One list, in the order of the night the hero terminal tells: one tool per
-// hour, 02:00 to 08:00. Each row closes with its chapter's last line.
-const all = await getCollection('products');
-const rows = NIGHT.flatMap(({ id, hour }, i) => {
-  const p = all.find((x) => x.id === id);
-  return p ? [{ p, hour, last: NOVELLAS[id].at(-1), t: i / (NIGHT.length - 1) }] : [];
-});
+// Two shelves (owner, 2026-10-14): the tools, then the research benches,
+// which are experiments and not products. Each shelf numbers its rows from 01.
+// The rows carry no hour and no chapter line: the night of the hero terminal
+// runs across all seven chapters, and a clock split over two shelves reads as
+// nonsense. The story is told in the hero and on each product page.
+const all = (await getCollection('products')).sort((a, b) => a.data.order - b.data.order);
+const rows = all.map((p, i) => ({ p, seed: 1117 + i * 100 }));
+const shelves = [
+  { kind: 'product', rows: rows.filter((r) => r.p.data.kind === 'product') },
+  { kind: 'research', rows: rows.filter((r) => r.p.data.kind === 'research') },
+];
+const count = (n: number) => String(n).padStart(2, '0');
+/** Bands the number breaks into while it glitches. */
+const BANDS = [0, 1, 2, 3, 4];
 
 // The tile edge wears away into pixels, like a torn print. Still 3px cells,
 // but no regular pattern: the depth of the worn band follows a slow noise, the
@@ -84,7 +90,7 @@ function tileMask(seed: number) {
   <div class="sl-wrap">
     <div class="ht__head">
       <div>
-        <p class="ht__stamp">One night · seven tools</p>
+        <p class="ht__stamp">Five tools · two experiments</p>
         <h2 class="h2">Many tools, one throughline.</h2>
       </div>
       <p class="lede ht__lede">
@@ -94,30 +100,53 @@ function tileMask(seed: number) {
       </p>
     </div>
 
-    <ol class="ht__list">
-      {rows.map(({ p, hour, last, t }) => {
-        const acc = accentVars(p.data.accent as AccentKey);
-        const meta = p.data.status ? STATUS_META[p.data.status] : null;
-        return (
-          <li style={`--ral:${acc.light};--rad:${acc.dark};--t:${t.toFixed(3)};--tile-mask:${tileMask(1117 + Math.round(t * 600))}`}>
-            <a class="ht__row" href={`/products/${p.id}/`}>
-              <span class="ht__hour">{hour}</span>
-              <span class="ht__obj"><Image src={STICKER[p.id]} alt="" width={480} height={480} /></span>
-              <h3 class="ht__name">{p.data.name}</h3>
-              <div class="ht__say">
-                <p class="ht__tag">{p.data.tagline}</p>
-                <p class="ht__last">{last}</p>
-              </div>
-              <span class="ht__meta">
-                <span class="ht__form">{p.data.form}{p.data.kind === 'research' && ' · research'}</span>
-                {meta && <span class="ht__status">{meta.label}</span>}
-              </span>
-              <span class="ht__go" aria-hidden="true">→</span>
-            </a>
-          </li>
-        );
-      })}
-    </ol>
+    {shelves.map((shelf) => (
+      <div class:list={['ht__shelf', `ht__shelf--${shelf.kind}`]}>
+        {shelf.kind === 'research' && (
+          <div class="ht__shelf-head">
+            <h3 class="ht__shelf-name">Research</h3>
+            <p class="ht__shelf-note">
+              Experiments, not products. Each one tests an idea and reports what
+              it found. DAOS is finished and archived. MxM is active: its
+              solution is being polished for production.
+            </p>
+            <span class="ht__shelf-count">{count(shelf.rows.length)}</span>
+          </div>
+        )}
+        <ol class="ht__list">
+          {shelf.rows.map(({ p, seed }, i) => {
+            const acc = accentVars(p.data.accent as AccentKey);
+            const meta = p.data.status ? STATUS_META[p.data.status] : null;
+            // The research shelf sits under its own h3, so its names step down.
+            const Name = shelf.kind === 'research' ? 'h4' : 'h3';
+            return (
+              <li style={`--ral:${acc.light};--rad:${acc.dark};--tile-mask:${tileMask(seed)}`}>
+                <a class="ht__row" href={`/products/${p.id}/`}>
+                  <span class="ht__n sl-fx-glitch sl-fx-glitch--shatter" data-text={count(i + 1)} aria-hidden="true">
+                    <span class="sl-fx-glitch__text">{count(i + 1)}</span>
+                    <span class="sl-fx-glitch__shards">
+                      {BANDS.map((b) => (
+                        <span class="sl-fx-glitch__shard" style={`--slfx-i:${b};--slfx-n:${BANDS.length}`}>{count(i + 1)}</span>
+                      ))}
+                    </span>
+                  </span>
+                  <span class="ht__obj"><Image src={STICKER[p.id]} alt="" width={480} height={480} /></span>
+                  <Name class="ht__name">{p.data.name}</Name>
+                  <div class="ht__say">
+                    <p class="ht__tag">{p.data.tagline}</p>
+                  </div>
+                  <span class="ht__meta">
+                    <span class="ht__form">{p.data.form}</span>
+                    {meta && <span class="ht__status">{meta.label}</span>}
+                  </span>
+                  <span class="ht__go" aria-hidden="true">→</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    ))}
   </div>
 </section>
 
@@ -140,6 +169,38 @@ function tileMask(seed: number) {
     color: var(--sl-text-secondary);
   }
 
+  /* The research shelf: its own head, smaller names, quieter tiles. It must
+     not read as two more products. */
+  .ht__shelf--research { margin-top: clamp(3rem, 6vw, 5rem); }
+  .ht__shelf-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    padding-bottom: 0.9rem;
+  }
+  .ht__shelf-name {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: var(--sl-text-xl);
+    letter-spacing: -0.03em;
+  }
+  .ht__shelf-note { margin: 0; max-width: 60ch; color: var(--sl-text-secondary); font-size: var(--sl-text-sm); line-height: var(--sl-line-normal); }
+  .ht__shelf-count { font-family: var(--sl-font-mono); font-size: var(--sl-text-sm); color: var(--sl-text-secondary); }
+  .ht__shelf--research .ht__list { border-top-style: dashed; }
+  .ht__shelf--research .ht__row { border-bottom-style: dashed; }
+  .ht__shelf--research .ht__name { font-size: clamp(1.3rem, 1rem + 1.4vw, 1.9rem); }
+  .ht__shelf--research .ht__obj { width: 6rem; height: 6rem; justify-self: center; }
+  .ht__shelf--research .ht__obj img { filter: grayscale(1); }
+  .ht__shelf--research .ht__status {
+    align-self: start;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid var(--sl-border-default);
+    border-radius: var(--sl-radius-sm);
+    color: var(--sl-text-primary);
+  }
+
   .ht__list {
     list-style: none;
     margin: 0;
@@ -152,7 +213,7 @@ function tileMask(seed: number) {
   .ht__row {
     position: relative;
     display: grid;
-    grid-template-columns: 6.5rem 9rem minmax(0, 0.9fr) minmax(0, 1.3fr) 9rem 1.5rem;
+    grid-template-columns: 5rem 9rem minmax(0, 0.9fr) minmax(0, 1.3fr) 9rem 1.5rem;
     align-items: center;
     gap: 0 1.5rem;
     padding: 1rem 0;
@@ -161,13 +222,21 @@ function tileMask(seed: number) {
     color: inherit;
     border-radius: 0;
   }
-  /* The hour warms through the night: ink at 02:00, the accent by 08:00. */
-  .ht__hour {
+  /* 50px is four cells of the pixel face (12.5px each), so the squares stay
+     whole. The number glitches while the pointer is on its row. */
+  .ht__n {
     font-family: var(--sl-font-pixel);
-    font-size: 25px;
+    font-size: 50px;
     line-height: 1;
-    color: color-mix(in oklch, var(--slc-accent-text) calc(var(--t) * 100%), var(--sl-text-secondary));
+    color: var(--sl-text-secondary);
+    /* A strong glitch: the colour copies split 8px apart, and the number
+       breaks into five bands that jump sideways. */
+    --slfx-gx: 8px;
+    transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
+  .ht__row:hover .ht__n,
+  .ht__row:focus-visible .ht__n { color: var(--sl-text-primary); }
+  .ht__shelf--research .ht__n { font-size: 37.5px; }
   .ht__obj {
     align-self: center;
     width: 9rem;
@@ -198,14 +267,6 @@ function tileMask(seed: number) {
     font-size: var(--sl-text-md);
     line-height: var(--sl-line-normal);
   }
-  .ht__last {
-    margin: 0.35rem 0 0;
-    font-family: var(--sl-font-mono);
-    font-size: var(--sl-text-xs);
-    line-height: var(--sl-line-normal);
-    color: var(--sl-text-secondary);
-  }
-  .ht__last::before { content: '> '; color: var(--ra); }
   .ht__meta {
     display: flex;
     flex-direction: column;
@@ -226,7 +287,7 @@ function tileMask(seed: number) {
     position: absolute;
     left: 0;
     bottom: -1px;
-    width: 6.5rem;
+    width: 5rem;
     height: 3px;
     background: var(--ra);
     scale: 0 1;
@@ -246,6 +307,7 @@ function tileMask(seed: number) {
       grid-template-columns: 5rem minmax(0, 1fr) 1.5rem;
       row-gap: 0.5rem;
     }
+    .ht__n, .ht__shelf--research .ht__n { font-size: 25px; }
     .ht__obj { grid-column: 1; grid-row: 2 / span 3; align-self: start; width: 4.5rem; height: 4.5rem; }
     .ht__say, .ht__meta { grid-column: 2; }
     .ht__meta { flex-direction: row; gap: 1rem; }
@@ -254,10 +316,21 @@ function tileMask(seed: number) {
 
   @media (forced-colors: active) {
     .ht__row::before { background: Highlight; }
-    .ht__hour { color: CanvasText; }
     .ht__obj { display: none; }
   }
   @media (prefers-contrast: more) {
     .ht__obj { display: none; }
   }
 </style>
+
+<script>
+  import { hoverBurst } from '@sondalab/ui-kit/effects.js';
+
+  // The row number breaks up in long bursts with short pauses while the pointer
+  // is on its row. Without the
+  // script the number is plain type: nothing is missing.
+  for (const row of document.querySelectorAll('.ht__row')) {
+    const n = row.querySelector('.ht__n.sl-fx-glitch');
+    if (n) hoverBurst(row, n, { burstMin: 280, burstMax: 620, pauseMin: 180, pauseMax: 520 });
+  }
+</script>
