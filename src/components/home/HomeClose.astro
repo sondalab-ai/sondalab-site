@@ -1,0 +1,105 @@
+---
+import { Image } from 'astro:assets';
+import service from '../../assets/art/band-service.webp';
+import { SITE } from '../../lib/site';
+---
+
+<section class="hq">
+  <div class="sl-wrap hq__grid">
+    <!-- "The service": the black box across the wire. Decorative, no alt text. -->
+    <div class="hq__pic">
+      <Image src={service} alt="" widths={[480, 768]} sizes="(min-width: 60rem) 30rem, 100vw" />
+    </div>
+    <blockquote class="hq__quote">
+      <p class="hq__lead">Most software asks you to trust a black box across the wire.</p>
+      <p class="hq__punch">We'd rather hand you the lid and a flashlight.</p>
+    </blockquote>
+  </div>
+</section>
+
+<section id="contact" class="sl-section hc">
+  <div class="sl-wrap hc__grid">
+    <div>
+      <p class="sl-eyebrow">Contact</p>
+      <h2 class="h2 hc__title">Building something you'd rather run yourself?</h2>
+    </div>
+    <div class="hc__reach">
+      <p class="hc__lede">
+        Sondalab is early and independent. If the operator's stance resonates,
+        as a user, a builder or a collaborator, we'd like to hear from you.
+      </p>
+      <a class="hc__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hq { border-block: 1px solid var(--rule); }
+  .hq__grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
+  }
+  .hq__pic {
+    position: relative;
+    height: clamp(30rem, 70vh, 40rem);
+    aspect-ratio: 3 / 4;
+  }
+  .hq__pic img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hq__quote { margin: 0; padding-block: 3rem; }
+  .hq__lead,
+  .hq__punch {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 1rem + 2.6vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    max-width: 26ch;
+    text-wrap: balance;
+  }
+  .hq__lead { color: var(--sl-text-muted); }
+  .hq__punch { margin-top: 0.35em; }
+
+  .hc__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: 2rem 4rem;
+    align-items: end;
+  }
+  .hc__title { margin-top: 1.25rem; max-width: 16ch; }
+  .hc__lede {
+    margin: 0;
+    color: var(--sl-text-secondary);
+    line-height: var(--sl-line-normal);
+  }
+  .hc__email {
+    display: inline-block;
+    margin-top: 1.25rem;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(1.4rem, 1rem + 1.6vw, 2.1rem);
+    letter-spacing: -0.03em;
+    text-decoration: none;
+    border-bottom: 2px solid var(--slc-accent-text);
+    padding-bottom: 0.15em;
+  }
+  .hc__email:hover { color: var(--slc-accent-text); }
+
+  @media (max-width: 60rem) {
+    .hq__grid { grid-template-columns: 1fr; }
+    .hq__pic { height: auto; width: 100%; }
+    .hq__pic img { position: static; height: auto; display: block; }
+    .hc__grid { grid-template-columns: 1fr; align-items: start; }
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .hq__grid { grid-template-columns: 1fr; }
+    .hq__pic { display: none; }
+  }
+</style>

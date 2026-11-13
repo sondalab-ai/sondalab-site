@@ -35,6 +35,10 @@ const acc = accentVars(data.accent as AccentKey);
 const meta = data.status ? STATUS_META[data.status] : null;
 const screens = SCREENS[product.id] ?? [];
 
+// One print per chapter of the operator's log, keyed by product id.
+const covers = import.meta.glob<{ default: ImageMetadata }>('../../assets/art/cover-*.webp', { eager: true });
+const cover = covers[`../../assets/art/cover-${product.id}.webp`]?.default;
+
 const NAME_BANDS = 6;
 const nameShards = Array.from({ length: NAME_BANDS }, (_, i) => i);
 const NAV_BANDS = 4;
@@ -126,6 +130,7 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
       )}
 
       {novella && (
+        <div class:list={['log', { 'log--print': cover }]}>
         <aside class="novella" data-novella>
           <span class="novella__marker sl-fx-glitch" data-text={logMarker}>{logMarker}</span>
           <div class="novella__body">
@@ -134,6 +139,12 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
             ))}
           </div>
         </aside>
+        {cover && (
+          <div class="log__print">
+            <Image src={cover} alt="" widths={[480, 768, 1024]} sizes="(max-width: 60rem) 92vw, 26rem" loading="lazy" />
+          </div>
+        )}
+        </div>
       )}
 
       <nav class="product__nav" aria-label="Other tools">
@@ -409,11 +420,31 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
   .product__nav-link:hover .product__nav-name { color: var(--slc-accent-text); }
 
   /* --- operator's log (serial novella) --- */
-  .novella {
+  .log {
     margin-top: clamp(3rem, 7vw, 6rem);
     padding-top: clamp(2rem, 5vw, 3rem);
     border-top: 1px solid var(--sl-border-subtle);
-    max-width: 46rem;
+  }
+  /* The chapter's print stands beside the prose, at its own 4:5 shape. */
+  .log--print {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: 2.5rem clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+  .log__print img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--sl-radius-md);
+  }
+  .novella { max-width: 46rem; }
+  @media (max-width: 60rem) {
+    .log--print { grid-template-columns: 1fr; }
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .log--print { display: block; }
+    .log__print { display: none; }
   }
   .novella__marker {
     display: inline-block;

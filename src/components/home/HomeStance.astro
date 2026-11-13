@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+import operator from '../../assets/art/stance.webp';
+---
+
+<section class="sl-invert hs">
+  <div class="sl-wrap hs__grid">
+  <div class="hs__text">
+    <p class="sl-eyebrow hs__label">The stance</p>
+    <h2 class="hs__claim">
+      Tools that keep you in command of the machines working for you.
+    </h2>
+    <p class="hs__body">
+      Sondalab builds software that runs, watches and improves the agents doing
+      your work, and keeps them legible, controllable and yours. The stance
+      holds as machines grow more capable: from today's software agents toward
+      the physical systems, and robotics, ahead.
+    </p>
+  </div>
+  <!-- The operator is a print: a panel with its own ground, cut by the band's
+       top, bottom and right edges. Decorative, so it has no alt text. -->
+  <div class="hs__pic">
+    <Image src={operator} alt="" widths={[640, 1024]} sizes="(min-width: 60rem) 46vw, 100vw" />
+  </div>
+  </div>
+</section>
+
+<style>
+  /* The band has a fixed height, and the print keeps its own 4:5 shape at
+     that height. The picture is never cropped: its width follows its height. */
+  .hs__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: clamp(2rem, 5vw, 5rem);
+    height: clamp(36rem, 80vh, 46rem);
+  }
+  .hs__text {
+    align-self: center;
+  }
+  .hs__label { margin-bottom: 1.5rem; }
+  .hs__claim {
+    margin: 0;
+    max-width: 14ch;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(2.2rem, 1rem + 3.6vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+  .hs__body {
+    margin: 1.5rem 0 0;
+    max-width: 46ch;
+    font-size: var(--sl-text-lg);
+    line-height: var(--sl-line-normal);
+    color: color-mix(in srgb, var(--sl-bg-canvas) 78%, transparent);
+  }
+  .hs__pic {
+    position: relative;
+    height: clamp(36rem, 80vh, 46rem);
+    aspect-ratio: 4 / 5;
+  }
+  .hs__pic img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 60rem) {
+    .hs__grid { grid-template-columns: 1fr; height: auto; }
+    .hs__text { padding-block: 4rem; }
+    .hs__pic { height: auto; width: 100%; }
+    .hs__pic img { position: static; height: auto; display: block; }
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .hs__grid { grid-template-columns: 1fr; height: auto; }
+    .hs__text { padding-block: 4rem; }
+    .hs__pic { display: none; }
+  }
+</style>

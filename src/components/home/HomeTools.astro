@@ -1,0 +1,263 @@
+---
+import { getCollection } from 'astro:content';
+import { accentVars, type AccentKey } from '../../lib/accents';
+import { STATUS_META } from '../../lib/site';
+import { Image } from 'astro:assets';
+import { NIGHT, NOVELLAS } from '../../lib/novellas';
+import sSwitch from '../../assets/art/tile-switch.webp';
+import sEye from '../../assets/art/tile-eye-lens.webp';
+import sPlug from '../../assets/art/tile-plug.webp';
+import sKey from '../../assets/art/tile-key.webp';
+import sRobot from '../../assets/art/tile-robot.webp';
+import sTorch from '../../assets/art/tile-flashlight.webp';
+import sDisc from '../../assets/art/tile-disc.webp';
+
+// One object per tool: what the operator holds at that hour.
+const STICKER: Record<string, ImageMetadata> = {
+  spexr: sSwitch,
+  introspect: sEye,
+  'claude-loadout': sPlug,
+  daos: sKey,
+  'local-agents': sRobot,
+  skillkit: sTorch,
+  mxm: sDisc,
+};
+
+// One list, in the order of the night the hero terminal tells: one tool per
+// hour, 02:00 to 08:00. Each row closes with its chapter's last line.
+const all = await getCollection('products');
+const rows = NIGHT.flatMap(({ id, hour }, i) => {
+  const p = all.find((x) => x.id === id);
+  return p ? [{ p, hour, last: NOVELLAS[id].at(-1), t: i / (NIGHT.length - 1) }] : [];
+});
+
+// The tile edge wears away into pixels, like a torn print. Still 3px cells,
+// but no regular pattern: the depth of the worn band follows a slow noise, the
+// corners wear more than the sides, and each cell falls by its own chance.
+// Every tile gets its own mask from its own seed. Built here, used as a CSS
+// mask, so the middle of each picture stays untouched.
+const CELLS = 48;
+function tileMask(seed: number) {
+  let s = seed >>> 0;
+  const rnd = () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const STEP = 6;
+  const N = CELLS / STEP + 2;
+  const lattice = Array.from({ length: N * N }, rnd);
+  const ease = (t: number) => t * t * (3 - 2 * t);
+  const slow = (x: number, y: number) => {
+    const gx = x / STEP, gy = y / STEP;
+    const ix = Math.floor(gx), iy = Math.floor(gy);
+    const fx = ease(gx - ix), fy = ease(gy - iy);
+    const at = (i: number, j: number) => lattice[j * N + i];
+    return (at(ix, iy) * (1 - fx) + at(ix + 1, iy) * fx) * (1 - fy)
+      + (at(ix, iy + 1) * (1 - fx) + at(ix + 1, iy + 1) * fx) * fy;
+  };
+  const R = 11;
+  let d = '';
+  for (let y = 0; y < CELLS; y++) {
+    let run = 0;
+    for (let x = 0; x <= CELLS; x++) {
+      let on = false;
+      if (x < CELLS) {
+        const dx = Math.min(x, CELLS - 1 - x) + 0.5;
+        const dy = Math.min(y, CELLS - 1 - y) + 0.5;
+        const edge = dx < R && dy < R ? R - Math.hypot(R - dx, R - dy) : Math.min(dx, dy);
+        const depth = 1.5 + 8.5 * slow(x, y);
+        const keep = ease(Math.min(1, Math.max(0, edge / depth)));
+        on = rnd() < keep * keep;
+      }
+      if (on) run++;
+      else if (run) { d += `M${x - run} ${y}h${run}v1h${-run}z`; run = 0; }
+    }
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CELLS} ${CELLS}" shape-rendering="crispEdges"><path d="${d}"/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+---
+
+<section id="products" class="sl-section ht">
+  <div class="sl-wrap">
+    <div class="ht__head">
+      <div>
+        <p class="ht__stamp">One night · seven tools</p>
+        <h2 class="h2">Many tools, one throughline.</h2>
+      </div>
+      <p class="lede ht__lede">
+        Together they cover the whole loop of working with agents: writing and
+        running the work, watching every step, scoping what a session loads,
+        and hosting it on hardware you own.
+      </p>
+    </div>
+
+    <ol class="ht__list">
+      {rows.map(({ p, hour, last, t }) => {
+        const acc = accentVars(p.data.accent as AccentKey);
+        const meta = p.data.status ? STATUS_META[p.data.status] : null;
+        return (
+          <li style={`--ral:${acc.light};--rad:${acc.dark};--t:${t.toFixed(3)};--tile-mask:${tileMask(1117 + Math.round(t * 600))}`}>
+            <a class="ht__row" href={`/products/${p.id}/`}>
+              <span class="ht__hour">{hour}</span>
+              <span class="ht__obj"><Image src={STICKER[p.id]} alt="" width={480} height={480} /></span>
+              <h3 class="ht__name">{p.data.name}</h3>
+              <div class="ht__say">
+                <p class="ht__tag">{p.data.tagline}</p>
+                <p class="ht__last">{last}</p>
+              </div>
+              <span class="ht__meta">
+                <span class="ht__form">{p.data.form}{p.data.kind === 'research' && ' · research'}</span>
+                {meta && <span class="ht__status">{meta.label}</span>}
+              </span>
+              <span class="ht__go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .ht__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: 1.5rem 4rem;
+    align-items: end;
+    margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  }
+  .ht__lede { max-width: none; margin: 0; }
+  .ht__stamp {
+    margin: 0 0 1.25rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-micro);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sl-text-secondary);
+  }
+
+  .ht__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--sl-text-primary);
+  }
+  .ht__list li { --ra: var(--rad); }
+  :global([data-sl-theme='light']) .ht__list li { --ra: var(--ral); }
+
+  .ht__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 6.5rem 9rem minmax(0, 0.9fr) minmax(0, 1.3fr) 9rem 1.5rem;
+    align-items: center;
+    gap: 0 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    color: inherit;
+    border-radius: 0;
+  }
+  /* The hour warms through the night: ink at 02:00, the accent by 08:00. */
+  .ht__hour {
+    font-family: var(--sl-font-pixel);
+    font-size: 25px;
+    line-height: 1;
+    color: color-mix(in oklch, var(--slc-accent-text) calc(var(--t) * 100%), var(--sl-text-secondary));
+  }
+  .ht__obj {
+    align-self: center;
+    width: 9rem;
+    height: 9rem;
+    overflow: hidden;
+    -webkit-mask: var(--tile-mask) center / 100% 100% no-repeat;
+    mask: var(--tile-mask) center / 100% 100% no-repeat;
+  }
+  .ht__obj img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: scale var(--sl-motion-mid) var(--sl-motion-ease), rotate var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .ht__row:hover .ht__obj img,
+  .ht__row:focus-visible .ht__obj img { scale: 1.1; rotate: -4deg; }
+  .ht__name {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 1rem + 2.4vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    transition: translate var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .ht__tag {
+    margin: 0;
+    font-size: var(--sl-text-md);
+    line-height: var(--sl-line-normal);
+  }
+  .ht__last {
+    margin: 0.35rem 0 0;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    line-height: var(--sl-line-normal);
+    color: var(--sl-text-secondary);
+  }
+  .ht__last::before { content: '> '; color: var(--ra); }
+  .ht__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-text-secondary);
+  }
+  .ht__form { color: var(--sl-text-primary); }
+  .ht__go {
+    justify-self: end;
+    color: var(--sl-text-secondary);
+    transition: translate var(--sl-motion-mid) var(--sl-motion-ease), color var(--sl-motion-fast) var(--sl-motion-ease);
+  }
+
+  .ht__row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 6.5rem;
+    height: 3px;
+    background: var(--ra);
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .ht__row:hover::before,
+  .ht__row:focus-visible::before { scale: 1 1; }
+  .ht__row:hover .ht__name,
+  .ht__row:focus-visible .ht__name { translate: 0.5rem 0; }
+  .ht__row:hover .ht__go,
+  .ht__row:focus-visible .ht__go { translate: 0.25rem 0; color: var(--sl-text-primary); }
+
+  @media (max-width: 60rem) {
+    .ht__head { grid-template-columns: 1fr; align-items: start; }
+    .ht__row {
+      grid-template-columns: 5rem minmax(0, 1fr) 1.5rem;
+      row-gap: 0.5rem;
+    }
+    .ht__obj { grid-column: 1; grid-row: 2 / span 3; align-self: start; width: 4.5rem; height: 4.5rem; }
+    .ht__say, .ht__meta { grid-column: 2; }
+    .ht__meta { flex-direction: row; gap: 1rem; }
+    .ht__go { grid-column: 3; grid-row: 1; }
+  }
+
+  @media (forced-colors: active) {
+    .ht__row::before { background: Highlight; }
+    .ht__hour { color: CanvasText; }
+    .ht__obj { display: none; }
+  }
+  @media (prefers-contrast: more) {
+    .ht__obj { display: none; }
+  }
+</style>

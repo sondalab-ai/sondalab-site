@@ -3,6 +3,11 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { getPosts, readingTime, formatDate, isoDate, type Post } from '../../lib/blog';
 import { extractSources } from '../../lib/sources';
+import { Image } from 'astro:assets';
+
+// One print per transmission, keyed by the post's slug. A post without a file
+// simply has no print.
+const covers = import.meta.glob<{ default: ImageMetadata }>('../../assets/art/post-*.webp', { eager: true });
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -34,6 +39,7 @@ interface Props {
 }
 
 const { post, newer, next, nextNo, no } = Astro.props;
+const cover = covers[`../../assets/art/post-${post.id}.webp`]?.default;
 const sources = extractSources(post.body ?? '');
 const { Content } = await render(post);
 
@@ -74,6 +80,12 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
           </p>
         </div>
       </header>
+
+      {cover && (
+        <div class="post__print">
+          <Image src={cover} alt="" widths={[640, 1024, 1536]} sizes="(min-width: 60rem) 52rem, 92vw" loading="eager" />
+        </div>
+      )}
 
       <p class="post__standfirst">{post.data.summary}</p>
 
@@ -140,6 +152,20 @@ const navShards = Array.from({ length: NAV_BANDS }, (_, i) => i);
     transition: color var(--sl-motion-fast) var(--sl-motion-ease);
   }
   .post__back:hover { color: var(--slc-accent-text); }
+
+  .post__print {
+    max-width: 52rem;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+  }
+  .post__print img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--sl-radius-md);
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .post__print { display: none; }
+  }
 
   /* The rule runs the full measure; only the type is held to a narrow column. */
   .post__head {

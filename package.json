@@ -29,7 +29,8 @@
     "stance:probe": "node scripts/stance-probe.mjs",
     "layout:probe": "node scripts/layout-probe.mjs",
     "post:probe": "node scripts/post-probe.mjs",
-    "daos:probe": "node scripts/daos-probe.mjs"
+    "daos:probe": "node scripts/daos-probe.mjs",
+    "post:cover": "node scripts/make-post-cover.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

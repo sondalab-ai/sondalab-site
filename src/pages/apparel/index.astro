@@ -2,9 +2,7 @@
 import { Image, getImage } from 'astro:assets';
 
 import Base from '../../layouts/Base.astro';
-import CrtScene from '../../components/CrtScene.astro';
-import cityFlat from '../../assets/scenes/city-flat.webp';
-import cityFlatLight from '../../assets/scenes/city-flat-light.webp';
+import wearer from '../../assets/art/apparel.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
 
@@ -39,20 +37,6 @@ const ledger = [
   description="Sondalab apparel: tees, caps and pants. Every piece funds the open-source research behind the tools."
 >
   <section class="ap-open">
-    {/* The city sits behind the opening rather than beside it, so the page
-        starts inside the world the clothes come from. It runs at roughly a
-        third of full intensity: the heading and the lede are on the glass, and
-        a tube bright enough to be admired is a tube nobody can read off. The
-        figure is the one scripts/contrast-probe.mjs settled on, not a taste. */}
-    <CrtScene
-      scene="city"
-      flat={cityFlat}
-      flatLight={cityFlatLight}
-      intensity={0.35}
-      class="ap-open__field"
-      pointerHost=".ap-open"
-    />
-
     <div class="sl-wrap ap-open__inner">
       <div>
         <p class="sl-eyebrow">Apparel</p>
@@ -62,6 +46,9 @@ const ledger = [
           itself. Apparel is how the research gets funded: you get something worth
           wearing, the work gets another month.
         </p>
+      </div>
+      <div class="ap-open__print">
+        <Image src={wearer} alt="" widths={[480, 768, 1024]} sizes="(min-width: 60rem) 30rem, 92vw" loading="eager" />
       </div>
     </div>
   </section>
@@ -171,54 +158,27 @@ const ledger = [
 
 <style>
   /* --- opening ------------------------------------------------------- */
-  .ap-open {
-    position: relative;
-    isolation: isolate;
-    padding-block: clamp(5rem, 12vw, 10rem) clamp(4rem, 9vw, 8rem);
-  }
-  /* `:global()` because the element is rendered by CrtScene.astro and carries
-     that component's scope rather than this page's. The class is doubled up
-     with `.crt-scene` to win on specificity: the component declares
-     `position: relative` for its own children, and a single-class rule here
-     loses to it on source order — which collapses the backdrop to zero height,
-     since everything inside it is absolutely positioned. */
-  :global(.crt-scene.ap-open__field) {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  /*
-   * The words need a ground of their own, and dimming the picture until they
-   * get one is the wrong trade: measured with scripts/contrast-probe.mjs, the
-   * light theme bottoms out at 1.00:1 — the tube matching the lede's own colour
-   * exactly — and the scene has to fall to a smudge before it clears 4.5:1.
-   * Both themes are ink-on-paper or light-on-glass, and the text is the same
-   * substance as the picture behind it.
-   *
-   * So the left of the tube is lit to the page's own canvas colour and falls off
-   * across the frame: a broadcast's lower-third rather than a wash over a photo.
-   * The picture survives where nothing is read, which is most of it.
-   */
-  .ap-open::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      95deg,
-      var(--sl-bg-canvas) 0%,
-      var(--sl-bg-canvas) 44%,
-      color-mix(in srgb, var(--sl-bg-canvas) 60%, transparent) 64%,
-      transparent 84%
-    );
-  }
+  /* The opening is the claim on the left and one print on the right: the
+     operator in the shirt. The print keeps its own 4:5 shape. */
+  .ap-open { padding-block: clamp(3rem, 7vw, 6rem); }
   .ap-open__inner {
-    position: relative;
-    z-index: 2;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    gap: 2.5rem clamp(2rem, 6vw, 6rem);
+    align-items: center;
+  }
+  .ap-open__print img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--sl-radius-md);
+  }
+  @media (max-width: 60rem) {
+    .ap-open__inner { grid-template-columns: 1fr; }
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .ap-open__inner { grid-template-columns: 1fr; }
+    .ap-open__print { display: none; }
   }
   .ap-open__h {
     margin-top: 1.5rem;
@@ -228,22 +188,6 @@ const ledger = [
     margin-top: clamp(1.75rem, 4vw, 2.75rem);
     max-width: 46ch;
   }
-  /* Below 64rem the lede runs across the tube, past the lit left of the
-     frame: it read 2.63:1 over the live scene and 1.27:1 over its flat image
-     at 390px, and 2.48:1 over the image at 768px (light). So the scene is
-     composed above it: it holds the top and the right, behind the heading
-     (large, it clears its 3:1 there), and dissolves toward the bottom of the
-     section over 7rem, gone 15rem up from it, the height of the lede and the
-     padding under it at these widths. Nothing of it comes back below the
-     words. From 64rem the lede sits in the lit left (1024px: passes). */
-  @media (max-width: 63.99rem) {
-    :global(.crt-scene.ap-open__field) {
-      --ap-room: 15rem;
-      -webkit-mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
-      mask-image: linear-gradient(to top, transparent var(--ap-room), #000 calc(var(--ap-room) + 7rem));
-    }
-  }
-
   /* --- the beds ------------------------------------------------------ */
   /* Both sections lie on a bed of the kit's art fields, as the home page
      lays its own (Method, ProductsIndex): the stripes under the pact, fading
