@@ -5,7 +5,6 @@ import Base from '../../layouts/Base.astro';
 import PrintHero from '../../components/PrintHero.astro';
 import wearer from '../../assets/art/band-apparel.webp';
 import wearerGround from '../../assets/art/band-ground.webp';
-import pactPrint from '../../assets/art/page-pact.webp';
 import { APPAREL, categoryHref } from '../../lib/apparel';
 import { SITE } from '../../lib/site';
 
@@ -53,11 +52,6 @@ const ledger = [
 
   <section class="sl-section ap-pact">
     <div class="sl-wrap ap-pact__grid">
-      {/* The shirt feeds the machine. Decorative. It stands on the left, so the
-          page's prints alternate sides: the wearer above is on the right. */}
-      <div class="ap-pact__print">
-        <Image src={pactPrint} alt="" widths={[480, 768, 1024]} sizes="(min-width: 60rem) 28rem, 92vw" />
-      </div>
       <div>
         <div class="sl-section__head">
           <span class="sl-section__idx">01</span>
@@ -71,16 +65,16 @@ const ledger = [
           No sponsor, no roadmap sold in advance, no feature waiting on
           someone else's quarter.
         </p>
-
-        <ul class="ap-ledger" data-reveal-list>
-          {ledger.map((l, i) => (
-            <li class="ap-ledger__row" data-reveal style={`--i: ${i}`}>
-              <span class="ap-ledger__key">{l.key}</span>
-              <span class="ap-ledger__note">{l.note}</span>
-            </li>
-          ))}
-        </ul>
       </div>
+
+      <ul class="ap-ledger" data-reveal-list>
+        {ledger.map((l, i) => (
+          <li class="ap-ledger__row" data-reveal style={`--i: ${i}`}>
+            <span class="ap-ledger__key">{l.key}</span>
+            <span class="ap-ledger__note">{l.note}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -167,13 +161,8 @@ const ledger = [
     margin-top: clamp(1.75rem, 4vw, 2.75rem);
     max-width: 46ch;
   }
-  /* --- the pact print --------------------------------------------------- */
   .ap-pact,
   .ap-cats { position: relative; }
-  .ap-pact__print img { display: block; width: 100%; height: auto; border-radius: var(--sl-radius-md); }
-  @media (prefers-contrast: more), (forced-colors: active) {
-    .ap-pact__print { display: none; }
-  }
   .ap-pact > .sl-wrap,
   .ap-cats > .sl-wrap { position: relative; z-index: 1; }
 
@@ -184,7 +173,7 @@ const ledger = [
     gap: clamp(2.5rem, 6vw, 4rem);
   }
   @media (min-width: 52rem) {
-    .ap-pact__grid { grid-template-columns: minmax(0, 28rem) minmax(0, 1fr); align-items: center; }
+    .ap-pact__grid { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
   }
   .ap-pact__grid .h2 { margin-top: 1.25rem; max-width: 20ch; }
   .ap-pact__body {
@@ -193,7 +182,7 @@ const ledger = [
     color: var(--sl-text-secondary);
   }
 
-  .ap-ledger { list-style: none; margin: 2.5rem 0 0; padding: 0; max-width: 52ch; }
+  .ap-ledger { list-style: none; margin: 0; padding: 0; }
   .ap-ledger__row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
