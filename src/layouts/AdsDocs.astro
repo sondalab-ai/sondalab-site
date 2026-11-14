@@ -1,0 +1,157 @@
+---
+// The ADS docs frame: the page list beside the content from 60rem up, above
+// it below that, then the page, the line that says which ADS commit it was
+// checked against, and the previous and next pages. The body is rendered
+// Markdown: its example blocks are the transcripts' ink block (.ads-doc pre
+// in site.css), and each table sits in a <div class="table-wrap"> written in
+// the Markdown, so both scroll in their own box at phone width.
+import Base from './Base.astro';
+import { docHref, neighbours, type DocRef } from '../lib/ads-docs';
+
+interface Props {
+  title: string;
+  summary: string;
+  currentId: string;
+  docs: readonly DocRef[];
+  syncedFrom: string;
+  verified: Date;
+}
+const { title, summary, currentId, docs, syncedFrom, verified } = Astro.props;
+const { prev, next } = neighbours(docs, currentId);
+const day = verified.toISOString().slice(0, 10);
+// The index has no current page and its title already says ADS docs.
+const pageTitle = currentId ? `${title} · ADS docs` : title;
+---
+
+<Base title={pageTitle} description={summary}>
+  <div class="sl-wrap docs">
+    <nav class="docs__nav" aria-label="ADS docs">
+      <p class="sl-eyebrow"><a href="/ads/">ADS</a> · <a href="/ads/docs/">docs</a></p>
+      <ol class="docs__list">
+        {docs.map((d) => (
+          <li><a href={docHref(d.id)} aria-current={d.id === currentId ? 'page' : undefined}>{d.title}</a></li>
+        ))}
+      </ol>
+    </nav>
+
+    <article class="docs__main">
+      <header class="docs__head">
+        <h1>{title}</h1>
+        <p class="docs__lede">{summary}</p>
+      </header>
+      <div class="ads-doc">
+        <slot />
+      </div>
+      <footer class="docs__foot">
+        <p class="docs__synced">Synced with ADS <code>{syncedFrom.slice(0, 7)}</code> on {day}</p>
+        {(prev || next) && (
+          <nav class="docs__pager" aria-label="Previous and next page">
+            {prev && <a class="sl-link" href={docHref(prev.id)} rel="prev">← {prev.title}</a>}
+            {next && <a class="sl-link docs__next" href={docHref(next.id)} rel="next">{next.title} →</a>}
+          </nav>
+        )}
+      </footer>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .docs {
+    display: grid;
+    gap: var(--sl-space-6);
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
+  }
+  @media (min-width: 60rem) {
+    .docs { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--sl-space-8); align-items: start; }
+    .docs__nav { position: sticky; top: 5rem; }
+  }
+
+  .docs__nav { min-width: 0; }
+  .docs__nav .sl-eyebrow { margin: 0 0 var(--sl-space-3); }
+  .docs__nav .sl-eyebrow a { color: inherit; }
+  .docs__list {
+    display: grid;
+    gap: var(--sl-space-1);
+    margin: 0;
+    padding: 0 0 0 var(--sl-space-3);
+    list-style: none;
+    border-left: 1px solid var(--slc-border-subtle);
+  }
+  .docs__list a {
+    display: block;
+    padding: var(--sl-space-1) var(--sl-space-2);
+    border-radius: var(--sl-radius-sm);
+    color: var(--slc-text-secondary);
+    text-decoration: none;
+  }
+  .docs__list a:hover { color: var(--slc-text); background: color-mix(in srgb, var(--slc-text) 6%, transparent); }
+  .docs__list a[aria-current='page'] { color: var(--slc-text); font-weight: 600; background: color-mix(in srgb, var(--slc-text) 8%, transparent); }
+
+  .docs__main { min-width: 0; }
+  .docs__head { display: grid; gap: var(--sl-space-3); margin-bottom: var(--sl-space-6); }
+  .docs__head h1 {
+    margin: 0;
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: var(--sl-line-tight);
+    text-wrap: balance;
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+  .docs__lede { max-width: 62ch; margin: 0; color: var(--slc-text-secondary); font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem); }
+
+  /* The Markdown body: prose at the reading measure, wide blocks at the
+     column's width so they scroll inside it. */
+  .ads-doc { line-height: var(--sl-line-relaxed); font-size: clamp(1rem, 0.96rem + 0.2vw, 1.075rem); }
+  .ads-doc > :global(*) { max-width: 68ch; margin-block: 0 var(--sl-space-4); }
+  .ads-doc > :global(:is(pre, .table-wrap)) { max-width: 100%; }
+  .ads-doc :global(h2) {
+    margin: var(--sl-space-8) 0 var(--sl-space-3);
+    font-family: var(--sl-font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: var(--sl-line-tight);
+    font-size: clamp(1.45rem, 1.2rem + 1vw, 1.9rem);
+    scroll-margin-top: 5rem;
+  }
+  .ads-doc :global(h3) { margin: var(--sl-space-6) 0 var(--sl-space-2); font-size: 1.15rem; font-weight: 600; scroll-margin-top: 5rem; }
+  .ads-doc :global(:is(ul, ol)) { padding-left: 1.3em; }
+  .ads-doc :global(li + li) { margin-top: var(--sl-space-2); }
+  .ads-doc :global(a) { color: var(--slc-accent-text); }
+  .ads-doc :global(strong) { color: var(--slc-text); font-weight: 600; }
+  .ads-doc :global(:not(pre) > code) {
+    font-family: var(--sl-font-mono);
+    font-size: 0.9em;
+    background: var(--sl-bg-surface);
+    padding: 0.1em 0.35em;
+    border-radius: var(--sl-radius-sm);
+    overflow-wrap: anywhere;
+  }
+  .ads-doc :global(.table-wrap) { overflow-x: auto; }
+  /* Markdown gives a bare <table>: the kit's sl-table look, on the same
+     tokens, without its class. */
+  .ads-doc :global(table) { min-width: 36rem; width: 100%; border-collapse: collapse; font-size: var(--sl-text-sm); }
+  .ads-doc :global(th) {
+    text-align: left;
+    font-size: var(--sl-text-xs);
+    font-weight: 500;
+    color: var(--slc-text-muted);
+    background: color-mix(in srgb, var(--slc-text) 4%, transparent);
+  }
+  .ads-doc :global(:is(th, td)) { padding: var(--sl-space-3) var(--sl-space-4); vertical-align: top; }
+  .ads-doc :global(td) { border-bottom: 1px solid var(--slc-border-subtle); }
+  .ads-doc :global(tr:last-child td) { border-bottom: none; }
+  .ads-doc :global(td code) { white-space: nowrap; overflow-wrap: normal; }
+
+  .docs__foot {
+    display: grid;
+    gap: var(--sl-space-4);
+    margin-top: var(--sl-space-8);
+    padding-top: var(--sl-space-4);
+    border-top: 1px solid var(--slc-border-subtle);
+  }
+  .docs__synced { margin: 0; color: var(--slc-text-muted); font-size: var(--sl-text-sm); }
+  .docs__synced code { font-family: var(--sl-font-mono); }
+  .docs__pager { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sl-space-3); }
+  .docs__next { margin-left: auto; }
+</style>

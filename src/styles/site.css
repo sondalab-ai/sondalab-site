@@ -420,6 +420,52 @@ a { color: inherit; }
   border-top: 1px solid var(--sl-border-subtle);
 }
 
+/* --- ink block --------------------------------------------------------- *
+ * Terminal text on the ink, inverted from the page: the ADS transcripts
+ * (Transcript.astro) and the example blocks of the ADS docs. Long lines
+ * scroll inside the block, never the page.
+ *
+ * In an sl-invert band the kit sets --slc-text to the canvas colour and
+ * leaves --slc-canvas alone, so the block's two colours would be the same.
+ * There the block takes the page's own text colour back: a canvas-coloured
+ * block with dark text on a dark band, the opposite of its band, as
+ * daos.astro's excerpts are. The role colours (t-*) mix with --slc-canvas,
+ * so they follow.
+ *
+ * The docs' blocks are Shiki's css-variables theme, which paints only with
+ * --astro-code-*: they take the same ink, and every token the block's text
+ * colour, so no syntax theme shows.
+ * --------------------------------------------------------------------- */
+.ink-pre,
+.ads-doc pre {
+  margin: 0;
+  padding: var(--sl-space-4) 1.15rem;
+  background: var(--slc-text);
+  color: var(--slc-canvas);
+  border-radius: var(--sl-radius-md, 10px);
+  overflow-x: auto;
+  white-space: pre;
+  font-family: var(--sl-font-mono);
+  font-size: clamp(0.76rem, 0.72rem + 0.25vw, 0.88rem);
+  line-height: var(--sl-line-loose);
+}
+.sl-invert .ink-pre { --slc-canvas: var(--sl-text-primary); }
+.ads-doc pre {
+  --astro-code-background: var(--slc-text);
+  --astro-code-foreground: var(--slc-canvas);
+  --astro-code-token-constant: currentColor;
+  --astro-code-token-string: currentColor;
+  --astro-code-token-comment: currentColor;
+  --astro-code-token-keyword: currentColor;
+  --astro-code-token-parameter: currentColor;
+  --astro-code-token-function: currentColor;
+  --astro-code-token-string-expression: currentColor;
+  --astro-code-token-punctuation: currentColor;
+  --astro-code-token-link: currentColor;
+}
+:is(.ink-pre, .ads-doc pre):focus-visible { outline: 2px solid var(--slc-focus); outline-offset: 3px; }
+.ads-doc pre code { font: inherit; color: inherit; background: none; padding: 0; border-radius: 0; }
+
 /* The glitch is @sondalab/ui-kit's now: sl-fx-glitch in effects.css, and
  * burst / autoBurst / hoverBurst in effects.js. This file carried its own for
  * as long as the kit had none; 0.9.2 took autoBurst, hoverBurst and a settable

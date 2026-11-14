@@ -42,6 +42,11 @@ export const NOVELLAS: Record<string, string[]> = {
     "The service would gladly remember for you, in a vault you'll never open, and decide what you're allowed to recall. Here the memory speaks only when it has something that stands out, and you can open it, read it, move it, delete it. Nothing it knows is out of your sight.",
     "Tomorrow night starts where this one ended. The switch is yours. End of shift.",
   ],
+  ads: [
+    "9 a.m. You're heading out, but the queue isn't empty. So you hand it to the team: one writes the tests first and freezes them, one makes the change, the others read it in layers. The small fixes land on their own, each one signed. The big ones wait at the door for you.",
+    "The service would merge it all while you slept and call it help. Here nothing risky lands without a code only you can type, and anything that lands can be walked back.",
+    "You type ok, and the four letters after it. The switch was always yours.",
+  ],
 };
 
 /** The night in chapter order: one tool per hour, 2am to the end of the shift. */
@@ -53,4 +58,5 @@ export const NIGHT: { id: string; hour: string }[] = [
   { id: 'local-agents', hour: '06:00' },
   { id: 'skillkit', hour: '07:00' },
   { id: 'mxm', hour: '08:00' },
+  { id: 'ads', hour: '09:00' },
 ];
