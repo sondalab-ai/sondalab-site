@@ -1,0 +1,41 @@
+---
+// A terminal transcript as text: real ADS output on the ink, one line per
+// entry, each role line painted with its terminal role (sondalab-ui
+// tui-patterns.md). Long lines scroll inside the block, never the page.
+import type { TranscriptLine } from '../lib/ads-page';
+
+interface Props {
+  lines: readonly TranscriptLine[];
+  label: string;
+}
+const { lines, label } = Astro.props;
+---
+
+<figure class="transcript"><pre aria-label={label} tabindex="0">{lines.map((l, i) => <Fragment>{l.role ? <span class={`t-${l.role}`}>{l.text}</span> : l.text}{i < lines.length - 1 ? '\n' : ''}</Fragment>)}</pre></figure>
+
+<style>
+  .transcript { margin: 0; min-width: 0; }
+  /* Inverted from the page, as daos.astro's excerpts are: inside an sl-invert
+     band the roles swap, so the block stays the opposite of its band. */
+  pre {
+    margin: 0;
+    padding: var(--sl-space-4) 1.15rem;
+    background: var(--slc-text);
+    color: var(--slc-canvas);
+    border-radius: var(--sl-radius-md, 10px);
+    overflow-x: auto;
+    white-space: pre;
+    font-family: var(--sl-font-mono);
+    font-size: clamp(0.76rem, 0.72rem + 0.25vw, 0.88rem);
+    line-height: var(--sl-line-loose);
+  }
+  pre:focus-visible { outline: 2px solid var(--slc-focus); outline-offset: 3px; }
+  /* Status hues lifted toward the block's text so they read on the ink
+     (design-language.md §Decision 2). */
+  .t-prompt { color: color-mix(in srgb, var(--slc-accent) 55%, var(--slc-canvas)); font-weight: 600; }
+  .t-ok { color: color-mix(in srgb, var(--slc-success) 45%, var(--slc-canvas)); }
+  .t-warn { color: color-mix(in srgb, var(--slc-warning) 45%, var(--slc-canvas)); }
+  .t-err { color: color-mix(in srgb, var(--slc-danger) 45%, var(--slc-canvas)); }
+  .t-dim { color: color-mix(in srgb, var(--slc-canvas) 62%, var(--slc-text)); }
+  .t-accent { color: color-mix(in srgb, var(--slc-info, var(--slc-accent)) 50%, var(--slc-canvas)); font-weight: 600; }
+</style>

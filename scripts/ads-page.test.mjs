@@ -1,0 +1,92 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  ADS_APPROVAL,
+  ADS_BENEFITS,
+  ADS_HERO,
+  ADS_INSTALL,
+  ADS_LIMITS,
+  ADS_PREREQS,
+  ADS_RECIPES,
+  ADS_SESSION,
+  ADS_STEPS,
+  repoState,
+} from '../src/lib/ads-page.ts';
+
+const COPY = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS, ADS_PREREQS]);
+
+test('the repo notice shows until the repository is public, then the link does', () => {
+  assert.deepEqual(repoState(false), { notice: 'ADS is in beta. The repository opens soon.', repoHref: null });
+  assert.deepEqual(repoState(true), { notice: null, repoHref: 'https://github.com/sondalab-ai/agentic-dev-system' });
+});
+
+test('the benefit sections come in the agreed order, after four steps', () => {
+  assert.deepEqual(ADS_BENEFITS.map((b) => b.id), ['talk', 'risk', 'signed', 'control', 'budget']);
+  assert.equal(ADS_STEPS.length, 4);
+});
+
+test('the session shows the request, the plan, the steps and the end', () => {
+  const texts = ADS_SESSION.map((l) => l.text);
+  assert.match(texts[0], /fix #13$/);
+  assert.ok(texts.some((t) => t.startsWith('#13  Plan   ')));
+  assert.ok(texts.filter((t) => t.startsWith('#13  Step   ')).length >= 2);
+  assert.match(texts.at(-1), /^#13  End    /);
+});
+
+test('the approval block ends on the reply line with a 4-hex code', () => {
+  assert.match(ADS_APPROVAL[0].text, /^ads needs your approval: /);
+  assert.match(ADS_APPROVAL.at(-1).text, /^To approve, reply:\s+ok [0-9a-f]{4}$/);
+});
+
+test('install runs make install, then ads init, then ads doctor', () => {
+  const texts = ADS_INSTALL.map((l) => l.text);
+  const at = (s) => texts.findIndex((t) => t.includes(s));
+  assert.ok(at('make install') >= 0 && at('make install') < at('ads init') && at('ads init') < at('ads doctor'), texts.join('\n'));
+});
+
+test('every recipe link is a docs path with the trailing slash', () => {
+  assert.ok(ADS_RECIPES.length >= 3 && ADS_RECIPES.length <= 4);
+  for (const { href } of ADS_RECIPES) {
+    assert.ok(href.startsWith('/ads/docs/'), href);
+    assert.ok(href.split('#')[0].endsWith('/'), href);
+  }
+});
+
+// Every number on the page was checked against the ADS code at d7e7189; a new
+// one must be checked too, so the test lists the ones that were.
+const VERIFIED = new Set([
+  '1', // internal/config/config.go:511 trivial 1M tokens, and low 1.5M (the regex stops at the dot)
+  '3', // internal/config/config.go:504 Rounds: 3
+  '10', // internal/approve/approve.go:31 TTL = 10 * time.Minute
+  '12', // example: issue #12, as in the ADS README table
+  '13', // example: issue #13, as in internal/report/view_test.go
+  '20', // internal/config/config.go:574 trivial 20 lines
+  '200', // internal/config/config.go:574 low 200 lines
+  '400', // internal/config/config.go:574 medium 400 lines
+  '2.38', // scripts/install.sh:38 git 2.38 or newer
+  '3600', // internal/config/config.go:504 Seconds: 3600
+]);
+
+test('the copy states no number that was not verified', () => {
+  const found = new Set([...COPY.matchAll(/\b\d+(\.\d+)?\b/g)].map((m) => m[0]));
+  for (const n of found) assert.ok(VERIFIED.has(n), `unverified number ${n}`);
+});
+
+// The number regex reads 1.5M as 1 and 3M as nothing, so the budget table is
+// checked cell by cell (internal/config/config.go:504, 511-512).
+test('the budget table holds the built-in budgets', () => {
+  const budget = ADS_BENEFITS.find((b) => b.id === 'budget');
+  assert.deepEqual(budget.table.head, ['Risk', 'Rounds', 'Seconds', 'Tokens']);
+  assert.deepEqual(budget.table.rows, [
+    ['trivial', '3', '3600', '1M'],
+    ['low', '3', '3600', '1.5M'],
+    ['medium', '3', '3600', '3M'],
+    ['high', '3', '3600', '8M'],
+    ['critical', '3', '3600', '8M'],
+  ]);
+});
+
+test('the copy uses no hype words', () => {
+  const all = JSON.stringify([COPY, ADS_SESSION, ADS_APPROVAL, ADS_INSTALL, ADS_RECIPES]);
+  assert.doesNotMatch(all, /seamless|powerful|effortless|autopilot|10x|blazing/i);
+});
