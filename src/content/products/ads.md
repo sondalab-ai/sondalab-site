@@ -14,8 +14,8 @@ summary: "You ask Claude Code for a change; an agent team writes the tests, make
 ---
 
 You ask Claude Code for a change, "fix #12" or "work the queue", and `ads`
-runs it for you. A test author writes tests first and freezes them, an
-implementer makes the change until those tests and the checks pass, and
+runs it for you. A test author writes tests first and freezes them (a
+docs-only change has none), an implementer makes the change until those tests and the checks pass, and
 separate reviewers look at it in layers. The more risk, the more layers.
 
 The risk of the change decides who signs it. Once `ads init` has set up the

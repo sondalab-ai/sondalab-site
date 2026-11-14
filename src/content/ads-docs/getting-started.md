@@ -16,7 +16,7 @@ sources:
   - cmd/ads/testdata/script/init_rerun.txtar
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: d7e7189
+syncedFrom: 8942f68
 verified: 2026-11-14
 ---
 
@@ -120,7 +120,7 @@ Review       correctness ✓
 Undo         say "undo #12"
 ```
 
-**What happens.** Claude Code runs `ads work 12` in the background and relays its lines. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. Up to medium risk, a change that passes every check lands by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
+**What happens.** Claude Code runs `ads work 12` in the background and relays its lines. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. A change of trivial, low or medium risk that stays within its size limit and passes every check can land by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
 
 ## Update
 

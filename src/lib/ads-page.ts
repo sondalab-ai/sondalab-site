@@ -7,7 +7,9 @@
  * (FollowPlan, FollowStep, FollowEnd) and the cases of view_test.go; the
  * approval block copies internal/flow/ask.go (approvalBlock) and
  * internal/flow/signoff.go, as cmd/ads/testdata/script/signoff_flow.txtar
- * prints it. Text in backticks is shown in code font.
+ * prints it. The docs-only exception of the first step comes from ADS
+ * 8942f68 (internal/flow/attempt.go, README.md). Text in backticks is shown
+ * in code font.
  */
 
 export const ADS_REPO = 'https://github.com/sondalab-ai/agentic-dev-system';
@@ -76,7 +78,7 @@ export const ADS_APPROVAL: readonly TranscriptLine[] = [
 export const ADS_STEPS: readonly { title: string; body: string }[] = [
   {
     title: 'Tests first',
-    body: 'A test author writes tests for the request, and they are frozen. For a bug or a feature, they must fail before the change.',
+    body: 'A test author writes tests for the request, and they are frozen. For a bug or a feature, they must fail before the change. A docs-only change has none: a test would pass before and after it.',
   },
   {
     title: 'The change',

@@ -12,7 +12,9 @@ sources:
   - internal/report/report.go
   - internal/report/view.go
   - internal/report/view_test.go
-syncedFrom: d7e7189
+  - internal/risk/risk.go
+  - internal/stage/validate.go
+syncedFrom: 8942f68
 verified: 2026-11-14
 ---
 
@@ -79,6 +81,19 @@ Each layer is a separate reviewer. The more risk, the more layers:
 </div>
 
 A finding blocks the change only from severity `major`, and only with a reproducer: a test that fails on the change. A finding without both does not block the change.
+
+## Docs changes
+
+A change of type `docs` has no test author: a test of a docs change passes before and after it, so it proves nothing. The plan names no test author, and the report's Proof line says so:
+
+```text
+…
+#14  Plan   implementer, 1 review layer · at most 3 rounds · 1M tokens · 3600 s
+…
+Proof        docs only, no test · checks pass
+```
+
+A docs change may touch only documentation: `*.md`, `*.mdx`, `*.markdown`, `*.rst` and `*.adoc` files. If its diff changes any other file, its risk becomes at least `high`, so it waits for your sign-off, and its Proof line no longer says `docs only`.
 
 ## The final look
 

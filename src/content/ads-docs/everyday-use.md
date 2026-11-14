@@ -17,7 +17,7 @@ sources:
   - internal/report/view.go
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
-syncedFrom: d7e7189
+syncedFrom: 8942f68
 verified: 2026-11-14
 ---
 
@@ -45,7 +45,7 @@ Recommended  half up
 Answer       say what to do, for example "half up"
 ```
 
-**What happens.** Claude Code runs `ads work 12` in the background. When the request is clear, the team writes the tests, makes the change and reviews it, and you get a report that starts with `Landed`, `Ready for sign-off` or `Waiting for you`. Here it asks first. Answer in your own words, for example "half up": the team goes on from where it stopped. A plain description works as well as an issue number, for example "add a cover target to the Makefile".
+**What happens.** Claude Code runs `ads work 12` in the background. When the request is clear, the team writes the tests (none for a docs change), makes the change and reviews it, and you get a report that starts with `Landed`, `Ready for sign-off` or `Waiting for you`. Here it asks first. Answer in your own words, for example "half up": the team goes on from where it stopped. A plain description works as well as an issue number, for example "add a cover target to the Makefile".
 
 ## Work the queue
 

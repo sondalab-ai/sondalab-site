@@ -87,7 +87,7 @@ test('every page has at least two example blocks', () => {
   }
 });
 
-// Every number on the pages was checked against ADS d7e7189; a new one must
+// Every number on the pages was checked against ADS 8942f68; a new one must
 // be checked too. 1.5M reads as 1.5M and 8M as 8M, so a token budget is
 // checked whole. Dates and timestamps are example values, not claims, and
 // are left out.
