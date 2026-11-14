@@ -75,22 +75,39 @@ export const ADS_APPROVAL: readonly TranscriptLine[] = [
   { text: 'To approve, reply:   ok 4f2a', role: 'prompt' },
 ];
 
-export const ADS_STEPS: readonly { title: string; body: string }[] = [
+/** One step of the four-step flow; `who` is the role that acts in it. */
+export interface AdsStep {
+  readonly who: string;
+  readonly title: string;
+  readonly body: string;
+}
+
+/** The two ways step 4 ends, shown as the fork after the last step. */
+export const ADS_EXITS: readonly { readonly when: string; readonly then: string }[] = [
+  { when: 'trivial, low, medium', then: 'lands by itself, signed with the team key' },
+  { when: 'high, critical', then: 'waits for your `ok <code>`, signed with your key' },
+];
+
+export const ADS_STEPS: readonly AdsStep[] = [
   {
+    who: 'test author',
     title: 'Tests first',
     body: 'A test author writes tests for the request, and they are frozen. For a bug or a feature, they must fail before the change. A docs-only change has none: a test would pass before and after it.',
   },
   {
+    who: 'implementer',
     title: 'The change',
     body: 'An implementer makes the change until the frozen tests and the checks pass, in at most 3 rounds by default.',
   },
   {
+    who: 'reviewers',
     title: 'A review in layers',
     body: 'Each layer is a separate reviewer: one for a trivial change, six for high and critical. A finding blocks only from severity major, and only with a test that fails on the change.',
   },
   {
+    who: 'risk decides',
     title: 'It lands, or it waits for you',
-    body: 'A trivial, low or medium change that stays within its size limit and passes every check lands by itself, signed with the team key; a medium one only when the run had no dispute and no stall. A high or critical change waits for your sign-off and is signed with your key. Every landed change can be undone, after your approval, with a signed revert.',
+    body: 'The risk picks one of the two exits below. To land by itself, a change must stay within its size limit and pass every check; a medium one only when the run had no dispute and no stall. Every landed change can be undone, after your approval, with a signed revert.',
   },
 ];
 

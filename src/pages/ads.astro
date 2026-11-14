@@ -14,6 +14,7 @@ import heroGround from '../assets/art/band-ground.webp';
 import { markClass } from '../lib/marks';
 import {
   ADS_BENEFITS,
+  ADS_EXITS,
   ADS_FIRST_RUN,
   ADS_HERO,
   ADS_INSTALL,
@@ -63,13 +64,27 @@ const tail = ADS_BENEFITS.length;
       <div class="sl-wrap">
         <h2 class="big-h2">How a change lands, in four steps.</h2>
         <ol class="steps">
-          {ADS_STEPS.map((s) => (
-            <li class="sl-card step">
-              <h3>{s.title}</h3>
-              <p class="sl-prose">{s.body}</p>
+          {ADS_STEPS.map((s, i) => (
+            <li class="step">
+              <div class="step__node" aria-hidden="true">
+                <span class="step__num sl-px">{String(i + 1).padStart(2, '0')}</span>
+              </div>
+              <div class="sl-card step__card">
+                <p class={markClass(i + 1)}>{s.who}</p>
+                <h3>{s.title}</h3>
+                <p class="sl-prose">{s.body}</p>
+              </div>
             </li>
           ))}
         </ol>
+        <ul class="exits" aria-label="How step 4 ends">
+          {ADS_EXITS.map((x, i) => (
+            <li class:list={['exit', i === 0 ? 'exit--lands' : 'exit--waits']}>
+              <span class="exit__when">{x.when}</span>
+              <span class="exit__then">{ticks(x.then).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
 
@@ -178,12 +193,99 @@ const tail = ADS_BENEFITS.length;
   .sec-body { display: grid; gap: var(--sl-space-3); max-width: 62ch; margin-bottom: clamp(1.6rem, 3vw, 2.4rem); }
   .sec-body p { margin: 0; }
 
-  .steps { display: grid; gap: var(--sl-space-4); margin: 0; padding: 0; list-style: none; counter-reset: step; }
-  @media (min-width: 900px) { .steps { grid-template-columns: repeat(4, 1fr); } }
-  .step { display: grid; align-content: start; gap: var(--sl-space-2); counter-increment: step; min-width: 0; }
-  .step::before { content: counter(step, decimal-leading-zero); font-family: var(--sl-font-mono); color: var(--slc-accent-text); font-weight: 600; }
-  .step h3 { margin: 0; font-size: 1.2rem; }
-  .step p { margin: 0; }
+  /* The four steps on one rail: a pixel numeral on a node, the rail running
+     through the nodes, and the card under it. Narrow: the rail runs down the
+     left edge instead. Step 4 ends in a fork of two exits. */
+  .steps { display: grid; gap: var(--sl-space-5); margin: 0; padding: 0; list-style: none; }
+  .step { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--sl-space-4); min-width: 0; }
+  .step__node { position: relative; display: flex; justify-content: center; }
+  .step__num {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    font-size: var(--sl-text-px-4);
+    line-height: 1;
+    padding: var(--sl-space-2) var(--sl-space-2) var(--sl-space-1);
+    background: var(--slc-canvas);
+  }
+  /* The rail: down from each node to the next one. */
+  .step:not(:last-child) .step__node::after {
+    content: '';
+    position: absolute;
+    top: var(--sl-space-8);
+    bottom: calc(-1 * var(--sl-space-5));
+    left: 50%;
+    border-left: 2px dashed var(--slc-accent-text);
+    opacity: 0.55;
+  }
+  .step__card { display: grid; align-content: start; gap: var(--sl-space-2); min-width: 0; }
+  .step__card h3 { margin: 0; font-size: 1.25rem; }
+  .step__card p { margin: 0; }
+
+  @media (min-width: 900px) {
+    .steps { grid-template-columns: repeat(4, 1fr); gap: var(--sl-space-4); }
+    .step { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: var(--sl-space-3); }
+    .step__node { justify-content: start; }
+    .step:not(:last-child) .step__node::after {
+      top: 50%;
+      bottom: auto;
+      left: var(--sl-space-8);
+      right: calc(-1 * var(--sl-space-4));
+      border-left: 0;
+      border-top: 2px dashed var(--slc-accent-text);
+    }
+  }
+
+  .exits {
+    display: grid;
+    gap: var(--sl-space-3);
+    margin: var(--sl-space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 900px) {
+    /* The fork hangs under step 4: a stub down from the card's centre (75% of
+       this box), a bar across, and a drop into each exit (25% and 75%). */
+    .exits {
+      position: relative;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--sl-space-4);
+      margin-inline-start: calc(50% + var(--sl-space-2));
+      margin-block-start: 0;
+      padding-block-start: calc(var(--sl-space-5) + var(--sl-space-4));
+    }
+    .exits::before {
+      content: '';
+      position: absolute;
+      top: var(--sl-space-5);
+      left: 25%;
+      right: 25%;
+      height: var(--sl-space-4);
+      border: 2px dashed var(--slc-accent-text);
+      border-bottom: 0;
+      opacity: 0.55;
+    }
+    .exits::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 75%;
+      height: var(--sl-space-5);
+      border-left: 2px dashed var(--slc-accent-text);
+      opacity: 0.55;
+    }
+  }
+  .exit {
+    display: grid;
+    gap: var(--sl-space-1);
+    padding: var(--sl-space-3) var(--sl-space-4);
+    border: 1px solid var(--slc-border-subtle);
+    border-inline-start: 4px solid var(--slc-accent-text);
+    border-radius: var(--sl-radius-md);
+  }
+  .exit--waits { border-inline-start-style: dashed; }
+  .exit__when { font-family: var(--sl-font-mono); font-size: 0.85rem; color: var(--slc-text-secondary); }
+  .exit__then { font-weight: 600; }
 
   /* A wide table scrolls in its own box, never the page. */
   .table-wrap { overflow-x: auto; max-width: 100%; }
