@@ -12,13 +12,16 @@ interface Props {
 const { lines, label } = Astro.props;
 ---
 
-<figure class="transcript"><pre class="ink-pre" aria-label={label} tabindex="0">{lines.map((l, i) => <Fragment>{l.role ? <span class={`t-${l.role}`}>{l.text}</span> : l.text}{i < lines.length - 1 ? '\n' : ''}</Fragment>)}</pre></figure>
+<figure class="transcript"><pre class="ink-pre" role="region" aria-label={label} tabindex="0">{lines.map((l, i) => <Fragment>{l.role ? <span class={`t-${l.role}`}>{l.text}</span> : l.text}{i < lines.length - 1 ? '\n' : ''}</Fragment>)}</pre></figure>
 
 <style>
   .transcript { margin: 0; min-width: 0; }
   /* Status hues lifted toward the block's text so they read on the ink
      (design-language.md §Decision 2). */
   .t-prompt { color: color-mix(in srgb, var(--slc-accent) 55%, var(--slc-canvas)); font-weight: 600; }
+  /* In a band the block is light on the light theme, and the accent needs
+     more of the block's text to hold 4.5:1 there (layout-probe ink check). */
+  :global(.sl-invert) .t-prompt { color: color-mix(in srgb, var(--slc-accent) 40%, var(--slc-canvas)); }
   .t-ok { color: color-mix(in srgb, var(--slc-success) 45%, var(--slc-canvas)); }
   .t-warn { color: color-mix(in srgb, var(--slc-warning) 45%, var(--slc-canvas)); }
   .t-err { color: color-mix(in srgb, var(--slc-danger) 45%, var(--slc-canvas)); }

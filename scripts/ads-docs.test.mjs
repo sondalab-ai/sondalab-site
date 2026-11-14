@@ -170,3 +170,12 @@ test('every page that says the team key signs says when', () => {
 test('the pages use no hype words', () => {
   for (const p of pages()) assert.doesNotMatch(p.body, /seamless|powerful|effortless|autopilot|10x|blazing/i, p.id);
 });
+
+// A <pre> that scrolls sideways must take the keyboard focus. Shiki gives
+// every block tabindex="0" (astro.config.mjs); the built page proves it.
+const BUILT = new URL('../dist/ads/docs/everyday-use/index.html', import.meta.url);
+test('every example block of a built docs page is keyboard-focusable', { skip: !existsSync(BUILT) && 'no build in dist/' }, () => {
+  const pres = readFileSync(BUILT, 'utf8').match(/<pre\b[^>]*>/g) ?? [];
+  assert.ok(pres.length >= 2, 'no example blocks in the built page');
+  for (const pre of pres) assert.match(pre, /tabindex="0"/, pre);
+});

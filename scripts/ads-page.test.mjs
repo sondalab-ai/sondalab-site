@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   ADS_APPROVAL,
   ADS_BENEFITS,
+  ADS_FIRST_RUN,
   ADS_HERO,
   ADS_INSTALL,
   ADS_LIMITS,
@@ -13,7 +15,7 @@ import {
   repoState,
 } from '../src/lib/ads-page.ts';
 
-const COPY = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS, ADS_PREREQS]);
+const COPY = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS, ADS_PREREQS, ADS_FIRST_RUN]);
 
 test('the repo notice shows until the repository is public, then the link does', () => {
   assert.deepEqual(repoState(false), { notice: 'ADS is in beta. The repository opens soon.', repoHref: null });
@@ -91,8 +93,23 @@ test('the budget table holds the built-in budgets', () => {
 test('the copy never says only low risk lands by itself', () => {
   const all = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS]);
   assert.doesNotMatch(all, /anything riskier|low[- ]risk change lands by itself|low risk lands/i);
-  assert.match(ADS_HERO.lede, /medium/);
+  assert.match(ADS_HERO.lede, /small change of trivial, low or medium risk[^.]*can land by itself/);
   assert.match(ADS_HERO.lede, /high and critical[^.]*`ok <code>`/);
+});
+
+// A change lands by itself only within its size limit, and a medium one only
+// with no dispute and no stall (ADS internal/flow/landing.go Landing,
+// landingAt): step 4 says both conditions.
+test('step 4 states the size limit and the medium condition', () => {
+  assert.match(ADS_STEPS[3].body, /within its size limit/);
+  assert.match(ADS_STEPS[3].body, /medium one only when the run had no dispute and no stall/);
+});
+
+// ads init writes the fake adapter for every role (ADS docs/guides/setup.md),
+// so the install band says what a first change needs.
+test('the install band says to set the agents before the first change', () => {
+  assert.match(ADS_FIRST_RUN, /`fake` adapter/);
+  assert.match(ADS_FIRST_RUN, /use the claude agents for every role/);
 });
 
 // ads work refuses to start without a trusted team key (ADS
@@ -117,4 +134,17 @@ test('the copy uses no hype words', () => {
 test('the landing shows no team-rule example that ADS refuses', () => {
   const all = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS, ADS_RECIPES]);
   assert.doesNotMatch(all, /payment\//);
+});
+
+// The landing and the docs state the same budgets and size limits, read from
+// the docs page that the drift check ties to ADS internal/config/config.go.
+test('the landing budgets and size limits equal how-changes-land', () => {
+  const doc = readFileSync(new URL('../src/content/ads-docs/how-changes-land.md', import.meta.url), 'utf8');
+  const budget = ADS_BENEFITS.find((b) => b.id === 'budget');
+  for (const row of budget.table.rows) assert.ok(doc.includes(`| ${row.join(' | ')} |`), `docs miss budget row ${row.join(', ')}`);
+  const docLimits = Object.fromEntries([...doc.matchAll(/^- `(trivial|low|medium)`: at most (\d+)/gm)].map((m) => [m[1], m[2]]));
+  const risk = ADS_BENEFITS.find((b) => b.id === 'risk').body.join(' ');
+  const m = risk.match(/(\d+) changed lines for trivial, (\d+) for low, (\d+) for medium/);
+  assert.ok(m, 'the landing states no size limits');
+  assert.deepEqual({ trivial: m[1], low: m[2], medium: m[3] }, docLimits);
 });

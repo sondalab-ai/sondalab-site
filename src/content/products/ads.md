@@ -10,7 +10,7 @@ repoPublic: false
 fullPage:
   href: /ads/
   label: See how ADS works
-summary: "You ask Claude Code for a change; an agent team writes the tests, makes the change and reviews it in layers. Up to medium risk, a change that passes every check <strong>lands by itself</strong>; high and critical <strong>wait for your approval</strong>, and every step is signed in git."
+summary: "You ask Claude Code for a change; an agent team writes the tests, makes the change and reviews it in layers. A small change of trivial, low or medium risk that passes every check <strong>can land by itself</strong>; high and critical <strong>wait for your approval</strong>, and every step is signed in git."
 ---
 
 You ask Claude Code for a change, "fix #12" or "work the queue", and `ads`

@@ -19,9 +19,11 @@ interface Props {
 const { title, summary, currentId, docs, syncedFrom, verified } = Astro.props;
 const { prev, next } = neighbours(docs, currentId);
 const day = verified.toISOString().slice(0, 10);
+// The index has no current page and its title already says ADS docs.
+const pageTitle = currentId ? `${title} · ADS docs` : title;
 ---
 
-<Base title={`${title} · ADS docs`} description={summary}>
+<Base title={pageTitle} description={summary}>
   <div class="sl-wrap docs">
     <nav class="docs__nav" aria-label="ADS docs">
       <p class="sl-eyebrow"><a href="/ads/">ADS</a> · <a href="/ads/docs/">docs</a></p>

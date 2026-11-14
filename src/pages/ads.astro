@@ -11,6 +11,7 @@ import { markClass } from '../lib/marks';
 import {
   ADS_APPROVAL,
   ADS_BENEFITS,
+  ADS_FIRST_RUN,
   ADS_HERO,
   ADS_INSTALL,
   ADS_LIMITS,
@@ -30,7 +31,7 @@ const tail = ADS_BENEFITS.length;
 
 <Base
   title="ADS — an agent team for your changes, in Claude Code"
-  description="Say “fix #13” in Claude Code. An agent team writes tests, makes the change and reviews it in layers. Up to medium risk, a passing change lands signed; high and critical wait for your ok <code>."
+  description="Say “fix #13” in Claude Code. An agent team writes tests, makes the change and reviews it in layers. A small, passing change of trivial, low or medium risk can land by itself, signed; high and critical wait for your ok <code>."
 >
   <article class="ads">
     <header class="hero">
@@ -111,6 +112,7 @@ const tail = ADS_BENEFITS.length;
         <h2 class="big-h2">Set it up once, then talk to Claude Code.</h2>
         <p class="sl-prose">{ADS_PREREQS}</p>
         <Transcript lines={ADS_INSTALL} label="Install commands: clone, make install, ads init, ads doctor" />
+        <p class="sl-prose">{ticks(ADS_FIRST_RUN).map((t) => (t.code ? <code>{t.text}</code> : t.text))}</p>
         {notice && <p class="notice sl-badge sl-badge--info">{notice}</p>}
         <div class="actions">
           <a class="sl-btn sl-btn--primary" href="/ads/docs/getting-started/">Get started</a>

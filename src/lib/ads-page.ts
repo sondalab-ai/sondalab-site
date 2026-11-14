@@ -44,7 +44,7 @@ export interface AdsBenefit {
 export const ADS_HERO = {
   eyebrow: 'ADS · beta',
   h1: 'Say `fix #13`. An agent team tests, changes and reviews it. You keep the last word.',
-  lede: 'You ask Claude Code for a change, and `ads` runs an agent team for it: tests first, then the change, then a review in layers. Up to medium risk, a change that passes every check lands by itself, signed in git; high and critical changes wait for your `ok <code>`.',
+  lede: 'You ask Claude Code for a change, and `ads` runs an agent team for it: tests first, then the change, then a review in layers. A small change of trivial, low or medium risk that passes every check can land by itself, signed in git; high and critical changes wait for your `ok <code>`.',
 };
 
 export const ADS_SESSION: readonly TranscriptLine[] = [
@@ -88,7 +88,7 @@ export const ADS_STEPS: readonly { title: string; body: string }[] = [
   },
   {
     title: 'It lands, or it waits for you',
-    body: 'A trivial, low or medium change that passes every check lands by itself, signed with the team key. A high or critical change waits for your sign-off and is signed with your key. Every landed change can be undone, after your approval, with a signed revert.',
+    body: 'A trivial, low or medium change that stays within its size limit and passes every check lands by itself, signed with the team key; a medium one only when the run had no dispute and no stall. A high or critical change waits for your sign-off and is signed with your key. Every landed change can be undone, after your approval, with a signed revert.',
   },
 ];
 
@@ -184,6 +184,9 @@ export const ADS_LIMITS: readonly string[] = [
   'GitHub is optional: `ads init --no-github` skips the GitHub steps.',
   '`ads` is in beta. Its commands and its output still change.',
 ];
+
+/** The install band's line after the commands: ads init writes the fake adapter for every role (ADS docs/guides/setup.md), so a first change needs real agents. */
+export const ADS_FIRST_RUN = '`ads init` sets every agent role to the `fake` adapter, which does no work. Before your first change, ask Claude Code to “use the claude agents for every role”.';
 
 export const ADS_PREREQS = 'You need Go, git 2.38 or newer, OpenSSH and Claude Code. The GitHub CLI is optional.';
 

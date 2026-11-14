@@ -63,7 +63,7 @@ To approve, reply:   ok 4f2a
 
 ## What the approval protects, and what it does not
 
-The ADS store keeps only a keyed digest of the code, under a key of your machine in your user config directory (`ads/approval.key`). So a file in the store cannot approve anything.
+ADS stores a hash of the code, not the code, so reading its files cannot approve anything. The hash is keyed with a key of your machine, kept in your user config directory (`ads/approval.key`).
 
 The limits:
 

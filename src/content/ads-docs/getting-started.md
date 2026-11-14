@@ -49,14 +49,20 @@ sonda/lab ads …
 
 ## Set up once: `ads init`
 
-Run `ads init` in the repository you work on, in a terminal. It checks your machine and the repository, and asks before each change. Before each step it says what the step checks, why `ads` needs it, and what it changes. It sets up:
+Run `ads init` in the repository you work on, in a terminal. Before each step it says what the step checks, why `ads` needs it, and what it changes, and it asks before it changes anything.
 
-- your signing key, which needs a passphrase, and the team key;
-- both keys as signing keys on GitHub, so the commits they sign show as verified;
-- the first signed commit of `.ads/` on the trunk, or a join request when `.ads/` already exists;
-- the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
+### What `ads init` asks you
 
-The team key step is optional, but `ads work` starts only once `ads init` has set up the team key and listed it as trusted; before that it stops with `the team key is not set up: run ads init in a terminal`. In `ads work`, the team key signs what the agents do and the changes that land by themselves, and your key signs your answers and approvals.
+- to set your signing key, which needs a passphrase (it can create one), and to create the team key;
+- to add both keys as signing keys on GitHub, so the commits they sign show as verified;
+- to make the first signed commit of `.ads/` on the trunk (the main branch, for example `main`), or a join request when `.ads/` already exists;
+- to set the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
+
+### Why there are two keys
+
+The team key signs what the agents do and the changes that land by themselves. Your key signs what you do: your answers, approvals, sign-offs and team-rule changes.
+
+You can skip the team key step, but then `ads work` does not start: it stops with `the team key is not set up: run ads init in a terminal`. It starts once `ads init` has set up the team key and listed it as trusted.
 
 Running `ads init` again is safe: a step that is already fine reports `ok`, and the run fixes what is left. The last line says what to do next.
 
@@ -74,7 +80,7 @@ Summary  12 ok · 0 fixed · 1 warn · 0 failed
     Next: run ads doctor any time to re-check this setup
 ```
 
-### Set the agents before the first change
+## Set the agents before the first change
 
 The `.ads/config.yaml` that `ads init` writes uses the `fake` adapter for every agent role, so a first change stops with `fake adapter: no scripted result left for role assessor`. Ask Claude Code to change the team rules, for example "use the claude agents for every role". That change needs your approval, like every team-rule change (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
 
