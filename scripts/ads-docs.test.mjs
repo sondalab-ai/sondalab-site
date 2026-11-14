@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { docHref, neighbours, orderDocs } from '../src/lib/ads-docs.ts';
 
 const doc = (id, order) => ({ id, title: id, order });
@@ -23,4 +25,148 @@ test('neighbours gives the previous and the next page, null at the ends', () => 
 
 test('docHref is the page path with the trailing slash', () => {
   assert.equal(docHref('status-api'), '/ads/docs/status-api/');
+});
+
+// ---- the five pages -------------------------------------------------------
+// Read from the source, since CI runs the tests before the build.
+
+const DIR = new URL('../src/content/ads-docs/', import.meta.url);
+const IDS = ['getting-started', 'everyday-use', 'how-changes-land', 'approvals-and-undo', 'status-api'];
+
+/** A page split into its frontmatter fields (the few the tests read) and its body. */
+function page(id) {
+  const text = readFileSync(new URL(`${id}.md`, DIR), 'utf8');
+  const m = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  assert.ok(m, `${id}.md has no frontmatter`);
+  const [, head, body] = m;
+  const order = Number(head.match(/^order: (\d+)$/m)?.[1]);
+  const sources = [...head.matchAll(/^ {2}- (.+)$/gm)].map((s) => s[1].trim());
+  return { id, order, sources, body };
+}
+
+const pages = () => IDS.map(page);
+
+test('the five pages exist with orders 0 to 4, in reading order', () => {
+  const files = readdirSync(DIR).filter((f) => f.endsWith('.md')).map((f) => f.replace(/\.md$/, ''));
+  assert.deepEqual(files.sort(), [...IDS].sort());
+  assert.deepEqual(orderDocs(pages().map((p) => ({ id: p.id, title: p.id, order: p.order }))).map((p) => p.id), IDS);
+  assert.deepEqual(pages().map((p) => p.order), [0, 1, 2, 3, 4]);
+});
+
+test('every source of every page exists in the ADS checkout', { skip: !process.env.ADS_REPO_DIR && 'ADS_REPO_DIR is not set' }, () => {
+  const root = resolve(process.env.ADS_REPO_DIR);
+  for (const p of pages()) {
+    assert.ok(p.sources.length > 0, `${p.id}: no sources`);
+    for (const s of p.sources) assert.ok(existsSync(join(root, s)), `${p.id}: ${s} is not in ${root}`);
+  }
+});
+
+// nginx redirects a path without the trailing slash (astro.config.mjs).
+test('every internal link ends with a slash', () => {
+  for (const p of pages()) {
+    const links = [...p.body.matchAll(/\]\((\/[^)\s]*)\)/g), ...p.body.matchAll(/href="(\/[^"]*)"/g)].map((l) => l[1]);
+    for (const l of links) assert.ok(l.split('#')[0].endsWith('/'), `${p.id}: ${l}`);
+  }
+});
+
+// The /ads/ landing links to these recipes (src/lib/ads-page.ts ADS_RECIPES).
+// The slug is the one Astro gives a heading: lowercase, only a-z, 0-9,
+// spaces and hyphens kept, spaces as hyphens.
+test('everyday use has the recipe headings the landing links to', () => {
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/ /g, '-');
+  const ids = [...page('everyday-use').body.matchAll(/^## (.+)$/gm)].map((h) => slug(h[1]));
+  for (const id of ['fix-an-issue', 'work-the-queue', 'whats-waiting', 'one-more-round', 'stricter-rules', 'follow-only']) {
+    assert.ok(ids.includes(id), `no heading with id ${id} in ${ids.join(', ')}`);
+  }
+});
+
+test('every page has at least two example blocks', () => {
+  for (const p of pages()) {
+    const fences = p.body.match(/^```/gm) ?? [];
+    assert.ok(fences.length % 2 === 0 && fences.length / 2 >= 2, `${p.id}: ${fences.length / 2} example blocks`);
+  }
+});
+
+// Every number on the pages was checked against ADS d7e7189; a new one must
+// be checked too. 1.5M reads as 1.5M and 8M as 8M, so a token budget is
+// checked whole. Dates and timestamps are example values, not claims, and
+// are left out.
+const VERIFIED = new Set([
+  '0', // exit code 0 (docs/guides/setup.md:118); counts of 0 in pinned output (init_rerun.txtar:54, report_test.go landedGolden); FORCE_COLOR 0 (README.md:116)
+  '1', // exit code 1 (setup.md:118); 1 round, 1 review layer, 1 frozen test, 1 warn in pinned output; schema_version 1 (docs/guides/api.md); SONDALAB_ASCII=1 (README.md:117); option 1
+  '2', // exit code 2 (setup.md:118); 2 new tests (report_test.go landedGolden); option 2; round 2 of an example
+  '3', // internal/config/config.go:504 Rounds: 3; option 3; the patch of Go 1.27.3
+  '4', // internal/approve/approve.go:63 the code is 4 hex characters; +4 lines and seq 4 in examples (api.md:36)
+  '6', // internal/config/config.go:556-560 high and critical have 6 review layers (store.ReviewLayers)
+  '8', // UTF-8 (README.md:117)
+  '10', // internal/approve/approve.go:31 TTL = 10 * time.Minute
+  '12', // example: issue #12 (README.md table, report_test.go landedGolden); the 12-line fix of how-changes-land
+  '13', // example: issue #13 (internal/report/view_test.go)
+  '14', // example: issue #14
+  '16', // README.md:116 the 16 ANSI colours of the terminal theme
+  '18', // example: +18 lines of a test file in the sign-off block (slice 1 ADS_APPROVAL)
+  '20', // internal/config/config.go:574 trivial 20 lines
+  '32', // example: implementer 32 s (internal/report/view_test.go:52)
+  '74', // example: test author 74 s (internal/report/view_test.go:51)
+  '120', // internal/flow/follow.go:495 "no running change for 120 seconds"
+  '160', // internal/flow/ask.go:515 summaryRunes = 160
+  '200', // internal/config/config.go:574 low 200 lines
+  '400', // internal/config/config.go:574 medium 400 lines
+  '1200000', // example: tokens of the status document in docs/guides/api.md:23
+  '3600', // internal/config/config.go:504 Seconds: 3600
+  '0.21', // example: $0.21 in internal/report/report_test.go landedGolden
+  '0.48', // example: usd of the status document in docs/guides/api.md:23
+  '1.27', // go.mod:3 go 1.27.3
+  '2.38', // scripts/install.sh:38 git 2.38 or newer
+  '2.46', // README.md:14 git 2.46 or newer is better
+  '123k', // example: 123k tokens (internal/report/view_test.go:65)
+  '1M', // internal/config/config.go:511 trivial 1M tokens
+  '1.2M', // example: 1.2M tokens in internal/report/report_test.go landedGolden
+  '1.5M', // internal/config/config.go:511 low 1.5M tokens
+  '3M', // internal/config/config.go:512 medium 3M tokens
+  '8M', // internal/config/config.go:512 high and critical 8M tokens
+]);
+
+test('the pages state no number that was not verified', () => {
+  for (const p of pages()) {
+    const text = p.body.replace(/\d{4}-\d{2}-\d{2}(T[\d:.]+Z)?/g, '');
+    for (const [n] of text.matchAll(/\b\d+(\.\d+)?[kM]?\b/g)) assert.ok(VERIFIED.has(n), `${p.id}: unverified number ${n}`);
+  }
+});
+
+// The built-in budgets, cell by cell (ADS internal/config/config.go:504-513).
+test('how a change lands holds the built-in budgets', () => {
+  const body = page('how-changes-land').body;
+  for (const row of [
+    '| trivial | 3 | 3600 | 1M |',
+    '| low | 3 | 3600 | 1.5M |',
+    '| medium | 3 | 3600 | 3M |',
+    '| high | 3 | 3600 | 8M |',
+    '| critical | 3 | 3600 | 8M |',
+  ]) assert.ok(body.includes(row), `missing budget row ${row}`);
+});
+
+test('how a change lands shows the 12-line fix example', () => {
+  assert.match(page('how-changes-land').body, /12-line fix in `src\/` lands by itself[\s\S]*`package\.json` waits for you/);
+});
+
+test('the undo, pause and stop table has its three questions', () => {
+  assert.match(page('approvals-and-undo').body, /^\|[^\n]*\| Needs approval \| Loses work \| Can still land \|$/m);
+});
+
+// Trivial, low and medium can land by themselves (ADS internal/flow/landing.go
+// landingAt), and the team key signs only once ads init set it up and trusted
+// it (internal/flow/landing.go signerOf).
+test('the pages never say only low risk lands by itself', () => {
+  for (const p of pages()) assert.doesNotMatch(p.body, /anything riskier|low[- ]risk change lands by itself|only low risk|low risk lands/i, p.id);
+});
+
+test('every page that says the team key signs says when', () => {
+  for (const p of pages()) {
+    if (/team key/i.test(p.body)) assert.match(p.body, /once `ads init` has set up the team key/i, p.id);
+  }
+});
+
+test('the pages use no hype words', () => {
+  for (const p of pages()) assert.doesNotMatch(p.body, /seamless|powerful|effortless|autopilot|10x|blazing/i, p.id);
 });

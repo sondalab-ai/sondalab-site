@@ -128,7 +128,7 @@ const day = verified.toISOString().slice(0, 10);
   .ads-doc :global(.table-wrap) { overflow-x: auto; }
   /* Markdown gives a bare <table>: the kit's sl-table look, on the same
      tokens, without its class. */
-  .ads-doc :global(table) { min-width: 32rem; width: 100%; border-collapse: collapse; font-size: var(--sl-text-sm); }
+  .ads-doc :global(table) { min-width: 36rem; width: 100%; border-collapse: collapse; font-size: var(--sl-text-sm); }
   .ads-doc :global(th) {
     text-align: left;
     font-size: var(--sl-text-xs);
@@ -139,6 +139,7 @@ const day = verified.toISOString().slice(0, 10);
   .ads-doc :global(:is(th, td)) { padding: var(--sl-space-3) var(--sl-space-4); vertical-align: top; }
   .ads-doc :global(td) { border-bottom: 1px solid var(--slc-border-subtle); }
   .ads-doc :global(tr:last-child td) { border-bottom: none; }
+  .ads-doc :global(td code) { white-space: nowrap; overflow-wrap: normal; }
 
   .docs__foot {
     display: grid;

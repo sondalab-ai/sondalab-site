@@ -8,7 +8,7 @@ import { createProbe } from './probe-kit.mjs';
 const BASE = process.argv[2];
 const probe = await createProbe(BASE, 'layout-probe.mjs');
 const { browser, report } = probe;
-const PAGES = ['/', '/blog/', '/blog/there-is-no-fix-for-prompt-injection/', '/apparel/', '/products/spexr/', '/products/daos/', '/products/ads/', '/daos/', '/ads/', '/design-system/'];
+const PAGES = ['/', '/blog/', '/blog/there-is-no-fix-for-prompt-injection/', '/apparel/', '/products/spexr/', '/products/daos/', '/products/ads/', '/daos/', '/ads/', '/ads/docs/', '/ads/docs/getting-started/', '/ads/docs/everyday-use/', '/ads/docs/how-changes-land/', '/ads/docs/approvals-and-undo/', '/ads/docs/status-api/', '/design-system/'];
 const WIDTHS = [360, 390, 480, 560, 640, 720, 768, 820, 900, 1024, 1280, 1440];
 
 for (const path of PAGES) {
