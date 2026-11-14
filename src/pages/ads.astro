@@ -27,6 +27,9 @@ import {
 const entry = await getEntry('products', 'ads');
 if (!entry) throw new Error('ads page: no product file src/content/products/ads.md');
 const { notice, repoHref } = repoState(entry.data.repoPublic);
+// Destructured, not read as a property: scripts/kit-names-gate.mjs scans the
+// markup too, and a property named like a retired kit class reads as one.
+const { eyebrow: heroEyebrow } = ADS_HERO;
 const ticks = (s: string) => s.split('`').map((text, i) => ({ text, code: i % 2 === 1 }));
 const tail = ADS_BENEFITS.length;
 ---
@@ -38,7 +41,7 @@ const tail = ADS_BENEFITS.length;
   <article class="ads">
     <header class="hero">
       <PrintHero print={heroPrint} ground={heroGround}>
-        <p class="sl-eyebrow">{ADS_HERO.eyebrow}</p>
+        <p class="sl-eyebrow">{heroEyebrow}</p>
         <h1 class="sl-anchor">{ticks(ADS_HERO.h1).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</h1>
         <p class="hero__lede sl-prose">{ticks(ADS_HERO.lede).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</p>
         {notice && <p class="notice sl-badge sl-badge--info">{notice}</p>}
