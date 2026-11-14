@@ -38,7 +38,7 @@ Agents cannot lower the risk below the path rules. The risk decides who signs th
 
 </div>
 
-The team key signs only once `ads init` has set up the team key and listed it as trusted in `.ads/allowed_signers`. Until then nothing lands by itself: every change waits for you.
+The team key signs only once `ads init` has set up the team key and listed it as trusted in `.ads/allowed_signers`. Until then `ads work` does not start, so no change runs or lands.
 
 A report that starts with `Ready for sign-off` waits for you. After your `ok <code>`, the change is signed with your key. If the change moved in the meantime, the sign-off stops and the team gives a new report.
 

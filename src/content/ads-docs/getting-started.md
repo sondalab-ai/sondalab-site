@@ -56,7 +56,7 @@ Run `ads init` in the repository you work on, in a terminal. It checks your mach
 - the first signed commit of `.ads/` on the trunk, or a join request when `.ads/` already exists;
 - the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
 
-The team key step is optional, but without a trusted team key `ads work` does not start. Once `ads init` has set up the team key and listed it as trusted, the team key signs what the agents do and the changes that land by themselves; until then your key signs those steps, and nothing lands by itself.
+The team key step is optional, but `ads work` starts only once `ads init` has set up the team key and listed it as trusted; before that it stops with `the team key is not set up: run ads init in a terminal`. In `ads work`, the team key signs what the agents do and the changes that land by themselves, and your key signs your answers and approvals.
 
 Running `ads init` again is safe: a step that is already fine reports `ok`, and the run fixes what is left. The last line says what to do next.
 

@@ -107,7 +107,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
         ['“work the queue”', 'The team works the open issues labeled `ads`, one at a time, and ends with what waits for you.'],
         ['“what is waiting for me?”', 'A list of the changes that need you: a sign-off, a question, a budget, or a paused change.'],
         ['“change X”', 'After a report: the team makes one more round with your words.'],
-        ['“be stricter on payment/”', 'The session proposes a change of the team rules. After your approval, it lands signed with your key.'],
+        ['“let medium changes land by themselves only up to 200 lines”', 'The session proposes a change of the team rules. After your approval, it lands signed with your key.'],
         ['`ok 4f2a`', 'Approves the one pending question with the code `4f2a`.'],
       ],
     },

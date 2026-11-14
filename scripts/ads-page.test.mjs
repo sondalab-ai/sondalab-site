@@ -107,3 +107,11 @@ test('the copy uses no hype words', () => {
   const all = JSON.stringify([COPY, ADS_SESSION, ADS_APPROVAL, ADS_INSTALL, ADS_RECIPES]);
   assert.doesNotMatch(all, /seamless|powerful|effortless|autopilot|10x|blazing/i);
 });
+
+// At ADS d7e7189 a folder path rule ("be stricter on payment/") is refused as
+// too large to approve (internal/flow/ask.go checkItems): the landing shows a
+// team-rule change that ADS accepts.
+test('the landing shows no team-rule example that ADS refuses', () => {
+  const all = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS, ADS_RECIPES]);
+  assert.doesNotMatch(all, /payment\//);
+});
