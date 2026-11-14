@@ -84,4 +84,24 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { products, blog };
+/**
+ * The /ads/docs/ pages. Each one records the ADS files its facts come from
+ * and the ADS commit it was checked against, so the drift check can list
+ * the pages whose sources changed since. A wrong value fails the build.
+ */
+const adsDocs = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/ads-docs' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().max(200),
+    /** Position in the sidebar and in the previous/next links. */
+    order: z.number().int().nonnegative(),
+    /** ADS repo paths the page's facts come from. */
+    sources: z.array(z.string().min(1)).nonempty(),
+    /** The ADS commit the page was checked against. */
+    syncedFrom: z.string().regex(/^[0-9a-f]{7,40}$/),
+    verified: z.coerce.date(),
+  }),
+});
+
+export const collections = { products, blog, adsDocs };
