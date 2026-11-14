@@ -23,7 +23,8 @@
     "layout:probe": "node scripts/layout-probe.mjs",
     "post:probe": "node scripts/post-probe.mjs",
     "daos:probe": "node scripts/daos-probe.mjs",
-    "post:cover": "node scripts/make-post-cover.mjs"
+    "post:cover": "node scripts/make-post-cover.mjs",
+    "ads-docs:drift": "node scripts/ads-docs-drift.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
