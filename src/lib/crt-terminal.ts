@@ -14,7 +14,7 @@
 import { SITE } from './site';
 import { NIGHT, NOVELLAS } from './novellas';
 
-/** Chapter order and hours come from the one list of the night, 2am to 8am. */
+/** Chapter order and hours come from the one list of the night, 2am to 9am. */
 const ORDER = NIGHT.map((n) => n.id);
 const HOURS: Record<string, string> = Object.fromEntries(NIGHT.map((n) => [n.id, n.hour]));
 

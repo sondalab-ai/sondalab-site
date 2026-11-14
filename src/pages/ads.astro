@@ -7,6 +7,9 @@
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Transcript from '../components/Transcript.astro';
+import PrintHero from '../components/PrintHero.astro';
+import heroPrint from '../assets/art/band-ads.webp';
+import heroGround from '../assets/art/band-ground.webp';
 import { markClass } from '../lib/marks';
 import {
   ADS_APPROVAL,
@@ -35,7 +38,7 @@ const tail = ADS_BENEFITS.length;
 >
   <article class="ads">
     <header class="hero">
-      <div class="sl-wrap hero__in">
+      <PrintHero print={heroPrint} ground={heroGround}>
         <p class="sl-eyebrow">{ADS_HERO.eyebrow}</p>
         <h1 class="sl-anchor">{ticks(ADS_HERO.h1).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</h1>
         <p class="hero__lede sl-prose">{ticks(ADS_HERO.lede).map((p) => (p.code ? <code>{p.text}</code> : p.text))}</p>
@@ -45,7 +48,7 @@ const tail = ADS_BENEFITS.length;
           <a class="sl-btn" href="/ads/docs/everyday-use/">Read the docs</a>
           {repoHref && <a class="sl-btn" href={repoHref}>Source on GitHub</a>}
         </div>
-      </div>
+      </PrintHero>
     </header>
 
     <section id="session" class="sl-section session" aria-label="A session with ADS">
@@ -159,7 +162,7 @@ const tail = ADS_BENEFITS.length;
   }
 
   /* ---- hero ------------------------------------------------------------- */
-  .hero__in { display: grid; gap: var(--sl-space-5); justify-items: start; padding-block: clamp(3rem, 7vw, 6rem) clamp(1.5rem, 3vw, 2.5rem); }
+  .hero :global(.ph__text) { display: grid; gap: var(--sl-space-5); justify-items: start; }
   .hero h1 { max-width: 24ch; margin: 0; font-size: clamp(2rem, 1.3rem + 3vw, 3.6rem); }
   .hero__lede { max-width: 62ch; margin: 0; color: var(--slc-text-secondary); font-size: clamp(1.05rem, 1rem + 0.4vw, 1.24rem); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--sl-space-3); }
@@ -167,7 +170,6 @@ const tail = ADS_BENEFITS.length;
 
   /* ---- the session ------------------------------------------------------- */
   .ads > .sl-section { position: relative; padding-block: clamp(var(--sl-space-8), 7vw, 6rem); }
-  .ads > .session { padding-block-start: 0; }
   .session__grid { display: grid; gap: var(--sl-space-4); }
 
   /* ---- sections ---------------------------------------------------------- */
