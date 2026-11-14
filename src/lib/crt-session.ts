@@ -55,7 +55,9 @@ export function layoutRows(lines: readonly TranscriptLine[], width: number): Row
     const role: Role = l.role ?? 'ink';
     const text = l.text;
     if (!text) { rows.push({ line, role, indent: 0, start: 0, text: '' }); return; }
-    const hang = Math.min(hangingIndent(text), Math.max(0, width - 12));
+    // On a narrow tube a 12-column hang would leave a ribbon of text; it is
+    // capped at a fifth of the row.
+    const hang = Math.min(hangingIndent(text), Math.floor(width / 5));
     let start = 0;
     let indent = 0;
     while (start < text.length) {
@@ -222,18 +224,23 @@ export interface SessionTubeOptions {
   approval: readonly TranscriptLine[];
   aspect: number;
   narrow: boolean;
+  /** The screen's width in CSS pixels now, which the glyph size is solved against. */
+  measureWidth(): number;
+  /** The look's overscan: the faceplate shows the picture this much smaller. */
+  overscan?: number;
 }
 
 const MONO = '"Geist Mono", ui-monospace, Menlo, monospace';
-const CELL_W = 13;
-const CELL_H = 26;
-/** Glyph size against the cell height; a phone needs it a touch larger. */
-const fontScale = (narrow: boolean) => (narrow ? 0.7 : 0.62);
-/** Rows the tube is laid out for. */
-const rowsFor = (narrow: boolean) => (narrow ? 30 : 26);
-/** Margins in cells: the curvature and overscan eat the edge of the picture. */
-const MARGIN_X = 3.2;
-const MARGIN_Y = 1.6;
+
+/**
+ * The size the glyphs are seen at, in CSS pixels: the page's body text on a
+ * desktop, never below 15 on a phone. The tube wraps and scrolls to keep it,
+ * and never shrinks the type to fit.
+ */
+export const fontCss = (narrow: boolean) => (narrow ? 15 : 19);
+const LINE_HEIGHT = 1.5;
+/** Texture pixels per CSS pixel: the surface itself renders at up to 1.25. */
+const TEX_SCALE = 1.25;
 
 /** Build the session tube as a CrtSource for mountCrtSurface. */
 export function createSessionTube(o: SessionTubeOptions): CrtSource {
@@ -252,24 +259,37 @@ export function createSessionTube(o: SessionTubeOptions): CrtSource {
   const root = document.documentElement;
 
   let narrow = o.narrow;
-  let cols = 80;
-  let rows = 25;
+  const overscan = o.overscan ?? 1.1;
+  let room = 20;
   let width = 80;
   let rowsLaid: Row[] = [];
-  let charW = 9.6;
+  let charW = 10;
+  let fontPx = 24;
+  let lineH = 36;
+  let x0 = 0;
+  let y0 = 0;
 
-  const font = () => `${Math.round(CELL_H * fontScale(narrow))}px ${MONO}`;
+  const font = () => `${fontPx}px ${MONO}`;
 
+  /**
+   * Size the texture to the screen and the type to the reader. The texture
+   * follows the screen's own pixels, so the faceplate scales it by a known
+   * amount, and the font is solved backwards from the size it must be seen at:
+   * the overscan shows the picture 1/overscan smaller, so it is drawn that much
+   * larger. Columns and rows are whatever then fits.
+   */
   function geometry(aspect: number) {
-    rows = rowsFor(narrow);
-    cols = Math.round(Math.min(200, Math.max(36, (rows * aspect) / (CELL_W / CELL_H))));
-    rows = Math.max(12, Math.round((cols * CELL_W) / aspect / CELL_H));
-    canvas.width = cols * CELL_W;
-    canvas.height = rows * CELL_H;
+    canvas.width = Math.max(320, Math.round(o.measureWidth() * TEX_SCALE));
+    canvas.height = Math.round(canvas.width / aspect);
+    fontPx = Math.round(fontCss(narrow) * TEX_SCALE * overscan);
+    lineH = fontPx * LINE_HEIGHT;
     ctx.font = font();
-    charW = ctx.measureText('M').width || CELL_W * 0.75;
-    // Columns of text, which the mono glyph's own width decides, not the grid.
-    width = Math.max(24, Math.floor((canvas.width - 2 * MARGIN_X * CELL_W) / charW));
+    charW = ctx.measureText('M').width || fontPx * 0.6;
+    // The curvature and the overscan eat the edge of the picture.
+    x0 = Math.max(charW * 2, canvas.width * 0.06);
+    y0 = Math.max(lineH * 0.8, canvas.height * 0.075);
+    width = Math.max(20, Math.floor((canvas.width - 2 * x0) / charW));
+    room = Math.max(6, Math.floor((canvas.height - 2 * y0) / lineH));
     rowsLaid = layoutRows(script, width);
   }
 
@@ -347,15 +367,12 @@ export function createSessionTube(o: SessionTubeOptions): CrtSource {
     ctx.textBaseline = 'middle';
 
     const visible = rowsLaid.filter((r) => cycle.present(r.line) && (r.text === '' || cycle.shown(r.line) > r.start));
-    const room = rows - Math.ceil(MARGIN_Y * 2);
     // Scroll like a terminal: the newest row stays on screen.
     const view = visible.slice(Math.max(0, visible.length - room));
-    const x0 = MARGIN_X * CELL_W;
-    const y0 = MARGIN_Y * CELL_H;
 
     let cursor: [number, number] | null = null;
     view.forEach((r, i) => {
-      const y = y0 + i * CELL_H + CELL_H / 2;
+      const y = y0 + i * lineH + lineH / 2;
       const n = Math.max(0, Math.min(r.text.length, cycle.shown(r.line) - r.start));
       const x = x0 + r.indent * charW;
       let s = r.text.slice(0, n);
@@ -379,14 +396,13 @@ export function createSessionTube(o: SessionTubeOptions): CrtSource {
       cursor = [x + s.length * charW, y];
     });
 
-    if (!cursor) cursor = [x0, y0 + CELL_H / 2];
+    if (!cursor) cursor = [x0, y0 + lineH / 2];
     // Solid while wiping: a wipe in progress must not read as an idle prompt.
     const on = cycle.phase === 'erasing' || Math.floor(now * 2) % 2 === 0;
     if (on) {
       const [cx, cy] = cursor;
-      const h = CELL_H * fontScale(narrow);
       ctx.fillStyle = cycle.phase === 'erasing' ? paint.erase : paint.cursor;
-      ctx.fillRect(cx + 2, cy - h * 0.55, charW * 0.7, h * 1.1);
+      ctx.fillRect(cx + 2, cy - fontPx * 0.55, charW * 0.7, fontPx * 1.1);
     }
     dirty = false;
   }

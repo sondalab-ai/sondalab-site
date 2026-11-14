@@ -128,3 +128,9 @@ test('a long frame spends its time across several phases in order', () => {
   c.tick(30);
   assert.ok(['waiting', 'erasing', 'typing'].includes(c.phase));
 });
+
+test('on a phone-width tube a wrapped line keeps most of the row, not a ribbon', () => {
+  const rows = layoutRows(SCRIPT, 30);
+  for (const r of rows) assert.ok(r.indent <= 6, `indent ${r.indent} on "${r.text}"`);
+  SCRIPT.forEach((l, i) => assert.equal(rejoin(rows, i), l.text));
+});

@@ -102,7 +102,14 @@ import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
       async createSource(aspect, narrow) {
         // The wrap width is measured in glyphs, so the mono face has to be in.
         try { await document.fonts?.load('16px "Geist Mono"'); } catch {}
-        const tube = createSessionTube({ session: ADS_SESSION, approval: ADS_APPROVAL, aspect, narrow });
+        const tube = createSessionTube({
+          session: ADS_SESSION,
+          approval: ADS_APPROVAL,
+          aspect,
+          narrow,
+          overscan: LOOK.overscan,
+          measureWidth: () => screen!.getBoundingClientRect().width,
+        });
         let live = false;
         const setLive = (on: boolean) => {
           if (on === live) return;
@@ -149,9 +156,7 @@ import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
     inset: 0 0 auto 0;
     visibility: hidden;
     pointer-events: none;
-    max-width: 60rem;
-    margin-inline: auto;
-    padding: clamp(0.55rem, 1.4vw, 1.1rem);
+    padding: clamp(0.4rem, 1.2vw, 1rem);
     padding-bottom: 0;
     background: var(--slc-raised);
     border: 1px solid var(--slc-edge-hairline);
@@ -162,17 +167,17 @@ import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
      outside the glass: the curved tube sits in it with no seam. */
   .ads-crt__screen {
     position: relative;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 3 / 2;
     background: var(--sl-bg-canvas);
     border: 1px solid var(--slc-edge-hairline);
     border-radius: var(--sl-radius-md);
     box-shadow: var(--slc-shadow-inset);
     overflow: hidden;
   }
-  /* The same breakpoint as crt-surface's narrow class: a phone gets a taller
-     tube, and the source wraps to fewer columns. */
+  /* The same breakpoint as crt-surface's narrow class: a phone gets a tall
+     tube, and the source wraps to fewer columns rather than smaller type. */
   @media (max-width: 40rem) {
-    .ads-crt__screen { aspect-ratio: 2 / 3; }
+    .ads-crt__screen { aspect-ratio: 9 / 16; }
   }
   .ads-crt__canvas {
     position: absolute;
