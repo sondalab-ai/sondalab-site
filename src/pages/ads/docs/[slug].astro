@@ -1,0 +1,34 @@
+---
+// One ADS docs page per entry of the adsDocs collection, in `order`. Getting
+// started also says where the source is: the beta notice while the
+// repository is private, the link once the product file says it is public.
+import { getCollection, getEntry, render } from 'astro:content';
+import AdsDocs from '../../../layouts/AdsDocs.astro';
+import { orderDocs } from '../../../lib/ads-docs';
+import { repoState } from '../../../lib/ads-page';
+
+export async function getStaticPaths() {
+  const entries = orderDocs((await getCollection('adsDocs')).map((e) => ({ id: e.id, title: e.data.title, order: e.data.order, entry: e })));
+  const docs = entries.map(({ id, title, order }) => ({ id, title, order }));
+  return entries.map(({ id, entry }) => ({ params: { slug: id }, props: { entry, docs } }));
+}
+
+const { entry, docs } = Astro.props;
+const { Content } = await render(entry);
+const product = await getEntry('products', 'ads');
+if (!product) throw new Error('ads docs: no product file src/content/products/ads.md');
+const { notice, repoHref } = entry.id === 'getting-started' ? repoState(product.data.repoPublic) : { notice: null, repoHref: null };
+---
+
+<AdsDocs
+  title={entry.data.title}
+  summary={entry.data.summary}
+  currentId={entry.id}
+  docs={docs}
+  syncedFrom={entry.data.syncedFrom}
+  verified={entry.data.verified}
+>
+  {notice && <p class="notice sl-badge sl-badge--info">{notice}</p>}
+  {repoHref && <p><a class="sl-btn" href={repoHref}>Source on GitHub</a></p>}
+  <Content />
+</AdsDocs>

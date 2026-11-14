@@ -9,4 +9,7 @@ export default defineConfig({
   // so internal links and canonical URLs never trigger a redirect.
   trailingSlash: 'always',
   build: { format: 'directory' },
+  // Terminal output and JSON examples in Markdown are painted on the ink like
+  // the transcripts (site.css, .ads-doc pre), not by a syntax theme.
+  markdown: { syntaxHighlight: false },
 });

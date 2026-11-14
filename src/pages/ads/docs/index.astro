@@ -1,0 +1,28 @@
+---
+// The docs index: one line per page, through the same frame. Its footer
+// names the oldest check among the pages, so it never claims a fresher sync
+// than the stalest page has.
+import { getCollection } from 'astro:content';
+import AdsDocs from '../../../layouts/AdsDocs.astro';
+import { docHref, orderDocs } from '../../../lib/ads-docs';
+
+const entries = orderDocs((await getCollection('adsDocs')).map((e) => ({ id: e.id, title: e.data.title, order: e.data.order, data: e.data })));
+const docs = entries.map(({ id, title, order }) => ({ id, title, order }));
+const oldest = [...entries].sort((a, b) => a.data.verified.getTime() - b.data.verified.getTime())[0];
+if (!oldest) throw new Error('ads docs: no page in src/content/ads-docs');
+---
+
+<AdsDocs
+  title="ADS documentation"
+  summary="How to install ADS, work with it in Claude Code, and read what it does. Each page answers one question, with examples."
+  currentId=""
+  docs={docs}
+  syncedFrom={oldest.data.syncedFrom}
+  verified={oldest.data.verified}
+>
+  <ul class="index">
+    {entries.map((e) => (
+      <li><a href={docHref(e.id)}>{e.title}</a>: {e.data.summary}</li>
+    ))}
+  </ul>
+</AdsDocs>
