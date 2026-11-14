@@ -8,6 +8,7 @@ sources:
   - go.mod
   - scripts/install.sh
   - internal/cli/wizard.go
+  - internal/cli/work.go
   - internal/flow/landing.go
   - internal/report/report.go
   - internal/report/report_test.go
