@@ -13,10 +13,19 @@ sources:
   - internal/report/report.go
   - internal/report/report_test.go
   - internal/report/view.go
+  - internal/cli/agents.go
+  - internal/config/config.go
   - cmd/ads/testdata/script/init_rerun.txtar
+  - cmd/ads/testdata/script/init_agents.txtar
+  - cmd/ads/testdata/script/init_agents_wizard.txtar
+  - cmd/ads/testdata/script/init_wizard.txtar
+  - internal/onboard/runner.go
+  - internal/term/input.go
+  - internal/term/steps.go
+  - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 8942f68
+syncedFrom: 29fbba3
 verified: 2026-11-14
 ---
 
@@ -27,7 +36,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - Go 1.27.3 or newer (the `go` line of the ADS `go.mod`).
 - git 2.38 or newer. With git 2.46 or newer, a sign-off question also shows line counts for a text file that `.gitattributes` marks as binary.
 - OpenSSH: `ssh-keygen` and `ssh-add`.
-- Claude Code. You work through it, and its hooks make approvals in the session work.
+- Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
 - The GitHub CLI, `gh`, is optional. Without it, run `ads init --no-github`.
 
 ## Install
@@ -54,6 +63,7 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 
 ### What `ads init` asks you
 
+- on a new repository, to use the claude agents for every role, when it finds the `claude` CLI;
 - to set your signing key, which needs a passphrase (it can create one), and to create the team key;
 - to add both keys as signing keys on GitHub, so the commits they sign show as verified;
 - to make the first signed commit of `.ads/` on the trunk (the main branch, for example `main`), or a join request when `.ads/` already exists;
@@ -81,13 +91,34 @@ Summary  12 ok · 0 fixed · 1 warn · 0 failed
     Next: run ads doctor any time to re-check this setup
 ```
 
-## Set the agents before the first change
+## The agents
 
-The `.ads/config.yaml` that `ads init` writes uses the `fake` adapter for every agent role, so a first change stops with `fake adapter: no scripted result left for role assessor`. Ask Claude Code to change the team rules, for example "use the claude agents for every role". That change needs your approval, like every team-rule change (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
+On a new repository, `ads init` picks the agents that `.ads/config.yaml` gets, so your first change runs with real agents.
+
+- **Claude Code is installed.** When the `claude` CLI is on your `PATH`, `ads init` asks whether to use the claude agents for every role. The default is yes, and with `--yes` or without a terminal it takes yes. Then `claude-opus` implements, and `claude-sonnet` writes the tests, reviews, settles disputes and assesses the requests.
+- **No Claude Code, or you say no.** Every role gets the `fake` adapter, which does no work, and a first change stops at the assessor. Install Claude Code if it is missing, then ask its session to "use the claude agents for every role". That is a team-rule change, so it needs your approval (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
+
+**You see**, with Claude Code installed:
+
+```text
+$ ads init
+…
+  ● Agents                      claude CLI found at …
+? Use the claude agents for every role in .ads/config.yaml? [Y/n]
+…
+  ✓ Agents                      every role uses the claude agents: claude-opus implements, claude-sonnet does the rest
+```
+
+**You see**, without it:
+
+```text
+  ! Agents                      no claude CLI on PATH: every role uses the fake adapter, and the first change stops at the assessor
+    Try: install Claude Code, then ask its session: use the claude agents for every role
+```
 
 ## Check: `ads doctor`
 
-`ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script.
+`ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
 
 ## Your first change
 

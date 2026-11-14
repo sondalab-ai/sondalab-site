@@ -8,6 +8,8 @@ sources:
   - internal/approve/approve.go
   - internal/flow/ask.go
   - internal/flow/ask_test.go
+  - internal/flow/trustrules.go
+  - internal/flow/trustlist_test.go
   - internal/flow/answer.go
   - internal/flow/work.go
   - internal/flow/work_test.go
@@ -18,7 +20,7 @@ sources:
   - internal/report/report_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
-syncedFrom: 8942f68
+syncedFrom: 29fbba3
 verified: 2026-11-14
 ---
 
@@ -171,3 +173,23 @@ To approve, reply:   ok 5a03
 ```
 
 After your `ok <code>`, the team goes on with one more budget of the same size. [How a change lands](/ads/docs/how-changes-land/) lists the budgets.
+
+## A change of the team rules
+
+A change of the team rules shows what it does in plain words, so you see what you give up before you approve. For a path rule, ADS checks the files on the trunk with the old and the new rules. The files that lose protection come before the files that gain it.
+
+**Situation.** Someone asks to make the default high-risk rule low risk.
+
+**You see**
+
+```text
+ads needs your approval: change the team rules
+
+  Changes the high-risk rule from high to low risk.
+  3 files on the trunk lose protection and go from high to low risk, for example go.mod.
+  New files that match these globs can get a lower risk.
+
+To approve, reply:   ok 3d8f
+```
+
+**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.

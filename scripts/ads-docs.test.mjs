@@ -87,44 +87,44 @@ test('every page has at least two example blocks', () => {
   }
 });
 
-// Every number on the pages was checked against ADS 8942f68; a new one must
+// Every number on the pages was checked against ADS 29fbba3; a new one must
 // be checked too. 1.5M reads as 1.5M and 8M as 8M, so a token budget is
 // checked whole. Dates and timestamps are example values, not claims, and
 // are left out.
 const VERIFIED = new Set([
-  '0', // exit code 0 (docs/guides/setup.md:118); counts of 0 in pinned output (init_rerun.txtar:54, report_test.go landedGolden); FORCE_COLOR 0 (README.md:116)
-  '1', // exit code 1 (setup.md:118); 1 round, 1 review layer, 1 frozen test, 1 warn in pinned output; schema_version 1 (docs/guides/api.md); SONDALAB_ASCII=1 (README.md:117); option 1
-  '2', // exit code 2 (setup.md:118); 2 new tests (report_test.go landedGolden); option 2; round 2 of an example
-  '3', // internal/config/config.go:504 Rounds: 3; option 3; the patch of Go 1.27.3
+  '0', // exit code 0 (docs/guides/setup.md:121); counts of 0 in pinned output (init_rerun.txtar:66, report_test.go landedGolden); FORCE_COLOR 0 (README.md:120)
+  '1', // exit code 1 (setup.md:121); 1 round, 1 review layer, 1 frozen test, 1 warn in pinned output; schema_version 1 (docs/guides/api.md); SONDALAB_ASCII=1 (README.md:121); option 1
+  '2', // exit code 2 (setup.md:121); 2 new tests (report_test.go landedGolden); option 2; round 2 of an example; 2 files gain protection (trust_risk_rule.txtar:22)
+  '3', // internal/config/config.go:517 Rounds: 3; option 3; the patch of Go 1.27.3; 3 files lose protection (internal/flow/trustlist_test.go:71)
   '4', // internal/approve/approve.go:63 the code is 4 hex characters; +4 lines and seq 4 in examples (api.md:36)
-  '6', // internal/config/config.go:556-560 high and critical have 6 review layers (store.ReviewLayers)
-  '8', // UTF-8 (README.md:117)
+  '6', // internal/config/config.go:569-573 high and critical have 6 review layers (store.ReviewLayers)
+  '8', // UTF-8 (README.md:121)
   '10', // internal/approve/approve.go:31 TTL = 10 * time.Minute
   '12', // example: issue #12 (README.md table, report_test.go landedGolden); the 12-line fix of how-changes-land
   '13', // example: issue #13 (internal/report/view_test.go)
   '14', // example: issue #14
-  '16', // README.md:116 the 16 ANSI colours of the terminal theme
+  '16', // README.md:120 the 16 ANSI colours of the terminal theme
   '18', // example: +18 lines of a test file in the sign-off block (slice 1 ADS_APPROVAL)
-  '20', // internal/config/config.go:574 trivial 20 lines
+  '20', // internal/config/config.go:587 trivial 20 lines
   '32', // example: implementer 32 s (internal/report/view_test.go:52)
   '74', // example: test author 74 s (internal/report/view_test.go:51)
   '120', // internal/flow/follow.go:495 "no running change for 120 seconds"
   '160', // internal/flow/ask.go:515 summaryRunes = 160
-  '200', // internal/config/config.go:574 low 200 lines
-  '400', // internal/config/config.go:574 medium 400 lines
+  '200', // internal/config/config.go:587 low 200 lines
+  '400', // internal/config/config.go:587 medium 400 lines
   '1200000', // example: tokens of the status document in docs/guides/api.md:23
-  '3600', // internal/config/config.go:504 Seconds: 3600
+  '3600', // internal/config/config.go:517 Seconds: 3600
   '0.21', // example: $0.21 in internal/report/report_test.go landedGolden
   '0.48', // example: usd of the status document in docs/guides/api.md:23
   '1.27', // go.mod:3 go 1.27.3
   '2.38', // scripts/install.sh:38 git 2.38 or newer
   '2.46', // README.md:14 git 2.46 or newer is better
   '123k', // example: 123k tokens (internal/report/view_test.go:65)
-  '1M', // internal/config/config.go:511 trivial 1M tokens
+  '1M', // internal/config/config.go:524 trivial 1M tokens
   '1.2M', // example: 1.2M tokens in internal/report/report_test.go landedGolden
-  '1.5M', // internal/config/config.go:511 low 1.5M tokens
-  '3M', // internal/config/config.go:512 medium 3M tokens
-  '8M', // internal/config/config.go:512 high and critical 8M tokens
+  '1.5M', // internal/config/config.go:524 low 1.5M tokens
+  '3M', // internal/config/config.go:525 medium 3M tokens
+  '8M', // internal/config/config.go:525 high and critical 8M tokens
 ]);
 
 test('the pages state no number that was not verified', () => {
@@ -134,7 +134,7 @@ test('the pages state no number that was not verified', () => {
   }
 });
 
-// The built-in budgets, cell by cell (ADS internal/config/config.go:504-513).
+// The built-in budgets, cell by cell (ADS internal/config/config.go:517-525).
 test('how a change lands holds the built-in budgets', () => {
   const body = page('how-changes-land').body;
   for (const row of [
