@@ -10,7 +10,7 @@ repoPublic: false
 fullPage:
   href: /ads/
   label: See how ADS works
-summary: "You ask Claude Code for a change; an agent team writes the tests, makes the change and reviews it in layers. <strong>Low risk lands by itself</strong>, anything riskier <strong>waits for your approval</strong>, and every step is signed in git."
+summary: "You ask Claude Code for a change; an agent team writes the tests, makes the change and reviews it in layers. Up to medium risk, a change that passes every check <strong>lands by itself</strong>; high and critical <strong>wait for your approval</strong>, and every step is signed in git."
 ---
 
 You ask Claude Code for a change, "fix #12" or "work the queue", and `ads`
@@ -18,8 +18,10 @@ runs it for you. A test author writes tests first and freezes them, an
 implementer makes the change until those tests and the checks pass, and
 separate reviewers look at it in layers. The more risk, the more layers.
 
-The risk of the change decides who signs it. A trivial or low-risk change
-within its size limit lands by itself, signed with the team key. A high-risk
+The risk of the change decides who signs it. Once `ads init` has set up the
+team key, a trivial, low or medium change within its size limit that passes
+every check lands by itself, signed with that key; a medium change with a
+dispute or a stall waits for you. A high or critical
 change waits for your sign-off: one block in the session with the facts of
 the change, and a short `ok <code>` from you, which signs it with your key.
 Every step is a signed event in git, and every landed change can be undone

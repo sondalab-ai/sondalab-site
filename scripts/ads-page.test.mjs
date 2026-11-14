@@ -86,6 +86,23 @@ test('the budget table holds the built-in budgets', () => {
   ]);
 });
 
+// Trivial, low and medium can land by themselves (ADS internal/flow/landing.go
+// landingAt); copy that says only low risk does contradicts the landing table.
+test('the copy never says only low risk lands by itself', () => {
+  const all = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS]);
+  assert.doesNotMatch(all, /anything riskier|low[- ]risk change lands by itself|low risk lands/i);
+  assert.match(ADS_HERO.lede, /medium/);
+  assert.match(ADS_HERO.lede, /high and critical[^.]*`ok <code>`/);
+});
+
+// The team key signs only once ads init set it up and trusted it (ADS
+// internal/store/store.go signerFor, internal/flow/landing.go signerOf).
+test('every team-key claim says when the team key signs', () => {
+  const signed = ADS_BENEFITS.find((b) => b.id === 'signed');
+  assert.match(signed.body.join(' '), /once `ads init` has set up the team key/i);
+  assert.match(ADS_STEPS[3].body, /once `ads init` has set up the team key/i);
+});
+
 test('the copy uses no hype words', () => {
   const all = JSON.stringify([COPY, ADS_SESSION, ADS_APPROVAL, ADS_INSTALL, ADS_RECIPES]);
   assert.doesNotMatch(all, /seamless|powerful|effortless|autopilot|10x|blazing/i);
