@@ -12,12 +12,14 @@ sources:
   - internal/flow/follow.go
   - internal/flow/ask.go
   - internal/flow/trustwords.go
+  - internal/flow/trustrules.go
   - internal/report/report.go
   - internal/report/report_test.go
   - internal/report/view.go
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
-syncedFrom: 8942f68
+  - cmd/ads/testdata/script/trust_risk_rule.txtar
+syncedFrom: 29fbba3
 verified: 2026-11-14
 ---
 
@@ -122,33 +124,32 @@ Sign-off     say "sign off #13"
 
 ## Stricter rules
 
-You make the team rules stricter, and the change lands only after your approval, signed with your key.
+You make a folder high risk, so from now on every change there waits for your sign-off. The rule lands only after your approval, signed with your key.
 
-**Situation.** You want medium-risk changes to land by themselves only when they are small: at most 200 changed lines, not the default 400.
+**Situation.** Your trunk has two files under `payment/`, and you want every change there to wait for you.
 
 **You say**
 
 ```text
-let medium changes land by themselves only up to 200 lines
+be stricter on payment/
 ```
 
-**You see** the proposed rule, then the approval question:
+**You see** the proposed rule in plain words, with the files it affects, then the approval question:
 
 ```text
-review.max_diff_lines.medium: 400 → 200
+Adds payment/** to the high-risk rule.
+2 files on the trunk gain protection and go from low to high risk, for example payment/charge.go.
 rev …
 
 ads needs your approval: change the team rules
 
-  A change of risk medium lands by itself with at most 200 changed lines, unless a dispute or a stall blocks it
-  (now: at most 400 changed lines)
+  Adds payment/** to the high-risk rule.
+  2 files on the trunk gain protection and go from low to high risk, for example payment/charge.go.
 
 To approve, reply:   ok 7c1e
 ```
 
-**What happens.** Claude Code writes the new `.ads/config.yaml` to a file, proposes it with `ads trust propose`, and asks for your approval. After your `ok <code>`, `ads trust apply` lands the rule on the trunk, signed with your key. The question shows at most eight changes, each in one line of at most 160 characters; a larger change is refused with `the team-rule change is too large to approve: split it into smaller changes`.
-
-A rule that makes a folder high risk, such as "be stricter on payment/", goes the same way, as a change of the path rules (`risk_rules`). At ADS `d7e7189` the question shows the whole list of path rules as one line, and with the default rules that line is longer than 160 characters, so this change is refused as too large. Signers and prompts change only from a terminal.
+**What happens.** Claude Code writes the new `.ads/config.yaml` to a file, proposes it with `ads trust propose`, and asks for your approval. ADS checks the files on the trunk with the old and the new rules, and says which ones gain or lose protection. After your `ok <code>`, `ads trust apply` lands the rule on the trunk, signed with your key. Other team rules go the same way, for example "let medium changes land by themselves only up to 200 lines". The question shows at most eight changes, each in one line of at most 160 characters; a larger change is refused with `the team-rule change is too large to approve: split it into smaller changes`. Signers and prompts change only from a terminal.
 
 ## Follow only
 

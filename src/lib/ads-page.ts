@@ -8,8 +8,10 @@
  * approval block copies internal/flow/ask.go (approvalBlock) and
  * internal/flow/signoff.go, as cmd/ads/testdata/script/signoff_flow.txtar
  * prints it. The docs-only exception of the first step comes from ADS
- * 8942f68 (internal/flow/attempt.go, README.md). Text in backticks is shown
- * in code font.
+ * 8942f68 (internal/flow/attempt.go, README.md). The agents that ads init
+ * sets (internal/cli/agents.go, internal/config/config.go) and the
+ * "be stricter on payment/" row of the README table come from ADS 29fbba3.
+ * Text in backticks is shown in code font.
  */
 
 export const ADS_REPO = 'https://github.com/sondalab-ai/agentic-dev-system';
@@ -126,7 +128,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
         ['“work the queue”', 'The team works the open issues labeled `ads`, one at a time, and ends with what waits for you.'],
         ['“what is waiting for me?”', 'A list of the changes that need you: a sign-off, a question, a budget, or a paused change.'],
         ['“change X”', 'After a report: the team makes one more round with your words.'],
-        ['“let medium changes land by themselves only up to 200 lines”', 'The session proposes a change of the team rules. After your approval, it lands signed with your key.'],
+        ['“be stricter on payment/”', 'The session proposes a change of the team rules and shows it in plain words, with the files that gain or lose protection. After your approval, it lands signed with your key.'],
         ['`ok 4f2a`', 'Approves the one pending question with the code `4f2a`.'],
       ],
     },
@@ -204,8 +206,8 @@ export const ADS_LIMITS: readonly string[] = [
   '`ads` is in beta. Its commands and its output still change.',
 ];
 
-/** The install band's line after the commands: ads init writes the fake adapter for every role (ADS docs/guides/setup.md), so a first change needs real agents. */
-export const ADS_FIRST_RUN = '`ads init` sets every agent role to the `fake` adapter, which does no work. Before your first change, ask Claude Code to “use the claude agents for every role”.';
+/** The install band's line after the commands: ads init sets the claude agents when the claude CLI is on PATH, else the fake adapter (ADS internal/cli/agents.go, docs/guides/setup.md). */
+export const ADS_FIRST_RUN = 'With Claude Code installed, `ads init` sets the claude agents for every role, so your first change runs with real agents. Without it, every role gets the `fake` adapter, which does no work: install Claude Code, then ask it to “use the claude agents for every role”.';
 
 export const ADS_PREREQS = 'You need Go, git 2.38 or newer, OpenSSH and Claude Code. The GitHub CLI is optional.';
 

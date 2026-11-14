@@ -9,12 +9,13 @@ sources:
   - internal/flow/landing.go
   - internal/flow/answer.go
   - internal/flow/attempt.go
+  - internal/flow/view.go
   - internal/report/report.go
   - internal/report/view.go
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: 8942f68
+syncedFrom: 29fbba3
 verified: 2026-11-14
 ---
 
@@ -93,7 +94,7 @@ A change of type `docs` has no test author: a test of a docs change passes befor
 Proof        docs only, no test · checks pass
 ```
 
-A docs change may touch only documentation: `*.md`, `*.mdx`, `*.markdown`, `*.rst` and `*.adoc` files. If its diff changes any other file, its risk becomes at least `high`, so it waits for your sign-off, and its Proof line no longer says `docs only`.
+A docs change may touch only documentation: `*.md`, `*.mdx`, `*.markdown`, `*.rst` and `*.adoc` files. If its diff changes any other file, its risk becomes at least `high`, so it waits for your sign-off, and its Proof line no longer says `docs only`. The report's `Risk` line names the file and the rule, for example `Risk         high: scripts/build.sh is not a docs file, and a docs change may only change docs, declared low`.
 
 ## The final look
 
