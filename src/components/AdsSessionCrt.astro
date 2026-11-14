@@ -1,0 +1,248 @@
+---
+// The /ads/ session on a CRT tube: the real ADS session and its approval
+// block, typed on the same WebGPU faceplate as the home hero's terminal, in a
+// console of the kit's materials.
+//
+// Progressive enhancement, and the fallback is the default. The server renders
+// the two transcripts, and they stay what a visitor gets without WebGPU, with
+// high contrast or with forced colours. Only once the surface is up does the
+// screen carry `data-crt="on"`, and the section switch to the tube. The
+// transcripts then stay in the DOM, clipped rather than hidden, so a screen
+// reader still reads the real text; the console is aria-hidden.
+//
+// Reduced motion is deliberately not consulted: scripts/motion-gate.mjs
+// records why this site animates for everyone, the home hero included.
+import Transcript from './Transcript.astro';
+import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
+---
+
+<div class="ads-crt" data-ads-crt>
+  <div class="ads-crt__text">
+    <Transcript lines={ADS_SESSION} label="A Claude Code session: fix #13, the plan, each step, and the end" />
+    <Transcript lines={ADS_APPROVAL} label="The approval block that ADS shows for a sign-off" />
+  </div>
+  <!-- Laid out but invisible until the GPU answers: the surface measures the
+       screen before it is shown, and a display:none element measures 0x0. -->
+  <div class="ads-crt__console" aria-hidden="true">
+    <div class="ads-crt__screen" data-ads-crt-screen>
+      <canvas class="ads-crt__canvas"></canvas>
+    </div>
+    <div class="ads-crt__chin">
+      <span class="ads-crt__led"></span>
+      <span class="ads-crt__mark">ads · session replay</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { mountCrtSurface, type CrtSource } from '../lib/crt-surface';
+  import { createSessionTube } from '../lib/crt-session';
+  import { CRT_SHADER } from '../lib/crt-shader';
+  import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
+
+  const wrap = document.querySelector<HTMLElement>('[data-ads-crt]');
+  const screen = wrap?.querySelector<HTMLElement>('[data-ads-crt-screen]');
+  const canvas = screen?.querySelector('canvas');
+  const consoleEl = wrap?.querySelector<HTMLElement>('.ads-crt__console');
+  const root = document.documentElement;
+
+  /**
+   * The home hero's frozen look, with less tracking error: this tube is read
+   * line by line, and the sweep crossing a log line hides the line it crosses.
+   */
+  const LOOK = {
+    curvature: 0.07,
+    bezel: 0.055,
+    overscan: 1.1,
+    gain: 0.94,
+    ior: 2,
+    glassDepth: 0.1,
+    rimPower: 0.01,
+    reflectPower: 0.58,
+    scanDepth: 0.32,
+    scanCount: 290,
+    maskDepth: 0.36,
+    glowPower: 0.1,
+    glowRadius: 0.005,
+    splitAmount: 0.004,
+    tearAmount: 0.004,
+    tearRate: 20,
+    trackingAmount: 0.8,
+    dropoutAmount: 0.14,
+    rollAmount: 0.24,
+    noiseAmount: 0.055,
+  };
+
+  /** High contrast and forced colours keep the transcripts; no GPU is spent on them. */
+  const plainText = () =>
+    root.getAttribute('data-sl-theme') === 'high-contrast' ||
+    window.matchMedia('(forced-colors: active), (prefers-contrast: more)').matches;
+
+  /**
+   * The clipped transcripts are focusable scroll regions; while the tube is on,
+   * a Tab must not land on a box nobody can see. Back to the tab order when
+   * the page falls back to text.
+   */
+  function syncFocus() {
+    const on = screen?.getAttribute('data-crt') === 'on' && !plainText();
+    wrap?.querySelectorAll('pre').forEach((pre) => pre.setAttribute('tabindex', on ? '-1' : '0'));
+  }
+
+  async function boot() {
+    if (!wrap || !screen || !canvas || !consoleEl || plainText()) return;
+
+    await mountCrtSurface({
+      canvas,
+      host: screen,
+      shader: CRT_SHADER,
+      look: LOOK,
+      glowTaps: [6, 12],
+      vignette: [0.1, 0.35],
+
+      async createSource(aspect, narrow) {
+        // The wrap width is measured in glyphs, so the mono face has to be in.
+        try { await document.fonts?.load('16px "Geist Mono"'); } catch {}
+        const tube = createSessionTube({ session: ADS_SESSION, approval: ADS_APPROVAL, aspect, narrow });
+        let live = false;
+        const setLive = (on: boolean) => {
+          if (on === live) return;
+          live = on;
+          consoleEl!.toggleAttribute('data-live', on);
+        };
+        // The console's lamp is lit while the tube runs and goes out when the
+        // loop stops, so it states something true.
+        const source: CrtSource = {
+          get canvas() { return tube.canvas; },
+          get width() { return tube.width; },
+          get height() { return tube.height; },
+          get dirty() { return tube.dirty; },
+          get lightPolarity() { return tube.lightPolarity; },
+          get screenBackground() { return tube.screenBackground; },
+          tick: (dt) => { setLive(true); tube.tick(dt); },
+          draw: (time) => tube.draw(time),
+          drawSignalLoss: () => { setLive(false); tube.drawSignalLoss(); },
+          refreshTokens: () => tube.refreshTokens(),
+          resize: (a, n) => tube.resize(a, n),
+        };
+        return source;
+      },
+
+      onReady() {
+        syncFocus();
+        new MutationObserver(syncFocus).observe(root, { attributes: true, attributeFilter: ['data-sl-theme'] });
+      },
+    });
+  }
+
+  void boot();
+</script>
+
+<style>
+  .ads-crt { position: relative; }
+  .ads-crt__text { display: grid; gap: var(--sl-space-4); }
+
+  /* The console: a shell of the kit's raised material on a hairline, the tube
+     recessed into it, a chin with the lamp. Present in layout from the start
+     so it can be measured, invisible until the GPU answers. */
+  .ads-crt__console {
+    position: absolute;
+    inset: 0 0 auto 0;
+    visibility: hidden;
+    pointer-events: none;
+    max-width: 60rem;
+    margin-inline: auto;
+    padding: clamp(0.55rem, 1.4vw, 1.1rem);
+    padding-bottom: 0;
+    background: var(--slc-raised);
+    border: 1px solid var(--slc-edge-hairline);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: var(--slc-depth-float);
+  }
+  /* The recess is the page's canvas colour, which is what the shader paints
+     outside the glass: the curved tube sits in it with no seam. */
+  .ads-crt__screen {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--sl-bg-canvas);
+    border: 1px solid var(--slc-edge-hairline);
+    border-radius: var(--sl-radius-md);
+    box-shadow: var(--slc-shadow-inset);
+    overflow: hidden;
+  }
+  /* The same breakpoint as crt-surface's narrow class: a phone gets a taller
+     tube, and the source wraps to fewer columns. */
+  @media (max-width: 40rem) {
+    .ads-crt__screen { aspect-ratio: 2 / 3; }
+  }
+  .ads-crt__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+  .ads-crt__chin {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sl-space-2);
+    padding: var(--sl-space-3) var(--sl-space-2);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    letter-spacing: 0.08em;
+    color: var(--slc-text-muted);
+  }
+  .ads-crt__led {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: var(--sl-radius-pill);
+    background: color-mix(in srgb, var(--slc-text) 22%, transparent);
+    transition: background var(--sl-motion-mid) var(--sl-motion-ease),
+      box-shadow var(--sl-motion-mid) var(--sl-motion-ease);
+  }
+  .ads-crt__console[data-live] .ads-crt__led {
+    background: var(--slc-accent);
+    box-shadow: 0 0 0.45rem color-mix(in srgb, var(--slc-accent) 70%, transparent);
+  }
+
+  /* --- tube on ------------------------------------------------------------ */
+  .ads-crt__screen[data-crt='on'] .ads-crt__canvas { display: block; }
+  .ads-crt:has(.ads-crt__screen[data-crt='on']) .ads-crt__console {
+    position: relative;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  /* Clipped, not removed: display:none and visibility:hidden drop the text
+     from the accessibility tree, and it is the real session. */
+  .ads-crt:has(.ads-crt__screen[data-crt='on']) .ads-crt__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* High contrast and forced colours: the transcripts, whatever the GPU did.
+     The canvas leaves the viewport with the console, so the loop stops. */
+  :global(:root[data-sl-theme='high-contrast']) .ads-crt .ads-crt__console { display: none; }
+  :global(:root[data-sl-theme='high-contrast']) .ads-crt .ads-crt__text {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .ads-crt .ads-crt__console { display: none; }
+    .ads-crt .ads-crt__text {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+    }
+  }
+</style>
