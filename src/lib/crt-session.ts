@@ -228,6 +228,24 @@ export interface SessionTubeOptions {
   measureWidth(): number;
   /** The look's overscan: the faceplate shows the picture this much smaller. */
   overscan?: number;
+  /** The tallest the screen may grow, in CSS pixels, before the tube scrolls. */
+  maxCssHeight?: number;
+  /** Told the screen's CSS height whenever the layout settles on one. */
+  onHeight?(cssHeight: number): void;
+}
+
+/** Share of the picture's height the curvature eats, top and bottom each. */
+const EDGE_Y = 0.075;
+
+/**
+ * Texture height that holds `rowCount` rows of `lineH` inside the edge the
+ * curvature eats, capped at `maxH`. The screen grows with the buffer, so the
+ * whole exchange stays on one screen; only past the cap does the tube scroll.
+ */
+export function fitHeight(rowCount: number, lineH: number, maxH = Infinity): number {
+  const body = rowCount * lineH;
+  const h = Math.max(body / (1 - 2 * EDGE_Y), body + 2 * lineH * 0.8);
+  return Math.ceil(Math.min(h, maxH));
 }
 
 const MONO = '"Geist Mono", ui-monospace, Menlo, monospace';
@@ -278,19 +296,23 @@ export function createSessionTube(o: SessionTubeOptions): CrtSource {
    * the overscan shows the picture 1/overscan smaller, so it is drawn that much
    * larger. Columns and rows are whatever then fits.
    */
-  function geometry(aspect: number) {
+  function geometry(_aspect: number) {
     canvas.width = Math.max(320, Math.round(o.measureWidth() * TEX_SCALE));
-    canvas.height = Math.round(canvas.width / aspect);
     fontPx = Math.round(fontCss(narrow) * TEX_SCALE * overscan);
     lineH = fontPx * LINE_HEIGHT;
     ctx.font = font();
     charW = ctx.measureText('M').width || fontPx * 0.6;
     // The curvature and the overscan eat the edge of the picture.
     x0 = Math.max(charW * 2, canvas.width * 0.06);
-    y0 = Math.max(lineH * 0.8, canvas.height * 0.075);
     width = Math.max(20, Math.floor((canvas.width - 2 * x0) / charW));
-    room = Math.max(6, Math.floor((canvas.height - 2 * y0) / lineH));
     rowsLaid = layoutRows(script, width);
+    // The height follows the buffer, not an aspect: every row of the exchange
+    // fits at once. Setting a canvas size clears it, and the font with it.
+    canvas.height = fitHeight(rowsLaid.length, lineH, (o.maxCssHeight ?? Infinity) * TEX_SCALE);
+    ctx.font = font();
+    y0 = Math.max(lineH * 0.8, canvas.height * EDGE_Y);
+    room = Math.max(6, Math.floor((canvas.height - 2 * y0) / lineH));
+    o.onHeight?.(canvas.height / TEX_SCALE);
   }
 
   const isLight = () => root.getAttribute('data-sl-theme') === 'light';

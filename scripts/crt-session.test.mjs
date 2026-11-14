@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { codeSpan, createCycle, hangingIndent, layoutRows, SESSION_TIMINGS } from '../src/lib/crt-session.ts';
+import { codeSpan, createCycle, fitHeight, hangingIndent, layoutRows, SESSION_TIMINGS } from '../src/lib/crt-session.ts';
 import { ADS_APPROVAL, ADS_SESSION } from '../src/lib/ads-page.ts';
 
 const SCRIPT = [...ADS_SESSION, { text: '' }, ...ADS_APPROVAL];
@@ -133,4 +133,12 @@ test('on a phone-width tube a wrapped line keeps most of the row, not a ribbon',
   const rows = layoutRows(SCRIPT, 30);
   for (const r of rows) assert.ok(r.indent <= 6, `indent ${r.indent} on "${r.text}"`);
   SCRIPT.forEach((l, i) => assert.equal(rejoin(rows, i), l.text));
+});
+
+test('the screen grows with the buffer, so every row fits inside the curved edge', () => {
+  const lineH = 39;
+  const h = fitHeight(25, lineH);
+  assert.ok(h * (1 - 2 * 0.075) >= 25 * lineH);
+  assert.ok(fitHeight(40, lineH) > h);
+  assert.equal(fitHeight(40, lineH, 1000), 1000);
 });

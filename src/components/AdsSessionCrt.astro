@@ -109,6 +109,13 @@ import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
           narrow,
           overscan: LOOK.overscan,
           measureWidth: () => screen!.getBoundingClientRect().width,
+          // Grows with the buffer so the whole exchange is on one screen; a
+          // phone that wraps into more rows than two viewports scrolls instead.
+          maxCssHeight: window.innerHeight * 2,
+          onHeight: (h) => {
+            screen!.style.aspectRatio = 'auto';
+            screen!.style.height = `${Math.round(h)}px`;
+          },
         });
         let live = false;
         const setLive = (on: boolean) => {
@@ -174,8 +181,8 @@ import { ADS_APPROVAL, ADS_SESSION } from '../lib/ads-page';
     box-shadow: var(--slc-shadow-inset);
     overflow: hidden;
   }
-  /* The same breakpoint as crt-surface's narrow class: a phone gets a tall
-     tube, and the source wraps to fewer columns rather than smaller type. */
+  /* Only the pre-boot measure uses these ratios: once the tube is up, the
+     source sets the height from its row count, so the whole buffer fits. */
   @media (max-width: 40rem) {
     .ads-crt__screen { aspect-ratio: 9 / 16; }
   }
