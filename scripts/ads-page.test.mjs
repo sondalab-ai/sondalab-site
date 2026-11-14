@@ -95,14 +95,17 @@ test('the copy never says only low risk lands by itself', () => {
   assert.match(ADS_HERO.lede, /high and critical[^.]*`ok <code>`/);
 });
 
-// The team key signs only once ads init set it up and trusted it (ADS
-// internal/store/store.go signerFor, internal/flow/landing.go signerOf).
-test('every team-key claim says when the team key signs', () => {
+// ads work refuses to start without a trusted team key (ADS
+// internal/cli/work.go workFlow), so the agents' steps are never signed with
+// the operator's key: the copy says when ads work starts, and never that your
+// key signs agent steps.
+test('the landing says ads work needs the team key, and your key signs only your actions', () => {
   const signed = ADS_BENEFITS.find((b) => b.id === 'signed');
-  assert.match(signed.body.join(' '), /once `ads init` has set up the team key/i);
-  assert.match(ADS_STEPS[3].body, /once `ads init` has set up the team key/i);
+  assert.match(signed.body.join(' '), /`ads work` starts only once `ads init` has set up the team key/);
+  assert.deepEqual(signed.table.rows.find((r) => r[0].startsWith('the agent team'))?.[1], 'team key');
+  const all = JSON.stringify([ADS_HERO, ADS_STEPS, ADS_BENEFITS, ADS_LIMITS]);
+  assert.doesNotMatch(all, /your key (signs )?(those|before that)|until then your key|your key signs[^.]*(agent|tests|review|what the agents)/i);
 });
-
 test('the copy uses no hype words', () => {
   const all = JSON.stringify([COPY, ADS_SESSION, ADS_APPROVAL, ADS_INSTALL, ADS_RECIPES]);
   assert.doesNotMatch(all, /seamless|powerful|effortless|autopilot|10x|blazing/i);

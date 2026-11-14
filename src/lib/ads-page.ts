@@ -88,7 +88,7 @@ export const ADS_STEPS: readonly { title: string; body: string }[] = [
   },
   {
     title: 'It lands, or it waits for you',
-    body: 'Once `ads init` has set up the team key, a trivial, low or medium change that passes every check lands by itself, signed with it. A high or critical change waits for your sign-off and is signed with your key. Every landed change can be undone, after your approval, with a signed revert.',
+    body: 'A trivial, low or medium change that passes every check lands by itself, signed with the team key. A high or critical change waits for your sign-off and is signed with your key. Every landed change can be undone, after your approval, with a signed revert.',
   },
 ];
 
@@ -123,8 +123,8 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
     table: {
       head: ['Risk', 'Lands', 'Signed by'],
       rows: [
-        ['trivial, low', 'by itself, when every check passes and the team key is set up', 'team key'],
-        ['medium', 'by itself, when every check passes, the run had no dispute and no stall, and the team key is set up; otherwise it waits for your sign-off', 'team key, or you'],
+        ['trivial, low', 'by itself, when every check passes', 'team key'],
+        ['medium', 'by itself, when every check passes, the run had no dispute and no stall; otherwise it waits for your sign-off', 'team key, or you'],
         ['high, critical', 'waits for your sign-off', 'your key'],
       ],
     },
@@ -134,13 +134,13 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
     kicker: 'Signed in git',
     h2: 'Every step is signed in git.',
     body: [
-      'Each change keeps its history as signed events on its own git ref. Your answers and approvals are signed with your key. Once `ads init` has set up the team key and listed it as trusted, the team key signs what the agents do; until then your key signs those too, and nothing lands by itself.',
+      'Each change keeps its history as signed events on its own git ref. The team key signs what the agents do. `ads work` starts only once `ads init` has set up the team key and listed it as trusted. Your key signs your answers, approvals, sign-offs and team-rule changes.',
       'The keys that may sign are listed in `.ads/allowed_signers` on the trunk. `ads audit verify` checks every signature, and `ads audit show` prints each event with its signer.',
     ],
     table: {
       head: ['Who acts', 'Signed with'],
       rows: [
-        ['the agent team: tests, change, review, a landing by itself', 'team key, once set up and trusted; your key before that'],
+        ['the agent team: tests, change, review, a landing by itself', 'team key'],
         ['you: an approval, a sign-off, a team-rule change', 'your key'],
       ],
     },
