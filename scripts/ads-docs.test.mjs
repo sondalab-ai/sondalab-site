@@ -109,6 +109,9 @@ const VERIFIED = new Set([
   '32', // example: implementer 32 s (internal/report/view_test.go:52)
   '74', // example: test author 74 s (internal/report/view_test.go:51)
   '120', // internal/flow/follow.go:495 "no running change for 120 seconds"
+  '5', // internal/flow/run.go:17 runProgressEvery = 5 * time.Minute (killed run loses at most about 5 minutes)
+  '130', // internal/cli/signal.go:63 exit 128 + SIGINT (2)
+  '143', // internal/cli/signal.go:63 exit 128 + SIGTERM (15)
   '160', // internal/flow/ask.go:515 summaryRunes = 160
   '200', // internal/config/config.go:587 low 200 lines
   '400', // internal/config/config.go:587 medium 400 lines

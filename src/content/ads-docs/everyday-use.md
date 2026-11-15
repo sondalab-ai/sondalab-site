@@ -19,7 +19,7 @@ sources:
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: d2d7b7c
+syncedFrom: d3d8b15419d42e676e04c52c138a3f2349718de0
 verified: 2026-11-15
 ---
 
