@@ -13,7 +13,7 @@ sources:
   - internal/report/view.go
   - internal/term/tui.json
   - cmd/ads/testdata/script/doctor.txtar
-syncedFrom: e21855b
+syncedFrom: 8d11a77
 verified: 2026-11-15
 ---
 

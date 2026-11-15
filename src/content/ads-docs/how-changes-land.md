@@ -15,8 +15,8 @@ sources:
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: 29fbba3
-verified: 2026-11-14
+syncedFrom: 8d11a77
+verified: 2026-11-15
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.

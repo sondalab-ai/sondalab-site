@@ -25,8 +25,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 29fbba3
-verified: 2026-11-14
+syncedFrom: 8d11a77
+verified: 2026-11-15
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
