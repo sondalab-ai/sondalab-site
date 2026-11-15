@@ -20,8 +20,8 @@ sources:
   - internal/report/report_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
-syncedFrom: 29fbba3
-verified: 2026-11-14
+syncedFrom: d2d7b7c
+verified: 2026-11-15
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? Five actions wait for you: a sign-off, an undo, a stop, one more budget, and a change of the team rules. A pause does not, because it loses nothing.
@@ -176,7 +176,7 @@ After your `ok <code>`, the team goes on with one more budget of the same size. 
 
 ## A change of the team rules
 
-A change of the team rules shows what it does in plain words, so you see what you give up before you approve. For a path rule, ADS checks the files on the trunk with the old and the new rules. The files that lose protection come before the files that gain it.
+A change of the team rules shows what it does in plain words, so you see what you give up before you approve. For a path rule, ADS checks the files on the trunk and the files that open fixes change, with the old and the new rules. A file that stays under `checks.sensitive_paths` is critical whatever the rules say, so it never counts. An open fix whose head is not in this clone is not counted, and the question says so. The files that lose protection come before the files that gain it.
 
 **Situation.** Someone asks to make the default high-risk rule low risk.
 
@@ -186,10 +186,10 @@ A change of the team rules shows what it does in plain words, so you see what yo
 ads needs your approval: change the team rules
 
   Changes the high-risk rule from high to low risk.
-  3 files on the trunk lose protection and go from high to low risk, for example go.mod.
+  2 files on the trunk lose protection and go from high to low risk, for example go.mod.
   New files that match these globs can get a lower risk.
 
 To approve, reply:   ok 3d8f
 ```
 
-**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.
+**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.

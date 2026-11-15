@@ -19,8 +19,8 @@ sources:
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: 29fbba3
-verified: 2026-11-14
+syncedFrom: d2d7b7c
+verified: 2026-11-15
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -149,7 +149,7 @@ ads needs your approval: change the team rules
 To approve, reply:   ok 7c1e
 ```
 
-**What happens.** Claude Code writes the new `.ads/config.yaml` to a file, proposes it with `ads trust propose`, and asks for your approval. ADS checks the files on the trunk with the old and the new rules, and says which ones gain or lose protection. After your `ok <code>`, `ads trust apply` lands the rule on the trunk, signed with your key. Other team rules go the same way, for example "let medium changes land by themselves only up to 200 lines". The question shows at most eight changes, each in one line of at most 160 characters; a larger change is refused with `the team-rule change is too large to approve: split it into smaller changes`. Signers and prompts change only from a terminal.
+**What happens.** Claude Code writes the new `.ads/config.yaml` to a file, proposes it with `ads trust propose`, and asks for your approval. ADS checks the files on the trunk and the files that open fixes change, with the old and the new rules, and says which ones gain or lose protection. A line that counts a file only an open fix has says `on the trunk or in open fixes`. After your `ok <code>`, `ads trust apply` lands the rule on the trunk, signed with your key. Other team rules go the same way, for example "let medium changes land by themselves only up to 200 lines". The question shows at most eight changes, each in one line of at most 160 characters; a larger change is refused with `the team-rule change is too large to approve: split it into smaller changes`. Signers and prompts change only from a terminal.
 
 ## Follow only
 
