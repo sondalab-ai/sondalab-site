@@ -15,7 +15,7 @@ sources:
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: 8d11a77
+syncedFrom: 5e7f0e4
 verified: 2026-11-15
 ---
 
