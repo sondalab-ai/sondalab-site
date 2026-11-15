@@ -15,7 +15,7 @@ sources:
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: d2d7b7c
+syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
 verified: 2026-11-15
 ---
 
@@ -128,7 +128,7 @@ Each change has a budget, so a stuck run stops and asks you before it spends mor
 
 </div>
 
-Tokens count every kind, cache reads included. There is no dollar limit by default. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. There is no dollar limit by default. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
 
 ## Example: the same fix, two outcomes
 

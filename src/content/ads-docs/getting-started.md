@@ -25,7 +25,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: d2d7b7c
+syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
 verified: 2026-11-15
 ---
 
@@ -151,7 +151,7 @@ Review       correctness ✓
 Undo         say "undo #12"
 ```
 
-**What happens.** Claude Code runs `ads work 12` in the background and relays its lines. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. A change of trivial, low or medium risk that stays within its size limit and passes every check can land by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
+**What happens.** Claude Code runs `ads work 12` in the background and relays its lines. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. A change of trivial, low or medium risk that stays within its size limit and passes every check can land by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. If you press Ctrl-C while it runs, the running stage ends cleanly, the steps after it still run, and the command exits with 130 (143 for SIGTERM); a second signal kills it at once. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
 
 ## Update
 

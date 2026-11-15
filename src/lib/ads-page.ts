@@ -182,7 +182,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
     kicker: 'A budget per change',
     h2: 'Each change has a budget, and asks before it spends more.',
     body: [
-      'By default a change gets at most 3 rounds and 3600 seconds, and a token budget for its risk. Tokens count every kind, cache reads included. There is no dollar limit by default.',
+      'By default a change gets at most 3 rounds and 3600 seconds, and a token budget for its risk. Tokens count every kind, cache reads included. The seconds count only the time while a stage runs, not a wait for your answer or a pause. There is no dollar limit by default.',
       'Going over asks you for one more budget, with an approval. You can set your own budgets per risk in `.ads/config.yaml`.',
     ],
     table: {
