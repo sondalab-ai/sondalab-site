@@ -13,8 +13,8 @@ sources:
   - internal/report/view.go
   - internal/term/tui.json
   - cmd/ads/testdata/script/doctor.txtar
-syncedFrom: 29fbba3
-verified: 2026-11-14
+syncedFrom: e21855b
+verified: 2026-11-15
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
@@ -107,7 +107,7 @@ A `change` on a follower line is the view at the time of the poll that found the
 
 ## Versions
 
-Every document and every line has `schema_version`, an integer, now `1`. A new field that you may ignore adds no version. A removed field, a changed type, or a field that becomes required raises it. Check `schema_version` first, and refuse a version you do not know:
+Every document and every line has `schema_version`, an integer, now `1`. A new field that you may ignore adds no version. A removed field, a changed type, or a field that becomes required raises it. A new value of an enum field, for example a new risk source, adds no version: accept a value you do not know and show it as it is. A schema file lists the values known when it was written, so if you validate against one, treat an unknown enum value as a warning, not an error. Check `schema_version` first, and refuse a version you do not know:
 
 ```sh
 ads status --json | jq -e '.schema_version == 1'
