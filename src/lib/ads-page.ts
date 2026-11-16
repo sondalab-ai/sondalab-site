@@ -11,6 +11,8 @@
  * 8942f68 (internal/flow/attempt.go, README.md). The agents that ads init
  * sets (internal/cli/agents.go, internal/config/config.go) and the
  * "be stricter on payment/" row of the README table come from ADS 29fbba3.
+ * The "sweep the codebase" row and the sweep rule of the medium row come
+ * from ADS 6846133 (README.md, internal/flow/landing.go).
  * Text in backticks is shown in code font.
  */
 
@@ -126,6 +128,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
       rows: [
         ['“fix #12”', 'The team works on issue 12 in the background. You get a short report, or one question.'],
         ['“work the queue”', 'The team works the open issues labeled `ads`, one at a time, and ends with what waits for you.'],
+        ['“sweep the codebase”', 'Sweeper agents read part of the trunk and file what they find as issues labeled `ads`. “what would a sweep find?” shows the findings and files nothing.'],
         ['“what is waiting for me?”', 'A list of the changes that need you: a sign-off, a question, a budget, or a paused change.'],
         ['“change X”', 'After a report: the team makes one more round with your words.'],
         ['“be stricter on payment/”', 'The session proposes a change of the team rules and shows it in plain words, with the files that gain or lose protection. After your approval, it lands signed with your key.'],
@@ -145,7 +148,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
       head: ['Risk', 'Lands', 'Signed by'],
       rows: [
         ['trivial, low', 'by itself, when every check passes', 'team key'],
-        ['medium', 'by itself, when every check passes, the run had no dispute and no stall; otherwise it waits for your sign-off', 'team key, or you'],
+        ['medium', 'by itself, when every check passes, the run had no dispute and no stall; otherwise it waits for your sign-off. A fix of a sweep issue always waits.', 'team key, or you'],
         ['high, critical', 'waits for your sign-off', 'your key'],
       ],
     },
