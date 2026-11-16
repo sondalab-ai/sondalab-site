@@ -24,7 +24,8 @@
     "post:probe": "node scripts/post-probe.mjs",
     "daos:probe": "node scripts/daos-probe.mjs",
     "post:cover": "node scripts/make-post-cover.mjs",
-    "ads-docs:drift": "node scripts/ads-docs-drift.mjs"
+    "ads-docs:drift": "node scripts/ads-docs-drift.mjs",
+    "links:check": "node scripts/content-links.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
@@ -36,6 +37,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/node": "^22.20.5",
     "puppeteer-core": "^25.8.0",
+    "satteri": "0.10.5",
     "typescript": "^6.0.3"
   }
 }

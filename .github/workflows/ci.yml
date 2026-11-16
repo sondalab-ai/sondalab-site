@@ -25,3 +25,5 @@ jobs:
         run: npm run audit
       - name: Build
         run: npm run build
+      - name: Internal links and anchors in the content
+        run: npm run links:check
