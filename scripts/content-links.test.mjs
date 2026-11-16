@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, before, describe, test } from 'node:test';
-import { checkContent, collectLinks } from './content-links.mjs';
+import { checkContent, collectLinks, htmlIds, main } from './content-links.mjs';
 
 let root;
 const put = (rel, text) => {
@@ -20,6 +20,8 @@ before(() => {
   put('dist/ads/docs/other/index.html', '<h2 id="real-anchor">x</h2>');
   put('dist/ads/docs/page/index.html', '<h2 id="own">x</h2>');
   put('dist/robots.txt', 'ok');
+  put('dist/index.html', '<h1 id="home">x</h1>');
+  put('dist/ads/docs/ids/index.html', `<h2 id="café">a</h2><h2 id="a&amp;b">b</h2><h2 id='single'>c</h2><h2 id=bare>d</h2><h2 id="n&#233;">e</h2><p data-id="nope">f</p>`);
 });
 after(() => rmSync(root, { recursive: true, force: true }));
 
@@ -71,5 +73,73 @@ describe('content links', () => {
   test('images and raw HTML hrefs are collected', () => {
     const links = collectLinks('![i](/a.png)\n\n<a href="/b/">b</a>\n');
     assert.deepEqual(links.map((l) => [l.target, l.line]), [['/a.png', 1], ['/b/', 3]]);
+  });
+
+  test('anchors are percent-decoded and entity-decoded', () => {
+    assert.deepEqual(check('[a](/ads/docs/ids/#caf%C3%A9) [b](/ads/docs/ids/#a%26b) [c](/ads/docs/ids/#n%C3%A9)\n'), []);
+  });
+
+  test('single-quoted and unquoted ids count, data-id does not', () => {
+    assert.deepEqual(check('[a](/ads/docs/ids/#single) [b](/ads/docs/ids/#bare)\n'), []);
+    assert.equal(check('[a](/ads/docs/ids/#nope)\n').length, 1);
+    assert.deepEqual([...htmlIds('<p data-id="x" id="y">')], ['y']);
+  });
+
+  test('malformed percent escapes are reported, not thrown', () => {
+    assert.match(check('[a](#%zz)\n')[0].reason, /not a valid URL/);
+    assert.match(check('[a](/%zz/)\n')[0].reason, /not a valid URL/);
+  });
+
+  test('a query string is ignored, a fragment after it is checked', () => {
+    assert.deepEqual(check('[a](/ads/docs/other/?a=1) [b](/ads/docs/other/?a=1#real-anchor)\n'), []);
+    assert.equal(check('[a](/ads/docs/other/?a=1#gone)\n').length, 1);
+  });
+
+  test('the root link resolves to dist/index.html', () => {
+    assert.deepEqual(check('[a](/) [b](/#home)\n'), []);
+    assert.equal(check('[a](/#gone)\n').length, 1);
+  });
+
+  test('a missing static file fails', () => {
+    assert.match(check('[a](/missing.png)\n')[0].reason, /no page at/);
+  });
+
+  test('a reference definition after a blank line serves [text][ref]', () => {
+    const md = 'See [text][ref].\n\n\n[ref]: /ads/docs/nope/\n';
+    const broken = check(md);
+    assert.ok(broken.some((b) => b.target === '/ads/docs/nope/' && b.line === 4));
+    assert.deepEqual(check('See [text][ref].\n\n[ref]: /ads/docs/other/\n'), []);
+  });
+
+  test('unquoted raw HTML href is collected', () => {
+    assert.deepEqual(collectLinks('<div>\n<a href=/b/>b</a>\n</div>\n').map((l) => [l.target, l.line]), [['/b/', 2]]);
+  });
+
+  test('a nested folder or a frontmatter slug is refused', () => {
+    put('content/ads-docs/sub/deep.md', 'x\n');
+    assert.throws(() => checkContent(join(root, 'content'), join(root, 'dist')), /nested/);
+    rmSync(join(root, 'content/ads-docs/sub'), { recursive: true });
+    assert.throws(() => check('---\nslug: other\n---\n\ntext\n'), /slug/);
+  });
+});
+
+describe('main', () => {
+  const run = (args) => {
+    const [log, err] = [console.log, console.error];
+    console.log = console.error = () => {};
+    try {
+      return main(args);
+    } finally {
+      [console.log, console.error] = [log, err];
+    }
+  };
+  const dirs = () => ['--content', join(root, 'content'), '--dist', join(root, 'dist')];
+
+  test('exit codes: 0 clean, 1 broken, 2 without dist', () => {
+    put('content/ads-docs/page.md', '[x](/ads/docs/other/)\n');
+    assert.equal(run(dirs()), 0);
+    put('content/ads-docs/page.md', '[x](/ads/docs/nope/)\n');
+    assert.equal(run(dirs()), 1);
+    assert.equal(run(['--content', join(root, 'content'), '--dist', join(root, 'no-dist')]), 2);
   });
 });
