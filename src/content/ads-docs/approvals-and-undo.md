@@ -20,11 +20,13 @@ sources:
   - internal/report/report_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
-syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
-verified: 2026-11-15
+syncedFrom: 68461336676989779e25c3f89757e4d2f7b298a5
+verified: 2026-11-16
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? Five actions wait for you: a sign-off, an undo, a stop, one more budget, and a change of the team rules. A pause does not, because it loses nothing.
+
+A fix of an issue that `ads sweep` filed needs your sign-off from risk `medium` up, even after a clean run. Its text is untrusted, so its fix files no follow-up issues ([How a change lands](/ads/docs/how-changes-land/#sweep-issues)).
 
 ## The approval block
 

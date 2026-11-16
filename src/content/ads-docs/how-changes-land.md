@@ -15,8 +15,8 @@ sources:
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
-verified: 2026-11-15
+syncedFrom: 68461336676989779e25c3f89757e4d2f7b298a5
+verified: 2026-11-16
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -36,7 +36,7 @@ Agents cannot lower the risk below the path rules. The risk decides who signs th
 | Risk | Lands | Signed by |
 |---|---|---|
 | trivial, low | by itself, when every check passes and the team key is set up | team key |
-| medium | by itself, when every check passes, the run had no dispute and no stall, and the team key is set up; otherwise it waits for your sign-off | team key, or you |
+| medium | by itself, when every check passes, the run had no dispute and no stall, and the team key is set up; otherwise it waits for your sign-off. A fix of a sweep issue always waits. | team key, or you |
 | high, critical | waits for your sign-off | your key |
 
 </div>
@@ -111,6 +111,23 @@ Answer       say what to do, for example "say how to fix it"
 ## Raised risk
 
 A reviewer can raise the risk. The change then follows the rules of the higher risk, and the report says so on its `Risk` line, for example `Risk         high: security review raised it, declared low`. A change you expected to land by itself can then wait for your sign-off.
+
+## Sweep issues
+
+An issue that `ads sweep` filed holds text that a model wrote after it read trunk code (see [Find work](/ads/docs/find-work/)). Anyone who lands code can plant text there, so ADS treats that text as untrusted. ADS knows a sweep issue by the marker in its body, not by its label, whoever filed it.
+
+- Its fix lands by itself only at risk `trivial` or `low`.
+- From `medium` up, its fix always waits for your `ok <code>`, even after a clean run with no dispute and no stall.
+- Its fix files no follow-up issues, so text planted in the code never turns into more issues.
+
+The `Why` line of the report says why the fix waits:
+
+```text
+Why          found by the sweep, risk medium
+Sign-off     say "sign off #12"
+```
+
+When a reviewer raised the risk, the line reads `found by the sweep, a reviewer raised the risk to <risk>`.
 
 ## Budgets
 

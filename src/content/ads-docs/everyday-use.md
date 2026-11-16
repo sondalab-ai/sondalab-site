@@ -19,8 +19,8 @@ sources:
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
-verified: 2026-11-15
+syncedFrom: 68461336676989779e25c3f89757e4d2f7b298a5
+verified: 2026-11-16
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -72,7 +72,31 @@ Waiting for you:
   #14 "Split loses the remainder": a question: Keep the remainder on the last share?
 ```
 
-**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with the list of what waits for you, and Claude Code takes each item with you, one at a time.
+**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with the list of what waits for you, and Claude Code takes each item with you, one at a time. Issues that `ads sweep` filed carry the `ads` label too, so the queue works them like the others.
+
+## Sweep the codebase
+
+You get new work for the team, found in the code instead of written by you.
+
+**Situation.** The queue is empty, and you want the team to look for problems.
+
+**You say**
+
+```text
+sweep the codebase
+```
+
+**You see** the report of the sweep, with one line per filed issue:
+
+```text
+Read 4 files at trunk 3f9c0a7b12de
+bugs  1 kept · 1 dropped · 1k tokens
+bugs  calc/calc.go:3  Add subtracts
+line  calc/calc.go:40
+Filed #1 https://github.com/o/r/issues/1
+```
+
+**What happens.** Claude Code runs `ads sweep` in the background. Read-only sweeper agents read part of the trunk and file what they find as issues labeled `ads`. A sweep fixes nothing: say "work the queue" next. "what would a sweep find?" runs `ads sweep --dry-run`, which files nothing. "sweep every day" sets a local schedule. [Find work](/ads/docs/find-work/) has the rules, the limits and the schedule.
 
 ## What's waiting
 
@@ -117,6 +141,7 @@ change the target name to coverage
 …
 Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
 …
+Why          risk high
 Sign-off     say "sign off #13"
 ```
 

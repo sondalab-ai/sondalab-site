@@ -25,8 +25,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
-verified: 2026-11-15
+syncedFrom: 68461336676989779e25c3f89757e4d2f7b298a5
+verified: 2026-11-16
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -37,7 +37,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - git 2.38 or newer. With git 2.46 or newer, a sign-off question also shows line counts for a text file that `.gitattributes` marks as binary.
 - OpenSSH: `ssh-keygen` and `ssh-add`.
 - Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
-- The GitHub CLI, `gh`, is optional. Without it, run `ads init --no-github`.
+- The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field.
 
 ## Install
 
@@ -95,7 +95,7 @@ Summary  12 ok · 0 fixed · 1 warn · 0 failed
 
 On a new repository, `ads init` picks the agents that `.ads/config.yaml` gets, so your first change runs with real agents.
 
-- **Claude Code is installed.** When the `claude` CLI is on your `PATH`, `ads init` asks whether to use the claude agents for every role. The default is yes, and with `--yes` or without a terminal it takes yes. Then `claude-opus` implements, and `claude-sonnet` writes the tests, reviews, settles disputes and assesses the requests.
+- **Claude Code is installed.** When the `claude` CLI is on your `PATH`, `ads init` asks whether to use the claude agents for every role. The default is yes, and with `--yes` or without a terminal it takes yes. Then `claude-opus` implements, and `claude-sonnet` writes the tests, reviews, settles disputes, assesses the requests and sweeps the trunk ([Find work](/ads/docs/find-work/)).
 - **No Claude Code, or you say no.** Every role gets the `fake` adapter, which does no work, and a first change stops at the assessor. Install Claude Code if it is missing, then ask its session to "use the claude agents for every role". That is a team-rule change, so it needs your approval (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
 
 **You see**, with Claude Code installed:
@@ -168,6 +168,6 @@ make uninstall                      # this machine
 make uninstall ARGS="--repo <dir>"  # this machine and one repository
 ```
 
-The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, and the team key on GitHub. With `--repo`, it also removes the ADS git hooks and settings of that repository. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes.
+The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, every sweep schedule on macOS, and the team key on GitHub. On Linux, `ads sweep schedule` wrote no file: remove the line that runs `sweep --scheduled` from your crontab yourself. With `--repo`, it also removes the ADS git hooks and settings of that repository. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes.
 
 It never removes `.ads/` on the trunk, the GitHub rulesets, your own signing key on GitHub, or your SSH keys. It prints the commands for those.
