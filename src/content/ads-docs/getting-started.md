@@ -15,6 +15,8 @@ sources:
   - internal/report/view.go
   - internal/cli/agents.go
   - internal/config/config.go
+  - internal/cli/doctor.go
+  - internal/onboard/ghversion.go
   - cmd/ads/testdata/script/init_rerun.txtar
   - cmd/ads/testdata/script/init_agents.txtar
   - cmd/ads/testdata/script/init_agents_wizard.txtar
@@ -25,7 +27,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: ac68d575652607d8402ebc110e63ba47695f3bb7
+syncedFrom: d0a345994605b8e06d1fa0691a45dad3fc134a30
 verified: 2026-11-16
 ---
 
@@ -37,7 +39,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - git 2.38 or newer. With git 2.46 or newer, a sign-off question also shows line counts for a text file that `.gitattributes` marks as binary.
 - OpenSSH: `ssh-keygen` and `ssh-add`.
 - Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
-- The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field.
+- The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field. `ads doctor` warns when `gh --version` is older than 2.50 or cannot be read.
 
 ## Install
 
@@ -119,6 +121,14 @@ $ ads init
 ## Check: `ads doctor`
 
 `ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
+
+When `gh` is installed and logged in, `ads doctor` shows a `GitHub CLI version` line. It reads `gh --version`:
+
+- It is ok at gh 2.50 or newer, and shows `gh <version>`.
+- It warns when gh is older: `gh <version> is older than 2.50: gh issue list has no stateReason field`.
+- It warns when the version is unknown: `the gh version is unknown: …`, with what `gh --version` printed or why it failed.
+
+The fix of both warnings is `upgrade gh to 2.50 or newer`. With `--no-github`, or when `gh` is missing or not logged in, the line does not show.
 
 ## Your first change
 
