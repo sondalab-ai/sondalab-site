@@ -1,7 +1,7 @@
 ---
 title: Status API and other tools
 summary: Read what ADS does from your own scripts as versioned JSON, and set the colours and glyphs of its output.
-order: 4
+order: 5
 sources:
   - README.md
   - docs/guides/api.md
@@ -13,8 +13,8 @@ sources:
   - internal/report/view.go
   - internal/term/tui.json
   - cmd/ads/testdata/script/doctor.txtar
-syncedFrom: cbfde23f9e6a6423d9b8bc8489d49df96820e9a7
-verified: 2026-11-15
+syncedFrom: ac68d575652607d8402ebc110e63ba47695f3bb7
+verified: 2026-11-16
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
