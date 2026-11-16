@@ -27,7 +27,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 39cf79189e5876365b25cc1dca5514b1b4b78905
+syncedFrom: 055c6548b89d73996e2a234bb4d52771ae9aa426
 verified: 2026-11-16
 ---
 
@@ -39,7 +39,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - git 2.38 or newer. With git 2.46 or newer, a sign-off question also shows line counts for a text file that `.gitattributes` marks as binary.
 - OpenSSH: `ssh-keygen` and `ssh-add`.
 - Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
-- The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field. `ads doctor` warns when `gh --version` is older than 2.50 or cannot be read.
+- The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field. `make install` and `ads doctor` warn when `gh --version` is older than 2.50 or cannot be read. The install does not fail for the gh version.
 
 ## Install
 
