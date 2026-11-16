@@ -92,13 +92,13 @@ test('every page has at least two example blocks', () => {
 // checked whole. Dates and timestamps are example values, not claims, and
 // are left out.
 const VERIFIED = new Set([
-  '0', // exit code 0 (docs/guides/setup.md:121); counts of 0 in pinned output (init_rerun.txtar:66, report_test.go landedGolden); FORCE_COLOR 0 (README.md:120); ads sweep exits 0 (ADS 6846133 internal/cli/root.go run); sweep budget usd 0 (internal/config/config.go:218); 0 9 of the crontab line (docs/guides/setup.md:158)
-  '1', // exit code 1 (setup.md:121); 1 round, 1 review layer, 1 frozen test, 1 warn in pinned output; schema_version 1 (docs/guides/api.md); SONDALAB_ASCII=1 (README.md:121); option 1; ads sweep exits 1 (internal/cli/sweep.go newSweepCmd, internal/cli/root.go run); Filed #1 (cmd/ads/testdata/script/sweep_file.txtar:41)
-  '2', // exit code 2 (setup.md:121); 2 new tests (report_test.go landedGolden); option 2; round 2 of an example; 2 files gain protection (trust_risk_rule.txtar:22); ads doctor overdue after 2 days daily (internal/cli/doctor.go:236); 2 issues filed with 8 open: room = min(maxFiled, maxOpen-open) (internal/sweep/file.go:133 Plan) with the defaults of internal/config/config.go:217
+  '0', // exit code 0 (docs/guides/setup.md:131); counts of 0 in pinned output (init_rerun.txtar:66, report_test.go landedGolden); FORCE_COLOR 0 (README.md:120); ads sweep exits 0 (ADS 6846133 internal/cli/root.go run); sweep budget usd 0 (internal/config/config.go:218); 0 9 of the crontab line (docs/guides/setup.md:160)
+  '1', // exit code 1 (setup.md:131); 1 round, 1 review layer, 1 frozen test, 1 warn in pinned output; schema_version 1 (docs/guides/api.md); SONDALAB_ASCII=1 (README.md:121); option 1; ads sweep exits 1 (internal/cli/sweep.go newSweepCmd, internal/cli/root.go run); Filed #1 (cmd/ads/testdata/script/sweep_file.txtar:41)
+  '2', // exit code 2 (setup.md:131); 2 new tests (report_test.go landedGolden); option 2; round 2 of an example; 2 files gain protection (trust_risk_rule.txtar:22); ads doctor overdue after 2 days daily (internal/cli/doctor.go:239); 2 issues filed with 8 open: room = min(maxFiled, maxOpen-open) (internal/sweep/file.go:133 Plan) with the defaults of internal/config/config.go:217
   '3', // internal/config/config.go:517 Rounds: 3; option 3; the patch of Go 1.27.3; 3 files lose protection (internal/flow/trustlist_test.go:71); max_findings_per_category 3 (internal/config/config.go:217); calc.go:3 (sweep_dry_run.txtar:25)
   '4', // internal/approve/approve.go:63 the code is 4 hex characters; +4 lines and seq 4 in examples (api.md:36); Read 4 files (sweep_dry_run.txtar:23)
   '6', // internal/config/config.go:569-573 high and critical have 6 review layers (store.ReviewLayers)
-  '8', // UTF-8 (README.md:121); 8 days weekly (internal/cli/doctor.go:238); 8 open sweep issues in the cap example (internal/sweep/file.go:133 Plan)
+  '8', // UTF-8 (README.md:121); 8 days weekly (internal/cli/doctor.go:241); 8 open sweep issues in the cap example (internal/sweep/file.go:133 Plan)
   '10', // internal/approve/approve.go:31 TTL = 10 * time.Minute; max_open 10 (internal/config/config.go:217)
   '12', // example: issue #12 (README.md table, report_test.go landedGolden); the 12-line fix of how-changes-land; the 12 hex characters of the sweep label (internal/onboard/sweepjob.go:40)
   '13', // example: issue #13 (internal/report/view_test.go)
@@ -110,8 +110,8 @@ const VERIFIED = new Set([
   '74', // example: test author 74 s (internal/report/view_test.go:51)
   '120', // internal/flow/follow.go:495 "no running change for 120 seconds"
   '5', // internal/flow/run.go:17 runProgressEvery = 5 * time.Minute (killed run loses at most about 5 minutes); max_filed 5 (internal/config/config.go:217)
-  '130', // internal/cli/signal.go:63 exit 128 + SIGINT (2)
-  '143', // internal/cli/signal.go:63 exit 128 + SIGTERM (15)
+  '130', // internal/cli/signal.go:63 exit 128 + SIGINT (2); ads sweep too (internal/cli/sweep.go:41 interruptible)
+  '143', // internal/cli/signal.go:63 exit 128 + SIGTERM (15); ads sweep too (internal/cli/sweep.go:41 interruptible)
   '160', // internal/flow/ask.go:515 summaryRunes = 160
   '200', // internal/config/config.go:587 low 200 lines; max_open at most 200 (internal/config/schema/config.schema.json:155)
   '400', // internal/config/config.go:587 medium 400 lines
@@ -134,13 +134,13 @@ const VERIFIED = new Set([
   '50', // internal/config/schema/config.schema.json:154 max_filed maximum 50
   '4M', // internal/config/config.go:218 sweep Tokens: 4_000_000
   '900', // internal/config/config.go:218 sweep Seconds: 900
-  '1000', // internal/flow/sweep.go:74 maxSweepIssues = 1000
-  '09', // internal/cli/sweep.go:175 --at default 09:00
-  '00', // internal/cli/sweep.go:175 --at default 09:00
-  '9', // docs/guides/setup.md:158 the crontab line 0 9 * * *
-  '07', // example: --at 07:30 (docs/guides/setup.md:137, sweep_schedule.txtar:82)
-  '30', // example: --at 07:30 (docs/guides/setup.md:137, sweep_schedule.txtar:82)
-  '2.50', // README.md:16 gh 2.50 or newer
+  '1000', // internal/flow/sweep.go:80 maxSweepIssues = 1000
+  '09', // internal/cli/sweep.go:179 --at default 09:00
+  '00', // internal/cli/sweep.go:179 --at default 09:00
+  '9', // docs/guides/setup.md:160 the crontab line 0 9 * * *
+  '07', // example: --at 07:30 (docs/guides/setup.md:139, sweep_schedule.txtar:82)
+  '30', // example: --at 07:30 (docs/guides/setup.md:139, sweep_schedule.txtar:82)
+  '2.50', // README.md:16 gh 2.50 or newer; ads doctor GitHub CLI version (internal/onboard/ghversion.go:15-16 ghMinMinor, ghVersionFix)
 ]);
 
 test('the pages state no number that was not verified', () => {

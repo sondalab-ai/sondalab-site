@@ -15,6 +15,7 @@ sources:
   - internal/flow/landing.go
   - internal/flow/github.go
   - internal/flow/work.go
+  - internal/flow/resume.go
   - internal/sweep/file.go
   - internal/sweep/files.go
   - internal/sweep/finding.go
@@ -25,7 +26,7 @@ sources:
   - cmd/ads/testdata/script/sweep_file.txtar
   - cmd/ads/testdata/script/sweep_public.txtar
   - cmd/ads/testdata/script/sweep_schedule.txtar
-syncedFrom: ac68d575652607d8402ebc110e63ba47695f3bb7
+syncedFrom: 39cf79189e5876365b25cc1dca5514b1b4b78905
 verified: 2026-11-16
 ---
 
@@ -99,7 +100,7 @@ The `sweep` block of `.ads/config.yaml` holds the settings. A change to it is a 
 | `categories` | `[security, bugs, tests, refactor]` | the sweepers that run |
 | `min_confidence` | `high` | the lowest confidence a sweep keeps |
 | `max_files` | 40 | the files of one sweep |
-| `max_findings_per_category` | 3 | the findings kept per category, at most one per file |
+| `max_findings_per_category` | 3 | the findings kept per category, at most one per file, not counting files whose sweep issue blocks them |
 | `max_filed` | 5, at most 50 | the issues one sweep files |
 | `max_open` | 10, at most 200 | the open sweep issues at one time |
 | `budget.tokens` | 4M | the tokens of the whole sweep, checked after each category |
@@ -121,6 +122,10 @@ The report counts a finding over a cap as `Skipped cap`. ADS does not keep that 
 A sweep files at most one issue per category and file. The fingerprint of a finding is the first 16 hex characters of the sha256 of its category and its file. The line, the title and the function it names are not part of it, because a model names the same problem differently on each run.
 
 When a sweeper returns two findings on the same file, ADS keeps the higher ranked one. It drops the other as `same-file`. The cost: a second real problem in the same file and category waits until the first issue is closed as completed.
+
+A finding whose category and file already have a sweep issue that blocks it is left out before `max_findings_per_category` applies. The report counts it as `Skipped duplicate`. It is not a kept line and not a dropped line. So it never takes the place of a finding on a new file.
+
+A dry run lists no issues, so it leaves out none. A dry run can therefore show a finding that the real sweep skips as a duplicate.
 
 Before it files, a sweep lists the sweep issues of your `gh` login, open and closed:
 
@@ -151,7 +156,7 @@ Filed #1 https://github.com/o/r/issues/1
 security  1 finding not filed: the repository is public
 ```
 
-When `gh` cannot tell, the sweep files none either, and the line gives the reason. Read those findings in the report, and fix them privately. They do not count toward `max_filed`. The other categories file as usual.
+When `gh` cannot tell, the sweep files none either, and the line gives the reason. Read those findings in the report, and fix them privately. They do not count toward `max_filed`. A security finding that an existing sweep issue blocks is a duplicate, not a withheld finding. The other categories file as usual.
 
 ## How a sweep issue lands
 
@@ -175,7 +180,18 @@ A sweep issue holds text that a model wrote after it read trunk code. Anyone who
 - the security findings not filed on a public repository;
 - `Skipped duplicate <n>` and `Skipped cap <n>`.
 
-It exits 0 when it succeeds. It exits 1 when filing failed, when every category that ran failed, or when it refuses to run. A second sweep of the same clone refuses to start while one runs.
+It exits 0 when it succeeds. It exits 1 when filing failed, when every category that ran failed, or when it refuses to run. It exits 130 after Ctrl-C and 143 after SIGTERM, also with `--scheduled`. A second sweep of the same clone refuses to start while one runs.
+
+## Stop a sweep
+
+Ctrl-C or SIGTERM stops a sweep. This includes the SIGTERM that `launchctl bootout` sends to a scheduled sweep.
+
+- During the sweeper calls, the sweep stops them and files nothing.
+- During filing, the issue in flight finishes, and the sweep files no more.
+
+In both cases the sweep saves no state. The next sweep reads the same files again, and dedupe blocks the issues already filed. The sweep removes its worktree, releases its lock and exits with 130 or 143. A scheduled sweep logs `ads sweep: failed · interrupted`.
+
+A sweep reads the trunk in a worktree whose name starts with `sweep-`. A sweep that was killed can leave that worktree behind. The `ads resume` cleanup removes it only when no sweep holds the lock. A dry run holds no lock.
 
 ## Sweep on a schedule
 
