@@ -20,7 +20,7 @@ sources:
   - internal/report/report_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
-syncedFrom: 055c6548b89d73996e2a234bb4d52771ae9aa426
+syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
 verified: 2026-11-16
 ---
 
