@@ -26,7 +26,7 @@ sources:
   - cmd/ads/testdata/script/sweep_file.txtar
   - cmd/ads/testdata/script/sweep_public.txtar
   - cmd/ads/testdata/script/sweep_schedule.txtar
-syncedFrom: 39cf79189e5876365b25cc1dca5514b1b4b78905
+syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
 verified: 2026-11-16
 ---
 
@@ -156,7 +156,7 @@ Filed #1 https://github.com/o/r/issues/1
 security  1 finding not filed: the repository is public
 ```
 
-When `gh` cannot tell, the sweep files none either, and the line gives the reason. Read those findings in the report, and fix them privately. They do not count toward `max_filed`. A security finding that an existing sweep issue blocks is a duplicate, not a withheld finding. The other categories file as usual.
+When `gh` fails, the sweep waits 2 seconds and asks once more. When `gh` still cannot tell, the sweep files none either, and the line gives the reason. Read those findings in the report, and fix them privately. They do not count toward `max_filed`. A security finding that an existing sweep issue blocks is a duplicate, not a withheld finding. The other categories file as usual.
 
 ## How a sweep issue lands
 
@@ -210,31 +210,36 @@ ads sweep unschedule
 
 The sweep runs daily at 09:00 local time by default. A weekly sweep runs on Monday. Name another time with `--at`, for example `--at 07:30`. Say "stop the daily sweep" to run `ads sweep unschedule`.
 
-Before it writes anything, `ads sweep schedule` runs the checks that a scheduled sweep would fail on later: `gh repo view` on the remote, `gh auth status`, a sweeper that is not `fake`, and `claude auth status`. It refuses on the first one that fails. The scheduled job runs `ads sweep --scheduled`. It only files issues. It never works the queue.
+Before it writes anything, `ads sweep schedule` runs the checks that a scheduled sweep would fail on later: `gh repo view` on the remote, `gh auth status`, a sweeper that is not `fake`, and `claude auth status`. It refuses on the first one that fails.
+
+`gh auth status` and `claude auth status` run with only the job's variables: `PATH`, `HOME`, `USER`, `XDG_CONFIG_HOME`, `GH_CONFIG_DIR` and `CLAUDE_CONFIG_DIR`, each when set. A login that works only through a token variable of your shell would fail every scheduled run, so ADS refuses it: `GH_TOKEN`, `GITHUB_TOKEN`, `GH_ENTERPRISE_TOKEN` or `GITHUB_ENTERPRISE_TOKEN` for gh, and `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` or `CLAUDE_CODE_OAUTH_TOKEN` for claude. The refusal lists the job variables that are set, names the token variables your shell sets (never their values), and gives the error of the check. ADS never writes a token into the plist or the crontab line. Log in with `gh auth login` or `claude auth login`.
+
+There is one schedule per clone. The scheduled job runs `ads sweep --scheduled` in the main worktree of the clone. It only files issues. It never works the queue. `ads sweep schedule` from a linked worktree replaces the schedule of the clone and says `The job runs in <main worktree>, the main worktree of this clone.` The job keeps working after you remove the linked worktree. `ads sweep unschedule` and `ads doctor` find the schedule from any worktree of the clone.
 
 **On macOS**, the schedule is a launchd job:
 
-- The label is `ai.sondalab.ads-sweep.<id>`. The `<id>` is the first 12 hex characters of the sha256 of the absolute path of the repository. A new schedule of the same repository replaces the old one.
+- The label is `ai.sondalab.ads-sweep.<id>`. The `<id>` is the first 12 hex characters of the sha256 of the absolute path of the main worktree. A new schedule of the same clone replaces the old one.
 - The plist is `~/Library/LaunchAgents/ai.sondalab.ads-sweep.<id>.plist`.
 - `ads sweep unschedule` stops the job and deletes the plist.
+- A schedule that an older ADS set from a linked worktree keeps its old label. Remove it with `launchctl bootout gui/$UID/<label>`, then delete `~/Library/LaunchAgents/<label>.plist`. `make uninstall` also removes it.
 
 **On Linux**, `ads sweep schedule` writes nothing. It prints a line for you to add with `crontab -e`, for example:
 
 ```text
-0 9 * * * cd '/home/me/repo' && HOME='/home/me' PATH='/usr/local/bin:/usr/bin:/bin' '/home/me/go/bin/ads' sweep --scheduled >> '/home/me/repo/.git/ads/sweep/last.log' 2>&1
+0 9 * * * cd '/home/me/repo' && HOME='/home/me' PATH='/usr/local/bin:/usr/bin:/bin' USER='me' '/home/me/go/bin/ads' sweep --scheduled >> '/home/me/repo/.git/ads/sweep/last.log' 2>&1
 ```
 
-`ads sweep unschedule` then only reminds you to remove that line.
+`ads sweep unschedule` then only reminds you to remove that line. Remove an old line that does `cd` into a linked worktree.
 
-The job keeps the `PATH` and `HOME` of the shell where you ran `ads sweep schedule`, and its `CLAUDE_CONFIG_DIR` when that was set. So run it from a shell where `claude` works. Run it again after you move `gh`, `claude` or `ads`.
+The job keeps the `PATH`, `HOME` and `USER` of the shell where you ran `ads sweep schedule`, and its `XDG_CONFIG_HOME`, `GH_CONFIG_DIR` and `CLAUDE_CONFIG_DIR` when they were set. `claude` finds its keychain login by `USER`. Without the right `GH_CONFIG_DIR` or `XDG_CONFIG_HOME`, `gh` reads `~/.config/gh`. So run it from a shell where `claude` works. Run it again after you move `gh`, `claude` or `ads`.
 
-Only one clone on one machine should schedule a repository. The sweep lock stops a second sweep of the same clone only. Two clones can file the same finding twice.
+Only one clone on one machine should schedule a repository. ADS keeps one schedule per clone, and the sweep lock stops a second sweep of the same clone only. Two clones can file the same finding twice.
 
 ## The log of the schedule
 
 The job writes to `.git/ads/sweep/last.log` in a plain clone. It prints `ads sweep: started <time>` first. It prints `ads sweep: ok · <n> filed` or `ads sweep: failed · <error>` last. ADS never truncates the log, so delete it by hand when you want.
 
-On macOS, `ads doctor` shows a `Sweep schedule` line with the plist path when the repository has a schedule. It warns when:
+On macOS, `ads doctor` shows a `Sweep schedule` line with the plist path when the clone has a schedule. It warns when:
 
 - the sweeper uses the `fake` adapter;
 - the plist runs another `ads` than the one you run;
