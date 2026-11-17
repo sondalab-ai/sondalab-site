@@ -18,8 +18,9 @@ sources:
   - internal/stage/assess.go
   - internal/agent/exec.go
   - internal/agent/claude.go
+  - internal/agent/kinds/kinds.go
   - internal/flow/stranger.go
-syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
+syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
 verified: 2026-11-17
 ---
 
@@ -162,6 +163,14 @@ A budget can count only what the agents report. An `exec` agent must report each
 - A field that is `null` counts as missing. A reported `0` is accepted.
 
 The error names what is missing, for example `exec adapter: the cost has no usd and no tokens, but the budget limits them`. A `claude` agent fails the same way when its call has a dollar limit and Claude Code reports no cost: `claude adapter: output has no total_cost_usd, but the budget limits usd`.
+
+An `exec` adapter can declare in its `facts` block which amounts its agent reports, for example `facts: {cost: [tokens]}`. `cost` lists `tokens`, `usd`, both, or none (`[]`). An amount that the list leaves out is declared as not reported. Without `cost`, ADS checks each answer against the budget of its call, as above.
+
+- After each call, an answer that leaves out an amount the list promises fails, also when no budget limits it. The error then ends in `or the adapter facts promise them`, for example `exec adapter: the cost has no usd, but the budget limits them or the adapter facts promise them`.
+- When the config loads, ADS refuses a budget that limits an amount the list leaves out, because each call would fail after its spend. For example `adapters.codex: facts.cost says the agent does not report usd, but budgets.high.usd limits usd for the implementer: add usd to facts.cost`.
+- A limit that the config does not set is marked `(built in)`, for example `budgets.default.tokens (built in)`. For the `escalate_to` adapter of the implementer, the error says `for the implementer (escalate_to of <implementer adapter>)`.
+- Every budget in the table has a token limit, and so does the sweep, so a role adapter with a `cost` list must list `tokens`. The assessor budget limits both amounts, $1.00 and 200,000 tokens per call, so an `exec` assessor with a `cost` list must list `tokens` and `usd`. Its error names `the assessor budget ($1.00 per call)` or `the assessor budget (200,000 tokens per call)`.
+- A trunk config that already has such a budget still reads, so a team-rule change can repair it. `ads doctor` shows the error as an `Adapter costs` warning ([Getting started](/ads/docs/getting-started/#check-ads-doctor)).
 
 ## Example: the same fix, two outcomes
 
