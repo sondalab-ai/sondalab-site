@@ -11,6 +11,8 @@ sources:
   - internal/flow/status.go
   - internal/flow/follow.go
   - internal/flow/ask.go
+  - internal/flow/work.go
+  - internal/flow/stranger.go
   - internal/flow/trustwords.go
   - internal/flow/trustrules.go
   - internal/report/report.go
@@ -19,8 +21,8 @@ sources:
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
-verified: 2026-11-16
+syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+verified: 2026-11-17
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -49,6 +51,8 @@ Answer       say what to do, for example "half up"
 
 **What happens.** Claude Code runs `ads work 12` in the background. When the request is clear, the team writes the tests (none for a docs change), makes the change and reviews it, and you get a report that starts with `Landed`, `Ready for sign-off` or `Waiting for you`. Here it asks first. Answer in your own words, for example "half up": the team goes on from where it stopped. A plain description works as well as an issue number, for example "add a cover target to the Makefile".
 
+Comments of accounts without write access never reach the team: `ads work` drops them. An issue that such an account opened waits for your `ok <code>` before the team reads it ([Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/#an-issue-from-another-account)).
+
 ## Work the queue
 
 You clear the issues you labeled for the team, one at a time, without starting each one.
@@ -72,7 +76,7 @@ Waiting for you:
   #14 "Split loses the remainder": a question: Keep the remainder on the last share?
 ```
 
-**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with the list of what waits for you, and Claude Code takes each item with you, one at a time. Issues that `ads sweep` filed carry the `ads` label too, so the queue works them like the others.
+**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with the list of what waits for you, and Claude Code takes each item with you, one at a time. Issues that `ads sweep` filed carry the `ads` label too, so the queue works them like the others. The queue skips an issue that an account without write access opened, with `skipped #N: opened by an account without write access`: say "fix #N" to work on it after your approval.
 
 ## Sweep the codebase
 

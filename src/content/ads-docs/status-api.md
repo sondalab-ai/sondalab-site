@@ -13,8 +13,8 @@ sources:
   - internal/report/view.go
   - internal/term/tui.json
   - cmd/ads/testdata/script/doctor.txtar
-syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
-verified: 2026-11-16
+syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+verified: 2026-11-17
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
@@ -121,7 +121,7 @@ A record that does not verify has `verified: false`, its id as its title, and th
 
 ## What the API never carries
 
-No approval code, code digest, key path or environment value. `--json` needs no signer, changes nothing and approves nothing, and no flag makes it write. The pull request URL is not in the JSON either: GitHub holds it, and `--json` reads local data only.
+No approval code, code digest, key path or environment value. The record of an issue that an account without write access opened stays out too: it holds the approval that let its text through. `--json` needs no signer, changes nothing and approves nothing, and no flag makes it write. The pull request URL is not in the JSON either: GitHub holds it, and `--json` reads local data only.
 
 ## Colours and glyphs
 

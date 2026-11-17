@@ -15,8 +15,12 @@ sources:
   - internal/report/view_test.go
   - internal/risk/risk.go
   - internal/stage/validate.go
-syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
-verified: 2026-11-16
+  - internal/stage/assess.go
+  - internal/agent/exec.go
+  - internal/agent/claude.go
+  - internal/flow/stranger.go
+syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+verified: 2026-11-17
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -129,6 +133,10 @@ Sign-off     say "sign off #12"
 
 When a reviewer raised the risk, the line reads `found by the sweep, a reviewer raised the risk to <risk>`.
 
+## Issues from other accounts
+
+The text of an account without write access on the repository is untrusted. `ads work` drops its comments, so they never reach the agents. An issue that such an account opened needs your `ok <code>` before the team reads it ([Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/#an-issue-from-another-account)). Its fix files no follow-up issues. It lands by the same risk rules as any other change.
+
 ## Budgets
 
 Each change has a budget, so a stuck run stops and asks you before it spends more. By default:
@@ -145,7 +153,15 @@ Each change has a budget, so a stuck run stops and asks you before it spends mor
 
 </div>
 
-Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. There is no dollar limit by default. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. A change has no dollar limit by default. The assessor has its own limit of $0.25 per call. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+
+A budget can count only what the agents report. An `exec` agent must report each amount that the budget of its call limits, or ADS refuses its answer:
+
+- With a token limit, its `cost` reports at least one of `tokens_in`, `tokens_out`, `tokens_cache_write` and `tokens_cache_read`. Every budget in the table above has one, and so does the assessor.
+- With a dollar limit, its `cost` reports `usd`. The assessor always has one, so an `exec` assessor always reports `usd`.
+- A field that is `null` counts as missing. A reported `0` is accepted.
+
+The error names what is missing, for example `exec adapter: the cost has no usd and no tokens, but the budget limits them`. A `claude` agent fails the same way when its call has a dollar limit and Claude Code reports no cost: `claude adapter: output has no total_cost_usd, but the budget limits usd`.
 
 ## Example: the same fix, two outcomes
 
