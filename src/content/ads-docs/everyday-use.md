@@ -21,7 +21,7 @@ sources:
   - internal/report/view_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
 verified: 2026-11-17
 ---
 

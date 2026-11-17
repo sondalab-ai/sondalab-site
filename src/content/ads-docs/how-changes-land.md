@@ -19,7 +19,7 @@ sources:
   - internal/agent/exec.go
   - internal/agent/claude.go
   - internal/flow/stranger.go
-syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
 verified: 2026-11-17
 ---
 
@@ -153,7 +153,7 @@ Each change has a budget, so a stuck run stops and asks you before it spends mor
 
 </div>
 
-Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. A change has no dollar limit by default. The assessor call carries a dollar limit of $0.25 in its task. ADS records the cost but does not stop an assessor call that goes over it. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. A change has no dollar limit by default. The assessor has a dollar limit of $1.00 per call. A `claude` agent gets the dollar limit of its call as `--max-budget-usd`, together with the adapter's `max_budget_usd`: the smaller one applies. A call that reaches it fails, and its cost still counts. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
 
 A budget can count only what the agents report. An `exec` agent must report each amount that the budget of its call limits, or ADS refuses its answer:
 
