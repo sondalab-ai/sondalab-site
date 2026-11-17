@@ -18,6 +18,7 @@ sources:
   - internal/flow/resume.go
   - internal/sweep/file.go
   - internal/sweep/files.go
+  - internal/sweep/run.go
   - internal/sweep/finding.go
   - internal/onboard/sweepjob.go
   - internal/cli/root.go
@@ -26,7 +27,7 @@ sources:
   - cmd/ads/testdata/script/sweep_file.txtar
   - cmd/ads/testdata/script/sweep_public.txtar
   - cmd/ads/testdata/script/sweep_schedule.txtar
-syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
 verified: 2026-11-17
 ---
 
@@ -103,9 +104,9 @@ The `sweep` block of `.ads/config.yaml` holds the settings. A change to it is a 
 | `max_findings_per_category` | 3 | the findings kept per category, at most one per file, not counting files whose sweep issue blocks them |
 | `max_filed` | 5, at most 50 | the issues one sweep files |
 | `max_open` | 10, at most 200 | the open sweep issues at one time |
-| `budget.tokens` | 4M | the tokens of the whole sweep, checked after each category |
+| `budget.tokens` | 4M | the tokens of the whole sweep, checked after each category; each call gets what is left, so an `exec` sweeper must report its tokens |
 | `budget.seconds` | 900 | the time of each category call |
-| `budget.usd` | 0 | the dollars of each call; 0 means no limit |
+| `budget.usd` | 0 | the dollars of each call, passed to Claude Code as `--max-budget-usd`; 0 means no limit |
 
 </div>
 
