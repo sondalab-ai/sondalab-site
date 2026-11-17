@@ -16,6 +16,7 @@ sources:
   - internal/cli/agents.go
   - internal/config/config.go
   - internal/cli/doctor.go
+  - internal/agent/kinds/kinds.go
   - internal/onboard/ghversion.go
   - cmd/ads/testdata/script/init_rerun.txtar
   - cmd/ads/testdata/script/init_agents.txtar
@@ -27,7 +28,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
+syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
 verified: 2026-11-17
 ---
 
@@ -99,7 +100,7 @@ On a new repository, `ads init` picks the agents that `.ads/config.yaml` gets, s
 
 - **Claude Code is installed.** When the `claude` CLI is on your `PATH`, `ads init` asks whether to use the claude agents for every role. The default is yes, and with `--yes` or without a terminal it takes yes. Then `claude-opus` implements, and `claude-sonnet` writes the tests, reviews, settles disputes, assesses the requests and sweeps the trunk ([Find work](/ads/docs/find-work/)).
 - **No Claude Code, or you say no.** Every role gets the `fake` adapter, which does no work, and a first change stops at the assessor. Install Claude Code if it is missing, then ask its session to "use the claude agents for every role". That is a team-rule change, so it needs your approval (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
-- **Your own agent command.** An adapter of kind `exec` runs a command you name. It must report the cost of each call, or ADS refuses its answer ([How a change lands](/ads/docs/how-changes-land/#budgets)).
+- **Your own agent command.** An adapter of kind `exec` runs a command you name. It must report the cost of each call, or ADS refuses its answer ([How a change lands](/ads/docs/how-changes-land/#budgets)). An optional `facts` block says what the agent does, because ADS cannot see it: `cost` lists the amounts each answer reports (`tokens`, `usd`, both, or `[]`), `schema` is `native` when the agent enforces the result schema itself (the default is `validated`), and `sessions: false` says that it keeps no session files.
 
 **You see**, with Claude Code installed:
 
@@ -119,9 +120,20 @@ $ ads init
     Try: install Claude Code, then ask its session: use the claude agents for every role
 ```
 
+Each kind reads only its own keys. Every kind reads `kind`, `allowed_tools` and `escalate_to`. Besides those, `fake` reads only `script`, `exec` reads only `command` and `facts`, and `claude` reads only `model`, `max_budget_usd`, `permission_mode` and `bare`. ADS refuses any other key when the config loads, also when it holds an empty value such as `bare: false`, for example `adapters.x: kind exec does not read model: remove the key`. A trunk config that already has such a key still reads, so a team-rule change can remove it.
+
 ## Check: `ads doctor`
 
 `ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
+
+It also checks the agents and their config. The adapters of the roles count, and so does the `escalate_to` adapter of the implementer:
+
+- `Agent login (<adapter>)` runs the login check of the adapter with your shell environment: `claude auth status` for a `claude` adapter. An `exec` or `fake` adapter has no login check and no line. The line warns when the CLI is missing, when the check fails, or when it does not finish in 15s.
+- `Agent facts (<adapter>)` says who checks the result schema and whether the agent keeps session files, for every adapter other than `fake`. It warns when the agent keeps session files, because they hold the change and its code outside the worktree. An `exec` adapter keeps them by default. For an `exec` adapter each fact says `(declared)` when the `facts` block sets it, and `(default)` otherwise.
+- An `Adapter keys` warning shows the first key that the kind of an adapter does not read, with the fix `remove the key with a team-rule change`.
+- An `Adapter costs` warning shows a budget that limits an amount which an adapter declares it does not report, with the fix `change facts.cost or the budget with a team-rule change` ([How a change lands](/ads/docs/how-changes-land/#budgets)).
+
+`ads work` refuses a config with an `Adapter keys` or an `Adapter costs` warning.
 
 When `gh` is installed and logged in, `ads doctor` shows a `GitHub CLI version` line. It reads `gh --version`:
 

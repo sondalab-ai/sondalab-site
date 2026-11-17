@@ -27,7 +27,9 @@ sources:
   - cmd/ads/testdata/script/sweep_file.txtar
   - cmd/ads/testdata/script/sweep_public.txtar
   - cmd/ads/testdata/script/sweep_schedule.txtar
-syncedFrom: 8ceff3da1aa46c58fee8cb159e1b026c9ea01d83
+  - cmd/ads/testdata/script/sweep_schedule_exec.txtar
+  - internal/agent/kinds/kinds.go
+syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
 verified: 2026-11-17
 ---
 
@@ -211,9 +213,9 @@ ads sweep unschedule
 
 The sweep runs daily at 09:00 local time by default. A weekly sweep runs on Monday. Name another time with `--at`, for example `--at 07:30`. Say "stop the daily sweep" to run `ads sweep unschedule`.
 
-Before it writes anything, `ads sweep schedule` runs the checks that a scheduled sweep would fail on later: `gh repo view` on the remote, `gh auth status`, a sweeper that is not `fake`, and `claude auth status`. It refuses on the first one that fails.
+Before it writes anything, `ads sweep schedule` runs the checks that a scheduled sweep would fail on later: `gh repo view` on the remote, `gh auth status`, a sweeper that is not `fake`, and the login check of the sweeper adapter: `claude auth status` for a `claude` sweeper. An `exec` sweeper has no login check, so it needs no claude login. It refuses on the first one that fails.
 
-`gh auth status` and `claude auth status` run with only the job's variables: `PATH`, `HOME`, `USER`, `XDG_CONFIG_HOME`, `GH_CONFIG_DIR` and `CLAUDE_CONFIG_DIR`, each when set. A login that works only through a token variable of your shell would fail every scheduled run, so ADS refuses it: `GH_TOKEN`, `GITHUB_TOKEN`, `GH_ENTERPRISE_TOKEN` or `GITHUB_ENTERPRISE_TOKEN` for gh, and `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` or `CLAUDE_CODE_OAUTH_TOKEN` for claude. The refusal lists the job variables that are set, names the token variables your shell sets (never their values), and gives the error of the check. ADS never writes a token into the plist or the crontab line. Log in with `gh auth login` or `claude auth login`.
+`gh auth status` and, for a `claude` sweeper, `claude auth status` run with only the job's variables: `PATH`, `HOME`, `USER`, `XDG_CONFIG_HOME` and `GH_CONFIG_DIR`, each when set. A `claude` sweeper also gets `CLAUDE_CONFIG_DIR` when it is set. A login that works only through a token variable of your shell would fail every scheduled run, so ADS refuses it: `GH_TOKEN`, `GITHUB_TOKEN`, `GH_ENTERPRISE_TOKEN` or `GITHUB_ENTERPRISE_TOKEN` for gh, and, for a `claude` sweeper, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` or `CLAUDE_CODE_OAUTH_TOKEN` for claude. The refusal lists the job variables that are set, names the token variables your shell sets (never their values), and gives the error of the check. ADS never writes a token into the plist or the crontab line. Log in with `gh auth login` or `claude auth login`.
 
 There is one schedule per clone. The scheduled job runs `ads sweep --scheduled` in the main worktree of the clone. It only files issues. It never works the queue. `ads sweep schedule` from a linked worktree replaces the schedule of the clone and says `The job runs in <main worktree>, the main worktree of this clone.` The job keeps working after you remove the linked worktree. `ads sweep unschedule` and `ads doctor` find the schedule from any worktree of the clone.
 
@@ -232,7 +234,7 @@ There is one schedule per clone. The scheduled job runs `ads sweep --scheduled` 
 
 `ads sweep unschedule` then only reminds you to remove that line. Remove an old line that does `cd` into a linked worktree.
 
-The job keeps the `PATH`, `HOME` and `USER` of the shell where you ran `ads sweep schedule`, and its `XDG_CONFIG_HOME`, `GH_CONFIG_DIR` and `CLAUDE_CONFIG_DIR` when they were set. `claude` finds its keychain login by `USER`. Without the right `GH_CONFIG_DIR` or `XDG_CONFIG_HOME`, `gh` reads `~/.config/gh`. So run it from a shell where `claude` works. Run it again after you move `gh`, `claude` or `ads`.
+The job keeps the `PATH`, `HOME` and `USER` of the shell where you ran `ads sweep schedule`, and its `XDG_CONFIG_HOME` and `GH_CONFIG_DIR` when they were set. A `claude` sweeper also keeps `CLAUDE_CONFIG_DIR` when it was set. `claude` finds its keychain login by `USER`. Without the right `GH_CONFIG_DIR` or `XDG_CONFIG_HOME`, `gh` reads `~/.config/gh`. So run it from a shell where `gh` works, and `claude` too for a `claude` sweeper. Run it again after you move `gh`, `claude` or `ads`.
 
 Only one clone on one machine should schedule a repository. ADS keeps one schedule per clone, and the sweep lock stops a second sweep of the same clone only. Two clones can file the same finding twice.
 
