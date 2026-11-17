@@ -12,6 +12,8 @@ sources:
   - internal/flow/trustlist_test.go
   - internal/flow/answer.go
   - internal/flow/work.go
+  - internal/flow/stranger.go
+  - internal/cli/audit.go
   - internal/flow/work_test.go
   - internal/flow/github.go
   - internal/flow/status.go
@@ -20,11 +22,12 @@ sources:
   - internal/report/report_test.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
-syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
-verified: 2026-11-16
+  - cmd/ads/testdata/script/work_stranger.txtar
+syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+verified: 2026-11-17
 ---
 
-This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? Five actions wait for you: a sign-off, an undo, a stop, one more budget, and a change of the team rules. A pause does not, because it loses nothing.
+This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? Six actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules, and work on an issue that an account without write access opened. A pause does not, because it loses nothing.
 
 A fix of an issue that `ads sweep` filed needs your sign-off from risk `medium` up, even after a clean run. Its text is untrusted, so its fix files no follow-up issues ([How a change lands](/ads/docs/how-changes-land/#sweep-issues)).
 
@@ -195,3 +198,50 @@ To approve, reply:   ok 3d8f
 ```
 
 **What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.
+
+## An issue from another account
+
+ADS trusts the text of your `gh` login and of the accounts with write, maintain or admin permission on the repository. The text of any other account is untrusted. `ads work` drops the comments of such an account, so they never reach the agents. An issue that such an account opened waits for your approval.
+
+**Situation.** #21 was opened by `eve`, who has no write access to the repository.
+
+**You say**
+
+```text
+fix #21
+```
+
+**You see**
+
+```text
+ads needs your approval: work on acme/ledger#21 "Refunds keep the fee"
+
+  Opened by: "eve", an account without write access
+  Its text reaches the agents as untrusted text.
+  Follow-ups of this change are not filed.
+  Comments of accounts without write access stay hidden from the agents.
+
+  Untrusted text of the body, first lines:
+  Line 1: "ApplyRefund returns the amount without the fee."
+  Line 2: "The fee should be refunded too."
+  Body size: 79 characters in 2 lines, 0 lines not shown
+  Text digest: 83ed926aba131cadf701b560bd266b4b2c3716d5e084577d78f94995d55fa53a
+  Full text: the cat line shows it with control characters escaped,
+  and the shasum line prints the text digest of its exact bytes:
+  cd "…/ads/outsider"
+  cat 83ed926aba131cadf701b560bd266b4b2c3716d5e084577d78f94995d55fa53a.shown.txt
+  shasum -a 256 83ed926aba131cadf701b560bd266b4b2c3716d5e084577d78f94995d55fa53a.txt
+
+To approve, reply:   ok 7b2e
+```
+
+**What happens.** Claude Code runs `ads work 21`, which refuses: `#21 was opened by "eve", an account without write access, so it waits for ads ask outsider 21`. Claude Code then runs `ads ask outsider 21`, and you see the block. The question shows the first 3 non-blank lines of the body, each clipped at 60 characters. A clipped line ends with the count of characters it hides. Read the whole text in the `.shown.txt` file: its control characters are escaped. The `.txt` file holds the exact bytes, only for `shasum -a 256`, which prints the digest the question shows. Both files sit in your user config directory, under `ads/outsider/`, next to the approval key. A later run of ads removes them once they are older than 10 minutes.
+
+After your `ok <code>`, Claude Code runs `ads work 21` again, and the team works on it. The approved run reads the text again from GitHub, never from the files. The text stays untrusted, and the fix files no follow-up issues. It lands by the same risk rules as any other change.
+
+- The approval is bound to the author and to a digest of the title and the body. If the title or the body changed after you approved, the run says `the state changed after the approval: ask again`.
+- The approval holds for one run. When the team reads the issue again, for example after your answer to its question, it asks again.
+- The signed log records the approval on the change it admits. `ads audit show` shows it as `issue of "eve", an account without write access: approved in session at <time>`.
+- When ADS cannot check the account, for example because GitHub fails or the issue is in another repository than the remote, it treats the account as one without write access. The question then says `an account whose write access ads could not check`.
+- From a terminal, outside Claude Code, `ads work 21` runs with a warning and no approval: `its text reaches the agents as untrusted text`. Without a terminal on stdin, for example in a script, it is refused: `run it from a terminal or approve it in the session (ads ask outsider 21)`.
+- `ads ask outsider` on an issue that an account with write access opened says `it needs no approval`.

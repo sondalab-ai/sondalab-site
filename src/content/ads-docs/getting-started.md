@@ -27,8 +27,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 872611fb4a0ef1152af71847f3dbc4e7e720d3fd
-verified: 2026-11-16
+syncedFrom: 25e55b72ee09f40b1240e53729f64bdc08dad719
+verified: 2026-11-17
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -99,6 +99,7 @@ On a new repository, `ads init` picks the agents that `.ads/config.yaml` gets, s
 
 - **Claude Code is installed.** When the `claude` CLI is on your `PATH`, `ads init` asks whether to use the claude agents for every role. The default is yes, and with `--yes` or without a terminal it takes yes. Then `claude-opus` implements, and `claude-sonnet` writes the tests, reviews, settles disputes, assesses the requests and sweeps the trunk ([Find work](/ads/docs/find-work/)).
 - **No Claude Code, or you say no.** Every role gets the `fake` adapter, which does no work, and a first change stops at the assessor. Install Claude Code if it is missing, then ask its session to "use the claude agents for every role". That is a team-rule change, so it needs your approval (see [Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/)).
+- **Your own agent command.** An adapter of kind `exec` runs a command you name. It must report the cost of each call, or ADS refuses its answer ([How a change lands](/ads/docs/how-changes-land/#budgets)).
 
 **You see**, with Claude Code installed:
 
