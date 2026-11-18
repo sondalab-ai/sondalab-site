@@ -34,7 +34,7 @@ sources:
   - internal/flow/trustnotes_test.go
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
-syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+syncedFrom: a8d793f56cb649490136edceddea03eaef9c46f2
 verified: 2026-11-18
 ---
 
@@ -95,7 +95,7 @@ ads needs your approval: change the team rules
 To approve, reply:   ok 6b0d
 ```
 
-**What happens.** Claude Code runs `ads memory propose`. It reads the current `core` facts of the MxM stores of the main checkout and every other worktree of the clone, with a limit of 5 seconds per `mxm` call. It skips the facts already in the notes, and drops the ones that break a note rule: later runs skip them too. One run adds at most 8 notes. After your `ok <code>`, `ads trust apply` lands them on the trunk, signed with your key. When more facts wait, the output says so, and the session runs it again. The warning shows unless `gh` says that the repository is private.
+**What happens.** Claude Code runs `ads memory propose`. It reads the current `core` facts of the MxM stores of the main checkout and every other worktree of the clone, with a limit of 5 seconds per `mxm` call. It skips the facts already in the notes, and drops the ones that break a note rule: later runs skip them too. One run adds at most 8 notes. After your `ok <code>`, `ads trust apply` lands them on the trunk, signed with your key. When more facts wait, the output says so, and the session runs it again. The warning shows unless `gh` says that the repository is private. ADS counts the repository as private only when the push URL of the remote names the same repository as its fetch URL. The other note questions follow the same rule.
 
 Without `mxm` on your `PATH`, `ads memory propose` fails. Write the notes in `.ads/memory/notes.md` by hand and land them with `ads trust apply` from a terminal.
 
@@ -169,7 +169,7 @@ ADS posts the issue and its comments with your `gh` login, and GitHub does not e
 
 "forget the note …" removes up to 8 notes from one file. Claude Code finds each note by its exact text, without its bracket.
 
-- For learned notes, it runs `ads ask memory-forget --note "<text>"`, and after your `ok <code>`, `ads memory forget` lands one commit signed with your key that only removes their lines.
+- For learned notes, it runs `ads ask memory-forget --note "<text>"`, and after your `ok <code>`, `ads memory forget` lands one commit signed with your key that only removes their lines. The question warns that the repository is public unless `gh` says that it is private.
 - For team notes, `ads memory forget` builds a team-rule change that removes them from `.ads/memory/notes.md`, and you approve it like any other team-rule change.
 
 ## Flagged notes
