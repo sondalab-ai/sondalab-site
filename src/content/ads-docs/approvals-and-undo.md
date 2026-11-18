@@ -11,6 +11,9 @@ sources:
   - internal/flow/trustrules.go
   - internal/flow/trustlist_test.go
   - internal/flow/answer.go
+  - internal/cli/ask.go
+  - internal/flow/memoryheld.go
+  - internal/flow/memoryheld_test.go
   - internal/flow/work.go
   - internal/flow/stranger.go
   - internal/cli/audit.go
@@ -23,11 +26,11 @@ sources:
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
   - cmd/ads/testdata/script/work_stranger.txtar
-syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
-verified: 2026-11-17
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
 ---
 
-This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? Six actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules, and work on an issue that an account without write access opened. A pause does not, because it loses nothing.
+This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).
 
 A fix of an issue that `ads sweep` filed needs your sign-off from risk `medium` up, even after a clean run. Its text is untrusted, so its fix files no follow-up issues ([How a change lands](/ads/docs/how-changes-land/#sweep-issues)).
 
@@ -198,6 +201,24 @@ To approve, reply:   ok 3d8f
 ```
 
 **What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.
+
+## A learned note
+
+When the team learns a note from a fix that touches a guard, the fix lands and the note waits for you. The report ends with `Next: ads ask memory-keep <CDR id>`, and the session asks at once:
+
+```text
+ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
+
+  Warning: from now on, the assessor and every reviewer read this note
+  in each fix. It can change what they accept.
+  …
+  The fix has already landed. If you do not approve, the note is
+  dropped and the fix stays.
+
+To approve, reply:   ok 1c9a
+```
+
+After your `ok <code>`, `ads memory keep` lands the note, signed with your key. A note waits 7 days after its fix landed. [Team notes](/ads/docs/team-notes/#a-held-learning) has the whole question, the reasons and how to drop a note.
 
 ## An issue from another account
 

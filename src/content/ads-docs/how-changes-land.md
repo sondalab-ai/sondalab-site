@@ -20,8 +20,11 @@ sources:
   - internal/agent/claude.go
   - internal/agent/kinds/kinds.go
   - internal/flow/stranger.go
-syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
-verified: 2026-11-17
+  - internal/flow/learning.go
+  - internal/stage/learn.go
+  - internal/stage/memory.go
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -87,6 +90,18 @@ Each layer is a separate reviewer. The more risk, the more layers:
 </div>
 
 A finding blocks the change only from severity `major`, and only with a reproducer: a test that fails on the change. A finding without both does not block the change.
+
+## Team notes in a change
+
+When `memory.roles` in `.ads/config.yaml` names them, the assessor and the review layers read the team notes and the learned notes. The default is `[]`, so no agent reads a note. The final look and the environment layer never get notes. Whatever the config says, ADS removes `.ads/memory/` from every agent and check checkout, and refuses a change that puts a file there.
+
+With `memory.learn` on (the default) and a role in `memory.roles`, the implementer may propose up to 3 learnings, and the review layers judge them after the review passes. The learnings that every judging layer kept land with the fix, in the same commit, appended to `.ads/memory/learned.md`. The size limits leave that file out. A learning that touches a guard, comes from untrusted request text, belongs to a high-risk fix, or makes a check less strict is held: it does not land with the fix, and once the fix has landed it waits for your `ok <code>`. The report lists them under `Learned`:
+
+```text
+Learned      kept: "Fee rounding in billing/ rounds half to even."
+```
+
+An undo removes the learned lines of the fix it undoes. [Team notes](/ads/docs/team-notes/) has the rules.
 
 ## Docs changes
 

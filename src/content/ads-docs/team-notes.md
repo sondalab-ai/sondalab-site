@@ -1,0 +1,201 @@
+---
+title: Team notes
+summary: How the agents get notes from past work, how you fill them from MxM, keep or drop what the team learned from a fix, and see the notes a reviewer flagged.
+order: 6
+sources:
+  - README.md
+  - docs/guides/setup.md
+  - skills/ads-workflow/SKILL.md
+  - internal/config/config.go
+  - internal/memory/filter.go
+  - internal/memory/learning.go
+  - internal/memory/flag.go
+  - internal/memory/mxm.go
+  - internal/store/learned.go
+  - internal/flow/trustnotes.go
+  - internal/flow/memorypropose.go
+  - internal/flow/memorydrift.go
+  - internal/flow/memoryheld.go
+  - internal/flow/memorykeep.go
+  - internal/flow/memorywaiting.go
+  - internal/flow/memoryreminder.go
+  - internal/flow/memoryforget.go
+  - internal/flow/memoryflags.go
+  - internal/flow/memoryreset.go
+  - internal/flow/signoff.go
+  - internal/cli/memory.go
+  - internal/cli/memorydrift.go
+  - internal/cli/memoryflags.go
+  - internal/cli/status.go
+  - internal/cli/doctor.go
+  - internal/report/report.go
+  - internal/report/report_test.go
+  - internal/cli/memory_test.go
+  - internal/flow/trustnotes_test.go
+  - internal/flow/memoryheld_test.go
+  - internal/flow/memoryflags_test.go
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
+---
+
+This page answers: how do the agents learn from past work in the repository, and what do I approve on the way? The notes are short lines on the trunk. A person approves every team note. The team adds learned notes when a fix lands, and the ones that touch a guard wait for your `ok <code>`. By default no agent reads any note.
+
+## Two files of notes
+
+The notes are in two files on the trunk:
+
+- `.ads/memory/notes.md` holds the team notes, which a person approves. It is a trust file, like `.ads/config.yaml`: only `ads trust apply` changes it, in a commit signed by a person.
+- `.ads/memory/learned.md` holds the learned notes, which the team adds when a fix lands. Only ads commands change it.
+
+Each line is one note of at most 140 characters:
+
+```text
+- Fee rounding uses banker's rounding. [mxm:1a2b3c4d 2026-11-16]
+- Every handler in api/ checks the tenant first. [human 2026-11-17]
+- Fee rounding in billing/ rounds half to even. [ads:CDR-0042 2026-11-16]
+```
+
+The bracket says where the note comes from: an MxM fact, a person, or a fix. A file holds at most 64 notes and 16 KiB. A note with a link, an e-mail address, a secret, hidden or mixed-script characters, or a repeat of another note is refused, and so is the whole file.
+
+## Who reads the notes
+
+`memory.roles` in `.ads/config.yaml` names the roles that read the notes: `assessor`, `reviewer`, or both. The default is `[]`, and then no agent gets a note. With `reviewer`, the review layers get the notes, but the final look and the environment layer never do. To turn the notes on, change the team rules, for example "let the reviewers read the team notes". The team-rule question then says `The reviewers read the team notes`.
+
+The notes reach the agent as data, read at the verified trunk tip, and the signed log records which notes each call got, so `ads audit verify` can check them. Whatever the config says, ads removes `.ads/memory/` from every agent and check checkout, and refuses a change that puts a file there.
+
+`memory.learn` (default `true`) lets the team learn notes from its fixes. It has no effect while `memory.roles` is empty.
+
+## Update the team notes
+
+You turn the `core` facts that MxM keeps on this computer into team notes, after your approval.
+
+**Situation.** MxM holds a fact about how the repository rounds fees, and you want the reviewers to know it.
+
+**You say**
+
+```text
+update the team notes
+```
+
+**You see** the proposed notes, then the approval question:
+
+```text
+Dropped MxM fact 2b3c4d5e: link. Later runs skip it.
+Adds the note:
+  "Fee rounding uses banker's rounding."
+rev …
+
+ads needs your approval: change the team rules
+
+  Warning: this repository is public. Anyone can read these notes.
+
+  Adds the note:
+    "Fee rounding uses banker's rounding."
+
+To approve, reply:   ok 6b0d
+```
+
+**What happens.** Claude Code runs `ads memory propose`. It reads the current `core` facts of the MxM stores of the main checkout and every other worktree of the clone, with a limit of 5 seconds per `mxm` call. It skips the facts already in the notes, and drops the ones that break a note rule: later runs skip them too. One run adds at most 8 notes. After your `ok <code>`, `ads trust apply` lands them on the trunk, signed with your key. When more facts wait, the output says so, and the session runs it again. The warning shows unless `gh` says that the repository is private.
+
+Without `mxm` on your `PATH`, `ads memory propose` fails. Write the notes in `.ads/memory/notes.md` by hand and land them with `ads trust apply` from a terminal.
+
+## When MxM changes a fact
+
+ADS checks whether MxM changed the facts behind the signed notes: MxM may have retracted or replaced a fact, or a person may have edited a note. `ads doctor`, `ads status` and the start of a Claude Code session run the check. It only reports and never fails a command. `ads doctor` shows it as `Team notes and MxM`: ok, a warning with the count per state, or skipped with `cannot check` and the reason, for example `mxm is not on PATH`. `ads status` shows one count line, for example:
+
+```text
+2 team notes changed in MxM. Say "update the team notes".
+```
+
+"update the team notes" then shows each changed note as one item with the old and the new text, `Replaces a note. MxM fact <id> is now fact <new id>.`, or `Replaces a note. MxM holds other text for fact <id>.` It counts as one of the 8 changes. Before you approve, you choose one outcome per note:
+
+- "take the new text …" (`ads memory propose --take <id>`), the default for a replaced fact;
+- "keep the old note …" (`--keep <id>`), the default when MxM holds other text;
+- "drop the note …" (`--drop <id>`), which drops the note and the newer fact.
+
+A note whose MxM fact was retracted is one removal item, `Removes a note. MxM retracted fact <id>.`, and a keep makes it a person's note. After `ads trust apply` lands a keep that you signed, ADS tells MxM, so MxM holds the kept statement again. It sends two MxM ids, a sha256 and the trust commit, never any text. This is the only write from ADS into MxM. When it fails, ADS prints `MxM was not updated …`, and the next "update the team notes" tries again.
+
+## Learned notes
+
+With `memory.learn` on and a role in `memory.roles`, the implementer may propose up to 3 learnings with its change. After the review passes, each review layer that ran, plus `correctness` and `scope`, judges them in a call that gets no notes. When the fix lands, ADS appends the learnings that every judging layer kept to `.ads/memory/learned.md`, in the same commit. The report lists them under `Learned`, each with its state:
+
+```text
+Learned      kept: "Fee rounding in billing/ rounds half to even."
+             held (guard-word): "Sub-cent rounding differences in billing/ are minor findings."
+```
+
+A sign-off question shows them under `Notes the team learned:`. An undo removes the lines of the fix it undoes.
+
+## A held learning
+
+A learning is held for you instead of landing when it touches a guard topic or a protected path, comes from request text that the repository does not vouch for, belongs to a high-risk fix, or a review layer said that it makes a check less strict. The fix lands anyway. Its report ends with `Next: ads ask memory-keep <CDR id>`, and the session asks you at once.
+
+**You see**
+
+```text
+ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
+
+  Warning: from now on, the assessor and every reviewer read this note
+  in each fix. It can change what they accept.
+  Warning: this repository is public. Anyone can read this note.
+
+  The note, word for word:
+    "Sub-cent rounding differences in billing/ are minor findings."
+
+  Why it needs you: it talks about review findings or severity.
+  Written by the implementer. Judged by 2 review layers, all kept it.
+
+  The fix has already landed. If you do not approve, the note is
+  dropped and the fix stays.
+
+To approve, reply:   ok 1c9a
+```
+
+**What happens.** After your `ok <code>`, `ads memory keep` lands the note in one commit signed with your key. One question asks at most 8 notes, and approves all of them or none. When you do not answer, nothing is written and the fix stays.
+
+A held learning waits 7 days after its fix landed. Every clone sees the same list of waiting notes, built from the signed log and the trunk. Each clone asks at most twice by itself: right after the land report, and at the start of a later Claude Code session, which gets the line `ads: 2 learned notes wait for your ok.`. `ads status` shows `2 learned notes wait for your ok. Say "show waiting notes".` as its first line. "show waiting notes" asks again for the notes that wait.
+
+"drop the waiting note CDR-0042#2" runs `ads memory drop CDR-0042 2`. It needs no approval: this clone stops asking for that note, and the note still waits for the other operators until its 7 days end.
+
+## The reminder issue
+
+On a GitHub repository, one open issue with the label `ads-learning` lists the waiting notes, so you hear of them outside the session. It has one line per note: the fix with a link, the note id such as `CDR-0042#2`, why it waits, and the date its 7 days end. It never shows the note text, and it ends with `To approve, say "show waiting notes" in your ads session.` The issue has no approval power: ADS never reads its body, its comments or its state.
+
+A run that lands a fix, `ads memory keep`, `ads memory forget` and `ads memory reset` update the issue. The run that lands a fix also posts one comment per new waiting note. The body lists at most 100 notes. When no note waits, ADS closes the issue with `No learned notes wait any more.` When GitHub cannot be reached, `ads status` and `ads doctor` say that the issue is out of date.
+
+ADS posts the issue and its comments with your `gh` login, and GitHub does not e-mail you about your own comments by default. To get them, turn on "Include your own updates" in the e-mail settings of your GitHub notifications.
+
+## Forget a note
+
+"forget the note …" removes up to 8 notes from one file. Claude Code finds each note by its exact text, without its bracket.
+
+- For learned notes, it runs `ads ask memory-forget --note "<text>"`, and after your `ok <code>`, `ads memory forget` lands one commit signed with your key that only removes their lines.
+- For team notes, `ads memory forget` builds a team-rule change that removes them from `.ads/memory/notes.md`, and you approve it like any other team-rule change.
+
+## Flagged notes
+
+A review layer that reads the notes may flag up to 2 notes that the code contradicts, each with a reason and the `path:line` of trunk code that the fix did not write. A fix keeps at most 4 flags, one per note. A flag never changes a note, and never reaches an agent, the report, GitHub or MxM. Once its fix has landed, `ads status` says `1 team note was flagged by a reviewer. Say "show flagged notes".`
+
+**You say**
+
+```text
+show flagged notes
+```
+
+**You see**
+
+```text
+A reviewer flagged a team note (1 flag). Newest: the correctness review of fix #12 (CDR-0042), flag CDR-0042-A1-N1
+  Note: "Every handler in api/ checks the tenant first."
+  The reviewer wrote (agent text, not checked): "…"
+  Evidence: api/export.go:40 at 3f9c0a7b12de
+  The note may be out of date, or the code may break a rule that the note keeps.
+  If the note is out of date, say "forget the note …". If the note is right, look at the code at the evidence.
+  To hide this flag here, say "dismiss the flag …".
+```
+
+**What happens.** Claude Code runs `ads memory flags` and shows its output as it is. A flag closes by itself when its fix is undone, its note leaves the file, or its evidence line is gone from the trunk. "dismiss the flag …" runs `ads memory dismiss <flag id>`: it needs no approval and hides the flag on this clone only.
+
+## Repair the learned notes
+
+A hand edit, a merge or a plain `git revert` of `.ads/memory/learned.md` stops every stage that reads the notes. `ads doctor` shows it as a failed `Learned notes` check, with the commit and the fix `ads memory reset`. In the session, Claude Code runs `ads ask memory-reset`, and after your `ok <code>`, `ads memory reset` restores the file as of the commit before the bad one, in one commit signed with your key.

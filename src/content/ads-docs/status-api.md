@@ -13,8 +13,12 @@ sources:
   - internal/report/view.go
   - internal/term/tui.json
   - cmd/ads/testdata/script/doctor.txtar
-syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
-verified: 2026-11-17
+  - docs/api/ads-status.schema.json
+  - internal/flow/memorywaiting.go
+  - internal/flow/memorydrift.go
+  - internal/flow/memoryflags.go
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
@@ -104,6 +108,34 @@ The lines it reads (shortened):
 ```
 
 A `change` on a follower line is the view at the time of the poll that found the event, so it can already hold later steps. An `end` line with a `note` says that the follower stopped following the change for that reason, not that the change ended.
+
+## Notes that wait or changed
+
+The status document has three more fields about the team notes ([Team notes](/ads/docs/team-notes/)). Each one is left out when it has nothing to say, so the document does not change then.
+
+- `learnings_waiting`: one entry per learned note that waits for your ok and whose fix landed at most 7 days ago. `change` names the fix, `learning` is its id `<CDR id>#<n>`, `note` is the note word for word, `reasons` lists why it waits (`untrusted-text`, `high-risk`, `guarded-path`, `guard-word` or `loosens`) and `reason_text` says the same in ADS words. `landed_at` and `expires_at` give the 7 days, and `asked` counts how often this clone asked for it.
+- `notes_drift`: the result of the MxM check, when the team notes hold a note from MxM. `checked: false` carries a `reason` (`mxm-missing`, `no-store`, `mxm-failed` or `trunk-unverified`). `notes` lists each note whose MxM fact changed, with its `state` (`changed`, `replaced`, `kept-pending` or `retracted`), its text in `note`, and, except for `retracted`, the text MxM holds now in `now`. `--json` reads the last result that `ads doctor` or the session start kept, when it still matches, else it runs the check with a limit of 5 seconds, and it never writes the file. The data is local to the clone: two clones can disagree.
+- `notes_flagged`: one entry per team note with an open reviewer flag, with the note, the number of flags, and the newest flag: the fix, the review layer, the reviewer's `reason` and the `evidence` line.
+
+**You run**
+
+```sh
+ads status --json | jq -r '.learnings_waiting[]? | "\(.learning) \(.expires_at)"'
+```
+
+**You see**
+
+```text
+CDR-0042#1 2026-11-23T10:02:11Z
+```
+
+A `learnings_waiting` entry:
+
+```json
+{"change":{"ref":"#12","id":"CDR-0042","title":{"untrusted":true,"text":"ApplyFee truncates instead of rounding"}},"learning":"CDR-0042#1","note":{"untrusted":true,"text":"Rounding differences under one cent in billing/ are minor findings."},"reasons":["guard-word"],"reason_text":["it talks about review findings or severity"],"landed_at":"2026-11-16T10:02:11Z","expires_at":"2026-11-23T10:02:11Z","asked":1}
+```
+
+The note texts (`note`, and `now` of `notes_drift`), the title, the reviewer's reason and the evidence path are untrusted text. Only notes and flags from a log that verifies are listed.
 
 ## Versions
 
