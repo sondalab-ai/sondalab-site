@@ -20,10 +20,14 @@ sources:
   - internal/report/report_test.go
   - internal/report/view.go
   - internal/report/view_test.go
+  - internal/flow/memorywaiting.go
+  - internal/cli/memorydrift.go
+  - internal/cli/memoryflags.go
+  - internal/cli/memory.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
-verified: 2026-11-17
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -125,7 +129,7 @@ Recent:
   #12 "ApplyFee truncates instead of rounding": landed 2026-11-14
 ```
 
-**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. When nothing waits, the first line is `Nothing is waiting for you.` Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
+**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. When nothing waits, the first line is `Nothing is waiting for you.` When learned notes wait for your ok, the first line is `2 learned notes wait for your ok. Say "show waiting notes".` instead. After the list, a line can say that team notes changed in MxM or that a reviewer flagged a team note ([Team notes](/ads/docs/team-notes/)). Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
 
 ## One more round
 
@@ -180,6 +184,32 @@ To approve, reply:   ok 7c1e
 ```
 
 **What happens.** Claude Code writes the new `.ads/config.yaml` to a file, proposes it with `ads trust propose`, and asks for your approval. ADS checks the files on the trunk and the files that open fixes change, with the old and the new rules, and says which ones gain or lose protection. A line that counts a file only an open fix has says `on the trunk or in open fixes`. After your `ok <code>`, `ads trust apply` lands the rule on the trunk, signed with your key. Other team rules go the same way, for example "let medium changes land by themselves only up to 200 lines". The question shows at most eight changes, each in one line of at most 160 characters; a larger change is refused with `the team-rule change is too large to approve: split it into smaller changes`. When the change touches the `facts` block of an adapter, the question shows each fact as a sentence, for example `Adapter codex reports tokens, and not usd` or `Adapter codex keeps no session files, as the team declares: ads cannot check it`. Signers and prompts change only from a terminal.
+
+## Update the team notes
+
+You give the reviewers what the team already knows about the repository, after your approval.
+
+**Situation.** MxM on your computer holds facts about the repository, and the config lets the reviewers read the team notes.
+
+**You say**
+
+```text
+update the team notes
+```
+
+**You see** the notes it proposes, then the approval question:
+
+```text
+Adds the note:
+  "Fee rounding uses banker's rounding."
+rev …
+
+ads needs your approval: change the team rules
+…
+To approve, reply:   ok 6b0d
+```
+
+**What happens.** Claude Code runs `ads memory propose`, which turns the `core` MxM facts of this computer into team notes, at most 8 at a time. After your `ok <code>`, `ads trust apply` lands them on the trunk, signed with your key. "show waiting notes" asks for the notes the team learned from a fix that wait for you, "forget the note …" removes notes, and "show flagged notes" shows the notes a reviewer found contradicted by the code. [Team notes](/ads/docs/team-notes/) has the rules.
 
 ## Follow only
 

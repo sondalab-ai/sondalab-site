@@ -13,6 +13,8 @@
  * "be stricter on payment/" row of the README table come from ADS 29fbba3.
  * The "sweep the codebase" row and the sweep rule of the medium row come
  * from ADS 6846133 (README.md, internal/flow/landing.go).
+ * The "update the team notes" row comes from ADS b64742e (README.md,
+ * skills/ads-workflow/SKILL.md).
  * Text in backticks is shown in code font.
  */
 
@@ -132,6 +134,7 @@ export const ADS_BENEFITS: readonly AdsBenefit[] = [
         ['“what is waiting for me?”', 'A list of the changes that need you: a sign-off, a question, a budget, or a paused change.'],
         ['“change X”', 'After a report: the team makes one more round with your words.'],
         ['“be stricter on payment/”', 'The session proposes a change of the team rules and shows it in plain words, with the files that gain or lose protection. After your approval, it lands signed with your key.'],
+        ['“update the team notes”', 'The session proposes facts from MxM as team notes for the agents. After your approval, they land signed with your key.'],
         ['`ok 4f2a`', 'Approves the one pending question with the code `4f2a`.'],
       ],
     },

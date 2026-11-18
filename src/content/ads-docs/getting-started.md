@@ -16,6 +16,8 @@ sources:
   - internal/cli/agents.go
   - internal/config/config.go
   - internal/cli/doctor.go
+  - internal/cli/memorydrift.go
+  - internal/hooks/claude/settings.json
   - internal/agent/kinds/kinds.go
   - internal/onboard/ghversion.go
   - cmd/ads/testdata/script/init_rerun.txtar
@@ -28,8 +30,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: abed2b7b509c0592f01858e5cf50d81e39cb7604
-verified: 2026-11-17
+syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
+verified: 2026-11-18
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -41,6 +43,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - OpenSSH: `ssh-keygen` and `ssh-add`.
 - Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
 - The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field. `make install` and `ads doctor` warn when `gh --version` is older than 2.50 or cannot be read. The install does not fail for the gh version.
+- MxM is optional. `ads memory propose` reads the team notes from it ([Team notes](/ads/docs/team-notes/)). Without it, a person writes the notes by hand.
 
 ## Install
 
@@ -71,6 +74,8 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 - to add both keys as signing keys on GitHub, so the commits they sign show as verified;
 - to make the first signed commit of `.ads/` on the trunk (the main branch, for example `main`), or a join request when `.ads/` already exists;
 - to set the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
+
+The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
 
 ### Why there are two keys
 
@@ -134,6 +139,12 @@ It also checks the agents and their config. The adapters of the roles count, and
 - An `Adapter costs` warning shows a budget that limits an amount which an adapter declares it does not report, with the fix `change facts.cost or the budget with a team-rule change` ([How a change lands](/ads/docs/how-changes-land/#budgets)).
 
 `ads work` refuses a config with an `Adapter keys` or an `Adapter costs` warning.
+
+It also checks the notes of the agents ([Team notes](/ads/docs/team-notes/)):
+
+- `Team notes and MxM` compares each team note from MxM with the MxM facts of this clone. It is ok, a warning with the count of notes per state and the fix `say "update the team notes"`, or skipped with `cannot check` and the reason, for example `mxm is not on PATH`. It only reports, and it shows only when the team notes hold a note from MxM.
+- `Learned notes` fails when a commit changed `.ads/memory/learned.md` outside ADS, for example a hand edit. It names the commit, with the fix `ads memory reset`.
+- `Learned notes issue` warns when the GitHub issue that lists the waiting learned notes is out of date, and is skipped when notes wait and the repository has no GitHub remote.
 
 When `gh` is installed and logged in, `ads doctor` shows a `GitHub CLI version` line. It reads `gh --version`:
 
