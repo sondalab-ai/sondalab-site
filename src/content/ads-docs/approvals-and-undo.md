@@ -26,8 +26,10 @@ sources:
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/signoff_flow.txtar
   - cmd/ads/testdata/script/work_stranger.txtar
-syncedFrom: a8d793f56cb649490136edceddea03eaef9c46f2
-verified: 2026-11-18
+  - internal/flow/trustexempt.go
+  - internal/trust/exempt.go
+syncedFrom: 00f6af769a0475c58ebe984d741a181a0fcc4a8b
+verified: 2026-11-19
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).
@@ -200,7 +202,15 @@ ads needs your approval: change the team rules
 To approve, reply:   ok 3d8f
 ```
 
-**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection.
+**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection. A change that turns learning on shows `Warning: this repository is public. Anyone can read the notes the team learns.` unless `gh` says that the repository is private. A config with no `memory` block has memory on, so adding `memory: {roles: []}` shows as turning memory off.
+
+## A hand-made commit to a trust file
+
+A commit to a trust file that `ads trust apply` did not sign breaks the trust chain of the trunk: the commands that read the trunk stop, and `ads audit verify` reports `changes <file> without a valid trust change`. A later signed commit that restores the file does not repair it. Run `ads trust propose --exempt <commit> -m "<reason>"` with the full id of the hand-made commit. It builds one unsigned commit that restores the trust files of that commit to their content before it, names the commit in an `ADS-Trust-Exempt` trailer, and prints its `rev`.
+
+**You see**, after `ads ask trust <rev>`, the commit id, its subject, author and commit date, and the trust files it changed, as their own item. After your `ok <code>`, `ads trust apply <rev> -m "<reason>"` lands it signed with your key, and the trust chain skips that one commit.
+
+**What happens.** In the session, only an exemption that restores `.ads/config.yaml` or the team notes can be asked. A restore of a file under `.ads/prompts/` lands only from a terminal with `ads trust apply`. ADS refuses the exemption when the hand-made commit changed `.ads/allowed_signers`, when another commit also breaks the chain, or when the files are not restored. One commit is exempted once. From the hand-made commit up to the exemption the trust files were never signed, so a change whose base lies in that range does not verify. Never sign an exemption by hand: one that the chain refuses breaks the chain for good.
 
 ## A learned note
 
@@ -218,7 +228,7 @@ ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
 To approve, reply:   ok 1c9a
 ```
 
-After your `ok <code>`, `ads memory keep` lands the note, signed with your key. A note waits 7 days after its fix landed. [Team notes](/ads/docs/team-notes/#a-held-learning) has the whole question, the reasons and how to drop a note.
+After your `ok <code>`, `ads memory keep` lands the note, signed with your key. A note waits 7 days after its fix landed. The question warns that the repository is public, and that anyone can read the note, unless `gh` says that it is private. [Team notes](/ads/docs/team-notes/#a-held-learning) has the whole question, the reasons and how to drop a note.
 
 ## An issue from another account
 

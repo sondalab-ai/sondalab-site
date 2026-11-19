@@ -34,11 +34,11 @@ sources:
   - internal/flow/trustnotes_test.go
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
-syncedFrom: a8d793f56cb649490136edceddea03eaef9c46f2
-verified: 2026-11-18
+syncedFrom: 00f6af769a0475c58ebe984d741a181a0fcc4a8b
+verified: 2026-11-19
 ---
 
-This page answers: how do the agents learn from past work in the repository, and what do I approve on the way? The notes are short lines on the trunk. A person approves every team note. The team adds learned notes when a fix lands, and the ones that touch a guard wait for your `ok <code>`. By default no agent reads any note.
+This page answers: how do the agents learn from past work in the repository, and what do I approve on the way? The notes are short lines on the trunk. A person approves every team note. The team adds learned notes when a fix lands, and the ones that touch a guard wait for your `ok <code>`. Memory is on by default: with no `memory` block in `.ads/config.yaml`, the assessor and the reviewers read the notes and the team learns from its fixes. `memory: {roles: []}` turns it off.
 
 ## Two files of notes
 
@@ -59,11 +59,15 @@ The bracket says where the note comes from: an MxM fact, a person, or a fix. A f
 
 ## Who reads the notes
 
-`memory.roles` in `.ads/config.yaml` names the roles that read the notes: `assessor`, `reviewer`, or both. The default is `[]`, and then no agent gets a note. With `reviewer`, the review layers get the notes, but the final look and the environment layer never do. To turn the notes on, change the team rules, for example "let the reviewers read the team notes". The team-rule question then says `The reviewers read the team notes`.
+`memory.roles` in `.ads/config.yaml` names the roles that read the notes: `assessor`, `reviewer`, or both. The default is `[assessor, reviewer]`, so memory is on when the config has no `memory` block. Set `memory: {roles: []}` to turn memory off: then no agent gets a note and the team learns nothing. With `reviewer`, the review layers get the notes, but the final look and the environment layer never do. To change who reads them, change the team rules, for example "let only the reviewers read the team notes". The team-rule question then says `The reviewers read the team notes`. Adding `memory: {roles: []}` to a config with no `memory` block shows in the question as turning memory off, and removing it as turning memory on. `ads init` writes a comment in the config that says how to turn memory off.
+
+`ads doctor` shows a `Memory` line that says whether memory is on and which roles read the notes, for example `on: the assessor and the reviewers read the team notes; the team adds what it learns from each fix`. When `gh` does not say that the repository is private, the line ends with `; anyone who can read the repository can read the learned notes`.
 
 The notes reach the agent as data, read at the verified trunk tip, and the signed log records which notes each call got, so `ads audit verify` can check them. Whatever the config says, ads removes `.ads/memory/` from every agent and check checkout, and refuses a change that puts a file there.
 
 `memory.learn` (default `true`) lets the team learn notes from its fixes. It has no effect while `memory.roles` is empty.
+
+A team-rule change that turns learning on shows the warning `Warning: this repository is public. Anyone can read the notes the team learns.`, unless `gh` says that the repository is private.
 
 ## Update the team notes
 
@@ -124,11 +128,17 @@ Learned      kept: "Fee rounding in billing/ rounds half to even."
              held (guard-word): "Sub-cent rounding differences in billing/ are minor findings."
 ```
 
+A kept learning lands with no question, so in a public repository anyone can read it. The first time the team adds a note to `.ads/memory/learned.md`, ADS says so once: `the team adds its first learned note to .ads/memory/learned.md: anyone who can read the repository can read it; memory.roles: [] in .ads/config.yaml turns memory off`.
+
 A sign-off question shows them under `Notes the team learned:`. An undo removes the lines of the fix it undoes.
 
 ## A held learning
 
 A learning is held for you instead of landing when it touches a guard topic or a protected path, comes from request text that the repository does not vouch for, belongs to a high-risk fix, or a review layer said that it makes a check less strict. The fix lands anyway. Its report ends with `Next: ads ask memory-keep <CDR id>`, and the session asks you at once.
+
+The guard words match spaced letters too, such as "t e s t", and a learning with a letter outside the Latin script, such as Russian, is held with the reason `it talks about text in a script other than Latin, which the guard words cannot check`. A path such as `internal/` does not hold a learning only because a protected path such as `internal/payments/**` is under it, but a path that a guard names as a whole directory, such as `internal/**`, still holds. A relative path such as `payments/fees.go` holds against `internal/payments/**`.
+
+These rules have a version, which ADS records with each learning. Version 2 is the one that holds spaced letters and other scripts. A clone that still runs an older ADS lands its learnings under version 1. `memory.min_rules` in `.ads/config.yaml` sets the lowest version that a learning or a reviewer flag may use: 1 or 2, default 1. With `2`, `ads audit verify` and every append refuse a learning or a flag that records version 1 and was decided against, or lands on, a commit whose config has that floor. Events decided against an older commit stay valid. Set it with a team-rule change, which shows as `Learnings must use the guard rules of version 2 or later (now: 1)`, and only after every clone runs this ADS: an older ADS refuses the whole config as soon as the key is set. While learning is on and the floor is below the current version, `ads doctor` shows a `Learning rules` line that says so.
 
 **You see**
 
@@ -159,9 +169,9 @@ A held learning waits 7 days after its fix landed. Every clone sees the same lis
 
 ## The reminder issue
 
-On a GitHub repository, one open issue with the label `ads-learning` lists the waiting notes, so you hear of them outside the session. It has one line per note: the fix with a link, the note id such as `CDR-0042#2`, why it waits, and the date its 7 days end. It never shows the note text, and it ends with `To approve, say "show waiting notes" in your ads session.` The issue has no approval power: ADS never reads its body, its comments or its state.
+On a GitHub repository, one open issue with the label `ads-learning` lists the waiting notes, so you hear of them outside the session. It has one line per note: the fix with a link, the note id such as `CDR-0042#2`, why it waits, and the date its 7 days end. It never shows the note text, and it ends with `To approve, say "show waiting notes" in your ads session.` The issue has no approval power: ADS never reads its comments, and never reads its body or its state as an approval or as the list of waiting notes.
 
-A run that lands a fix, `ads memory keep`, `ads memory forget` and `ads memory reset` update the issue. The run that lands a fix also posts one comment per new waiting note. The body lists at most 100 notes. When no note waits, ADS closes the issue with `No learned notes wait any more.` When GitHub cannot be reached, `ads status` and `ads doctor` say that the issue is out of date.
+A run that lands a fix, `ads memory keep`, `ads memory forget` and `ads memory reset` update the issue. The run that lands a fix also posts one comment per new waiting note. The body lists at most 100 notes. When no note waits, ADS closes the issue with `No learned notes wait any more.` An issue that you close stays closed while the same notes wait, in every clone. When a new note waits, ADS reopens the issue that closed last and rewrites its body, so the history stays in one issue. It opens a new issue only when no closed issue exists. A closed issue hides a note only when it lists the note and closed after the fix of the note landed. When GitHub cannot be reached, `ads status` and `ads doctor` say that the issue is out of date.
 
 ADS posts the issue and its comments with your `gh` login, and GitHub does not e-mail you about your own comments by default. To get them, turn on "Include your own updates" in the e-mail settings of your GitHub notifications.
 
@@ -169,7 +179,7 @@ ADS posts the issue and its comments with your `gh` login, and GitHub does not e
 
 "forget the note …" removes up to 8 notes from one file. Claude Code finds each note by its exact text, without its bracket.
 
-- For learned notes, it runs `ads ask memory-forget --note "<text>"`, and after your `ok <code>`, `ads memory forget` lands one commit signed with your key that only removes their lines. The question warns that the repository is public unless `gh` says that it is private.
+- For learned notes, it runs `ads ask memory-forget --note "<text>"`, and after your `ok <code>`, `ads memory forget` lands one commit signed with your key that only removes their lines. The question warns that the repository is public unless `gh` says that it is private: anyone could already read the note while it was on the trunk, and the history keeps it.
 - For team notes, `ads memory forget` builds a team-rule change that removes them from `.ads/memory/notes.md`, and you approve it like any other team-rule change.
 
 ## Flagged notes
