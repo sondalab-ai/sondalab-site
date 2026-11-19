@@ -29,7 +29,7 @@ sources:
   - cmd/ads/testdata/script/sweep_schedule.txtar
   - cmd/ads/testdata/script/sweep_schedule_exec.txtar
   - internal/agent/kinds/kinds.go
-syncedFrom: 00f6af769a0475c58ebe984d741a181a0fcc4a8b
+syncedFrom: 0634022303f26a3fe1414a593381cf8211fb3ac5
 verified: 2026-11-19
 ---
 
@@ -136,7 +136,7 @@ Before it files, a sweep lists the sweep issues of your `gh` login, open and clo
 - An issue closed as not planned, as a duplicate, or with no reason blocks it for good.
 - An issue closed as completed frees it. A landed fix closes its issue as completed.
 
-When that list reaches 1000 issues, the sweep files nothing and says so.
+When that list reaches 1000 issues, the sweep files nothing and says so. Only the issues of your `gh` login count toward that limit: an `ads-sweep` label that someone else puts on their issues does not.
 
 ## Dismiss a finding for good
 
@@ -176,14 +176,14 @@ A sweep issue holds text that a model wrote after it read trunk code. Anyone who
 `ads sweep` prints, in this order:
 
 - the files it read and the trunk commit;
-- one line per category, with the kept and dropped findings and the tokens;
+- one line per category, with the kept and dropped findings and the tokens. A category that failed shows its error and the tokens, then `Try: ads doctor`, which checks the login and the facts of the sweeper agent;
 - each kept finding;
 - each dropped finding, with a one-word reason;
 - each filed issue, as `Filed #N <url>`;
 - the security findings not filed on a public repository;
 - `Skipped duplicate <n>` and `Skipped cap <n>`.
 
-It exits 0 when it succeeds. It exits 1 when filing failed, when every category that ran failed, or when it refuses to run. It exits 130 after Ctrl-C and 143 after SIGTERM, also with `--scheduled`. A second sweep of the same clone refuses to start while one runs.
+It exits 0 when it succeeds. It exits 1 when filing failed, when every category that ran failed, or when it refuses to run. It also exits 1 when it cannot save its state after filing: the error has three lines, the first is `The sweep state was not saved`, the filed issues stay filed, and the next sweep reads the same files again. It exits 130 after Ctrl-C and 143 after SIGTERM, also with `--scheduled`. A second sweep of the same clone refuses to start while one runs.
 
 ## Stop a sweep
 
@@ -194,7 +194,7 @@ Ctrl-C or SIGTERM stops a sweep. This includes the SIGTERM that `launchctl booto
 
 In both cases the sweep saves no state. The next sweep reads the same files again, and dedupe blocks the issues already filed. The sweep removes its worktree, releases its lock and exits with 130 or 143. A scheduled sweep logs `ads sweep: failed · interrupted`.
 
-A sweep reads the trunk in a worktree whose name starts with `sweep-`. A sweep that was killed can leave that worktree behind. The `ads resume` cleanup removes it only when no sweep holds the lock. A dry run holds no lock.
+A sweep reads the trunk in a worktree whose name starts with `sweep-`. A sweep that was killed can leave that worktree behind. The `ads resume` cleanup removes it only when no sweep and no dry run runs. A sweep that files holds the sweep lock. A dry run holds a separate lock that other dry runs share, so a dry run and a sweep that files can run at the same time.
 
 ## Sweep on a schedule
 
@@ -224,7 +224,7 @@ There is one schedule per clone. The scheduled job runs `ads sweep --scheduled` 
 - The label is `ai.sondalab.ads-sweep.<id>`. The `<id>` is the first 12 hex characters of the sha256 of the absolute path of the main worktree. A new schedule of the same clone replaces the old one.
 - The plist is `~/Library/LaunchAgents/ai.sondalab.ads-sweep.<id>.plist`.
 - `ads sweep unschedule` stops the job and deletes the plist.
-- A schedule that an older ADS set from a linked worktree keeps its old label. Remove it with `launchctl bootout gui/$UID/<label>`, then delete `~/Library/LaunchAgents/<label>.plist`. `make uninstall` also removes it.
+- An older ADS keyed a schedule on the worktree you set it from, so a linked worktree could have its own job. `ads sweep schedule` and `ads sweep unschedule` stop and remove such a job, after their own work, and say `Removed <plist>, an old schedule of a linked worktree`. They try every old job. When one cannot be removed, the command fails with an error that names each plist that is left and gives the commands to remove it. ADS leaves alone a job of a linked worktree that git no longer lists, for example after `git worktree prune`. Remove it with `launchctl bootout gui/$UID/<label>`, then delete `~/Library/LaunchAgents/<label>.plist`. `make uninstall` also removes it. A bare repository or a custom git dir keeps one schedule per worktree, so ADS removes none there.
 
 **On Linux**, `ads sweep schedule` writes nothing. It prints a line for you to add with `crontab -e`, for example:
 
@@ -247,6 +247,7 @@ On macOS, `ads doctor` shows a `Sweep schedule` line with the plist path when th
 - the sweeper uses the `fake` adapter;
 - the plist runs another `ads` than the one you run;
 - the last line of the log is a failure, or a run that did not finish;
-- no run happened for longer than the period plus one day: 2 days for a daily schedule, 8 days for a weekly one.
+- no run happened for longer than the period plus one day: 2 days for a daily schedule, 8 days for a weekly one;
+- an old schedule of a linked worktree is running, or ADS cannot list the old schedules. This line shows even when the clone has no schedule of its own. The fix is `ads sweep schedule --every daily|weekly --at HH:MM`, which replaces the old schedules: without the flags the new schedule runs daily at 09:00. `ads sweep unschedule` removes every schedule of the clone instead.
 
 A Mac that is off or asleep for longer than that shows the overdue warning until the next run. `make uninstall` removes every sweep schedule on macOS (see [Getting started](/ads/docs/getting-started/#uninstall)).
