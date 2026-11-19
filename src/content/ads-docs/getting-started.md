@@ -30,8 +30,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: a8d793f56cb649490136edceddea03eaef9c46f2
-verified: 2026-11-18
+syncedFrom: 5af7d48
+verified: 2026-11-19
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -43,7 +43,7 @@ This page answers: what do I need, how do I install `ads`, what does the setup a
 - OpenSSH: `ssh-keygen` and `ssh-add`.
 - Claude Code. You work through it, and its hooks make approvals in the session work. When the `claude` CLI is on your `PATH`, `ads init` sets the claude agents for every role.
 - The GitHub CLI, `gh`, 2.50 or newer. It is optional. Without it, run `ads init --no-github`. ADS reads the `stateReason` field of `gh issue list` for the queue, for follow-up issues and for `ads sweep`. Older `gh` versions do not have that field. `make install` and `ads doctor` warn when `gh --version` is older than 2.50 or cannot be read. The install does not fail for the gh version.
-- MxM is optional. `ads memory propose` reads the team notes from it ([Team notes](/ads/docs/team-notes/)). Without it, a person writes the notes by hand.
+- MxM is optional. Memory is on by default, and `ads memory propose` reads the team notes from MxM ([Team notes](/ads/docs/team-notes/)). Without it, a person writes the notes by hand.
 
 ## Install
 
@@ -142,7 +142,10 @@ It also checks the agents and their config. The adapters of the roles count, and
 
 It also checks the notes of the agents ([Team notes](/ads/docs/team-notes/)):
 
+- `Memory` says whether memory is on, which roles read the team notes and whether the team learns from each fix. Memory is on by default; `memory: {roles: []}` in `.ads/config.yaml` turns it off. Unless `gh` says that the repository is private, the line says that anyone who can read the repository can read the learned notes.
+- `Learning rules` is a hint while learning is on and `memory.min_rules` is below the current guard rules version ([Team notes](/ads/docs/team-notes/#a-held-learning)).
 - `Team notes and MxM` compares each team note from MxM with the MxM facts of this clone. It is ok, a warning with the count of notes per state and the fix `say "update the team notes"`, or skipped with `cannot check` and the reason, for example `mxm is not on PATH`. It only reports, and it shows only when the team notes hold a note from MxM.
+- `Trust chain` fails when a commit changed a trust file outside `ads trust apply`. Its fix names the repair `ads trust propose --exempt <commit>` ([Everyday use](/ads/docs/everyday-use/#repair-the-trust-chain)).
 - `Learned notes` fails when a commit changed `.ads/memory/learned.md` outside ADS, for example a hand edit. It names the commit, with the fix `ads memory reset`.
 - `Learned notes issue` warns when the GitHub issue that lists the waiting learned notes is out of date, and is skipped when notes wait and the repository has no GitHub remote.
 

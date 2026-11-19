@@ -26,8 +26,10 @@ sources:
   - internal/cli/memory.go
   - cmd/ads/testdata/script/session_approval.txtar
   - cmd/ads/testdata/script/trust_risk_rule.txtar
-syncedFrom: b64742e946cc0916dadce247e0a89ce0742f181a
-verified: 2026-11-18
+  - internal/flow/trustexempt.go
+  - internal/trust/exempt.go
+syncedFrom: 5af7d48
+verified: 2026-11-19
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -189,7 +191,7 @@ To approve, reply:   ok 7c1e
 
 You give the reviewers what the team already knows about the repository, after your approval.
 
-**Situation.** MxM on your computer holds facts about the repository, and the config lets the reviewers read the team notes.
+**Situation.** MxM on your computer holds facts about the repository, and you want the team notes to hold them. Memory is on by default, so the assessor and the reviewers read the notes unless the config says `memory: {roles: []}`.
 
 **You say**
 
@@ -210,6 +212,18 @@ To approve, reply:   ok 6b0d
 ```
 
 **What happens.** Claude Code runs `ads memory propose`, which turns the `core` MxM facts of this computer into team notes, at most 8 at a time. After your `ok <code>`, `ads trust apply` lands them on the trunk, signed with your key. "show waiting notes" asks for the notes the team learned from a fix that wait for you, "forget the note …" removes notes, and "show flagged notes" shows the notes a reviewer found contradicted by the code. [Team notes](/ads/docs/team-notes/) has the rules.
+
+## Repair the trust chain
+
+A commit to a trust file that `ads trust apply` did not sign breaks the trust chain of the trunk. `ads doctor` and the commands that read the trunk name the commit, and the error ends with `(to repair it: ads trust propose --exempt <commit>)`.
+
+**You say**
+
+```text
+repair the trust chain
+```
+
+**What happens.** Claude Code runs `ads trust propose --exempt <commit> -m "<reason>"` with the full commit id, and shows its lines. Then it runs `ads ask trust <rev>`, and after your `ok <code>`, `ads trust apply <rev> -m "<reason>"` lands one commit signed with your key. The trust chain then skips that one commit. A commit that changed `.ads/allowed_signers`, or a trunk with more than one such commit, has no such repair. [Approvals and undo](/ads/docs/approvals-and-undo/#a-hand-made-commit-to-a-trust-file) has the details.
 
 ## Follow only
 

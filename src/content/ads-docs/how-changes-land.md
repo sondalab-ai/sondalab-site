@@ -23,8 +23,8 @@ sources:
   - internal/flow/learning.go
   - internal/stage/learn.go
   - internal/stage/memory.go
-syncedFrom: a8d793f56cb649490136edceddea03eaef9c46f2
-verified: 2026-11-18
+syncedFrom: 5af7d48
+verified: 2026-11-19
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -93,9 +93,9 @@ A finding blocks the change only from severity `major`, and only with a reproduc
 
 ## Team notes in a change
 
-When `memory.roles` in `.ads/config.yaml` names them, the assessor and the review layers read the team notes and the learned notes. The default is `[]`, so no agent reads a note. The final look and the environment layer never get notes. Whatever the config says, ADS removes `.ads/memory/` from every agent and check checkout, and refuses a change that puts a file there.
+When `memory.roles` in `.ads/config.yaml` names them, the assessor and the review layers read the team notes and the learned notes. The default is `[assessor, reviewer]`, so memory is on when the config has no `memory` block. `memory: {roles: []}` turns it off, and then no agent reads a note. The final look and the environment layer never get notes. Whatever the config says, ADS removes `.ads/memory/` from every agent and check checkout, and refuses a change that puts a file there.
 
-With `memory.learn` on (the default) and a role in `memory.roles`, the implementer may propose up to 3 learnings, and the review layers judge them after the review passes. The learnings that every judging layer kept land with the fix, in the same commit, appended to `.ads/memory/learned.md`. The size limits leave that file out. A learning that touches a guard, comes from untrusted request text, belongs to a high-risk fix, or makes a check less strict is held: it does not land with the fix, and once the fix has landed it waits for your `ok <code>`. The report lists them under `Learned`:
+With `memory.learn` on (the default) and a role in `memory.roles`, the implementer may propose up to 3 learnings, and the review layers judge them after the review passes. The learnings that every judging layer kept land with the fix, in the same commit, appended to `.ads/memory/learned.md`. The size limits leave that file out. A learning that touches a guard, comes from untrusted request text, belongs to a high-risk fix, or makes a check less strict is held: it does not land with the fix, and once the fix has landed it waits for your `ok <code>`. The guard words also match spaced letters such as "t e s t", and a learning in a script other than Latin is held too. A kept learning lands with no question, so in a public repository anyone can read it: the first time ADS adds a note to `.ads/memory/learned.md`, it says so. The report lists them under `Learned`:
 
 ```text
 Learned      kept: "Fee rounding in billing/ rounds half to even."
