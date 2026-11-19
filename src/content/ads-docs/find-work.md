@@ -29,7 +29,7 @@ sources:
   - cmd/ads/testdata/script/sweep_schedule.txtar
   - cmd/ads/testdata/script/sweep_schedule_exec.txtar
   - internal/agent/kinds/kinds.go
-syncedFrom: 0634022303f26a3fe1414a593381cf8211fb3ac5
+syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
 verified: 2026-11-19
 ---
 
