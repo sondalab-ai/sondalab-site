@@ -17,7 +17,7 @@ sources:
   - internal/flow/memorywaiting.go
   - internal/flow/memorydrift.go
   - internal/flow/memoryflags.go
-syncedFrom: 00f6af769a0475c58ebe984d741a181a0fcc4a8b
+syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
 verified: 2026-11-19
 ---
 

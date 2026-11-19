@@ -30,7 +30,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 00f6af769a0475c58ebe984d741a181a0fcc4a8b
+syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
 verified: 2026-11-19
 ---
 
@@ -127,6 +127,8 @@ $ ads init
 
 Each kind reads only its own keys. Every kind reads `kind`, `allowed_tools` and `escalate_to`. Besides those, `fake` reads only `script`, `exec` reads only `command` and `facts`, and `claude` reads only `model`, `max_budget_usd`, `permission_mode` and `bare`. ADS refuses any other key when the config loads, also when it holds an empty value such as `bare: false`, for example `adapters.x: kind exec does not read model: remove the key`. A trunk config that already has such a key still reads, so a team-rule change can remove it.
 
+Where an agent runs depends on its kind. An `exec` adapter runs under the sandbox driver (`sandbox.driver`, default `none`). With `none` it runs on your machine as you, with your `HOME` and no file isolation, so its command can read any of your files, for example the gh login in `~/.config/gh/hosts.yml`. Use driver `container` to isolate it: the command then runs in a container with no network, a read-only root, and only the work directory and a scratch `/tmp`. A `claude` adapter always runs on your machine, for its login. ADS limits it through Claude Code: Claude Code gets only the tools of `allowed_tools` (by default `Read(./**)`, plus `Edit(./**)` and `Write(./**)` for the test author and the implementer), with those allow rules, no MCP server and no `Bash`. The config refuses `Bash`, `Glob`, `Grep`, a `Read`, `Edit` or `Write` rule that is not scoped to the work directory, and a `permission_mode` such as `bypassPermissions`: it allows only `manual`, `acceptEdits`, `plan` and `dontAsk`. ADS does not check other tools that the team adds to `allowed_tools`, such as `WebFetch`, and it does not isolate the claude process from your files.
+
 ## Check: `ads doctor`
 
 `ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
@@ -143,7 +145,7 @@ It also checks the agents and their config. The adapters of the roles count, and
 It also checks the notes of the agents ([Team notes](/ads/docs/team-notes/)):
 
 - `Memory` says whether memory is on, which roles read the team notes and whether the team learns from each fix. Memory is on by default; `memory: {roles: []}` in `.ads/config.yaml` turns it off. Unless `gh` says that the repository is private, the line says that anyone who can read the repository can read the learned notes.
-- `Learning rules` is a hint while learning is on and `memory.min_rules` is below the current guard rules version ([Team notes](/ads/docs/team-notes/#a-held-learning)).
+- `Learning rules` is a hint that shows only while learning is on and `.ads/config.yaml` sets `memory.min_rules: 1`, below the current guard rules version ([Team notes](/ads/docs/team-notes/#a-held-learning)).
 - `Team notes and MxM` compares each team note from MxM with the MxM facts of this clone. It is ok, a warning with the count of notes per state and the fix `say "update the team notes"`, or skipped with `cannot check` and the reason, for example `mxm is not on PATH`. It only reports, and it shows only when the team notes hold a note from MxM.
 - `Trust chain` fails when a commit changed a trust file outside `ads trust apply`. Its fix names the repair `ads trust propose --exempt <commit>` ([Everyday use](/ads/docs/everyday-use/#repair-the-trust-chain)).
 - `Learned notes` fails when a commit changed `.ads/memory/learned.md` outside ADS, for example a hand edit. It names the commit, with the fix `ads memory reset`.
