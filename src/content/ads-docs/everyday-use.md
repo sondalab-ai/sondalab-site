@@ -28,11 +28,31 @@ sources:
   - cmd/ads/testdata/script/trust_risk_rule.txtar
   - internal/flow/trustexempt.go
   - internal/trust/exempt.go
-syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
-verified: 2026-11-19
+syncedFrom: 5819cf8f50e2a3390b31f07bd494192d20231671
+verified: 2026-11-21
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
+
+Every session in a repository that uses ADS starts with a one-line reminder of what to say:
+
+```text
+ads: say "fix #N", "work the queue", "what is waiting for me?" or "sweep the codebase". Approve with "ok <code>". New here? Say "what is ads?".
+```
+
+## Get a tour
+
+You learn the workflow in five steps, with the real state of your repository.
+
+**Situation.** You open Claude Code in a repository that uses ADS for the first time.
+
+**You say**
+
+```text
+what is ads?
+```
+
+**You see** a short tour in plain words: what ADS does, where work comes from, what to say, how approvals work, and last the list of what waits for you now. The tour changes nothing. "how do I start?" gives the same tour.
 
 ## Fix an issue
 

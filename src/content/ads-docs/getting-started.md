@@ -30,8 +30,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
-verified: 2026-11-19
+syncedFrom: 5819cf8f50e2a3390b31f07bd494192d20231671
+verified: 2026-11-21
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -75,7 +75,7 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 - to make the first signed commit of `.ads/` on the trunk (the main branch, for example `main`), or a join request when `.ads/` already exists;
 - to set the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
 
-The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
+The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` shows you, at the start of every session, a one-line reminder of what to say, with "what is ads?" for a short tour. It also tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
 
 ### Why there are two keys
 

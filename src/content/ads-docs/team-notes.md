@@ -34,8 +34,8 @@ sources:
   - internal/flow/trustnotes_test.go
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
-syncedFrom: 1b933d32f8bcecc215dc94fc41e618b023b4718f
-verified: 2026-11-19
+syncedFrom: 5819cf8f50e2a3390b31f07bd494192d20231671
+verified: 2026-11-21
 ---
 
 This page answers: how do the agents learn from past work in the repository, and what do I approve on the way? The notes are short lines on the trunk. A person approves every team note. The team adds learned notes when a fix lands, and the ones that touch a guard wait for your `ok <code>`. Memory is on by default: with no `memory` block in `.ads/config.yaml`, the assessor and the reviewers read the notes and the team learns from its fixes. `memory: {roles: []}` turns it off.
