@@ -23,8 +23,8 @@ sources:
   - internal/flow/learning.go
   - internal/stage/learn.go
   - internal/stage/memory.go
-syncedFrom: 9c1afcedbf36d2a401d5f3a9d7e7b88381823f1a
-verified: 2026-11-21
+syncedFrom: 6eaec0fe58d19be52fe2b5771b3eea96106ed9e1
+verified: 2026-11-22
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
