@@ -34,7 +34,7 @@ sources:
   - internal/flow/trustnotes_test.go
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
-syncedFrom: 6eaec0fe58d19be52fe2b5771b3eea96106ed9e1
+syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
 verified: 2026-11-22
 ---
 
