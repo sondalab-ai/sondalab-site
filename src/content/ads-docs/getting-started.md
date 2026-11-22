@@ -20,6 +20,7 @@ sources:
   - internal/hooks/claude/settings.json
   - internal/hooks/install.go
   - internal/hooks/setters.go
+  - internal/hooks/linked.go
   - scripts/uninstall.sh
   - internal/agent/kinds/kinds.go
   - internal/onboard/ghversion.go
@@ -33,7 +34,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
+syncedFrom: 090666eb2ccbf3571f20bd7dcd641e6eceded326
 verified: 2026-11-22
 ---
 
@@ -80,7 +81,7 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 
 The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` shows you, at the start of every session, a one-line reminder of what to say, with "what is ads?" for a short tour. It also tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
 
-The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
+The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. Agents cannot change such a hook: the guard refuses it, so ask a person to make that edit. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
 
 ### Why there are two keys
 
