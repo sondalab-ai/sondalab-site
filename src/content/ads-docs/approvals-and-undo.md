@@ -28,8 +28,8 @@ sources:
   - cmd/ads/testdata/script/work_stranger.txtar
   - internal/flow/trustexempt.go
   - internal/trust/exempt.go
-syncedFrom: 9c1afcedbf36d2a401d5f3a9d7e7b88381823f1a
-verified: 2026-11-21
+syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
+verified: 2026-11-22
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).

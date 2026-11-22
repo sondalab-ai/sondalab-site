@@ -18,6 +18,9 @@ sources:
   - internal/cli/doctor.go
   - internal/cli/memorydrift.go
   - internal/hooks/claude/settings.json
+  - internal/hooks/install.go
+  - internal/hooks/setters.go
+  - scripts/uninstall.sh
   - internal/agent/kinds/kinds.go
   - internal/onboard/ghversion.go
   - cmd/ads/testdata/script/init_rerun.txtar
@@ -30,8 +33,8 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 9c1afcedbf36d2a401d5f3a9d7e7b88381823f1a
-verified: 2026-11-21
+syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
+verified: 2026-11-22
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -76,6 +79,8 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 - to set the GitHub rulesets of the trunk, the git hooks, and the Claude Code hooks that make approvals in the session work.
 
 The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` shows you, at the start of every session, a one-line reminder of what to say, with "what is ads?" for a short tour. It also tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
+
+The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
 
 ### Why there are two keys
 
@@ -207,6 +212,6 @@ make uninstall                      # this machine
 make uninstall ARGS="--repo <dir>"  # this machine and one repository
 ```
 
-The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, every sweep schedule on macOS, and the team key on GitHub. On Linux, `ads sweep schedule` wrote no file: remove the line that runs `sweep --scheduled` from your crontab yourself. With `--repo`, it also removes the ADS git hooks and settings of that repository. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes.
+The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, every sweep schedule on macOS, and the team key on GitHub. On Linux, `ads sweep schedule` wrote no file: remove the line that runs `sweep --scheduled` from your crontab yourself. With `--repo`, it also removes the ADS git hooks and settings of that repository, and puts back the hooks that ADS kept in `<name>.d/` or saved as `<name>.pre-ads`. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes.
 
 It never removes `.ads/` on the trunk, the GitHub rulesets, your own signing key on GitHub, or your SSH keys. It prints the commands for those.
