@@ -34,7 +34,7 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: a6b60fb9e2b76226cf6e95e157151c2b3394b6ed
+syncedFrom: 60bcccc107db686e9af80155387353622d9edce1
 verified: 2026-11-22
 ---
 
