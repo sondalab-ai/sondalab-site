@@ -17,9 +17,10 @@
  * skills/ads-workflow/SKILL.md).
  * ADS 154c220 (sguardo retro): the approval block puts the details first
  * and ends with the short tail (internal/flow/ask.go approvalBlock, as
- * cmd/ads/testdata/script/signoff_flow.txtar prints it). The session keeps
- * every step line, which ads status --follow --verbose prints; the skill
- * now relays only the risk and End lines.
+ * cmd/ads/testdata/script/signoff_flow.txtar prints it). The session shows
+ * only what skills/ads-workflow/SKILL.md relays of ads status --follow: the
+ * End lines and the risk lines (Plan or Step lines whose text starts with
+ * "risk"), never the other Plan or Step lines.
  * Text in backticks is shown in code font.
  */
 
@@ -62,13 +63,7 @@ export const ADS_HERO = {
 
 export const ADS_SESSION: readonly TranscriptLine[] = [
   { text: '> fix #13', role: 'prompt' },
-  { text: '#13  Plan   feature: Add a cover target to the Makefile', role: 'dim' },
   { text: '#13  Plan   risk high (forecast): Makefile matches a path rule, declared trivial', role: 'dim' },
-  { text: '#13  Plan   test author, implementer, 6 review layers · at most 3 rounds · 8M tokens · 3600 s', role: 'dim' },
-  { text: '#13  Step   test author done · 1 frozen test · 74 s' },
-  { text: '#13  Step   round 1 · implementer done · 32 s' },
-  { text: '#13  Step   checks: test pass · frozen pass' },
-  { text: '#13  Step   review round 1: correctness ✓ · scope ✓ · acceptance ✓ · security ✓ · concurrency ✓ · api ✓', role: 'ok' },
   { text: '#13  End    ready for sign-off · 123k tokens', role: 'accent' },
 ];
 
