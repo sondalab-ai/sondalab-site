@@ -34,8 +34,12 @@ sources:
   - internal/term/tui.json
   - cmd/ads/testdata/script/version.txtar
   - cmd/ads/testdata/script/work_default.txtar
-syncedFrom: 090666eb2ccbf3571f20bd7dcd641e6eceded326
-verified: 2026-11-22
+  - internal/onboard/stack.go
+  - internal/onboard/launchdhome.go
+  - internal/cli/doctorchecks.go
+  - skills/ads-workflow/SKILL.md
+syncedFrom: 154c220fa5bc9520494972cd52ac3c8cebd2844b
+verified: 2026-11-23
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
@@ -82,6 +86,10 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` shows you, at the start of every session, a one-line reminder of what to say, with "what is ads?" for a short tour. It also tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
 
 The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. Agents cannot change such a hook: the guard refuses it, so ask a person to make that edit. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
+
+On a new repository, `ads init` also writes the checks for the stack it finds in the root files, such as `go.mod` or `package.json` with its lock file. It runs nothing to find them. The `Stack` line names what it found, for example `Go` or `pnpm + Vitest`. With no known stack it warns `no known stack: no check command, so ads work refuses until .ads/config.yaml has one`: `ads work` does not start until the config names a check command ([How a change lands](/ads/docs/how-changes-land/#checks)).
+
+On macOS, `ads init` refuses to touch launchd when `HOME` is not the home of your account, and names both paths. Agents in Claude Code cannot run `ads init`: run it yourself in a terminal.
 
 ### Why there are two keys
 
@@ -137,7 +145,9 @@ Where an agent runs depends on its kind. An `exec` adapter runs under the sandbo
 
 ## Check: `ads doctor`
 
-`ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
+`ads doctor` re-runs the read-only checks of the setup. It changes no file and no branch. Run it in a terminal when something does not work.
+
+It can also run your checks on the trunk the way `ads work` does: `checks.setup` once, then each check of the lowest risk class that has one, in a temporary checkout of the trunk tip with a temporary `HOME`. Each command gets at most 300 seconds and no retry. It also tries `checks.test_runner` on the first file that matches `checks.test_paths`. These run the commands of the repository on your machine, so the first `ads doctor` in a clone asks before it runs them, and remembers a yes. Without a terminal, or with `--json`, it skips them unless you pass `--checks`. `--no-checks` always skips them. One `Trunk setup`, `Trunk check <name>` or `Test runner` line per step says why a step fails and what to do, for example that the command already fails on the trunk, so `ads work` cannot tell a change's own failure from it. A setup that installs packages needs network access. It exits 0 when no check failed, 1 when one did, and 2 on an internal error. `ads doctor --json` prints the same result for a script. While any role uses the `fake` adapter, it shows an `Agents` warning that names those roles.
 
 It also checks the agents and their config. The adapters of the roles count, and so does the `escalate_to` adapter of the implementer:
 
@@ -175,15 +185,10 @@ The fix of both warnings is `upgrade gh to 2.50 or newer`. With `--no-github`, o
 fix #12
 ```
 
-**You see** the plan, one line per step and the end, then the report:
+**You see** the risk of the change, its end, then the report:
 
 ```text
-#12  Plan   bug: ApplyFee truncates instead of rounding
 #12  Plan   risk low (forecast): as declared
-#12  Plan   test author, implementer, 1 review layer · at most 3 rounds · 1.5M tokens · 3600 s
-#12  Step   test author done · 2 frozen tests · 74 s
-#12  Step   round 1 · implementer done · 32 s
-…
 #12  End    landed · 1.2M tokens · $0.21
 
 Landed: #12 ApplyFee truncates instead of rounding            bug · risk low · 1.2M tokens · $0.21
@@ -196,7 +201,7 @@ Review       correctness ✓
 Undo         say "undo #12"
 ```
 
-**What happens.** Claude Code runs `ads work 12` in the background and relays its lines. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. A change of trivial, low or medium risk that stays within its size limit and passes every check can land by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. If you press Ctrl-C while it runs, the running stage ends cleanly, the steps after it still run, and the command exits with 130 (143 for SIGTERM); a second signal kills it at once. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
+**What happens.** Claude Code runs `ads work 12` in the background, follows it with `ads status --follow`, and relays only the risk lines and the `End` line. A test author writes tests that fail on the current code, and they are frozen. An implementer changes the code until those tests and the checks pass. A reviewer checks the change. A change of trivial, low or medium risk that stays within its size limit and passes every check can land by itself, signed in git. The report is the last thing you see: `Landed`, `Ready for sign-off` when it waits for you, or `Waiting for you` with one question. If you press Ctrl-C while it runs, the running stage ends cleanly, the steps after it still run, and the command exits with 130 (143 for SIGTERM); a second signal kills it at once. [Everyday use](/ads/docs/everyday-use/) has more recipes, and [How a change lands](/ads/docs/how-changes-land/) has the rules.
 
 ## Update
 
@@ -213,6 +218,6 @@ make uninstall                      # this machine
 make uninstall ARGS="--repo <dir>"  # this machine and one repository
 ```
 
-The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, every sweep schedule on macOS, and the team key on GitHub. On Linux, `ads sweep schedule` wrote no file: remove the line that runs `sweep --scheduled` from your crontab yourself. With `--repo`, it also removes the ADS git hooks and settings of that repository, and puts back the hooks that ADS kept in `<name>.d/` or saved as `<name>.pre-ads`. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes.
+The script lists what it removes and asks once. On this machine it removes the `ads` binary and its `PATH` line, the skill, the `ads.*` settings of your global git config, the ADS entries of the Claude Code hooks, every sweep schedule on macOS, and the team key on GitHub. On Linux, `ads sweep schedule` wrote no file: remove the line that runs `sweep --scheduled` from your crontab yourself. With `--repo`, it also removes the ADS git hooks and settings of that repository, and puts back the hooks that ADS kept in `<name>.d/` or saved as `<name>.pre-ads`. Clean each repository where you ran `ads init`: without the `ads` binary, its hooks block commits and pushes. On macOS, when `HOME` is not the home of your account, the script still removes the files under that `HOME` but stops no launchd job, and says why.
 
 It never removes `.ads/` on the trunk, the GitHub rulesets, your own signing key on GitHub, or your SSH keys. It prints the commands for those.

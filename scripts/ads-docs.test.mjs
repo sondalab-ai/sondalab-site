@@ -158,6 +158,10 @@ const VERIFIED = new Set([
   '140', // internal/memory/filter.go:30 MaxNoteRunes = 140
   '100', // internal/flow/memoryreminder.go:34 maxIssueLines = 100
   '0042', // example: CDR-0042 (docs/guides/api.md learnings_waiting entry, docs/guides/setup.md)
+  // Sguardo retro epic, checked against ADS 154c220.
+  '300', // internal/cli/doctorchecks.go:27 doctorCheckTimeout = 300 (ads doctor trunk checks)
+  '1250', // example: seconds spent in the budget question (internal/flow/budget.go:226 "%.0f of %d seconds")
+  '0002', // example: refs/ads/attempts/CDR-0002/A1 of the Branch line (internal/report/view_test.go:233)
 ]);
 
 test('the pages state no number that was not verified', () => {

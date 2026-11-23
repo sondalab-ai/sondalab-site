@@ -15,6 +15,11 @@
  * from ADS 6846133 (README.md, internal/flow/landing.go).
  * The "update the team notes" row comes from ADS b64742e (README.md,
  * skills/ads-workflow/SKILL.md).
+ * ADS 154c220 (sguardo retro): the approval block puts the details first
+ * and ends with the short tail (internal/flow/ask.go approvalBlock, as
+ * cmd/ads/testdata/script/signoff_flow.txtar prints it). The session keeps
+ * every step line, which ads status --follow --verbose prints; the skill
+ * now relays only the risk and End lines.
  * Text in backticks is shown in code font.
  */
 
@@ -68,8 +73,6 @@ export const ADS_SESSION: readonly TranscriptLine[] = [
 ];
 
 export const ADS_APPROVAL: readonly TranscriptLine[] = [
-  { text: 'ads needs your approval: sign off and land #13 "Add a cover target to the Makefile"', role: 'accent' },
-  { text: '' },
   { text: '  Risk: high' },
   { text: '  Tests: 1 frozen test failed before the change and passes now, checks pass' },
   { text: '  Spent: 123k tokens' },
@@ -77,6 +80,9 @@ export const ADS_APPROVAL: readonly TranscriptLine[] = [
   { text: '    - cover_cdr0013_test.go (+18 −0)' },
   { text: '    - Makefile (+4 −0)' },
   { text: '  Head: 3f9c0a7b12de' },
+  { text: '' },
+  { text: 'ads needs your approval: sign off and land #13 "Add a cover target to the Makefile"', role: 'accent' },
+  { text: '  Lands 2 changed files at risk high.' },
   { text: '' },
   { text: 'To approve, reply:   ok 4f2a', role: 'prompt' },
 ];

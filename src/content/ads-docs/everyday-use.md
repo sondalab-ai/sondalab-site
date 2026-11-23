@@ -28,8 +28,10 @@ sources:
   - cmd/ads/testdata/script/trust_risk_rule.txtar
   - internal/flow/trustexempt.go
   - internal/trust/exempt.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+  - internal/cli/github_test.go
+  - cmd/ads/testdata/script/github_flow.txtar
+syncedFrom: 154c220fa5bc9520494972cd52ac3c8cebd2844b
+verified: 2026-11-23
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -78,6 +80,8 @@ Answer       say what to do, for example "half up"
 
 **What happens.** Claude Code runs `ads work 12` in the background. When the request is clear, the team writes the tests (none for a docs change), makes the change and reviews it, and you get a report that starts with `Landed`, `Ready for sign-off` or `Waiting for you`. Here it asks first. Answer in your own words, for example "half up": the team goes on from where it stopped. A plain description works as well as an issue number, for example "add a cover target to the Makefile".
 
+`ads work` exits 2 when the change waits for you: a question, a sign-off, or a stop or pause. That is not a failure, even when the session marks the background command as failed. Only exit 1 is an error. A warning such as `GitHub: …` or `no sandbox: …` shows once: a GitHub warning once per change and text in one run, and `no sandbox` once per change across runs. A new change of the same issue, such as a new try after a stop, shows it again.
+
 Comments of accounts without write access never reach the team: `ads work` drops them. An issue that such an account opened waits for your `ok <code>` before the team reads it ([Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/#an-issue-from-another-account)).
 
 ## Work the queue
@@ -92,18 +96,21 @@ You clear the issues you labeled for the team, one at a time, without starting e
 work the queue
 ```
 
-**You see** the report of each change, then what waits for you:
+**You see** the report of each change, then what waits for you, one decision at a time:
 
 ```text
 Landed: #12 ApplyFee truncates instead of rounding            bug · risk low · 1.2M tokens · $0.21
 …
 
-Waiting for you:
-  #13 "Add a cover target to the Makefile": waits for your sign-off
+Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
+…
+Sign-off     say "sign off #13"
+…
+Also waiting, oldest first:
   #14 "Split loses the remainder": a question: Keep the remainder on the last share?
 ```
 
-**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with the list of what waits for you, and Claude Code takes each item with you, one at a time. Issues that `ads sweep` filed carry the `ads` label too, so the queue works them like the others. The queue skips an issue that an account without write access opened, with `skipped #N: opened by an account without write access`: say "fix #N" to work on it after your approval.
+**What happens.** Claude Code runs `ads work --queue` in the background. It works the open issues labeled `ads`, then the follow-ups the team filed, one at a time. It ends with what waits for you: the decision that has waited longest, in full, then each other one on one line under `Also waiting, oldest first:`. Each decision shows once. Claude Code takes the one in full with you, then runs `ads status` for the next one. Issues that `ads sweep` filed carry the `ads` label too, so the queue works them like the others. The queue skips an issue that an account without write access opened, with `skipped #N: opened by an account without write access`: say "fix #N" to work on it after your approval.
 
 ## Sweep the codebase
 
@@ -144,14 +151,17 @@ what is waiting for me?
 **You see**
 
 ```text
-Waiting for you:
-  #13 "Add a cover target to the Makefile": waits for your sign-off
+Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
+…
+Sign-off     say "sign off #13"
+…
+Also waiting, oldest first:
   #14 "Split loses the remainder": needs one more budget (1.5M tokens)
 Recent:
   #12 "ApplyFee truncates instead of rounding": landed 2026-11-14
 ```
 
-**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. When nothing waits, the first line is `Nothing is waiting for you.` When learned notes wait for your ok, the first line is `2 learned notes wait for your ok. Say "show waiting notes".` instead. After the list, a line can say that team notes changed in MxM or that a reviewer flagged a team note ([Team notes](/ads/docs/team-notes/)). Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
+**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. The decision that has waited longest comes first, in full, as `ads work` prints it: the question with its options, the sign-off report, or the paused report. A budget question also shows the size of one more budget on an `Extra` line. Every other decision follows on one line. Claude Code takes them with you one at a time, oldest first. Before a second budget question for the same change, Claude Code reads the report of the change and tells you why the rounds did not finish. When nothing waits, the first line is `Nothing is waiting for you.` When learned notes wait for your ok, the first line is `2 learned notes wait for your ok. Say "show waiting notes".` instead. After the list, a line can say that team notes changed in MxM or that a reviewer flagged a team note ([Team notes](/ads/docs/team-notes/)). Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
 
 ## One more round
 
@@ -165,11 +175,11 @@ You correct a change in your own words before it lands, without writing code.
 change the target name to coverage
 ```
 
-**You see** the live lines of the new round, then a new report:
+**You see** the end of the new round, then a new report:
 
 ```text
-#13  Step   round 2 · implementer done · 32 s
-…
+#13  End    ready for sign-off · …
+
 Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
 …
 Why          risk high
@@ -177,6 +187,8 @@ Sign-off     say "sign off #13"
 ```
 
 **What happens.** After a report, "change X" means one more round with your words: Claude Code runs `ads work 13 --answer "change the target name to coverage"`. While the change is not landed, a comment on its pull request steers the next round too. After a change has landed, "change X" starts a new change that names the landed one.
+
+A report can show a `Branch` line in place of the `PR` line, for example `Branch       refs/ads/attempts/CDR-0002/A1 · 2 files +10 −2 · not on GitHub`. Then GitHub has no pull request for the change, so there is nothing to read or comment on there: steer it with "change X" in the session. The line names the local ref of the change and its size, so you can look at the diff with `git diff`. It ends with `not on GitHub` when the change stays on your machine until your sign-off (high risk, or a CI file), and with `no pull request` when the change was pushed but the pull request could not be opened. The report and the sign-off work as usual.
 
 ## Stricter rules
 
@@ -197,10 +209,11 @@ Adds payment/** to the high-risk rule.
 2 files on the trunk gain protection and go from low to high risk, for example payment/charge.go.
 rev …
 
-ads needs your approval: change the team rules
-
   Adds payment/** to the high-risk rule.
   2 files on the trunk gain protection and go from low to high risk, for example payment/charge.go.
+
+ads needs your approval: change the team rules
+  Makes the team-rule changes listed above.
 
 To approve, reply:   ok 7c1e
 ```
@@ -226,8 +239,10 @@ Adds the note:
   "Fee rounding uses banker's rounding."
 rev …
 
-ads needs your approval: change the team rules
 …
+ads needs your approval: change the team rules
+  Makes the team-rule changes listed above.
+
 To approve, reply:   ok 6b0d
 ```
 
@@ -260,12 +275,8 @@ follow only high risk
 **You see** only the lines of #13, the high-risk change:
 
 ```text
-#13  Plan   feature: Add a cover target to the Makefile
 #13  Plan   risk high (forecast): Makefile matches a path rule, declared trivial
-#13  Plan   test author, implementer, 6 review layers · at most 3 rounds · 8M tokens · 3600 s
-…
 #13  End    ready for sign-off · 123k tokens
-no running change for 120 seconds
 ```
 
-**What happens.** While the team works, Claude Code shows live lines: the plan of each running change, one line per step, and an `End` line when the change lands, waits for you, or stops. By default it follows every running change. "follow only high risk" runs `ads status --follow --risk high`, and "follow only #13" runs `ads status 13 --follow`. A change whose risk rises out of the filter, for example to critical, ends with `risk is now critical: no longer followed`.
+**What happens.** While the team works, Claude Code runs `ads status --follow`, which is quiet by default. It prints the plan of each change, what a change that already runs does now, a line when the risk of a change moves, and an `End` line when the change lands, waits for you, or stops. Claude Code shows you only the risk lines and the `End` lines, as they are. A long `End` or risk line goes on over more lines that start with the same issue number, so the reason is never cut. `ads status --follow --verbose` prints every step, such as `round 1 · implementer done · 32 s`, but Claude Code never adds `--verbose`. By default it follows every running change. "follow only high risk" runs `ads status --follow --risk high`, and "follow only #13" runs `ads status 13 --follow`. A change whose risk rises out of the filter, for example to critical, ends with `risk is now critical: no longer followed`.

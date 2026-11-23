@@ -35,8 +35,12 @@ test('the session shows the request, the plan, the steps and the end', () => {
   assert.match(texts.at(-1), /^#13  End    /);
 });
 
-test('the approval block ends on the reply line with a 4-hex code', () => {
-  assert.match(ADS_APPROVAL[0].text, /^ads needs your approval: /);
+// ADS 154c220 internal/flow/ask.go approvalBlock: the details first, then the
+// short tail, with the reply line last.
+test('the approval block ends on the short tail and the reply line with a 4-hex code', () => {
+  assert.match(ADS_APPROVAL.at(-4).text, /^ads needs your approval: /);
+  assert.match(ADS_APPROVAL.at(-3).text, /^ {2}\S/);
+  assert.equal(ADS_APPROVAL.at(-2).text, '');
   assert.match(ADS_APPROVAL.at(-1).text, /^To approve, reply:\s+ok [0-9a-f]{4}$/);
 });
 
