@@ -80,7 +80,7 @@ Answer       say what to do, for example "half up"
 
 **What happens.** Claude Code runs `ads work 12` in the background. When the request is clear, the team writes the tests (none for a docs change), makes the change and reviews it, and you get a report that starts with `Landed`, `Ready for sign-off` or `Waiting for you`. Here it asks first. Answer in your own words, for example "half up": the team goes on from where it stopped. A plain description works as well as an issue number, for example "add a cover target to the Makefile".
 
-`ads work` exits 2 when the change waits for you: a question, a sign-off, or a stop or pause. That is not a failure, even when the session marks the background command as failed. Only exit 1 is an error. A warning such as `GitHub: …` or `no sandbox: …` shows once: a GitHub warning once per change and text in one run, and `no sandbox` once per change across runs. A new change of the same issue, such as a new try after a stop, shows it again.
+`ads work` exits 0 when the change landed, when it stopped or paused as you asked, and when it skipped an issue. It exits 2 when the change waits for you: a question, a sign-off, or a stop or pause that a plain run found. Exit 2 is not a failure, even when the session marks the background command as failed. Only exit 1 is an error. A warning such as `GitHub: …` or `no sandbox: …` shows once: a GitHub warning once per change and text in one run, and `no sandbox` once per change across runs. A new change of the same issue, such as a new try after a stop, shows it again.
 
 Comments of accounts without write access never reach the team: `ads work` drops them. An issue that such an account opened waits for your `ok <code>` before the team reads it ([Approvals, undo, pause and stop](/ads/docs/approvals-and-undo/#an-issue-from-another-account)).
 
@@ -240,6 +240,7 @@ Adds the note:
 rev …
 
 …
+
 ads needs your approval: change the team rules
   Makes the team-rule changes listed above.
 

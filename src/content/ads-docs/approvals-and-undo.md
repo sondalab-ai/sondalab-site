@@ -41,7 +41,7 @@ A fix of an issue that `ads sweep` filed needs your sign-off from risk `medium` 
 
 ## The approval block
 
-When an action needs you, Claude Code shows one block. Every block ends with the same short tail: `ads needs your approval:` and what ADS asks to do, one indented line with its cost or effect, a blank line, and last the line to reply with. A sign-off, a team-rule change, a note question or an issue from another account shows every detail in full above the tail. A budget, stop or undo question is the 4 lines of the tail alone.
+When an action needs you, Claude Code shows one block. Every block ends with the same short tail: `ads needs your approval:` and what ADS asks to do, one indented line with its cost or effect, a blank line, and last the line to reply with. A sign-off, a team-rule change, a note question or an issue from another account shows every detail in full above the tail. A budget, stop or undo question is the 4 lines of the tail alone, except an undo whose runbook path does not fit on the effect line: the path then goes on its own line above the tail.
 
 **Situation.** #13 adds a target to the `Makefile`, which a path rule makes high risk. The report says `Ready for sign-off`.
 
@@ -143,7 +143,7 @@ Paused: #12 ApplyFee truncates instead of rounding            risk low · …
 Resume       say "work on #12"
 ```
 
-**What happens.** The team stops after its current step. Nothing is lost, and no approval is needed. The current step can still land the change. "work on #12", "fix #12" or "resume #12" goes on where it paused. While it is paused, `what is waiting for me?` shows `#12 "ApplyFee truncates instead of rounding": paused, say "work on #12" to go on`. When nothing runs, the answer is `nothing to pause for #12`.
+**What happens.** The team stops after its current step. Nothing is lost, and no approval is needed. The current step can still land the change. "work on #12", "fix #12" or "resume #12" goes on where it paused. While it is paused, `what is waiting for me?` shows the paused report in full when it is the decision that has waited longest. Otherwise it shows one line under `Also waiting, oldest first:`, `#12 "ApplyFee truncates instead of rounding": paused, say "work on #12" to go on`. When nothing runs, the answer is `nothing to pause for #12`.
 
 ## Stop a change
 

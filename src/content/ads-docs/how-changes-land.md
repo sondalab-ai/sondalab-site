@@ -104,7 +104,7 @@ Fix the environment, then answer `fix the environment, then retry`: ADS runs the
 
 The test author writes new test files that carry the change tag in their name, for example `split_cdr0007_test.go`, or `split.cdr0007.test.ts` in the usual JavaScript and TypeScript form.
 
-For a change of type `refactor`, `chore` or `docs`, each acceptance criterion names what stays the same, for example "MONOREPO_ROOT still resolves to the same path", and the new text goes in the intent. So a comment-only change in a code file is a `chore`, and its tests check that the code still behaves the same, never the text of the comment.
+For a change of type `refactor`, `chore` or `docs`, each acceptance criterion names what stays the same, for example "MONOREPO_ROOT still resolves to the same path", and the new text goes in the intent. So a comment-only change in a code file is a `chore`, and its tests check that the code still behaves the same, never the text of the comment. A repository that keeps its own `.ads/prompts/assessor.md` or `.ads/prompts/test_author.md` does not get these rules.
 
 ## Review layers
 
