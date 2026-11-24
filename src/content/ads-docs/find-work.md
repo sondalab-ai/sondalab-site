@@ -29,8 +29,9 @@ sources:
   - cmd/ads/testdata/script/sweep_schedule.txtar
   - cmd/ads/testdata/script/sweep_schedule_exec.txtar
   - internal/agent/kinds/kinds.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+  - internal/onboard/launchdhome.go
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: how does ADS find work on its own, what does it file, and how do I run it on a schedule? A sweep reads part of the trunk with read-only agents. It files what they find as GitHub issues labeled `ads`. It never fixes anything by itself. You start the fixes when you say "work the queue".
@@ -224,6 +225,7 @@ There is one schedule per clone. The scheduled job runs `ads sweep --scheduled` 
 - The label is `ai.sondalab.ads-sweep.<id>`. The `<id>` is the first 12 hex characters of the sha256 of the absolute path of the main worktree. A new schedule of the same clone replaces the old one.
 - The plist is `~/Library/LaunchAgents/ai.sondalab.ads-sweep.<id>.plist`.
 - `ads sweep unschedule` stops the job and deletes the plist.
+- `ads sweep schedule` and `ads sweep unschedule` refuse to touch launchd when `HOME` is not the home of your account, for example a temporary `HOME`: `ads changes launchd jobs only for the home of your account`. The error names both paths, and its fix runs the same command with `env HOME=<your home>`.
 - An older ADS keyed a schedule on the worktree you set it from, so a linked worktree could have its own job. `ads sweep schedule` and `ads sweep unschedule` stop and remove such a job, after their own work, and say `Removed <plist>, an old schedule of a linked worktree`. They try every old job. When one cannot be removed, the command fails with an error that names each plist that is left and gives the commands to remove it. ADS leaves alone a job of a linked worktree that git no longer lists, for example after `git worktree prune`. Remove it with `launchctl bootout gui/$UID/<label>`, then delete `~/Library/LaunchAgents/<label>.plist`. `make uninstall` also removes it. A bare repository or a custom git dir keeps one schedule per worktree, so ADS removes none there.
 
 **On Linux**, `ads sweep schedule` writes nothing. It prints a line for you to add with `crontab -e`, for example:

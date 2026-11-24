@@ -31,7 +31,7 @@ for (const width of [44, 52, 104]) {
 test('rows keep the line role, and an unpainted line is ink', () => {
   const rows = layoutRows(SCRIPT, 44);
   assert.equal(rows[0].role, 'prompt');
-  assert.ok(rows.filter((r) => r.line === 7).every((r) => r.role === 'ok'));
+  assert.ok(rows.filter((r) => r.line === 2).every((r) => r.role === 'accent'));
   assert.equal(rows.find((r) => r.line === 4).role, 'ink');
 });
 

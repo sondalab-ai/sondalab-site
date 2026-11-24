@@ -28,8 +28,11 @@ sources:
   - cmd/ads/testdata/script/work_stranger.txtar
   - internal/flow/trustexempt.go
   - internal/trust/exempt.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+  - internal/flow/signoff.go
+  - internal/flow/memoryforget.go
+  - internal/flow/memoryreset.go
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).
@@ -38,7 +41,7 @@ A fix of an issue that `ads sweep` filed needs your sign-off from risk `medium` 
 
 ## The approval block
 
-When an action needs you, Claude Code shows one block: `ads needs your approval:` and what it is about, the facts on indented lines, and last the line to reply with.
+When an action needs you, Claude Code shows one block. Every block ends with the same short tail: `ads needs your approval:` and what ADS asks to do, one indented line with its cost or effect, a blank line, and last the line to reply with. A sign-off, a team-rule change, a note question or an issue from another account shows every detail in full above the tail. A budget, stop or undo question is the 4 lines of the tail alone, except an undo whose runbook path does not fit on the effect line: the path then goes on its own line above the tail.
 
 **Situation.** #13 adds a target to the `Makefile`, which a path rule makes high risk. The report says `Ready for sign-off`.
 
@@ -51,8 +54,6 @@ sign off #13
 **You see**
 
 ```text
-ads needs your approval: sign off and land #13 "Add a cover target to the Makefile"
-
   Risk: high
   Tests: 1 frozen test failed before the change and passes now, checks pass
   Spent: 123k tokens
@@ -61,10 +62,13 @@ ads needs your approval: sign off and land #13 "Add a cover target to the Makefi
     - Makefile (+4 −0)
   Head: 3f9c0a7b12de
 
+ads needs your approval: sign off and land #13 "Add a cover target to the Makefile"
+  Lands 2 changed files at risk high.
+
 To approve, reply:   ok 4f2a
 ```
 
-**What happens.** Reply with that line alone: `ok 4f2a`. Then the change is signed with your key and lands. The code is 4 random hex characters, new for each question, and appears only on the last line.
+**What happens.** Reply with that line alone: `ok 4f2a`. Then the change is signed with your key and lands. The code is 4 random hex characters, new for each question, and appears only on the last line. The `Tests` line says `checks pass` only when the checks pass at the risk of the change. When they fail only where the trunk fails too, it says `checks fail on base too`.
 
 ## How to answer
 
@@ -112,13 +116,12 @@ undo #12, it broke the login
 
 ```text
 ads needs your approval: undo #12 "ApplyFee truncates instead of rounding"
-
-  Landed: 2026-11-14
+  Landed on 2026-11-14.
 
 To approve, reply:   ok 9e1b
 ```
 
-**What happens.** After your `ok <code>`, ADS creates a revert of #12 with your reason, "it broke the login", and runs it. The revert is reviewed, by the correctness layer by default, and takes #12 off the trunk with a signed commit. The history of #12 stays in git. When later changes build on #12, the block adds a line `Later changes that build on it stay: …`. Afterwards `what is waiting for me?` lists it under `Recent` as `undone`.
+**What happens.** After your `ok <code>`, ADS creates a revert of #12 with your reason, "it broke the login", and runs it. The revert is reviewed, by the correctness layer by default, and takes #12 off the trunk with a signed commit. The history of #12 stays in git. When later changes build on #12, the effect line says so, for example `Landed on 2026-11-14. 1 later change that builds on it stays.` Afterwards `what is waiting for me?` lists it under `Recent` as `undone`.
 
 ## Pause a change
 
@@ -140,7 +143,7 @@ Paused: #12 ApplyFee truncates instead of rounding            risk low · …
 Resume       say "work on #12"
 ```
 
-**What happens.** The team stops after its current step. Nothing is lost, and no approval is needed. The current step can still land the change. "work on #12", "fix #12" or "resume #12" goes on where it paused. While it is paused, `what is waiting for me?` shows `#12 "ApplyFee truncates instead of rounding": paused, say "work on #12" to go on`. When nothing runs, the answer is `nothing to pause for #12`.
+**What happens.** The team stops after its current step. Nothing is lost, and no approval is needed. The current step can still land the change. "work on #12", "fix #12" or "resume #12" goes on where it paused. While it is paused, `what is waiting for me?` shows the paused report in full when it is the decision that has waited longest. Otherwise it shows one line under `Also waiting, oldest first:`, `#12 "ApplyFee truncates instead of rounding": paused, say "work on #12" to go on`. When nothing runs, the answer is `nothing to pause for #12`.
 
 ## Stop a change
 
@@ -158,7 +161,6 @@ stop #14
 
 ```text
 ads needs your approval: stop the work on #14 "Prevent duplicates"
-
   The team stops, and the pull request of the change is closed.
 
 To approve, reply:   ok 2c7d
@@ -168,21 +170,24 @@ Stopped: #14 Prevent duplicates
 
 **What happens.** After your `ok <code>`, the team stops, its pull request is closed and the branch of the change is deleted. The signed history of the change stays in git.
 
+One stop needs no approval: the answer `stop` to the question that a request typed `docs` asks before any work starts ([How a change lands](/ads/docs/how-changes-land/#docs-changes)). No change exists yet, so nothing is lost.
+
+## Fix it by hand after a stop
+
+After a stop, Claude Code can make the fix by hand, but only after your explicit yes in the chat. That yes is a plain answer, not an `ok <code>`. Claude Code makes the fix on a new branch from the trunk, with a name outside `ads/`, pushes only that branch, and opens its pull request into the trunk. It never pushes to the trunk and never merges the pull request: you review it and merge it. It never starts a hand fix while the change is not stopped.
+
 ## One more budget
 
 When a change uses up its budget, it stops with a question. Spending more needs your approval.
 
 ```text
 ads needs your approval: spend one more budget on #12 "ApplyFee truncates instead of rounding"
-
-  Risk: low
-  One more budget: 1.5M tokens
-  Spent so far: 1.5M tokens
+  One more budget: 1.5M tokens. Spent on this change so far: 1.5M tokens. Risk: low.
 
 To approve, reply:   ok 5a03
 ```
 
-After your `ok <code>`, the team goes on with one more budget of the same size. [How a change lands](/ads/docs/how-changes-land/) lists the budgets.
+`Spent on this change so far` counts every attempt of the change. After your `ok <code>`, the team goes on with one more budget of the same size. [How a change lands](/ads/docs/how-changes-land/) lists the budgets.
 
 ## A change of the team rules
 
@@ -193,16 +198,17 @@ A change of the team rules shows what it does in plain words, so you see what yo
 **You see**
 
 ```text
-ads needs your approval: change the team rules
-
   Changes the high-risk rule from high to low risk.
   2 files on the trunk lose protection and go from high to low risk, for example go.mod.
   New files that match these globs can get a lower risk.
 
+ads needs your approval: change the team rules
+  Makes the team-rule changes listed above.
+
 To approve, reply:   ok 3d8f
 ```
 
-**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The last line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection. A change that turns learning on shows `Warning: this repository is public. Anyone can read the notes the team learns.` unless `gh` says that the repository is private. A config with no `memory` block has memory on, so adding `memory: {roles: []}` shows as turning memory off.
+**What happens.** Approve only if you mean it: after your `ok <code>`, a change to those files can land by itself. The third line warns that a future file can get a lower risk too, even when no file on the trunk does today. It also shows when you drop a glob from `checks.sensitive_paths`. If the files that change risk are not the same when `ads trust apply` lands the rule (a new one on the trunk or in an open fix, or one gone), the approval no longer holds: `the state changed after the approval: ask again`. A new file that changes no risk keeps it. This holds for a change of `checks.sensitive_paths` too. [Everyday use](/ads/docs/everyday-use/#stricter-rules) shows a change that adds protection. A change that turns learning on shows `Warning: this repository is public. Anyone can read the notes the team learns.` unless `gh` says that the repository is private. A config with no `memory` block has memory on, so adding `memory: {roles: []}` shows as turning memory off.
 
 ## A hand-made commit to a trust file
 
@@ -217,13 +223,14 @@ A commit to a trust file that `ads trust apply` did not sign breaks the trust ch
 When the team learns a note from a fix that touches a guard, the fix lands and the note waits for you. The report ends with `Next: ads ask memory-keep <CDR id>`, and the session asks at once:
 
 ```text
-ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
-
   Warning: from now on, the assessor and every reviewer read this note
   in each fix. It can change what they accept.
   …
   The fix has already landed. If you do not approve, the note is
   dropped and the fix stays.
+
+ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
+  The assessor and every reviewer read this note in each fix from now on.
 
 To approve, reply:   ok 1c9a
 ```
@@ -245,8 +252,6 @@ fix #21
 **You see**
 
 ```text
-ads needs your approval: work on acme/ledger#21 "Refunds keep the fee"
-
   Opened by: "eve", an account without write access
   Its text reaches the agents as untrusted text.
   Follow-ups of this change are not filed.
@@ -262,6 +267,9 @@ ads needs your approval: work on acme/ledger#21 "Refunds keep the fee"
   cd "…/ads/outsider"
   cat 83ed926aba131cadf701b560bd266b4b2c3716d5e084577d78f94995d55fa53a.shown.txt
   shasum -a 256 83ed926aba131cadf701b560bd266b4b2c3716d5e084577d78f94995d55fa53a.txt
+
+ads needs your approval: work on acme/ledger#21 "Refunds keep the fee"
+  Lets the team work on this issue as untrusted text.
 
 To approve, reply:   ok 7b2e
 ```

@@ -27,16 +27,23 @@ test('the benefit sections come in the agreed order, after four steps', () => {
   assert.equal(ADS_STEPS.length, 4);
 });
 
-test('the session shows the request, the plan, the steps and the end', () => {
+// ADS 154c220 skills/ads-workflow/SKILL.md: the session relays only the End
+// lines and the risk lines (Plan or Step lines whose text starts with risk).
+test('the session shows the request, then only the risk and End lines', () => {
   const texts = ADS_SESSION.map((l) => l.text);
   assert.match(texts[0], /fix #13$/);
-  assert.ok(texts.some((t) => t.startsWith('#13  Plan   ')));
-  assert.ok(texts.filter((t) => t.startsWith('#13  Step   ')).length >= 2);
+  for (const t of texts.slice(1)) assert.match(t, /^#13  ((Plan|Step) {3}risk |End {4})/, t);
+  assert.ok(texts.some((t) => /^#13  (Plan|Step) {3}risk /.test(t)));
+  assert.ok(!texts.some((t) => t.startsWith('#13  Step   ')), 'a Step line is shown');
   assert.match(texts.at(-1), /^#13  End    /);
 });
 
-test('the approval block ends on the reply line with a 4-hex code', () => {
-  assert.match(ADS_APPROVAL[0].text, /^ads needs your approval: /);
+// ADS 154c220 internal/flow/ask.go approvalBlock: the details first, then the
+// short tail, with the reply line last.
+test('the approval block ends on the short tail and the reply line with a 4-hex code', () => {
+  assert.match(ADS_APPROVAL.at(-4).text, /^ads needs your approval: /);
+  assert.match(ADS_APPROVAL.at(-3).text, /^ {2}\S/);
+  assert.equal(ADS_APPROVAL.at(-2).text, '');
   assert.match(ADS_APPROVAL.at(-1).text, /^To approve, reply:\s+ok [0-9a-f]{4}$/);
 });
 

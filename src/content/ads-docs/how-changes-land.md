@@ -23,8 +23,14 @@ sources:
   - internal/flow/learning.go
   - internal/stage/learn.go
   - internal/stage/memory.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+  - internal/flow/budget.go
+  - internal/flow/environment.go
+  - internal/check/check.go
+  - internal/onboard/stack.go
+  - internal/stage/tests.go
+  - internal/agent/prompts/assessor.md
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -74,6 +80,32 @@ Even within its risk, a change lands by itself only when it is small. The limit 
 
 A binary file, or a change to a file outside what the request allows, also makes the change wait for your sign-off.
 
+## Checks
+
+The checks are the commands under `checks` in `.ads/config.yaml`. `ads init` writes them for the stack it finds in the root files of the repository (`go.mod`, `Cargo.toml`, `package.json` with its lock file, `pyproject.toml`, `uv.lock`, `poetry.lock`). It reads those files and runs nothing. A Go module gets the Go checks. A pnpm repository with Vitest in its root `package.json` gets the check `pnpm exec vitest run` and `checks.setup: "pnpm install --frozen-lockfile --prefer-offline"`. npm, yarn, Jest, Rust and Python with pytest get their own commands. The `Stack` line of `ads init` names what it found. A repository with no known stack gets no check command, and `ads work` refuses to start until the config names one: `No check command in .ads/config.yaml`.
+
+`checks.setup` is an optional command that prepares a checkout, for example `pnpm install --frozen-lockfile`. ADS runs it once in each checkout it makes before the checks run there: the change, the copy of the base, the copy for the tests and the copy for a reviewer's reproducer. It runs with the same tools, temporary home and `checks.timeout_seconds` as the checks, so a package manager starts with an empty cache each time and needs network access. With `sandbox.driver: container` the checks have no network, so an install that needs a registry fails there. `setup` is a reserved check name.
+
+A check that fails the same way on the base, before the change, is accepted only up to `medium` risk. From `high` up it blocks the round. The report then says `checks fail on base too`, not `checks pass`.
+
+A check that cannot run proves nothing about the code: a missing tool, packages that are not installed, no test files, or a failed `checks.setup`. The fix then stops with one question about the environment, instead of one more round:
+
+```text
+Waiting for you: #12 ApplyFee truncates instead of rounding
+Blocked      The check "test" could not run; the output says: "No test files found, …
+Options      1. stop  2. fix the environment, then retry
+Recommended  fix the environment, then retry
+Answer       say what to do, for example "fix the environment, then retry"
+```
+
+Fix the environment, then answer `fix the environment, then retry`: ADS runs the checks again on the same code, with no new round and no budget spent. To give up, stop the change.
+
+## Tests of a change
+
+The test author writes new test files that carry the change tag in their name, for example `split_cdr0007_test.go`, or `split.cdr0007.test.ts` in the usual JavaScript and TypeScript form.
+
+For a change of type `refactor`, `chore` or `docs`, each acceptance criterion names what stays the same, for example "MONOREPO_ROOT still resolves to the same path", and the new text goes in the intent. So a comment-only change in a code file is a `chore`, and its tests check that the code still behaves the same, never the text of the comment. A repository that keeps its own `.ads/prompts/assessor.md` or `.ads/prompts/test_author.md` does not get these rules.
+
 ## Review layers
 
 Each layer is a separate reviewer. The more risk, the more layers:
@@ -114,7 +146,23 @@ A change of type `docs` has no test author: a test of a docs change passes befor
 Proof        docs only, no test · checks pass
 ```
 
-A docs change may touch only documentation: `*.md`, `*.mdx`, `*.markdown`, `*.rst` and `*.adoc` files. If its diff changes any other file, its risk becomes at least `high`, so it waits for your sign-off, and its Proof line no longer says `docs only`. The report's `Risk` line names the file and the rule, for example `Risk         high: scripts/build.sh is not a docs file, and a docs change may only change docs, declared low`.
+A docs change may touch only documentation: `*.md`, `*.mdx`, `*.markdown`, `*.rst` and `*.adoc` files. When a request typed `docs` has a file in its scope that is not documentation, for example a comment fix in a `.py` file, or a glob such as `docs/**` that can hold code, ADS asks one question before any work starts:
+
+```text
+Waiting for you: #14 Fix the comment of MONOREPO_ROOT
+Blocked      The request is typed docs, but its scope holds files that are not docs: scripts/…
+Options      1. chore  2. keep docs (high risk)  3. stop
+Recommended  chore
+Answer       say what to do, for example "chore"
+```
+
+- `chore`: the change gets the risk that the rules give its diff, and its normal tests.
+- `keep docs (high risk)`: the change stays a docs change and waits for your sign-off.
+- `stop`: no change exists yet, so nothing is lost and no approval is needed. The issue then stays out of the queue until you change its title or body, or answer the question again. Remove its `ads` label to drop it for good.
+
+Only these answers count. Any other answer asks again, and the question then names the accepted answers.
+
+If the diff of a docs change changes any other file, its risk becomes at least `high`, so it waits for your sign-off, and its Proof line no longer says `docs only`. The report's `Risk` line names the file and the rule, for example `Risk         high: scripts/build.sh is not a docs file, and a docs change may only change docs, declared low`.
 
 ## The final look
 
@@ -169,7 +217,19 @@ Each change has a budget, so a stuck run stops and asks you before it spends mor
 
 </div>
 
-Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. A change has no dollar limit by default. The assessor has a dollar limit of $1.00 per call. A `claude` agent gets the dollar limit of its call as `--max-budget-usd`, together with the adapter's `max_budget_usd`: the smaller one applies. A call that reaches it fails, and its cost still counts. When a change uses up its budget, it stops with a question, for example `The change used its token budget for low risk (1.5M of 1.5M tokens). Spend one more budget?` One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+Tokens count every kind, cache reads included. The seconds count only the time while a stage runs: the time between two runs, a wait for your answer and a pause between runs are not counted. Ctrl-C on `ads work` ends the running stage cleanly, and a run that was killed counts up to the last thing it recorded, at most about 5 minutes back. A change has no dollar limit by default. The assessor has a dollar limit of $1.00 per call. A `claude` agent gets the dollar limit of its call as `--max-budget-usd`, together with the adapter's `max_budget_usd`: the smaller one applies. A call that reaches it fails, and its cost still counts. When a change uses up its budget, it stops with a question that shows what the attempt spent against each limit, for example `The attempt used its token budget for low risk. Spent on this attempt: 1.5M of 1.5M tokens, 2 of 3 rounds, 1250 of 3600 seconds. Spend one more budget?` ADS recommends `spend one more budget` only the first time. It recommends `stop` once a budget was granted, or when the last two rounds made no progress (see below). One more budget needs your approval. To set your own budgets, change the team rules, for example "raise the budget for medium changes".
+
+When the last two failed rounds made the same change and the checks gave the same results, the change makes no progress. ADS then stops before another round, asks one question and offers no extra budget:
+
+```text
+Waiting for you: #12 ApplyFee truncates instead of rounding
+Blocked      The last two rounds made the same change and the check "test" failed the same way: …
+Options      1. say how to fix it  2. stop
+Recommended  stop
+Answer       say what to do, for example "stop"
+```
+
+When ADS knows the cause, the question names it, for example a check that fails on the base too at a risk that does not accept that. To try again, answer `say how to fix it` with what the implementer must do differently. A change in the diff or in any check result never triggers this question.
 
 A budget can count only what the agents report. An `exec` agent must report each amount that the budget of its call limits, or ADS refuses its answer:
 

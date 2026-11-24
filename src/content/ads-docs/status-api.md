@@ -17,8 +17,8 @@ sources:
   - internal/flow/memorywaiting.go
   - internal/flow/memorydrift.go
   - internal/flow/memoryflags.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
@@ -31,7 +31,7 @@ This page answers: how can a script, a dashboard or another agent read what ADS 
 |---|---|
 | `ads status --json` | One JSON document of kind `status`: the changes that wait for you, the recent changes, and every running change. |
 | `ads status 12 --json` | One JSON document of kind `change`: that change, or the question of a request with no change yet. `--text "<description>"` works in place of the number. |
-| `ads status --follow --json` | One JSON object per line, of kind `plan`, `step`, `end` or `note`, as the changes run. It takes the same filters as the text follower, such as `--risk high`. |
+| `ads status --follow --json` | One JSON object per line, of kind `plan`, `step`, `end` or `note`, as the changes run. It takes the same filters as the text follower, such as `--risk high`. It prints a line for every event: the text follower hides the steps that are not risk steps unless `--verbose` is set, and `--verbose` does not change the JSON. |
 | `ads status --schema` | The JSON Schema of all of the above. |
 
 </div>
@@ -108,6 +108,8 @@ The lines it reads (shortened):
 ```
 
 A `change` on a follower line is the view at the time of the poll that found the event, so it can already hold later steps. An `end` line with a `note` says that the follower stopped following the change for that reason, not that the change ended.
+
+A `checks` step has `effective_risk`: the risk at which the checks of that round were judged. A check that fails the same way on the base (outcome `preexisting`) lets the change go on only up to `medium`, so this field tells you whether that failure blocked the round. Other steps leave the field out, and so does a log with no risk computed before the checks. It is a new field, so `schema_version` stays `1`.
 
 ## Notes that wait or changed
 

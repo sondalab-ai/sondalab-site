@@ -34,8 +34,9 @@ sources:
   - internal/flow/trustnotes_test.go
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
-syncedFrom: a2ec33895793cdc6a51c9c1ccb25c553033536aa
-verified: 2026-11-22
+  - internal/flow/ask.go
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: how do the agents learn from past work in the repository, and what do I approve on the way? The notes are short lines on the trunk. A person approves every team note. The team adds learned notes when a fix lands, and the ones that touch a guard wait for your `ok <code>`. Memory is on by default: with no `memory` block in `.ads/config.yaml`, the assessor and the reviewers read the notes and the team learns from its fixes. `memory: {roles: []}` turns it off.
@@ -89,12 +90,13 @@ Adds the note:
   "Fee rounding uses banker's rounding."
 rev …
 
-ads needs your approval: change the team rules
-
   Warning: this repository is public. Anyone can read these notes.
 
   Adds the note:
     "Fee rounding uses banker's rounding."
+
+ads needs your approval: change the team rules
+  Makes the team-rule changes listed above.
 
 To approve, reply:   ok 6b0d
 ```
@@ -143,8 +145,6 @@ These rules have a version, which ADS records with each learning. Version 2 is t
 **You see**
 
 ```text
-ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
-
   Warning: from now on, the assessor and every reviewer read this note
   in each fix. It can change what they accept.
   Warning: this repository is public. Anyone can read this note.
@@ -157,6 +157,9 @@ ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
 
   The fix has already landed. If you do not approve, the note is
   dropped and the fix stays.
+
+ads needs your approval: let the agents remember 1 note from fix #12 (CDR-0042)
+  The assessor and every reviewer read this note in each fix from now on.
 
 To approve, reply:   ok 1c9a
 ```
