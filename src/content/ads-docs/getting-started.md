@@ -38,8 +38,8 @@ sources:
   - internal/onboard/launchdhome.go
   - internal/cli/doctorchecks.go
   - skills/ads-workflow/SKILL.md
-syncedFrom: 154c220fa5bc9520494972cd52ac3c8cebd2844b
-verified: 2026-11-23
+syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+verified: 2026-11-24
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.
