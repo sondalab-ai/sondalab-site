@@ -23,6 +23,9 @@ sources:
   - internal/flow/memoryflags.go
   - internal/flow/memoryreset.go
   - internal/flow/signoff.go
+  - internal/flow/run.go
+  - internal/flow/integrate.go
+  - internal/flow/report.go
   - internal/cli/memory.go
   - internal/cli/memorydrift.go
   - internal/cli/memoryflags.go
@@ -35,7 +38,7 @@ sources:
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
   - internal/flow/ask.go
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+syncedFrom: b28a681cee77882f769a8e4b9c5701366aa837bd
 verified: 2026-11-24
 ---
 
@@ -132,7 +135,7 @@ Learned      kept: "Fee rounding in billing/ rounds half to even."
 
 A kept learning lands with no question, so in a public repository anyone can read it. The first time the team adds a note to `.ads/memory/learned.md`, ADS says so once: `the team adds its first learned note to .ads/memory/learned.md: anyone who can read the repository can read it; memory.roles: [] in .ads/config.yaml turns memory off`.
 
-A sign-off question shows them under `Notes the team learned:`. An undo removes the lines of the fix it undoes.
+A sign-off question shows them under `Notes the team learned:`. Each `ads work` on a change that waits for your sign-off runs the checks again on the current trunk, and the report shows these notes then, before you sign off. If the trunk moved and the change now conflicts with it, or a check fails, the change goes back to the team. An undo removes the lines of the fix it undoes.
 
 ## A held learning
 

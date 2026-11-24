@@ -12,6 +12,7 @@ sources:
   - internal/flow/trustlist_test.go
   - internal/flow/answer.go
   - internal/cli/ask.go
+  - internal/cli/diff.go
   - internal/flow/memoryheld.go
   - internal/flow/memoryheld_test.go
   - internal/flow/work.go
@@ -31,7 +32,7 @@ sources:
   - internal/flow/signoff.go
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+syncedFrom: b28a681cee77882f769a8e4b9c5701366aa837bd
 verified: 2026-11-24
 ---
 
@@ -45,11 +46,7 @@ When an action needs you, Claude Code shows one block. Every block ends with the
 
 **Situation.** #13 adds a target to the `Makefile`, which a path rule makes high risk. The report says `Ready for sign-off`.
 
-**You say**
-
-```text
-sign off #13
-```
+**You say** nothing. Claude Code shows the report, runs `ads diff 13` to show the changed files, then asks for your sign-off at once (`ads ask signoff 13`) in the same turn. Saying "sign off #13" still works.
 
 **You see**
 
