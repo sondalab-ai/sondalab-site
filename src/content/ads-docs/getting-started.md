@@ -38,7 +38,7 @@ sources:
   - internal/onboard/launchdhome.go
   - internal/cli/doctorchecks.go
   - skills/ads-workflow/SKILL.md
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+syncedFrom: 0ec6e25a6782ff88b02a55a104ca4bde866d2223
 verified: 2026-11-24
 ---
 

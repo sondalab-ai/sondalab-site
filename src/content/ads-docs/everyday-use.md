@@ -5,6 +5,7 @@ order: 1
 sources:
   - README.md
   - skills/ads-workflow/SKILL.md
+  - internal/cli/diff.go
   - internal/cli/status.go
   - internal/cli/work.go
   - internal/cli/trust.go
@@ -30,7 +31,7 @@ sources:
   - internal/trust/exempt.go
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+syncedFrom: 0ec6e25a6782ff88b02a55a104ca4bde866d2223
 verified: 2026-11-24
 ---
 
@@ -104,7 +105,7 @@ Landed: #12 ApplyFee truncates instead of rounding            bug · risk low ·
 
 Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
 …
-Sign-off     say "sign off #13"
+Sign-off     read the code with ads diff 13, then approve
 …
 Also waiting, oldest first:
   #14 "Split loses the remainder": a question: Keep the remainder on the last share?
@@ -153,7 +154,7 @@ what is waiting for me?
 ```text
 Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
 …
-Sign-off     say "sign off #13"
+Sign-off     read the code with ads diff 13, then approve
 …
 Also waiting, oldest first:
   #14 "Split loses the remainder": needs one more budget (1.5M tokens)
@@ -183,12 +184,16 @@ change the target name to coverage
 Ready for sign-off: #13 Add a cover target to the Makefile    feature · risk high · …
 …
 Why          risk high
-Sign-off     say "sign off #13"
+Sign-off     read the code with ads diff 13, then approve
 ```
 
 **What happens.** After a report, "change X" means one more round with your words: Claude Code runs `ads work 13 --answer "change the target name to coverage"`. While the change is not landed, a comment on its pull request steers the next round too. After a change has landed, "change X" starts a new change that names the landed one.
 
-A report can show a `Branch` line in place of the `PR` line, for example `Branch       refs/ads/attempts/CDR-0002/A1 · 2 files +10 −2 · not on GitHub`. Then GitHub has no pull request for the change, so there is nothing to read or comment on there: steer it with "change X" in the session. The line names the local ref of the change and its size, so you can look at the diff with `git diff`. It ends with `not on GitHub` when the change stays on your machine until your sign-off (high risk, or a CI file), and with `no pull request` when the change was pushed but the pull request could not be opened. The report and the sign-off work as usual.
+After a report that starts with `Ready for sign-off`, Claude Code shows the report, runs `ads diff 13` to show the changed files, and asks for your sign-off in the same turn. You do not have to say "sign off #13" first, but it still works. Say "show the code of #13" to read the code alone: Claude Code runs `ads diff 13` and asks for nothing.
+
+`ads diff` is read-only and pushes nothing. In a Claude Code session it lists the changed files, and when git has `diff.guitool` set, it asks git to open that tool. In a terminal it opens `diff.tool` or `diff.guitool`, or prints the whole diff. Give it an issue number, a change id or `--text "<description>"`.
+
+A report can show a `Branch` line in place of the `PR` line, for example `Branch       refs/ads/attempts/CDR-0002/A1 · 2 files +10 −2 · not on GitHub`. Then GitHub has no pull request for the change, so there is nothing to read or comment on there: steer it with "change X" in the session. The line names the local ref of the change and its size, so you can read the code with `ads diff`. It ends with `not on GitHub` when the change stays on your machine until your sign-off (high risk, or a CI file), and with `no pull request` when the change was pushed but the pull request could not be opened. The report and the sign-off work as usual.
 
 ## Stricter rules
 

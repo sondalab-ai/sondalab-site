@@ -6,6 +6,11 @@ sources:
   - README.md
   - docs/guides/setup.md
   - internal/config/config.go
+  - internal/cli/diff.go
+  - internal/flow/github.go
+  - internal/flow/run.go
+  - internal/flow/integrate.go
+  - internal/flow/report.go
   - internal/flow/landing.go
   - internal/flow/answer.go
   - internal/flow/attempt.go
@@ -29,7 +34,7 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
+syncedFrom: 0ec6e25a6782ff88b02a55a104ca4bde866d2223
 verified: 2026-11-24
 ---
 
@@ -57,7 +62,13 @@ Agents cannot lower the risk below the path rules. The risk decides who signs th
 
 The team key signs only once `ads init` has set up the team key and listed it as trusted in `.ads/allowed_signers`. Until then `ads work` does not start, so no change runs or lands.
 
-A report that starts with `Ready for sign-off` waits for you. After your `ok <code>`, the change is signed with your key. If the change moved in the meantime, the sign-off stops and the team gives a new report.
+A report that starts with `Ready for sign-off` waits for you. Its `Sign-off` line says `read the code with ads diff 13, then approve` (the issue number, or the change id when there is no issue). Claude Code runs `ads diff 13` for you, then asks for your approval in the same turn. `ads diff` is read-only and pushes nothing. In a Claude Code session it lists the changed files, and when git has `diff.guitool` set, it asks git to open that tool. In a terminal it opens `diff.tool` or `diff.guitool`, or prints the whole diff.
+
+After your `ok <code>`, the change is signed with your key. If the change moved in the meantime, the sign-off stops and the team gives a new report.
+
+Each `ads work` on a change that waits for your sign-off runs the checks again on the current trunk. The report then shows the notes the team learned, so you see them before you sign off. If the trunk moved and the change now conflicts with it, or a check fails, the change goes back to the team instead of showing ready.
+
+When the code of a change stays on your machine until your sign-off (high risk, or a CI file), ADS opens its pull request as a draft. The pull request text says that the code stays on this machine, and how to read it: run `ads diff 13` in the clone that ran ADS. When GitHub refuses a draft, ADS opens a normal pull request instead.
 
 ## Path rules
 
@@ -192,7 +203,7 @@ The `Why` line of the report says why the fix waits:
 
 ```text
 Why          found by the sweep, risk medium
-Sign-off     say "sign off #12"
+Sign-off     read the code with ads diff 12, then approve
 ```
 
 When a reviewer raised the risk, the line reads `found by the sweep, a reviewer raised the risk to <risk>`.
