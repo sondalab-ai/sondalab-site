@@ -34,7 +34,7 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: d68ad47ecc22e26dd99ec1fcd100d0bf61b600bb
+syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
 verified: 2026-11-25
 ---
 
