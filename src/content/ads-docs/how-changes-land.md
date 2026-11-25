@@ -34,8 +34,8 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 0ec6e25a6782ff88b02a55a104ca4bde866d2223
-verified: 2026-11-24
+syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
+verified: 2026-11-25
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -114,6 +114,20 @@ Fix the environment, then answer `fix the environment, then retry`: ADS runs the
 ## Tests of a change
 
 The test author writes new test files that carry the change tag in their name, for example `split_cdr0007_test.go`, or `split.cdr0007.test.ts` in the usual JavaScript and TypeScript form.
+
+A test file must load in the test runner. A file with a syntax error, or one that imports a module that does not exist, proves nothing about the code. With a plain `vitest run` test runner, ADS adds the Vitest JSON report to the frozen run to see this. It refuses such a file before it freezes the tests and asks you, with the file and the error in the question. A test of a `feature` change may import a new module of the change. Set `checks.oracle: exit` to judge the run by its exit code only. Go tests get the same rule from the compiler.
+
+When a frozen test file cannot load later, ADS runs it again on the frozen tests without the change. If it loads there, the change broke it, and the implementer gets another round. If it fails there too, no round can fix it, and ADS asks after the first round:
+
+```text
+Waiting for you: #11 Share link escapes HTML
+Blocked      Could not load the frozen test "apps/api/src/share.cdr0004.test.ts": "Transform failed…
+Options      1. rewrite the tests  2. stop
+Recommended  rewrite the tests
+Answer       say what to do, for example "rewrite the tests"
+```
+
+Answer with how the tests must be written. ADS ends this try and starts a fresh one: a new test author gets your answer and the error, and its tests are frozen again. A frozen test is never edited.
 
 For a change of type `refactor`, `chore` or `docs`, each acceptance criterion names what stays the same, for example "MONOREPO_ROOT still resolves to the same path", and the new text goes in the intent. So a comment-only change in a code file is a `chore`, and its tests check that the code still behaves the same, never the text of the comment. A repository that keeps its own `.ads/prompts/assessor.md` or `.ads/prompts/test_author.md` does not get these rules.
 

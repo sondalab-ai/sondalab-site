@@ -31,8 +31,8 @@ sources:
   - internal/trust/exempt.go
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
-syncedFrom: bdda6abf09ed1f7ba3e40ac78262e0d94570d437
-verified: 2026-11-24
+syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
+verified: 2026-11-25
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
