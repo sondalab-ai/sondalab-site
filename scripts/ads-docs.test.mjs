@@ -100,6 +100,7 @@ const VERIFIED = new Set([
   '6', // internal/config/config.go:569-573 high and critical have 6 review layers (store.ReviewLayers)
   '8', // UTF-8 (README.md:121); 8 days weekly (internal/cli/doctor.go:241); 8 open sweep issues in the cap example (internal/sweep/file.go:133 Plan)
   '10', // internal/approve/approve.go:31 TTL = 10 * time.Minute; max_open 10 (internal/config/config.go:217)
+  '11', // example: issue #11 of the frozen test question on how-changes-land
   '12', // example: issue #12 (README.md table, report_test.go landedGolden); the 12-line fix of how-changes-land; the 12 hex characters of the sweep label (internal/onboard/sweepjob.go:40)
   '13', // example: issue #13 (internal/report/view_test.go)
   '14', // example: issue #14
