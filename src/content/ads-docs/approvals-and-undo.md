@@ -32,7 +32,7 @@ sources:
   - internal/flow/signoff.go
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
-syncedFrom: aaf7ff7123138dd4e8e402e1886ab8a02bee47e7
+syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
 verified: 2026-11-26
 ---
 

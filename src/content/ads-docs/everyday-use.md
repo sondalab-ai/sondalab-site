@@ -33,7 +33,7 @@ sources:
   - internal/trust/exempt.go
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
-syncedFrom: aaf7ff7123138dd4e8e402e1886ab8a02bee47e7
+syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
 verified: 2026-11-26
 ---
 
@@ -193,7 +193,7 @@ Sign-off     read the code with ads diff 13, then approve
 
 After a report that starts with `Ready for sign-off`, Claude Code shows the report, runs `ads diff 13` to show the changed files, and asks for your sign-off in the same turn. You do not have to say "sign off #13" first, but it still works. Say "show the code of #13" to read the code alone: Claude Code runs `ads diff 13` and asks for nothing.
 
-`ads diff` is read-only and pushes nothing. Give it an issue number, a change id or `--text "<description>"`. In a Claude Code session it lists the changed files, then opens the code without waiting for it: in the tool git names in `diff.guitool` when that is set, else in the ADS viewer in a new Terminal window (Ghostty when the session runs in Ghostty). In a terminal it opens `diff.tool` or `diff.guitool`, else the ADS viewer in place. A diff tool that you set in git always comes first.
+`ads diff` is read-only and pushes nothing. Give it an issue number, a change id or `--text "<description>"`. In a Claude Code session it lists the changed files, then opens the code without waiting for it: in the tool git names in `diff.guitool` when that is set, else in the ADS viewer in a new Terminal window (Ghostty when the session runs in Ghostty). In a terminal it opens `diff.tool` or `diff.guitool`, else the ADS viewer in place. When you send its output to a pipe or a file, it lists the changed files and says how to read the code. A diff tool that you set in git always comes first.
 
 The ADS viewer shows a file tree on the left and the code of every file on the right, with line numbers and the changed words marked. Long lines wrap, and a wide window shows the old and the new code side by side. You approve in the session, not in the viewer.
 
