@@ -6,6 +6,8 @@ sources:
   - README.md
   - skills/ads-workflow/SKILL.md
   - internal/cli/diff.go
+  - internal/cli/diffwindow.go
+  - internal/diffview/model.go
   - internal/cli/status.go
   - internal/cli/work.go
   - internal/cli/trust.go
@@ -31,8 +33,8 @@ sources:
   - internal/trust/exempt.go
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
-syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
-verified: 2026-11-25
+syncedFrom: aaf7ff7123138dd4e8e402e1886ab8a02bee47e7
+verified: 2026-11-26
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
@@ -191,7 +193,26 @@ Sign-off     read the code with ads diff 13, then approve
 
 After a report that starts with `Ready for sign-off`, Claude Code shows the report, runs `ads diff 13` to show the changed files, and asks for your sign-off in the same turn. You do not have to say "sign off #13" first, but it still works. Say "show the code of #13" to read the code alone: Claude Code runs `ads diff 13` and asks for nothing.
 
-`ads diff` is read-only and pushes nothing. In a Claude Code session it lists the changed files, and when git has `diff.guitool` set, it asks git to open that tool. In a terminal it opens `diff.tool` or `diff.guitool`, or prints the whole diff. Give it an issue number, a change id or `--text "<description>"`.
+`ads diff` is read-only and pushes nothing. Give it an issue number, a change id or `--text "<description>"`. In a Claude Code session it lists the changed files, then opens the code without waiting for it: in the tool git names in `diff.guitool` when that is set, else in the ADS viewer in a new Terminal window (Ghostty when the session runs in Ghostty). In a terminal it opens `diff.tool` or `diff.guitool`, else the ADS viewer in place. A diff tool that you set in git always comes first.
+
+The ADS viewer shows a file tree on the left and the code of every file on the right, with line numbers and the changed words marked. Long lines wrap, and a wide window shows the old and the new code side by side. You approve in the session, not in the viewer.
+
+<div class="table-wrap">
+
+| To | Press | Or with the mouse |
+|---|---|---|
+| scroll | `j` `k`, arrows, `space` `b` | the wheel |
+| go to the next or the previous file | `tab`, `shift+tab` | click the file in the tree |
+| go to the next or the previous hunk | `]`, `[` | |
+| mark a file viewed: it folds, and the next file opens | `v` | click the file header |
+| search, then the next or the previous match | `/`, `n`, `N` | |
+| switch side by side and one column | `s` | |
+| switch line wrap | `w` | |
+| show or hide the file tree | `t` | drag the line next to the tree to resize it |
+| see every key | `?` | |
+| quit | `q` | |
+
+</div>
 
 A report can show a `Branch` line in place of the `PR` line, for example `Branch       refs/ads/attempts/CDR-0002/A1 · 2 files +10 −2 · not on GitHub`. Then GitHub has no pull request for the change, so there is nothing to read or comment on there: steer it with "change X" in the session. The line names the local ref of the change and its size, so you can read the code with `ads diff`. It ends with `not on GitHub` when the change stays on your machine until your sign-off (high risk, or a CI file), and with `no pull request` when the change was pushed but the pull request could not be opened. The report and the sign-off work as usual.
 
