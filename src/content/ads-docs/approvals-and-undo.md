@@ -32,7 +32,8 @@ sources:
   - internal/flow/signoff.go
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
-syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
+  - internal/hooks/guard.go
+syncedFrom: f388a815ea73e85be1a30af507a4143f2b8dfc74
 verified: 2026-11-26
 ---
 
@@ -209,7 +210,11 @@ To approve, reply:   ok 3d8f
 
 ## A hand-made commit to a trust file
 
-A commit to a trust file that `ads trust apply` did not sign breaks the trust chain of the trunk: the commands that read the trunk stop, and `ads audit verify` reports `changes <file> without a valid trust change`. A later signed commit that restores the file does not repair it. Run `ads trust propose --exempt <commit> -m "<reason>"` with the full id of the hand-made commit. It builds one unsigned commit that restores the trust files of that commit to their content before it, names the commit in an `ADS-Trust-Exempt` trailer, and prints its `rev`.
+A commit to a trust file that `ads trust apply` did not sign breaks the trust chain of the trunk: the commands that read the trunk stop, and `ads audit verify` reports `changes <file> without a valid trust change`.
+
+On your machine the git hooks stop most of these before they land. A commit, a move or a push of the trunk that brings such a commit is refused with `hand commit <id> changes <file>`, and the refusal names `ads trust`. The same goes for an amended or cherry-picked trust commit, because its signature no longer matches. A `git pull` that would merge a trust change from the remote is refused too, because the merge puts that change off the main line of the trunk: run `git merge --abort`, then `git pull --rebase`. A hand-made commit can still reach the trunk another way, for example on GitHub. Then repair it as follows.
+
+A later signed commit that restores the file does not repair it. Run `ads trust propose --exempt <commit> -m "<reason>"` with the full id of the hand-made commit. It builds one unsigned commit that restores the trust files of that commit to their content before it, names the commit in an `ADS-Trust-Exempt` trailer, and prints its `rev`.
 
 **You see**, after `ads ask trust <rev>`, the commit id, its subject, author and commit date, and the trust files it changed, as their own item. After your `ok <code>`, `ads trust apply <rev> -m "<reason>"` lands it signed with your key, and the trust chain skips that one commit.
 

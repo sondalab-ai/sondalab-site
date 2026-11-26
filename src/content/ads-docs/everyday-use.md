@@ -33,7 +33,8 @@ sources:
   - internal/trust/exempt.go
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
-syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
+  - internal/flow/handcommits.go
+syncedFrom: f388a815ea73e85be1a30af507a4143f2b8dfc74
 verified: 2026-11-26
 ---
 
@@ -164,7 +165,7 @@ Recent:
   #12 "ApplyFee truncates instead of rounding": landed 2026-11-14
 ```
 
-**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. The decision that has waited longest comes first, in full, as `ads work` prints it: the question with its options, the sign-off report, or the paused report. A budget question also shows the size of one more budget on an `Extra` line. Every other decision follows on one line. Claude Code takes them with you one at a time, oldest first. Before a second budget question for the same change, Claude Code reads the report of the change and tells you why the rounds did not finish. When nothing waits, the first line is `Nothing is waiting for you.` When learned notes wait for your ok, the first line is `2 learned notes wait for your ok. Say "show waiting notes".` instead. After the list, a line can say that team notes changed in MxM or that a reviewer flagged a team note ([Team notes](/ads/docs/team-notes/)). Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
+**What happens.** Claude Code runs `ads status`. A change waits for a sign-off, an answer to a question, one more budget, or because you paused it. The decision that has waited longest comes first, in full, as `ads work` prints it: the question with its options, the sign-off report, or the paused report. A budget question also shows the size of one more budget on an `Extra` line. Every other decision follows on one line. Claude Code takes them with you one at a time, oldest first. Before a second budget question for the same change, Claude Code reads the report of the change and tells you why the rounds did not finish. When nothing waits, the first line is `Nothing is waiting for you.` When learned notes wait for your ok, the first line is `2 learned notes wait for your ok. Say "show waiting notes".` instead. After the list, a line counts the commits on the trunk that ADS did not make since its last change, for example `2 hand commits on main since the last ads change.` Commits merged on GitHub count too. A line can also say that team notes changed in MxM or that a reviewer flagged a team note ([Team notes](/ads/docs/team-notes/)). Ask "what happened on #12?" for the report of one change (`ads status 12`). When the Claude Code hook that records approvals is missing, the output says `approvals do not work here: run ads init in a terminal`.
 
 ## One more round
 
