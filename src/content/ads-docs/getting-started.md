@@ -38,7 +38,10 @@ sources:
   - internal/onboard/launchdhome.go
   - internal/cli/doctorchecks.go
   - skills/ads-workflow/SKILL.md
-syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
+  - internal/hooks/guard.go
+  - internal/agentenv/agentenv.go
+  - internal/sandbox/sandbox.go
+syncedFrom: 0aca4376e9973c7580990124365de2d98f30a878
 verified: 2026-11-26
 ---
 
@@ -85,7 +88,7 @@ Run `ads init` in the repository you work on, in a terminal. Before each step it
 
 The Claude Code hooks are the `PreToolUse`, `PostToolUse`, `UserPromptSubmit` and `SessionStart` entries of the untracked `.claude/settings.local.json`. `SessionStart` shows you, at the start of every session, a one-line reminder of what to say, with "what is ads?" for a short tour. It also tells a new session, in count lines with no note text, when learned notes wait for your ok, when team notes changed in MxM, and when a reviewer flagged team notes. A repository set up before this entry existed needs `ads init` once more.
 
-The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. Agents cannot change such a hook: the guard refuses it, so ask a person to make that edit. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
+The git hooks are `pre-commit`, `pre-push` and `reference-transaction` in `.git/hooks`. They refuse a commit, a move or a push of the trunk from Claude Code and from the agents, tests and checks that ADS runs, unless ADS itself lands it. You can commit, merge and push on the trunk with plain git from your own terminal. The hooks refuse a commit of yours only when it changes a trust file ([A hand-made commit to a trust file](/ads/docs/approvals-and-undo/#a-hand-made-commit-to-a-trust-file)). `ads status` counts the commits on the trunk that ADS did not make. Hooks that were there keep running before the ADS checks: ADS moves each one to `.git/hooks/<name>.d/`. If your project keeps its hooks in a tracked folder set by `core.hooksPath` (a `setup` script often does this), ADS links those hooks from `.git/hooks` and removes `core.hooksPath`. An edit of a tracked hook then applies at once. Agents cannot change such a hook: the guard refuses it, so ask a person to make that edit. The setup also warns about a line in `package.json`, `.husky/`, `lefthook.yml` or a `Makefile` that sets `core.hooksPath` again. Remove that command, because it turns the ADS hooks off when it runs.
 
 On a new repository, `ads init` also writes the checks for the stack it finds in the root files, such as `go.mod` or `package.json` with its lock file. It runs nothing to find them. The `Stack` line names what it found, for example `Go` or `pnpm + Vitest`. With no known stack it warns `no known stack: no check command, so ads work refuses until .ads/config.yaml has one`: `ads work` does not start until the config names a check command ([How a change lands](/ads/docs/how-changes-land/#checks)).
 

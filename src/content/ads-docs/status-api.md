@@ -17,8 +17,8 @@ sources:
   - internal/flow/memorywaiting.go
   - internal/flow/memorydrift.go
   - internal/flow/memoryflags.go
-syncedFrom: 5cf0b3b3f540abe612768b43fe63069991c1b11b
-verified: 2026-11-24
+syncedFrom: 0aca4376e9973c7580990124365de2d98f30a878
+verified: 2026-11-26
 ---
 
 This page answers: how can a script, a dashboard or another agent read what ADS does, and how do I change how its output looks? The status API is the same view that `ads status` prints, as JSON, from the command line. There is no server, no port and no new credential.
