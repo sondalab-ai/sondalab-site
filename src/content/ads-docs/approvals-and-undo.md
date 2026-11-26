@@ -32,8 +32,8 @@ sources:
   - internal/flow/signoff.go
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
-syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
-verified: 2026-11-25
+syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
+verified: 2026-11-26
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).
@@ -46,7 +46,7 @@ When an action needs you, Claude Code shows one block. Every block ends with the
 
 **Situation.** #13 adds a target to the `Makefile`, which a path rule makes high risk. The report says `Ready for sign-off`.
 
-**You say** nothing. Claude Code shows the report, runs `ads diff 13` to show the changed files, then asks for your sign-off at once (`ads ask signoff 13`) in the same turn. Saying "sign off #13" still works.
+**You say** nothing. Claude Code shows the report, runs `ads diff 13` to show the changed files and open the code in a new window, then asks for your sign-off at once (`ads ask signoff 13`) in the same turn. Saying "sign off #13" still works.
 
 **You see**
 

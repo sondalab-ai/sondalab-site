@@ -7,6 +7,7 @@ sources:
   - docs/guides/setup.md
   - internal/config/config.go
   - internal/cli/diff.go
+  - internal/cli/diffwindow.go
   - internal/flow/github.go
   - internal/flow/run.go
   - internal/flow/integrate.go
@@ -34,8 +35,8 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 90e44d06ca2e5ff5741a3f356e322f7546a7c70e
-verified: 2026-11-25
+syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
+verified: 2026-11-26
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -62,7 +63,7 @@ Agents cannot lower the risk below the path rules. The risk decides who signs th
 
 The team key signs only once `ads init` has set up the team key and listed it as trusted in `.ads/allowed_signers`. Until then `ads work` does not start, so no change runs or lands.
 
-A report that starts with `Ready for sign-off` waits for you. Its `Sign-off` line says `read the code with ads diff 13, then approve` (the issue number, or the change id when there is no issue). Claude Code runs `ads diff 13` for you, then asks for your approval in the same turn. `ads diff` is read-only and pushes nothing. In a Claude Code session it lists the changed files, and when git has `diff.guitool` set, it asks git to open that tool. In a terminal it opens `diff.tool` or `diff.guitool`, or prints the whole diff.
+A report that starts with `Ready for sign-off` waits for you. Its `Sign-off` line says `read the code with ads diff 13, then approve` (the issue number, or the change id when there is no issue). Claude Code runs `ads diff 13` for you, then asks for your approval in the same turn. `ads diff` is read-only and pushes nothing. In a Claude Code session it lists the changed files, then opens the code: in the tool git names in `diff.guitool` when that is set, else in the ADS viewer in a new Terminal window (Ghostty when the session runs in Ghostty). In a terminal it opens `diff.tool` or `diff.guitool`, else the ADS viewer in place.
 
 After your `ok <code>`, the change is signed with your key. If the change moved in the meantime, the sign-off stops and the team gives a new report.
 
