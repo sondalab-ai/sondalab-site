@@ -38,7 +38,7 @@ sources:
   - internal/flow/memoryheld_test.go
   - internal/flow/memoryflags_test.go
   - internal/flow/ask.go
-syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
+syncedFrom: 3a3279c7ae4c2caf1e407b4641d1e1eba726a399
 verified: 2026-11-27
 ---
 
