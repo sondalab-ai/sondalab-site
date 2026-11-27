@@ -34,8 +34,8 @@ sources:
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
   - internal/flow/handcommits.go
-syncedFrom: 0aca4376e9973c7580990124365de2d98f30a878
-verified: 2026-11-26
+syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
+verified: 2026-11-27
 ---
 
 This page answers: what do I say to Claude Code for the common jobs, and what comes back? After setup you never type an `ads` command yourself. Claude Code runs `ads` for you and shows its output as it is. Each recipe below starts with what it gets you.
