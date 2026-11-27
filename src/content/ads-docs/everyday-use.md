@@ -34,7 +34,7 @@ sources:
   - internal/cli/github_test.go
   - cmd/ads/testdata/script/github_flow.txtar
   - internal/flow/handcommits.go
-syncedFrom: a6677169df27c3f93683f3806e8db63ee2f03abc
+syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
 verified: 2026-11-27
 ---
 
