@@ -35,8 +35,8 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
-verified: 2026-11-26
+syncedFrom: 56c1107051c90fba70ff182d5996a6191bbddbfa
+verified: 2026-11-27
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
