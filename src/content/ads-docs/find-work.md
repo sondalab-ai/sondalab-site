@@ -30,8 +30,8 @@ sources:
   - cmd/ads/testdata/script/sweep_schedule_exec.txtar
   - internal/agent/kinds/kinds.go
   - internal/onboard/launchdhome.go
-syncedFrom: 88d9830617563c8fe52596554dff59cf89318854
-verified: 2026-11-26
+syncedFrom: a6677169df27c3f93683f3806e8db63ee2f03abc
+verified: 2026-11-27
 ---
 
 This page answers: how does ADS find work on its own, what does it file, and how do I run it on a schedule? A sweep reads part of the trunk with read-only agents. It files what they find as GitHub issues labeled `ads`. It never fixes anything by itself. You start the fixes when you say "work the queue".

@@ -33,8 +33,8 @@ sources:
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
   - internal/hooks/guard.go
-syncedFrom: 0aca4376e9973c7580990124365de2d98f30a878
-verified: 2026-11-26
+syncedFrom: a6677169df27c3f93683f3806e8db63ee2f03abc
+verified: 2026-11-27
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).
@@ -186,6 +186,10 @@ To approve, reply:   ok 5a03
 ```
 
 `Spent on this change so far` counts every attempt of the change. After your `ok <code>`, the team goes on with one more budget of the same size. [How a change lands](/ads/docs/how-changes-land/) lists the budgets.
+
+## Stop or budget for a change without an issue
+
+A change that you started from a plain description has no issue number. For its stop and budget questions, Claude Code asks with the change id, for example `ads ask stop CDR-0042` or `ads ask budget CDR-0042`. It finds the id with `ads cdr list`, and asks you when it cannot tell which change is yours. Claude Code shows a question only when the `ads ask` command holds none of `| ; & < > $ ( )`, a backtick or a line break, and a description often holds one. The approval holds for that change only. After your `ok <code>`, Claude Code runs the stop or the budget answer with the description, as before.
 
 ## A change of the team rules
 
