@@ -35,7 +35,7 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
+syncedFrom: 3a3279c7ae4c2caf1e407b4641d1e1eba726a399
 verified: 2026-11-27
 ---
 
@@ -68,6 +68,10 @@ A report that starts with `Ready for sign-off` waits for you. Its `Sign-off` lin
 After your `ok <code>`, the change is signed with your key. If the change moved in the meantime, the sign-off stops and the team gives a new report.
 
 Each `ads work` on a change that waits for your sign-off runs the checks again on the current trunk. The report then shows the notes the team learned, so you see them before you sign off. If the trunk moved and the change now conflicts with it, or a check fails, the change goes back to the team instead of showing ready.
+
+To change a change that waits for your sign-off, say "change X" in the session instead of approving. Claude Code passes your words with `--answer`, the team runs one more round with them, and the change then shows ready again with the new code. That round counts against the rounds budget like any other. When the change has used all its rounds, ADS first asks whether to spend one more budget.
+
+Only a request in the session starts this round. A comment on the pull request of a waiting change does not: comments steer only rounds that are running. Until the requested round has run, the sign-off waits. `ads ask signoff` and `ads signoff` say `a change request waits: run ads work first, then sign off the new code`. If you ask for a change while the change is landing, ADS stops the landing and runs the round first. If an older ADS ignored a request on a waiting change, that request runs at the next `ads work` on the change after you upgrade.
 
 When the code of a change stays on your machine until your sign-off (high risk, or a CI file), ADS opens its pull request as a draft. The pull request text says that the code stays on this machine, and how to read it: run `ads diff 13` in the clone that ran ADS. When GitHub refuses a draft, ADS opens a normal pull request instead.
 
