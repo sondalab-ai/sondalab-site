@@ -33,7 +33,7 @@ sources:
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
   - internal/hooks/guard.go
-syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
+syncedFrom: 3a3279c7ae4c2caf1e407b4641d1e1eba726a399
 verified: 2026-11-27
 ---
 
@@ -67,6 +67,8 @@ To approve, reply:   ok 4f2a
 ```
 
 **What happens.** Reply with that line alone: `ok 4f2a`. Then the change is signed with your key and lands. The code is 4 random hex characters, new for each question, and appears only on the last line. The `Tests` line says `checks pass` only when the checks pass at the risk of the change. When they fail only where the trunk fails too, it says `checks fail on base too`.
+
+To change the code instead of signing it off, say "change X". The team runs one more round, and then you get a new report and a new sign-off question. Until that round has run, the sign-off waits: `a change request waits: run ads work first, then sign off the new code`.
 
 ## How to answer
 
