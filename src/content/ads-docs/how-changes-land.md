@@ -137,7 +137,7 @@ Answer with how the tests must be written. ADS ends this try and starts a fresh 
 The implementer may not change test files. When a fix needs one changed anyway, for example an old test that lists every setup step and must list a new one, no round can pass. ADS asks at once:
 
 ```text
-Waiting for you: #203 ads init creates missing ads labels
+Waiting for you: #12 ads init creates missing labels
 Blocked      The test path check refused the commit: the fix changed test files, but the tests are frozen: "internal/onboard/wizard_test.go"…
 Options      1. rewrite the tests  2. stop
 Recommended  rewrite the tests
