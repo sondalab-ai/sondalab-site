@@ -33,8 +33,8 @@ sources:
   - internal/flow/memoryforget.go
   - internal/flow/memoryreset.go
   - internal/hooks/guard.go
-syncedFrom: 3a3279c7ae4c2caf1e407b4641d1e1eba726a399
-verified: 2026-11-27
+syncedFrom: 83aee47261df5837b4ed27f6397df9e99464dbd3
+verified: 2026-11-28
 ---
 
 This page answers: what needs my approval, how do I give it, and what is the difference between undo, pause and stop? These actions wait for you: a sign-off, an undo, a stop, one more budget, a change of the team rules or of the team notes, a learned note that the team holds for you, forgetting or resetting learned notes, and work on an issue that an account without write access opened. A pause does not, because it loses nothing. Neither does dropping a waiting note or dismissing a reviewer flag on your computer ([Team notes](/ads/docs/team-notes/)).

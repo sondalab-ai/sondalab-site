@@ -41,8 +41,8 @@ sources:
   - internal/hooks/guard.go
   - internal/agentenv/agentenv.go
   - internal/sandbox/sandbox.go
-syncedFrom: 55f6c55e0165241df8146205e6c433f3fdbc7080
-verified: 2026-11-27
+syncedFrom: 83aee47261df5837b4ed27f6397df9e99464dbd3
+verified: 2026-11-28
 ---
 
 This page answers: what do I need, how do I install `ads`, what does the setup ask, and what does my first change look like? You run the install and the setup once, in a terminal. After that you work by talking to Claude Code.

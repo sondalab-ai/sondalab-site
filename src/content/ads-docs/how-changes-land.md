@@ -35,8 +35,8 @@ sources:
   - internal/onboard/stack.go
   - internal/stage/tests.go
   - internal/agent/prompts/assessor.md
-syncedFrom: 3a3279c7ae4c2caf1e407b4641d1e1eba726a399
-verified: 2026-11-27
+syncedFrom: 83aee47261df5837b4ed27f6397df9e99464dbd3
+verified: 2026-11-28
 ---
 
 This page answers: will this change land by itself, or wait for me, and why? The answer depends on the risk of the change, its size, and what the review found. The rules below are the defaults that `ads init` writes, or that apply when `.ads/config.yaml` sets none.
@@ -133,6 +133,20 @@ Answer       say what to do, for example "rewrite the tests"
 ```
 
 Answer with how the tests must be written. ADS ends this try and starts a fresh one: a new test author gets your answer and the error, and its tests are frozen again. A frozen test is never edited.
+
+The implementer may not change test files. When a fix needs one changed anyway, for example an old test that lists every setup step and must list a new one, no round can pass. ADS asks at once:
+
+```text
+Waiting for you: #12 ads init creates missing labels
+Blocked      The test path check refused the commit: the fix changed test files, but the tests are frozen: "internal/onboard/wizard_test.go"…
+Options      1. rewrite the tests  2. stop
+Recommended  rewrite the tests
+Answer       say what to do, for example "rewrite the tests"
+```
+
+Answer with how the tests must change. ADS ends this try and starts a fresh one: a new test author gets your answer, the refused test files and the output of the checks that failed.
+
+A change that an older ADS left stuck, with its last try failed and no try open, no longer stops every run. `ads work` on it names the cause, and an answer starts a fresh try whose test author gets your answer.
 
 For a change of type `refactor`, `chore` or `docs`, each acceptance criterion names what stays the same, for example "MONOREPO_ROOT still resolves to the same path", and the new text goes in the intent. So a comment-only change in a code file is a `chore`, and its tests check that the code still behaves the same, never the text of the comment. A repository that keeps its own `.ads/prompts/assessor.md` or `.ads/prompts/test_author.md` does not get these rules.
 
